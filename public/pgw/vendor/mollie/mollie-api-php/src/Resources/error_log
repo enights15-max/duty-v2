@@ -1,0 +1,472 @@
+[01-Sep-2025 21:30:09 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/AnyResource.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/AnyResource.php on line 12
+[01-Sep-2025 21:30:11 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Balance.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Balance.php on line 10
+[01-Sep-2025 21:30:13 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceCollection.php on line 5
+[01-Sep-2025 21:30:14 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceReport.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceReport.php on line 10
+[01-Sep-2025 21:30:16 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceTransaction.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceTransaction.php on line 12
+[01-Sep-2025 21:30:18 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceTransactionCollection.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceTransactionCollection.php on line 7
+[01-Sep-2025 21:30:19 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasResponse" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BaseCollection.php on line 11
+[01-Sep-2025 21:30:21 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasResponse" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BaseResource.php on line 10
+[01-Sep-2025 21:30:23 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Capability.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Capability.php on line 7
+[01-Sep-2025 21:30:25 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CapabilityCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CapabilityCollection.php on line 5
+[01-Sep-2025 21:30:26 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Capture.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Capture.php on line 10
+[01-Sep-2025 21:30:28 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CaptureCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CaptureCollection.php on line 5
+[01-Sep-2025 21:30:30 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Chargeback.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Chargeback.php on line 8
+[01-Sep-2025 21:30:31 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ChargebackCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ChargebackCollection.php on line 5
+[01-Sep-2025 21:30:33 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Client.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Client.php on line 10
+[01-Sep-2025 21:30:35 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ClientCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ClientCollection.php on line 5
+[01-Sep-2025 21:30:36 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ClientLink.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ClientLink.php on line 10
+[01-Sep-2025 21:31:22 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\Profile" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CurrentProfile.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CurrentProfile.php on line 7
+[01-Sep-2025 21:31:24 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CursorCollection.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CursorCollection.php on line 9
+[01-Sep-2025 21:31:26 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Customer.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Customer.php on line 11
+[01-Sep-2025 21:31:27 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CustomerCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CustomerCollection.php on line 5
+[01-Sep-2025 21:31:29 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Invoice.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Invoice.php on line 10
+[01-Sep-2025 21:31:31 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/InvoiceCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/InvoiceCollection.php on line 5
+[01-Sep-2025 21:31:32 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Issuer.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Issuer.php on line 8
+[01-Sep-2025 21:31:34 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/IssuerCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/IssuerCollection.php on line 5
+[01-Sep-2025 21:31:36 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasResponse" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/LazyCollection.php on line 16
+[01-Sep-2025 21:31:37 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Mandate.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Mandate.php on line 11
+[01-Sep-2025 21:31:39 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MandateCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MandateCollection.php on line 5
+[01-Sep-2025 21:31:41 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Method.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Method.php on line 8
+[01-Sep-2025 21:31:42 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MethodCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MethodCollection.php on line 5
+[01-Sep-2025 21:31:44 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MethodPrice.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MethodPrice.php on line 8
+[01-Sep-2025 21:31:45 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MethodPriceCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MethodPriceCollection.php on line 5
+[01-Sep-2025 21:31:47 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Onboarding.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Onboarding.php on line 10
+[01-Sep-2025 21:31:49 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Organization.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Organization.php on line 8
+[01-Sep-2025 21:31:50 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Partner.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Partner.php on line 8
+[01-Sep-2025 21:31:52 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Payment.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Payment.php on line 17
+[01-Sep-2025 21:31:54 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PaymentCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PaymentCollection.php on line 5
+[01-Sep-2025 21:31:55 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PaymentLink.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PaymentLink.php on line 10
+[01-Sep-2025 21:31:57 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PaymentLinkCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PaymentLinkCollection.php on line 5
+[01-Sep-2025 21:31:59 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Permission.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Permission.php on line 8
+[01-Sep-2025 21:32:00 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PermissionCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PermissionCollection.php on line 5
+[01-Sep-2025 21:32:02 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Profile.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Profile.php on line 12
+[01-Sep-2025 21:32:04 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ProfileCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ProfileCollection.php on line 5
+[01-Sep-2025 21:32:05 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Refund.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Refund.php on line 12
+[01-Sep-2025 21:32:07 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/RefundCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/RefundCollection.php on line 5
+[01-Sep-2025 21:32:09 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ResourceCollection.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ResourceCollection.php on line 8
+[01-Sep-2025 21:32:15 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ForwardsCalls" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ResourceWrapper.php on line 8
+[01-Sep-2025 21:32:17 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Route.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Route.php on line 8
+[01-Sep-2025 21:32:19 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/RouteCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/RouteCollection.php on line 5
+[01-Sep-2025 21:32:20 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SalesInvoice.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SalesInvoice.php on line 7
+[01-Sep-2025 21:32:22 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SalesInvoiceCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SalesInvoiceCollection.php on line 5
+[01-Sep-2025 21:32:24 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Session.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Session.php on line 11
+[01-Sep-2025 21:32:25 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SessionCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SessionCollection.php on line 5
+[01-Sep-2025 21:32:27 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Settlement.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Settlement.php on line 11
+[01-Sep-2025 21:32:29 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SettlementCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SettlementCollection.php on line 5
+[01-Sep-2025 21:32:30 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Subscription.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Subscription.php on line 12
+[01-Sep-2025 21:32:32 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SubscriptionCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SubscriptionCollection.php on line 5
+[01-Sep-2025 21:32:34 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Terminal.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Terminal.php on line 10
+[01-Sep-2025 21:32:35 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/TerminalCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/TerminalCollection.php on line 5
+[01-Sep-2025 21:32:37 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Webhook.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Webhook.php on line 13
+[01-Sep-2025 21:32:38 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/WebhookCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/WebhookCollection.php on line 5
+[01-Sep-2025 21:32:40 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/WebhookEvent.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/WebhookEvent.php on line 8
+[02-Sep-2025 15:34:57 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/AnyResource.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/AnyResource.php on line 12
+[02-Sep-2025 15:34:58 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Balance.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Balance.php on line 10
+[02-Sep-2025 15:35:00 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceCollection.php on line 5
+[02-Sep-2025 15:35:02 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceReport.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceReport.php on line 10
+[02-Sep-2025 15:35:04 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceTransaction.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceTransaction.php on line 12
+[02-Sep-2025 15:35:05 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceTransactionCollection.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BalanceTransactionCollection.php on line 7
+[02-Sep-2025 15:35:07 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasResponse" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BaseCollection.php on line 11
+[02-Sep-2025 15:35:09 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasResponse" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/BaseResource.php on line 10
+[02-Sep-2025 15:35:11 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Capability.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Capability.php on line 7
+[02-Sep-2025 15:35:13 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CapabilityCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CapabilityCollection.php on line 5
+[02-Sep-2025 15:35:14 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Capture.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Capture.php on line 10
+[02-Sep-2025 15:35:16 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CaptureCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CaptureCollection.php on line 5
+[02-Sep-2025 15:35:18 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Chargeback.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Chargeback.php on line 8
+[02-Sep-2025 15:35:20 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ChargebackCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ChargebackCollection.php on line 5
+[02-Sep-2025 15:35:22 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Client.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Client.php on line 10
+[02-Sep-2025 15:35:24 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ClientCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ClientCollection.php on line 5
+[02-Sep-2025 15:35:25 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ClientLink.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ClientLink.php on line 10
+[02-Sep-2025 15:35:27 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\Profile" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CurrentProfile.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CurrentProfile.php on line 7
+[02-Sep-2025 15:35:29 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CursorCollection.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CursorCollection.php on line 9
+[02-Sep-2025 15:35:30 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Customer.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Customer.php on line 11
+[02-Sep-2025 15:35:32 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CustomerCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/CustomerCollection.php on line 5
+[02-Sep-2025 15:35:34 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Invoice.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Invoice.php on line 10
+[02-Sep-2025 15:35:36 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/InvoiceCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/InvoiceCollection.php on line 5
+[02-Sep-2025 15:35:38 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Issuer.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Issuer.php on line 8
+[02-Sep-2025 15:35:39 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/IssuerCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/IssuerCollection.php on line 5
+[02-Sep-2025 15:35:41 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasResponse" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/LazyCollection.php on line 16
+[02-Sep-2025 15:35:43 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Mandate.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Mandate.php on line 11
+[02-Sep-2025 15:35:45 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MandateCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MandateCollection.php on line 5
+[02-Sep-2025 15:35:46 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Method.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Method.php on line 8
+[02-Sep-2025 15:35:48 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MethodCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MethodCollection.php on line 5
+[02-Sep-2025 15:35:50 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MethodPrice.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MethodPrice.php on line 8
+[02-Sep-2025 15:35:52 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MethodPriceCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/MethodPriceCollection.php on line 5
+[02-Sep-2025 15:35:54 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Onboarding.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Onboarding.php on line 10
+[02-Sep-2025 15:35:55 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Organization.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Organization.php on line 8
+[02-Sep-2025 15:35:57 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Partner.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Partner.php on line 8
+[02-Sep-2025 15:35:59 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Payment.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Payment.php on line 17
+[02-Sep-2025 15:36:01 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PaymentCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PaymentCollection.php on line 5
+[02-Sep-2025 15:36:03 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PaymentLink.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PaymentLink.php on line 10
+[02-Sep-2025 15:36:05 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PaymentLinkCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PaymentLinkCollection.php on line 5
+[02-Sep-2025 15:36:07 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Permission.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Permission.php on line 8
+[02-Sep-2025 15:36:08 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PermissionCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/PermissionCollection.php on line 5
+[02-Sep-2025 15:36:10 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Profile.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Profile.php on line 12
+[02-Sep-2025 15:36:12 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ProfileCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ProfileCollection.php on line 5
+[02-Sep-2025 15:36:14 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Refund.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Refund.php on line 12
+[02-Sep-2025 15:36:16 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/RefundCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/RefundCollection.php on line 5
+[02-Sep-2025 15:36:17 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ResourceCollection.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ResourceCollection.php on line 8
+[02-Sep-2025 15:36:25 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ForwardsCalls" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/ResourceWrapper.php on line 8
+[02-Sep-2025 15:36:26 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Route.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Route.php on line 8
+[02-Sep-2025 15:36:28 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\ResourceCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/RouteCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/RouteCollection.php on line 5
+[02-Sep-2025 15:36:30 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SalesInvoice.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SalesInvoice.php on line 7
+[02-Sep-2025 15:36:32 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SalesInvoiceCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SalesInvoiceCollection.php on line 5
+[02-Sep-2025 15:36:34 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Session.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Session.php on line 11
+[02-Sep-2025 15:36:35 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SessionCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SessionCollection.php on line 5
+[02-Sep-2025 15:36:37 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Settlement.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Settlement.php on line 11
+[02-Sep-2025 15:36:39 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SettlementCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SettlementCollection.php on line 5
+[02-Sep-2025 15:36:41 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Subscription.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Subscription.php on line 12
+[02-Sep-2025 15:36:43 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SubscriptionCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/SubscriptionCollection.php on line 5
+[02-Sep-2025 15:36:44 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Terminal.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Terminal.php on line 10
+[02-Sep-2025 15:36:46 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/TerminalCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/TerminalCollection.php on line 5
+[02-Sep-2025 15:36:48 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Webhook.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/Webhook.php on line 13
+[02-Sep-2025 15:36:50 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\CursorCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/WebhookCollection.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/WebhookCollection.php on line 5
+[02-Sep-2025 15:36:51 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Resources\BaseResource" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/WebhookEvent.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Resources/WebhookEvent.php on line 8

@@ -1,0 +1,34 @@
+[03-Sep-2025 06:21:34 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\HttpAdapterContract" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/GuzzleMollieHttpAdapter.php:24
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/GuzzleMollieHttpAdapter.php on line 24
+[03-Sep-2025 06:21:36 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\MollieHttpAdapterPickerContract" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/MollieHttpAdapterPicker.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/MollieHttpAdapterPicker.php on line 9
+[03-Sep-2025 06:21:37 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\HttpAdapterContract" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/PSR18MollieHttpAdapter.php:23
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/PSR18MollieHttpAdapter.php on line 23
+[03-Sep-2025 06:22:51 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasDefaultFactories" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/CurlMollieHttpAdapter.php on line 14
+[03-Sep-2025 06:22:52 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\HttpAdapterContract" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/GuzzleMollieHttpAdapter.php:24
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/GuzzleMollieHttpAdapter.php on line 24
+[03-Sep-2025 06:22:54 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\MollieHttpAdapterPickerContract" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/MollieHttpAdapterPicker.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/MollieHttpAdapterPicker.php on line 9
+[03-Sep-2025 06:22:55 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\HttpAdapterContract" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/PSR18MollieHttpAdapter.php:23
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/PSR18MollieHttpAdapter.php on line 23
+[03-Sep-2025 08:00:46 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Exceptions\MollieException" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/CurlInitializationException.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/CurlInitializationException.php on line 13
+[03-Sep-2025 08:00:48 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Exceptions\MollieException" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/CurlInitializationException.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/CurlInitializationException.php on line 13
+[03-Sep-2025 08:00:49 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasDefaultFactories" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Adapter/CurlMollieHttpAdapter.php on line 14

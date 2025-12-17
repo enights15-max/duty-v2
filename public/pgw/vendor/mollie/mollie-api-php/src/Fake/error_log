@@ -1,0 +1,14 @@
+[02-Sep-2025 17:07:05 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\MollieApiClient" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Fake/MockMollieClient.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Fake/MockMollieClient.php on line 10
+[02-Sep-2025 17:07:07 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\MollieApiClient" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Fake/MockMollieClient.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Fake/MockMollieClient.php on line 10
+[02-Sep-2025 17:07:09 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasDefaultFactories" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Fake/MockMollieHttpAdapter.php on line 13
+[02-Sep-2025 17:07:10 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasDefaultFactories" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Fake/MockMollieHttpAdapter.php on line 13
+[02-Sep-2025 17:07:12 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasDefaultFactories" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Fake/MockResponse.php on line 8
+[02-Sep-2025 17:07:14 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasDefaultFactories" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Fake/MockResponse.php on line 8
+[02-Sep-2025 17:07:16 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ForwardsCalls" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Fake/ResourceResponseBuilder.php on line 17
+[02-Sep-2025 17:07:18 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ForwardsCalls" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Fake/ResourceResponseBuilder.php on line 17

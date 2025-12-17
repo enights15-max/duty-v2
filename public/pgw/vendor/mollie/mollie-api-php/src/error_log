@@ -1,0 +1,2 @@
+[01-Sep-2025 03:47:38 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HandlesAuthentication" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/MollieApiClient.php on line 107
+[01-Sep-2025 21:29:51 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HandlesAuthentication" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/MollieApiClient.php on line 107

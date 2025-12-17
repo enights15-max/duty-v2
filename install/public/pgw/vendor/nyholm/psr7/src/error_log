@@ -1,0 +1,24 @@
+[01-Sep-2025 03:49:22 UTC] PHP Fatal error:  Trait "Nyholm\Psr7\MessageTrait" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Request.php on line 15
+[01-Sep-2025 03:49:26 UTC] PHP Fatal error:  Trait "Nyholm\Psr7\MessageTrait" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Response.php on line 16
+[01-Sep-2025 03:49:28 UTC] PHP Fatal error:  Trait "Nyholm\Psr7\MessageTrait" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/ServerRequest.php on line 16
+[01-Sep-2025 03:49:35 UTC] PHP Fatal error:  Trait "Nyholm\Psr7\StreamTrait" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Stream.php on line 16
+[01-Sep-2025 03:49:39 UTC] PHP Fatal error:  Uncaught Error: Interface "Psr\Http\Message\UploadedFileInterface" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/UploadedFile.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/UploadedFile.php on line 16
+[01-Sep-2025 03:49:42 UTC] PHP Fatal error:  Uncaught Error: Interface "Psr\Http\Message\UriInterface" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Uri.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Uri.php on line 20
+[01-Sep-2025 21:33:23 UTC] PHP Fatal error:  Trait "Nyholm\Psr7\MessageTrait" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Request.php on line 15
+[01-Sep-2025 21:33:26 UTC] PHP Fatal error:  Trait "Nyholm\Psr7\MessageTrait" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Response.php on line 16
+[01-Sep-2025 21:33:28 UTC] PHP Fatal error:  Trait "Nyholm\Psr7\MessageTrait" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/ServerRequest.php on line 16
+[01-Sep-2025 21:33:30 UTC] PHP Fatal error:  Trait "Nyholm\Psr7\StreamTrait" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Stream.php on line 16
+[01-Sep-2025 21:33:33 UTC] PHP Fatal error:  Uncaught Error: Interface "Psr\Http\Message\UploadedFileInterface" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/UploadedFile.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/UploadedFile.php on line 16
+[01-Sep-2025 21:33:35 UTC] PHP Fatal error:  Uncaught Error: Interface "Psr\Http\Message\UriInterface" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Uri.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Uri.php on line 20

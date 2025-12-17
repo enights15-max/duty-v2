@@ -1,0 +1,464 @@
+[02-Sep-2025 15:33:50 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateSessionRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateSessionRequestFactory.php on line 7
+[02-Sep-2025 15:33:52 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateSubscriptionRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateSubscriptionRequestFactory.php on line 8
+[02-Sep-2025 15:33:54 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateWebhookRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateWebhookRequestFactory.php on line 7
+[02-Sep-2025 15:33:55 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetAllPaginatedSubscriptionsRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetAllPaginatedSubscriptionsRequestFactory.php on line 7
+[02-Sep-2025 15:33:57 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateCustomerRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateCustomerRequestFactory.php on line 7
+[02-Sep-2025 17:03:33 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateMandateRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateMandateRequestFactory.php on line 9
+[02-Sep-2025 17:03:36 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentCaptureRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentCaptureRequestFactory.php on line 7
+[02-Sep-2025 17:03:38 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentCaptureRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentCaptureRequestFactory.php on line 7
+[02-Sep-2025 17:03:40 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentLinkRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentLinkRequestFactory.php on line 9
+[02-Sep-2025 17:03:42 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentLinkRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentLinkRequestFactory.php on line 9
+[02-Sep-2025 17:03:44 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentRefundRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentRefundRequestFactory.php on line 7
+[02-Sep-2025 17:03:46 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentRequestFactory.php on line 9
+[02-Sep-2025 17:03:48 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentRequestFactory.php on line 9
+[02-Sep-2025 17:03:49 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateProfileRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateProfileRequestFactory.php on line 7
+[02-Sep-2025 17:03:51 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateProfileRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateProfileRequestFactory.php on line 7
+[02-Sep-2025 17:03:53 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateSalesInvoiceRequestFactory.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateSalesInvoiceRequestFactory.php on line 10
+[02-Sep-2025 17:03:55 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateSalesInvoiceRequestFactory.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateSalesInvoiceRequestFactory.php on line 10
+[02-Sep-2025 17:03:57 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateSessionRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateSessionRequestFactory.php on line 7
+[02-Sep-2025 17:03:59 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateSubscriptionRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateSubscriptionRequestFactory.php on line 8
+[02-Sep-2025 17:04:01 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateWebhookRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateWebhookRequestFactory.php on line 7
+[02-Sep-2025 17:04:06 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetAllPaginatedSubscriptionsRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetAllPaginatedSubscriptionsRequestFactory.php on line 7
+[02-Sep-2025 17:04:08 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetAllPaymentMethodsRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetAllPaymentMethodsRequestFactory.php on line 8
+[02-Sep-2025 17:04:10 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetAllPaymentMethodsRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetAllPaymentMethodsRequestFactory.php on line 8
+[02-Sep-2025 17:04:12 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetBalanceReportRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetBalanceReportRequestFactory.php on line 8
+[02-Sep-2025 17:04:14 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetBalanceReportRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetBalanceReportRequestFactory.php on line 8
+[02-Sep-2025 17:04:16 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetClientRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetClientRequestFactory.php on line 8
+[02-Sep-2025 17:04:18 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetClientRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetClientRequestFactory.php on line 8
+[02-Sep-2025 17:04:20 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetEnabledMethodsRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetEnabledMethodsRequestFactory.php on line 9
+[02-Sep-2025 17:04:22 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetEnabledMethodsRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetEnabledMethodsRequestFactory.php on line 9
+[02-Sep-2025 17:04:23 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetMethodRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetMethodRequestFactory.php on line 8
+[02-Sep-2025 17:04:25 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetMethodRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetMethodRequestFactory.php on line 8
+[02-Sep-2025 17:04:27 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedChargebacksRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedChargebacksRequestFactory.php on line 8
+[02-Sep-2025 17:04:29 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedChargebacksRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedChargebacksRequestFactory.php on line 8
+[02-Sep-2025 17:04:31 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedClientRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedClientRequestFactory.php on line 8
+[02-Sep-2025 17:04:33 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedClientRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedClientRequestFactory.php on line 8
+[02-Sep-2025 17:04:35 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedCustomerPaymentsRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedCustomerPaymentsRequestFactory.php on line 7
+[02-Sep-2025 17:04:37 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedCustomerPaymentsRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedCustomerPaymentsRequestFactory.php on line 7
+[02-Sep-2025 17:04:39 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedInvoiceRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedInvoiceRequestFactory.php on line 7
+[02-Sep-2025 17:04:41 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedInvoiceRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedInvoiceRequestFactory.php on line 7
+[02-Sep-2025 17:04:42 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedPaymentCapturesRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedPaymentCapturesRequestFactory.php on line 8
+[02-Sep-2025 17:04:44 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedPaymentCapturesRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedPaymentCapturesRequestFactory.php on line 8
+[02-Sep-2025 17:04:46 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedPaymentChargebacksRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedPaymentChargebacksRequestFactory.php on line 8
+[02-Sep-2025 17:04:48 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedPaymentChargebacksRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedPaymentChargebacksRequestFactory.php on line 8
+[02-Sep-2025 17:04:50 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedPaymentRefundsRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedPaymentRefundsRequestFactory.php on line 8
+[02-Sep-2025 17:04:52 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedPaymentRefundsRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedPaymentRefundsRequestFactory.php on line 8
+[02-Sep-2025 17:04:54 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedRefundsRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedRefundsRequestFactory.php on line 8
+[02-Sep-2025 17:04:56 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedRefundsRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedRefundsRequestFactory.php on line 8
+[02-Sep-2025 17:04:57 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementCapturesRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementCapturesRequestFactory.php on line 8
+[02-Sep-2025 17:04:59 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementCapturesRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementCapturesRequestFactory.php on line 8
+[02-Sep-2025 17:05:01 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementChargebacksRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementChargebacksRequestFactory.php on line 8
+[02-Sep-2025 17:05:03 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementChargebacksRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementChargebacksRequestFactory.php on line 8
+[02-Sep-2025 17:05:05 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementRefundsQueryFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementRefundsQueryFactory.php on line 8
+[02-Sep-2025 17:05:07 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementRefundsQueryFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementRefundsQueryFactory.php on line 8
+[02-Sep-2025 17:05:09 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementsRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementsRequestFactory.php on line 7
+[02-Sep-2025 17:05:11 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementsRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaginatedSettlementsRequestFactory.php on line 7
+[02-Sep-2025 17:05:13 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentCaptureRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentCaptureRequestFactory.php on line 8
+[02-Sep-2025 17:05:15 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentCaptureRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentCaptureRequestFactory.php on line 8
+[02-Sep-2025 17:05:17 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentChargebackRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentChargebackRequestFactory.php on line 8
+[02-Sep-2025 17:05:19 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentChargebackRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentChargebackRequestFactory.php on line 8
+[02-Sep-2025 17:05:21 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentRefundRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentRefundRequestFactory.php on line 8
+[02-Sep-2025 17:05:23 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentRefundRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentRefundRequestFactory.php on line 8
+[02-Sep-2025 17:05:24 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentRequestFactory.php on line 8
+[02-Sep-2025 17:05:26 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/GetPaymentRequestFactory.php on line 8
+[02-Sep-2025 17:05:28 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/InvoiceLineCollectionFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/InvoiceLineCollectionFactory.php on line 7
+[02-Sep-2025 17:05:30 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/InvoiceLineCollectionFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/InvoiceLineCollectionFactory.php on line 7
+[02-Sep-2025 17:05:32 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/InvoiceLineFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/InvoiceLineFactory.php on line 8
+[02-Sep-2025 17:05:34 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/InvoiceLineFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/InvoiceLineFactory.php on line 8
+[02-Sep-2025 17:05:36 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/MoneyFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/MoneyFactory.php on line 7
+[02-Sep-2025 17:05:38 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/MoneyFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/MoneyFactory.php on line 7
+[02-Sep-2025 17:05:40 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/OrderLineCollectionFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/OrderLineCollectionFactory.php on line 7
+[02-Sep-2025 17:05:42 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/OrderLineCollectionFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/OrderLineCollectionFactory.php on line 7
+[02-Sep-2025 17:05:44 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/OrderLineFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/OrderLineFactory.php on line 7
+[02-Sep-2025 17:05:46 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/OrderLineFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/OrderLineFactory.php on line 7
+[02-Sep-2025 17:05:48 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/PaginatedQueryFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/PaginatedQueryFactory.php on line 7
+[02-Sep-2025 17:05:50 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/PaginatedQueryFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/PaginatedQueryFactory.php on line 7
+[02-Sep-2025 17:05:52 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/PaymentRouteCollectionFactory.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/PaymentRouteCollectionFactory.php on line 12
+[02-Sep-2025 17:05:53 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/PaymentRouteCollectionFactory.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/PaymentRouteCollectionFactory.php on line 12
+[02-Sep-2025 17:05:55 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RecipientFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RecipientFactory.php on line 7
+[02-Sep-2025 17:05:57 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RecipientFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RecipientFactory.php on line 7
+[02-Sep-2025 17:05:59 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RecurringBillingCycleFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RecurringBillingCycleFactory.php on line 8
+[02-Sep-2025 17:06:01 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RecurringBillingCycleFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RecurringBillingCycleFactory.php on line 8
+[02-Sep-2025 17:06:03 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RefundRouteCollectionFactory.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RefundRouteCollectionFactory.php on line 10
+[02-Sep-2025 17:06:05 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RefundRouteCollectionFactory.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RefundRouteCollectionFactory.php on line 10
+[02-Sep-2025 17:06:07 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RequestFactory.php on line 7
+[02-Sep-2025 17:06:09 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/RequestFactory.php on line 7
+[02-Sep-2025 17:06:10 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/SortablePaginatedQueryFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/SortablePaginatedQueryFactory.php on line 7
+[02-Sep-2025 17:06:12 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/SortablePaginatedQueryFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/SortablePaginatedQueryFactory.php on line 7
+[02-Sep-2025 17:06:14 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateCustomerRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateCustomerRequestFactory.php on line 7
+[02-Sep-2025 17:06:16 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdatePaymentLinkRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdatePaymentLinkRequestFactory.php on line 7
+[02-Sep-2025 17:06:18 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdatePaymentLinkRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdatePaymentLinkRequestFactory.php on line 7
+[02-Sep-2025 17:06:20 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdatePaymentRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdatePaymentRequestFactory.php on line 8
+[02-Sep-2025 17:06:22 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdatePaymentRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdatePaymentRequestFactory.php on line 8
+[02-Sep-2025 17:06:24 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdatePaymentRouteRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdatePaymentRouteRequestFactory.php on line 9
+[02-Sep-2025 17:06:25 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdatePaymentRouteRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdatePaymentRouteRequestFactory.php on line 9
+[02-Sep-2025 17:06:27 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateProfileRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateProfileRequestFactory.php on line 7
+[02-Sep-2025 17:06:29 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateProfileRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateProfileRequestFactory.php on line 7
+[02-Sep-2025 17:06:31 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateSalesInvoiceRequestFactory.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateSalesInvoiceRequestFactory.php on line 10
+[02-Sep-2025 17:06:33 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateSalesInvoiceRequestFactory.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateSalesInvoiceRequestFactory.php on line 10
+[02-Sep-2025 17:06:35 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateSubscriptionRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateSubscriptionRequestFactory.php on line 8
+[02-Sep-2025 17:06:37 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateSubscriptionRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateSubscriptionRequestFactory.php on line 8
+[02-Sep-2025 17:06:39 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateWebhookRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateWebhookRequestFactory.php on line 7
+[02-Sep-2025 17:06:40 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateWebhookRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/UpdateWebhookRequestFactory.php on line 7
+[02-Sep-2025 18:10:59 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/ApplePayPaymentSessionRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/ApplePayPaymentSessionRequestFactory.php on line 7
+[02-Sep-2025 18:11:01 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/ApplePayPaymentSessionRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/ApplePayPaymentSessionRequestFactory.php on line 7
+[02-Sep-2025 18:11:03 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/ApplicationFeeFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/ApplicationFeeFactory.php on line 7
+[02-Sep-2025 18:11:05 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\Factory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/ApplicationFeeFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/ApplicationFeeFactory.php on line 7
+[02-Sep-2025 18:11:07 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateClientLinkRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateClientLinkRequestFactory.php on line 9
+[02-Sep-2025 18:11:09 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateClientLinkRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateClientLinkRequestFactory.php on line 9
+[02-Sep-2025 18:11:10 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateCustomerPaymentRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateCustomerPaymentRequestFactory.php on line 9
+[02-Sep-2025 18:11:12 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateCustomerPaymentRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateCustomerPaymentRequestFactory.php on line 9
+[02-Sep-2025 18:11:14 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateCustomerRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateCustomerRequestFactory.php on line 7
+[02-Sep-2025 18:11:16 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateCustomerRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateCustomerRequestFactory.php on line 7
+[02-Sep-2025 18:11:18 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateDelayedPaymentRouteRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateDelayedPaymentRouteRequestFactory.php on line 8
+[02-Sep-2025 18:11:20 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateDelayedPaymentRouteRequestFactory.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateDelayedPaymentRouteRequestFactory.php on line 8
+[02-Sep-2025 18:11:21 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateMandateRequestFactory.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreateMandateRequestFactory.php on line 9
+[02-Sep-2025 18:11:23 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Factories\RequestFactory" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentRefundRequestFactory.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Factories/CreatePaymentRefundRequestFactory.php on line 7

@@ -1,0 +1,16 @@
+[01-Sep-2025 21:29:47 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\IdempotencyKeyGeneratorContract" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Idempotency/DefaultIdempotencyKeyGenerator.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Idempotency/DefaultIdempotencyKeyGenerator.php on line 8
+[01-Sep-2025 21:29:49 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\IdempotencyKeyGeneratorContract" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Idempotency/FakeIdempotencyKeyGenerator.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Idempotency/FakeIdempotencyKeyGenerator.php on line 9
+[02-Sep-2025 15:34:33 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\IdempotencyKeyGeneratorContract" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Idempotency/DefaultIdempotencyKeyGenerator.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Idempotency/DefaultIdempotencyKeyGenerator.php on line 8
+[02-Sep-2025 15:34:35 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\IdempotencyKeyGeneratorContract" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Idempotency/FakeIdempotencyKeyGenerator.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Idempotency/FakeIdempotencyKeyGenerator.php on line 9

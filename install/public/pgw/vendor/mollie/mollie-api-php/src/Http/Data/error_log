@@ -1,0 +1,124 @@
+[02-Sep-2025 20:57:22 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ComposableFromArray" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Address.php on line 8
+[02-Sep-2025 20:57:24 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ComposableFromArray" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Address.php on line 8
+[02-Sep-2025 20:57:26 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/ApplicationFee.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/ApplicationFee.php on line 7
+[02-Sep-2025 20:57:28 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/ApplicationFee.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/ApplicationFee.php on line 7
+[02-Sep-2025 20:57:30 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/DataCollection.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/DataCollection.php on line 16
+[02-Sep-2025 20:57:32 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/DataCollection.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/DataCollection.php on line 16
+[02-Sep-2025 20:57:35 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Http\Data\Temporal" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Date.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Date.php on line 5
+[02-Sep-2025 20:57:37 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Http\Data\Temporal" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Date.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Date.php on line 5
+[02-Sep-2025 20:57:39 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Http\Data\Temporal" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/DateTime.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/DateTime.php on line 7
+[02-Sep-2025 20:57:41 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Http\Data\Temporal" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/DateTime.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/DateTime.php on line 7
+[02-Sep-2025 20:57:43 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ComposableFromArray" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Discount.php on line 8
+[02-Sep-2025 20:57:46 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ComposableFromArray" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Discount.php on line 8
+[02-Sep-2025 20:57:48 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ComposableFromArray" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/EmailDetails.php on line 8
+[02-Sep-2025 20:57:50 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ComposableFromArray" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/EmailDetails.php on line 8
+[02-Sep-2025 20:57:52 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/InvoiceLine.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/InvoiceLine.php on line 7
+[02-Sep-2025 20:57:54 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/InvoiceLine.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/InvoiceLine.php on line 7
+[02-Sep-2025 20:57:56 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Arrayable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Money.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Money.php on line 7
+[02-Sep-2025 20:57:58 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Arrayable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Money.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Money.php on line 7
+[02-Sep-2025 20:57:59 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/OrderLine.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/OrderLine.php on line 7
+[02-Sep-2025 20:58:01 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/OrderLine.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/OrderLine.php on line 7
+[02-Sep-2025 20:58:03 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ComposableFromArray" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Owner.php on line 8
+[02-Sep-2025 20:58:05 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ComposableFromArray" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Owner.php on line 8
+[02-Sep-2025 20:58:07 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ComposableFromArray" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/OwnerAddress.php on line 8
+[02-Sep-2025 20:58:09 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ComposableFromArray" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/OwnerAddress.php on line 8
+[02-Sep-2025 20:58:12 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/PaginatedQuery.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/PaginatedQuery.php on line 7
+[02-Sep-2025 20:58:19 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/PaginatedQuery.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/PaginatedQuery.php on line 7
+[02-Sep-2025 20:58:21 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ComposableFromArray" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/PaymentDetails.php on line 8
+[02-Sep-2025 20:58:23 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\ComposableFromArray" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/PaymentDetails.php on line 8
+[02-Sep-2025 20:58:25 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/PaymentRoute.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/PaymentRoute.php on line 8
+[02-Sep-2025 20:58:28 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/PaymentRoute.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/PaymentRoute.php on line 8
+[02-Sep-2025 20:58:30 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Arrayable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Recipient.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Recipient.php on line 7
+[02-Sep-2025 20:58:32 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Arrayable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Recipient.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Recipient.php on line 7
+[02-Sep-2025 20:58:35 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/RecurringBillingCycle.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/RecurringBillingCycle.php on line 8
+[02-Sep-2025 20:58:37 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/RecurringBillingCycle.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/RecurringBillingCycle.php on line 8
+[02-Sep-2025 20:58:39 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/RefundRoute.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/RefundRoute.php on line 7
+[02-Sep-2025 20:58:41 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Resolvable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/RefundRoute.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/RefundRoute.php on line 7
+[02-Sep-2025 20:58:45 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Http\Data\PaginatedQuery" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/SortablePaginatedQuery.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/SortablePaginatedQuery.php on line 5
+[02-Sep-2025 20:58:47 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Http\Data\PaginatedQuery" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/SortablePaginatedQuery.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/SortablePaginatedQuery.php on line 5
+[02-Sep-2025 20:58:50 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Stringable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Temporal.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Temporal.php on line 10
+[02-Sep-2025 20:58:52 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Stringable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Temporal.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Data/Temporal.php on line 10

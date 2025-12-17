@@ -1,0 +1,16 @@
+[01-Sep-2025 03:51:48 UTC] PHP Fatal error:  Uncaught Error: Interface "Psr\Http\Client\ClientExceptionInterface" not found in /home/adspectr/public_html/api/vendor/psr/http-client/src/NetworkExceptionInterface.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/psr/http-client/src/NetworkExceptionInterface.php on line 14
+[01-Sep-2025 03:51:50 UTC] PHP Fatal error:  Uncaught Error: Interface "Psr\Http\Client\ClientExceptionInterface" not found in /home/adspectr/public_html/api/vendor/psr/http-client/src/RequestExceptionInterface.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/psr/http-client/src/RequestExceptionInterface.php on line 14
+[01-Sep-2025 21:33:52 UTC] PHP Fatal error:  Uncaught Error: Interface "Psr\Http\Client\ClientExceptionInterface" not found in /home/adspectr/public_html/api/vendor/psr/http-client/src/NetworkExceptionInterface.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/psr/http-client/src/NetworkExceptionInterface.php on line 14
+[01-Sep-2025 21:33:53 UTC] PHP Fatal error:  Uncaught Error: Interface "Psr\Http\Client\ClientExceptionInterface" not found in /home/adspectr/public_html/api/vendor/psr/http-client/src/RequestExceptionInterface.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/psr/http-client/src/RequestExceptionInterface.php on line 14

@@ -1,0 +1,56 @@
+[02-Sep-2025 19:17:24 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Authenticatable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/Connector.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/Connector.php on line 8
+[02-Sep-2025 19:17:25 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Authenticatable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/Connector.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/Connector.php on line 8
+[02-Sep-2025 19:17:47 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\ViableResponse" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/IsResponseAware.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/IsResponseAware.php on line 7
+[02-Sep-2025 19:17:49 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\ViableResponse" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/IsResponseAware.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/IsResponseAware.php on line 7
+[02-Sep-2025 19:17:51 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\ViableResponse" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/IsWrapper.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/IsWrapper.php on line 10
+[02-Sep-2025 19:17:52 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\ViableResponse" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/IsWrapper.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/IsWrapper.php on line 10
+[02-Sep-2025 19:17:57 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Repository" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/PayloadRepository.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/PayloadRepository.php on line 8
+[02-Sep-2025 19:17:59 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Repository" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/PayloadRepository.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/PayloadRepository.php on line 8
+[02-Sep-2025 19:18:07 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Arrayable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/Resolvable.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/Resolvable.php on line 5
+[02-Sep-2025 19:18:09 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Arrayable" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/Resolvable.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/Resolvable.php on line 5
+[02-Sep-2025 19:18:24 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\HasPayload" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/SupportsTestmodeInPayload.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/SupportsTestmodeInPayload.php on line 5
+[02-Sep-2025 19:18:26 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\HasPayload" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/SupportsTestmodeInPayload.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/SupportsTestmodeInPayload.php on line 5
+[02-Sep-2025 19:18:27 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\SupportsTestmode" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/SupportsTestmodeInQuery.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/SupportsTestmodeInQuery.php on line 5
+[02-Sep-2025 19:18:29 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\SupportsTestmode" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/SupportsTestmodeInQuery.php:5
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Contracts/SupportsTestmodeInQuery.php on line 5

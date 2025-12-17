@@ -1,0 +1,32 @@
+[02-Sep-2025 20:59:04 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\RequestMiddleware" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/ApplyIdempotencyKey.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/ApplyIdempotencyKey.php on line 10
+[02-Sep-2025 20:59:07 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\ResponseMiddleware" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/ConvertResponseToException.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/ConvertResponseToException.php on line 18
+[02-Sep-2025 20:59:16 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\ResponseMiddleware" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/Hydrate.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/Hydrate.php on line 11
+[02-Sep-2025 20:59:24 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\ResponseMiddleware" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/ResetIdempotencyKey.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/ResetIdempotencyKey.php on line 8
+[03-Sep-2025 06:23:05 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\RequestMiddleware" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/ApplyIdempotencyKey.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/ApplyIdempotencyKey.php on line 10
+[03-Sep-2025 06:23:06 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\ResponseMiddleware" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/ConvertResponseToException.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/ConvertResponseToException.php on line 18
+[03-Sep-2025 06:23:09 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\ResponseMiddleware" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/Hydrate.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/Hydrate.php on line 11
+[03-Sep-2025 06:23:11 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\ResponseMiddleware" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/ResetIdempotencyKey.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Middleware/ResetIdempotencyKey.php on line 8

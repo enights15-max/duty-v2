@@ -1,0 +1,2 @@
+[02-Sep-2025 15:37:54 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasHeaders" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Traits/HasRequestProperties.php on line 5
+[02-Sep-2025 15:37:56 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasHeaders" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Traits/HasRequestProperties.php on line 5

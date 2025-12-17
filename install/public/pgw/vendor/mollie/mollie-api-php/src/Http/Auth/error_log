@@ -1,0 +1,24 @@
+[03-Sep-2025 06:21:41 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Http\Auth\BearerTokenAuthenticator" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Auth/AccessTokenAuthenticator.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Auth/AccessTokenAuthenticator.php on line 7
+[03-Sep-2025 06:21:42 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Http\Auth\BearerTokenAuthenticator" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Auth/ApiKeyAuthenticator.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Auth/ApiKeyAuthenticator.php on line 7
+[03-Sep-2025 06:21:43 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Authenticator" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Auth/BearerTokenAuthenticator.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Auth/BearerTokenAuthenticator.php on line 8
+[03-Sep-2025 06:22:59 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Http\Auth\BearerTokenAuthenticator" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Auth/AccessTokenAuthenticator.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Auth/AccessTokenAuthenticator.php on line 7
+[03-Sep-2025 06:23:00 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\Http\Auth\BearerTokenAuthenticator" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Auth/ApiKeyAuthenticator.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Auth/ApiKeyAuthenticator.php on line 7
+[03-Sep-2025 06:23:01 UTC] PHP Fatal error:  Uncaught Error: Interface "Mollie\Api\Contracts\Authenticator" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Auth/BearerTokenAuthenticator.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Auth/BearerTokenAuthenticator.php on line 8

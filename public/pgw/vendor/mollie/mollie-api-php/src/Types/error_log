@@ -1,0 +1,4 @@
+[02-Sep-2025 15:38:34 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\GetAllConstants" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Types/BusinessCategory.php on line 7
+[02-Sep-2025 15:38:36 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\GetAllConstants" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Types/BusinessCategory.php on line 7
+[02-Sep-2025 18:13:20 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\GetAllConstants" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Types/SubscriptionStatus.php on line 7
+[02-Sep-2025 18:13:22 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\GetAllConstants" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Types/SubscriptionStatus.php on line 7

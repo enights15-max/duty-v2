@@ -1,0 +1,320 @@
+[02-Sep-2025 15:33:42 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/BalanceEndpointCollection.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/BalanceEndpointCollection.php on line 14
+[02-Sep-2025 15:33:44 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/BalanceReportEndpointCollection.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/BalanceReportEndpointCollection.php on line 10
+[02-Sep-2025 15:33:46 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/BalanceReportEndpointCollection.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/BalanceReportEndpointCollection.php on line 10
+[02-Sep-2025 15:33:48 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/BalanceTransactionEndpointCollection.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/BalanceTransactionEndpointCollection.php on line 14
+[02-Sep-2025 18:08:36 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementChargebackEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementChargebackEndpointCollection.php on line 12
+[02-Sep-2025 18:08:41 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementChargebackEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementChargebackEndpointCollection.php on line 12
+[02-Sep-2025 18:08:43 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementEndpointCollection.php on line 12
+[02-Sep-2025 18:08:45 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementEndpointCollection.php on line 12
+[02-Sep-2025 18:08:47 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementPaymentEndpointCollection.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementPaymentEndpointCollection.php on line 13
+[02-Sep-2025 18:08:49 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementPaymentEndpointCollection.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementPaymentEndpointCollection.php on line 13
+[02-Sep-2025 18:08:51 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementRefundEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementRefundEndpointCollection.php on line 12
+[02-Sep-2025 18:08:53 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SubscriptionEndpointCollection.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SubscriptionEndpointCollection.php on line 18
+[02-Sep-2025 18:08:54 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SubscriptionEndpointCollection.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SubscriptionEndpointCollection.php on line 18
+[02-Sep-2025 18:08:56 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SubscriptionPaymentEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SubscriptionPaymentEndpointCollection.php on line 12
+[02-Sep-2025 18:08:58 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SubscriptionPaymentEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SubscriptionPaymentEndpointCollection.php on line 12
+[02-Sep-2025 18:09:00 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/TerminalEndpointCollection.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/TerminalEndpointCollection.php on line 13
+[02-Sep-2025 18:09:01 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/TerminalEndpointCollection.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/TerminalEndpointCollection.php on line 13
+[02-Sep-2025 18:09:03 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/WalletEndpointCollection.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/WalletEndpointCollection.php on line 9
+[02-Sep-2025 18:09:05 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/WalletEndpointCollection.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/WalletEndpointCollection.php on line 9
+[02-Sep-2025 18:09:07 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/WebhookEndpointCollection.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/WebhookEndpointCollection.php on line 17
+[02-Sep-2025 18:09:08 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/WebhookEndpointCollection.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/WebhookEndpointCollection.php on line 17
+[02-Sep-2025 18:09:11 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/WebhookEventEndpointCollection.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/WebhookEventEndpointCollection.php on line 9
+[02-Sep-2025 18:09:12 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/WebhookEventEndpointCollection.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/WebhookEventEndpointCollection.php on line 9
+[02-Sep-2025 19:18:49 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/BalanceEndpointCollection.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/BalanceEndpointCollection.php on line 14
+[02-Sep-2025 19:18:50 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/BalanceTransactionEndpointCollection.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/BalanceTransactionEndpointCollection.php on line 14
+[02-Sep-2025 19:18:52 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/CapabilityEndpointCollection.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/CapabilityEndpointCollection.php on line 11
+[02-Sep-2025 19:18:54 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/CapabilityEndpointCollection.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/CapabilityEndpointCollection.php on line 11
+[02-Sep-2025 19:19:28 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ChargebackEndpointCollection.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ChargebackEndpointCollection.php on line 11
+[02-Sep-2025 19:19:31 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ChargebackEndpointCollection.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ChargebackEndpointCollection.php on line 11
+[02-Sep-2025 19:19:33 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ClientEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ClientEndpointCollection.php on line 12
+[02-Sep-2025 19:19:34 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ClientEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ClientEndpointCollection.php on line 12
+[02-Sep-2025 19:19:36 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ClientLinkEndpointCollection.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ClientLinkEndpointCollection.php on line 9
+[02-Sep-2025 19:19:37 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ClientLinkEndpointCollection.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ClientLinkEndpointCollection.php on line 9
+[02-Sep-2025 19:19:39 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/CustomerEndpointCollection.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/CustomerEndpointCollection.php on line 16
+[02-Sep-2025 19:19:41 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/CustomerEndpointCollection.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/CustomerEndpointCollection.php on line 16
+[02-Sep-2025 19:19:42 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/CustomerPaymentsEndpointCollection.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/CustomerPaymentsEndpointCollection.php on line 14
+[02-Sep-2025 19:19:44 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/CustomerPaymentsEndpointCollection.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/CustomerPaymentsEndpointCollection.php on line 14
+[02-Sep-2025 19:19:49 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/InvoiceEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/InvoiceEndpointCollection.php on line 12
+[02-Sep-2025 19:19:51 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/InvoiceEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/InvoiceEndpointCollection.php on line 12
+[02-Sep-2025 19:19:53 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/MandateEndpointCollection.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/MandateEndpointCollection.php on line 16
+[02-Sep-2025 19:19:54 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/MandateEndpointCollection.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/MandateEndpointCollection.php on line 16
+[02-Sep-2025 19:19:56 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/MethodEndpointCollection.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/MethodEndpointCollection.php on line 13
+[02-Sep-2025 19:19:57 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/MethodEndpointCollection.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/MethodEndpointCollection.php on line 13
+[02-Sep-2025 19:19:59 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/MethodIssuerEndpointCollection.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/MethodIssuerEndpointCollection.php on line 10
+[02-Sep-2025 19:20:01 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/MethodIssuerEndpointCollection.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/MethodIssuerEndpointCollection.php on line 10
+[02-Sep-2025 19:20:03 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/OnboardingEndpointCollection.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/OnboardingEndpointCollection.php on line 8
+[02-Sep-2025 19:20:04 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/OnboardingEndpointCollection.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/OnboardingEndpointCollection.php on line 8
+[02-Sep-2025 19:20:06 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/OrganizationEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/OrganizationEndpointCollection.php on line 12
+[02-Sep-2025 19:20:08 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/OrganizationEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/OrganizationEndpointCollection.php on line 12
+[02-Sep-2025 19:20:09 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/OrganizationPartnerEndpointCollection.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/OrganizationPartnerEndpointCollection.php on line 11
+[02-Sep-2025 19:20:11 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/OrganizationPartnerEndpointCollection.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/OrganizationPartnerEndpointCollection.php on line 11
+[02-Sep-2025 19:20:13 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentCaptureEndpointCollection.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentCaptureEndpointCollection.php on line 15
+[02-Sep-2025 19:20:14 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentCaptureEndpointCollection.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentCaptureEndpointCollection.php on line 15
+[02-Sep-2025 19:20:16 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentChargebackEndpointCollection.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentChargebackEndpointCollection.php on line 14
+[02-Sep-2025 19:20:18 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentChargebackEndpointCollection.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentChargebackEndpointCollection.php on line 14
+[02-Sep-2025 19:20:20 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentEndpointCollection.php:22
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentEndpointCollection.php on line 22
+[02-Sep-2025 19:20:21 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentEndpointCollection.php:22
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentEndpointCollection.php on line 22
+[02-Sep-2025 19:20:23 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentLinkEndpointCollection.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentLinkEndpointCollection.php on line 16
+[02-Sep-2025 19:20:25 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentLinkEndpointCollection.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentLinkEndpointCollection.php on line 16
+[02-Sep-2025 19:20:26 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentLinkPaymentEndpointCollection.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentLinkPaymentEndpointCollection.php on line 13
+[02-Sep-2025 19:20:28 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentLinkPaymentEndpointCollection.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentLinkPaymentEndpointCollection.php on line 13
+[02-Sep-2025 19:20:30 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentRefundEndpointCollection.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentRefundEndpointCollection.php on line 15
+[02-Sep-2025 19:20:31 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentRefundEndpointCollection.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentRefundEndpointCollection.php on line 15
+[02-Sep-2025 19:20:33 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentRouteEndpointCollection.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentRouteEndpointCollection.php on line 13
+[02-Sep-2025 19:20:35 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentRouteEndpointCollection.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PaymentRouteEndpointCollection.php on line 13
+[02-Sep-2025 19:20:37 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PermissionEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PermissionEndpointCollection.php on line 12
+[02-Sep-2025 19:20:38 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PermissionEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/PermissionEndpointCollection.php on line 12
+[02-Sep-2025 19:20:40 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ProfileEndpointCollection.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ProfileEndpointCollection.php on line 18
+[02-Sep-2025 19:20:42 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ProfileEndpointCollection.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ProfileEndpointCollection.php on line 18
+[02-Sep-2025 19:20:43 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ProfileMethodEndpointCollection.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ProfileMethodEndpointCollection.php on line 11
+[02-Sep-2025 19:20:45 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ProfileMethodEndpointCollection.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/ProfileMethodEndpointCollection.php on line 11
+[02-Sep-2025 19:20:47 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/RefundEndpointCollection.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/RefundEndpointCollection.php on line 11
+[02-Sep-2025 19:20:49 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/RefundEndpointCollection.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/RefundEndpointCollection.php on line 11
+[02-Sep-2025 19:20:50 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SalesInvoiceEndpointCollection.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SalesInvoiceEndpointCollection.php on line 15
+[02-Sep-2025 19:20:52 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SalesInvoiceEndpointCollection.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SalesInvoiceEndpointCollection.php on line 15
+[02-Sep-2025 19:20:53 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SessionEndpointCollection.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SessionEndpointCollection.php on line 16
+[02-Sep-2025 19:20:55 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SessionEndpointCollection.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SessionEndpointCollection.php on line 16
+[02-Sep-2025 19:20:57 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementCaptureEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementCaptureEndpointCollection.php on line 12
+[02-Sep-2025 19:20:59 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementCaptureEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementCaptureEndpointCollection.php on line 12
+[02-Sep-2025 19:21:00 UTC] PHP Fatal error:  Uncaught Error: Class "Mollie\Api\EndpointCollection\EndpointCollection" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementRefundEndpointCollection.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/EndpointCollection/SettlementRefundEndpointCollection.php on line 12

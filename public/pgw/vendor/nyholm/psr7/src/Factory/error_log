@@ -1,0 +1,16 @@
+[02-Sep-2025 18:13:51 UTC] PHP Fatal error:  Uncaught LogicException: You cannot use "Nyholm\Psr7\Factory\HttplugFactory" as the "php-http/message-factory" package is not installed. Try running "composer require php-http/message-factory". Note that this package is deprecated, use "psr/http-factory" instead in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Factory/HttplugFactory.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Factory/HttplugFactory.php on line 15
+[02-Sep-2025 18:13:53 UTC] PHP Fatal error:  Uncaught LogicException: You cannot use "Nyholm\Psr7\Factory\HttplugFactory" as the "php-http/message-factory" package is not installed. Try running "composer require php-http/message-factory". Note that this package is deprecated, use "psr/http-factory" instead in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Factory/HttplugFactory.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Factory/HttplugFactory.php on line 15
+[02-Sep-2025 18:13:54 UTC] PHP Fatal error:  Uncaught Error: Interface "Psr\Http\Message\RequestFactoryInterface" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Factory/Psr17Factory.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Factory/Psr17Factory.php on line 16
+[02-Sep-2025 18:13:56 UTC] PHP Fatal error:  Uncaught Error: Interface "Psr\Http\Message\RequestFactoryInterface" not found in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Factory/Psr17Factory.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/adspectr/public_html/api/vendor/nyholm/psr7/src/Factory/Psr17Factory.php on line 16

@@ -1,0 +1,4 @@
+[02-Sep-2025 15:34:06 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasMiddleware" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/PendingRequest.php on line 25
+[02-Sep-2025 15:34:08 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HasMiddleware" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/PendingRequest.php on line 25
+[02-Sep-2025 15:34:10 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HandlesDebugging" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Request.php on line 11
+[02-Sep-2025 15:34:12 UTC] PHP Fatal error:  Trait "Mollie\Api\Traits\HandlesDebugging" not found in /home/adspectr/public_html/api/vendor/mollie/mollie-api-php/src/Http/Request.php on line 11
