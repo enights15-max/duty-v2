@@ -21,7 +21,7 @@ try {
   $js  = json_decode($raw, true) ?: [];
 
   $amountMinor = (int)($js['amount_minor'] ?? 0);
-  $currency    = strtoupper(trim((string)($js['currency'] ?? 'USD'))); // fiat currency
+  $currency    = strtoupper(trim((string)($js['currency'] ?? 'DOP'))); // fiat currency
   $orderId     = 'ORDER-'.time();
 
   if ($amountMinor <= 0) { http_response_code(400); echo json_encode(['error'=>'Invalid amount_minor']); exit; }

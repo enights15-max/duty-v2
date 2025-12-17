@@ -31,7 +31,7 @@ $inputRaw = file_get_contents('php://input');
 $input = json_decode($inputRaw, true) ?: [];
 
 $amount   = $input['amount']   ?? null;
-$currency = $input['currency'] ?? 'usd';
+$currency = $input['currency'] ?? 'dop';
 
 // Validate amount is an integer >= 1
 if (!is_int($amount)) {
