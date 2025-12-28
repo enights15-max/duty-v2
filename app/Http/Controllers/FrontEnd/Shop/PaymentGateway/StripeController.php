@@ -58,12 +58,12 @@ class StripeController extends Controller
     $total_tax_amount = ($tax_percentage / 100) * ($total - $discount);
     $grand_total = ($shipping_charge + $total + $total_tax_amount) - $discount;
     // changing the currency before redirect to Stripe
-    if ($currencyInfo->base_currency_text !== 'USD') {
+    if ($currencyInfo->base_currency_text !== 'DOP') {
       $rate = floatval($currencyInfo->base_currency_rate);
       $convertedTotal = round(($grand_total / $rate), 2);
     }
 
-    $stripeTotal = $currencyInfo->base_currency_text === 'USD' ? $grand_total : $convertedTotal;
+    $stripeTotal = $currencyInfo->base_currency_text === 'DOP' ? $grand_total : $convertedTotal;
 
     if (Auth::guard('customer')->user()) {
       $user_id = Auth::guard('customer')->user()->id;
@@ -120,7 +120,7 @@ class StripeController extends Controller
           // generate charge
           $charge = $stripe->charges()->create([
             'source' => $request->stripeToken,
-            'currency' => 'USD',
+            'currency' => 'DOP',
             'amount'   => $stripeTotal
           ]);
         } catch (\Exception $th) {

@@ -62,7 +62,7 @@ class PayPalController extends Controller
     ];
 
     $message = [];
-    
+
     $message['fname.required'] = 'The first name feild is required';
     $message['lname.required'] = 'The last name feild is required';
     $message['gateway.required'] = 'The payment gateway feild is required';
@@ -84,12 +84,12 @@ class PayPalController extends Controller
 
     $total_early_bird_dicount = Session::get('total_early_bird_dicount');
     // changing the currency before redirect to PayPal
-    if ($currencyInfo->base_currency_text !== 'USD') {
+    if ($currencyInfo->base_currency_text !== 'DOP') {
       $rate = floatval($currencyInfo->base_currency_rate);
       $convertedTotal = round((($total + $tax_amount) / $rate), 2);
     }
 
-    $paypalTotal = $currencyInfo->base_currency_text === 'USD' ? $total + $tax_amount : $convertedTotal;
+    $paypalTotal = $currencyInfo->base_currency_text === 'DOP' ? $total + $tax_amount : $convertedTotal;
 
     $arrData = array(
       'event_id' => $event_id,

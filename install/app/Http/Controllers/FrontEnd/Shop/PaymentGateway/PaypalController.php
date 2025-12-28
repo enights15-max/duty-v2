@@ -75,14 +75,14 @@ class PaypalController extends Controller
     $tax_percentage = $tax->shop_tax;
     $total_tax_amount = ($tax_percentage / 100) * ($total - $discount);
     $grand_total = ($shipping_charge + $total + $total_tax_amount) - $discount;
-    
+
     // changing the currency before redirect to PayPal
-    if ($currencyInfo->base_currency_text !== 'USD') {
+    if ($currencyInfo->base_currency_text !== 'DOP') {
       $rate = floatval($currencyInfo->base_currency_rate);
       $convertedTotal = round(($grand_total / $rate), 2);
     }
 
-    $paypalTotal = $currencyInfo->base_currency_text === 'USD' ? $grand_total : $convertedTotal;
+    $paypalTotal = $currencyInfo->base_currency_text === 'DOP' ? $grand_total : $convertedTotal;
 
     if (Auth::guard('customer')->user()) {
       $user_id = Auth::guard('customer')->user()->id;

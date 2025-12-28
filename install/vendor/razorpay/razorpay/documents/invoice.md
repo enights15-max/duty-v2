@@ -5,7 +5,7 @@
 Request #1
 In this example, an invoice is created using the customer and item details. Here, the customer and item are created while creating the invoice.
 ```php
-$api->invoice->create(array ('type' => 'invoice','description' => 'Invoice for the month of January 2020','partial_payment' => true,'customer' =>array ('name' => 'Gaurav Kumar','contact' => 9999999999,'email' => 'gaurav.kumar@example.com','billing_address' => array ('line1' => 'Ground & 1st Floor, SJR Cyber Laskar','line2' => 'Hosur Road','zipcode' => '560068','city' => 'Bengaluru','state' => 'Karnataka','country' => 'in'),'shipping_address' => array ('line1' => 'Ground & 1st Floor, SJR Cyber Laskar','line2' => 'Hosur Road','zipcode' => '560068','city' => 'Bengaluru','state' => 'Karnataka','country' => 'in')),'line_items' => array (array ('name' => 'Master Cloud Computing in 30 Days','description' => 'Book by Ravena Ravenclaw','amount' => 399,'currency' => 'USD','quantity' => 1)),'sms_notify' => 1,'email_notify' => 1,'currency' => 'USD','expire_by' => 1589765167));
+$api->invoice->create(array ('type' => 'invoice','description' => 'Invoice for the month of January 2020','partial_payment' => true,'customer' =>array ('name' => 'Gaurav Kumar','contact' => 9999999999,'email' => 'gaurav.kumar@example.com','billing_address' => array ('line1' => 'Ground & 1st Floor, SJR Cyber Laskar','line2' => 'Hosur Road','zipcode' => '560068','city' => 'Bengaluru','state' => 'Karnataka','country' => 'in'),'shipping_address' => array ('line1' => 'Ground & 1st Floor, SJR Cyber Laskar','line2' => 'Hosur Road','zipcode' => '560068','city' => 'Bengaluru','state' => 'Karnataka','country' => 'in')),'line_items' => array (array ('name' => 'Master Cloud Computing in 30 Days','description' => 'Book by Ravena Ravenclaw','amount' => 399,'currency' => 'DOP','quantity' => 1)),'sms_notify' => 1,'email_notify' => 1,'currency' => 'DOP','expire_by' => 1589765167));
 ```
 **Parameters:**
 
@@ -273,7 +273,7 @@ $api->invoice->fetch($invoiceId)->edit(array('line_items' => array(array('id' =>
 
 ### Issue an invoice
 
-Only an invoice in the `draft` state can be issued. 
+Only an invoice in the `draft` state can be issued.
 ```php
 
 $api->invoice->fetch($invoiceId)->issue();
