@@ -1726,7 +1726,7 @@ class EventController extends Controller
           $rate = floatval($currencyInfo->base_currency_rate);
           $convertedTotal = $amount / $rate;
         }
-        $paidAmount = $currencyInfo->base_currency_text === 'USD' ? $amount : $convertedTotal;
+        $paidAmount = $currencyInfo->base_currency_text === 'DOP' ? $amount : $convertedTotal;
         $information = [
           "success" => true,
           "message" => "",
@@ -1797,12 +1797,12 @@ class EventController extends Controller
         ];
         break;
       case 'stripe':
-        if ($currencyInfo->base_currency_text !== 'USD') {
+        if ($currencyInfo->base_currency_text !== 'DOP') {
           $rate = floatval($currencyInfo->base_currency_rate);
           $convertedTotal = round(($amount / $rate), 2);
         }
 
-        $paidAmount = $currencyInfo->base_currency_text === 'USD' ? $amount : $convertedTotal;
+        $paidAmount = $currencyInfo->base_currency_text === 'DOP' ? $amount : $convertedTotal;
         $information = [
           "success" => true,
           "message" => "",
