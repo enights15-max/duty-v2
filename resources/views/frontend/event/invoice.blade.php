@@ -23,10 +23,10 @@
     <link rel="stylesheet" href="{{ asset('assets/admin/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/admin/css/invoice.css') }}">
     @php
-        $_15px = '16px';
-        $_10px = '12px';
-        $_12px = '14px';
-        $b_color = '#000000';
+        $_15px = '15px';
+        $_10px = '10px';
+        $_12px = '12px';
+        $b_color = '565656';
         $w_47 = '47%';
         $DejaVu_Sans = 'DejaVu Sans, serif';
     @endphp
@@ -82,8 +82,7 @@
 
         p {
             font-size: {{ $_12px }};
-            /*margin-bottom: {{ $_10px }};*/
-            margin-bottom: 0;
+            margin-bottom: {{ $_10px }};
         }
 
         * {
@@ -211,27 +210,47 @@
                 <p class="text-center">
                     <span>
                         <img class="img-fluid" alt="image"
-                            src="{{ asset('assets/admin/img/event_ticket/' . $event->ticket_image) }}" />
+                            src="{{ asset('assets/admin/img/event_ticket_logo/' . $event->ticket_logo) }}" />
                     </span>
                 </p>
             @endif
 
             <table class="mt-2" border="0" cellspacing="0" cellpadding="0" width="100%">
-                <tbody style="border-top: 5px dashed #000000">
+                <tbody style="border: 2px solid {{ $bg_color }}">
                     <tr>
-                       <td class="center p-3" style="width:100%;">
+                        @if ($language->direction == 1)
+                            <td class="right p-3" style="width:16.666667%;">
                                 <p class="text-center">
-                                    <img width="50%"  alt="image"
+                                    <img width="111" height="111" alt="image"
                                         src="{{ asset('assets/admin/qrcodes/' . $bookingInfo->booking_id . '__' . $variation['unique_id'] . '.svg') }}"
                                         alt="">
                                 </p>
                             </td>
+                        @else
+                            <td class="left" 
+                                style="width:33.333333%;
+                                    @if (empty($event->ticket_image))
+                                    background-color:{{ $bg_color }};
+                                    @else
+                                    background: url('{{ asset('assets/admin/img/event_ticket/' . $event->ticket_image) }}') no-repeat center center;
+                                    background-size: cover;
+                                    @endif
+                                
+                                ">
 
-                        <td class="center p-3" style="width:100%;">
-                            <!--<p class="h2 mb-2 {{ $language->direction == 1 ? 'rtl' : '' }}">-->
-                            <!--    {{ @$eventInfo->title }}-->
-                            <!--</p>-->
-                            <!--<hr>-->
+                                {{-- @if (!empty($event->ticket_image))
+                                    <img alt="image" width="100%"
+                                        src="{{ asset('assets/admin/img/event_ticket/' . $event->ticket_image) }}" />
+                                @endif --}}
+
+                            </td>
+                        @endif
+
+                        <td class="center p-3" style="width:50%;">
+                            <p class="h2 mb-2 {{ $language->direction == 1 ? 'rtl' : '' }}">
+                                {{ @$eventInfo->title }}
+                            </p>
+                            <hr>
                             <p class="h3 mb-2 {{ $language->direction == 1 ? 'rtl' : '' }}">
                                 {{ $bookingInfo->city }},
                                 {{ is_null($bookingInfo->state) ? '' : $bookingInfo->state . ',' }}
@@ -266,38 +285,38 @@
                                 @endif
                                 {{ $variation['name'] }}
                             </p>
-                            <!--<hr>-->
+                            <hr>
 
-                            <!--<p class="c-light h6 mb-1 {{ $language->direction == 1 ? 'rtl' : '' }}">-->
-                            <!--    {{ __('Billing Address') }}-->
-                            <!--</p>-->
-                            <!--<p class="h4 fw-0 mb-2 {{ $language->direction == 1 ? 'rtl' : '' }}">-->
-                            <!--    {{ $bookingInfo->address }}-->
-                            <!--</p>-->
+                            <p class="c-light h6 mb-1 {{ $language->direction == 1 ? 'rtl' : '' }}">
+                                {{ __('Billing Address') }}
+                            </p>
+                            <p class="h4 fw-0 mb-2 {{ $language->direction == 1 ? 'rtl' : '' }}">
+                                {{ $bookingInfo->address }}
+                            </p>
                             </p>
                             <hr>
                             <table border="0" cellspacing="0" cellpadding="0" width="100%">
                                 <tr>
-                                    <!--<td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">-->
-                                    <!--    <p class="mt-2">-->
-                                    <!--    <p class="c-light h6 mb-1  ">-->
-                                    <!--        {{ __('BOOKING DATE') }}-->
-                                    <!--    </p>-->
-                                    <!--    <p class="h4 fw-0 mb-2">-->
-                                    <!--        {{ date_format($bookingInfo->created_at, 'M d, Y') }}-->
-                                    <!--    </p>-->
-                                    <!--    </p>-->
-                                    <!--</td>-->
-                                    <!--<td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">-->
-                                    <!--    <p class="mt-2">-->
-                                    <!--    <p class="c-light h6 mb-1 ">-->
-                                    <!--        {{ __('DURATION') }}-->
-                                    <!--    </p>-->
-                                    <!--    <p class="h4 fw-0 mb-2">-->
-                                    <!--        {{ @$bookingInfo->evnt->duration }}-->
-                                    <!--    </p>-->
-                                    <!--    </p>-->
-                                    <!--</td>-->
+                                    <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">
+                                        <p class="mt-2">
+                                        <p class="c-light h6 mb-1  ">
+                                            {{ __('BOOKING DATE') }}
+                                        </p>
+                                        <p class="h4 fw-0 mb-2">
+                                            {{ date_format($bookingInfo->created_at, 'M d, Y') }}
+                                        </p>
+                                        </p>
+                                    </td>
+                                    <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">
+                                        <p class="mt-2">
+                                        <p class="c-light h6 mb-1 ">
+                                            {{ __('DURATION') }}
+                                        </p>
+                                        <p class="h4 fw-0 mb-2">
+                                            {{ @$bookingInfo->evnt->duration }}
+                                        </p>
+                                        </p>
+                                    </td>
                                     <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">
                                         <p class="mt-2">
                                         <p class="c-light h6 mb-1 ">
@@ -350,142 +369,107 @@
                             @endif
 
                             <!------ End slot system---->
-                            <!--<hr>-->
-                            <!--<table border="0" cellspacing="0" cellpadding="0" width="100%">-->
-                            <!--    <tr>-->
-                            <!--        <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">-->
-                            <!--            <p class="mt-2">-->
-                            <!--            <p class="c-light h6 mb-1">-->
-                            <!--                {{ __('TAX') }}-->
-                            <!--            </p>-->
-                            <!--            <p class="h4 fw-0 mb-2">-->
-                            <!--                {{ $position == 'left' ? $currency . ' ' : '' }}{{ is_null($bookingInfo->tax) ? '0.00' : $bookingInfo->tax }}{{ $position == 'right' ? ' ' . $currency : '' }}-->
-                            <!--            </p>-->
-                            <!--            </p>-->
-                            <!--        </td>-->
-                            <!--        <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">-->
-                            <!--            <p class="mt-2">-->
-                            <!--            <p class="c-light h6 mb-1">-->
-                            <!--                {{ __('EARLY BIRD') }}-->
-                            <!--            </p>-->
-                            <!--            <p class="h4 fw-0 mb-2">-->
-                            <!--                {{ $position == 'left' ? $currency . ' ' : '' }}{{ is_null($bookingInfo->early_bird_discount) ? '0.00' : $bookingInfo->early_bird_discount }}{{ $position == 'right' ? ' ' . $currency : '' }}-->
-                            <!--            </p>-->
-                            <!--            </p>-->
-                            <!--        </td>-->
-                            <!--        <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">-->
-                            <!--            <p class="mt-2">-->
-                            <!--            <p class="c-light h6 mb-1">-->
-                            <!--                {{ __('COUPON') }}-->
-                            <!--            </p>-->
-                            <!--            <p class="h4 fw-0 mb-2">-->
-                            <!--                {{ $position == 'left' ? $currency . ' ' : '' }}{{ is_null($bookingInfo->discount) ? '0.00' : $bookingInfo->discount }}{{ $position == 'right' ? ' ' . $currency : '' }}-->
-                            <!--            </p>-->
-                            <!--            </p>-->
-                            <!--        </td>-->
-                            <!--    </tr>-->
-                            <!--</table>-->
-                            <!--<hr>-->
-                            <!--<table border="0" cellspacing="0" cellpadding="0" width="100%">-->
-                            <!--    <tr>-->
-                            <!--        <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">-->
-                            <!--            <p class="mt-2">-->
-                            <!--                <span class="c-light h6 mb-1">-->
-                            <!--                    {{ __('TOTAL PAID') }}-->
-                            <!--                </span>-->
-                            <!--                <span class="h4 fw-0 mb-2">-->
-                            <!--                    {{ $position == 'left' ? $currency . ' ' : '' }}{{ $bookingInfo->price + $bookingInfo->tax }}{{ $position == 'right' ? ' ' . $currency : '' }}-->
-                            <!--                </span>-->
-                            <!--            </p>-->
-                            <!--        </td>-->
-                            <!--        <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">-->
-                            <!--            <p class="mt-2">-->
-                            <!--                <span class="c-light h6 mb-1">-->
-                            <!--                    {{ __('PAYMENT METHOD') }}-->
-                            <!--                </span>-->
-                            <!--                <span class="h4 fw-0 mb-2">-->
-                            <!--                    {{ is_null($bookingInfo->paymentMethod) ? '-' : $bookingInfo->paymentMethod }}-->
-                            <!--                </span>-->
-                            <!--            </p>-->
-                            <!--        </td>-->
-                            <!--        <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">-->
-                            <!--            <p class="mt-2">-->
-                            <!--                <span class="c-light h6 mb-1">-->
-                            <!--                    {{ __('PAYMENT STATUS') }}-->
-                            <!--                </span>-->
-                            <!--                <span class="h4 fw-0 mb-2">-->
-                            <!--                    @if ($bookingInfo->paymentStatus == 'completed')-->
-                            <!--                        {{ __('Completed') }}-->
-                            <!--                    @elseif ($bookingInfo->paymentStatus == 'pending')-->
-                            <!--                        {{ __('Pending') }}-->
-                            <!--                    @elseif ($bookingInfo->paymentStatus == 'rejected')-->
-                            <!--                        {{ __('Rejected') }}-->
-                            <!--                    @else-->
-                            <!--                        --->
-                            <!--                    @endif-->
-                            <!--                </span>-->
-                            <!--            </p>-->
-                            <!--        </td>-->
-                            <!--    </tr>-->
-                            <!--</table>-->
+                            <hr>
+                            <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                                <tr>
+                                    <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">
+                                        <p class="mt-2">
+                                        <p class="c-light h6 mb-1">
+                                            {{ __('TAX') }}
+                                        </p>
+                                        <p class="h4 fw-0 mb-2">
+                                            {{ $position == 'left' ? $currency . ' ' : '' }}{{ is_null($bookingInfo->tax) ? '0.00' : $bookingInfo->tax }}{{ $position == 'right' ? ' ' . $currency : '' }}
+                                        </p>
+                                        </p>
+                                    </td>
+                                    <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">
+                                        <p class="mt-2">
+                                        <p class="c-light h6 mb-1">
+                                            {{ __('EARLY BIRD') }}
+                                        </p>
+                                        <p class="h4 fw-0 mb-2">
+                                            {{ $position == 'left' ? $currency . ' ' : '' }}{{ is_null($bookingInfo->early_bird_discount) ? '0.00' : $bookingInfo->early_bird_discount }}{{ $position == 'right' ? ' ' . $currency : '' }}
+                                        </p>
+                                        </p>
+                                    </td>
+                                    <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">
+                                        <p class="mt-2">
+                                        <p class="c-light h6 mb-1">
+                                            {{ __('COUPON') }}
+                                        </p>
+                                        <p class="h4 fw-0 mb-2">
+                                            {{ $position == 'left' ? $currency . ' ' : '' }}{{ is_null($bookingInfo->discount) ? '0.00' : $bookingInfo->discount }}{{ $position == 'right' ? ' ' . $currency : '' }}
+                                        </p>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            <hr>
+                            <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                                <tr>
+                                    <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">
+                                        <p class="mt-2">
+                                            <span class="c-light h6 mb-1">
+                                                {{ __('TOTAL PAID') }}
+                                            </span>
+                                            <span class="h4 fw-0 mb-2">
+                                                {{ $position == 'left' ? $currency . ' ' : '' }}{{ $bookingInfo->price + $bookingInfo->tax }}{{ $position == 'right' ? ' ' . $currency : '' }}
+                                            </span>
+                                        </p>
+                                    </td>
+                                    <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">
+                                        <p class="mt-2">
+                                            <span class="c-light h6 mb-1">
+                                                {{ __('PAYMENT METHOD') }}
+                                            </span>
+                                            <span class="h4 fw-0 mb-2">
+                                                {{ is_null($bookingInfo->paymentMethod) ? '-' : $bookingInfo->paymentMethod }}
+                                            </span>
+                                        </p>
+                                    </td>
+                                    <td class="{{ $language->direction == 1 ? 'rtl' : '' }}" style="width: 33%">
+                                        <p class="mt-2">
+                                            <span class="c-light h6 mb-1">
+                                                {{ __('PAYMENT STATUS') }}
+                                            </span>
+                                            <span class="h4 fw-0 mb-2">
+                                                @if ($bookingInfo->paymentStatus == 'completed')
+                                                    {{ __('Completed') }}
+                                                @elseif ($bookingInfo->paymentStatus == 'pending')
+                                                    {{ __('Pending') }}
+                                                @elseif ($bookingInfo->paymentStatus == 'rejected')
+                                                    {{ __('Rejected') }}
+                                                @else
+                                                    -
+                                                @endif
+                                            </span>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
                             <div class="mt-4">
                             </div>
                         </td>
-                        
-                         @if ($language->direction == 1)
-                            
-                        <!--@else-->
-                            <!--<td class="left" -->
-                            <!--    style="width:33.333333%;-->
-                            <!--        @if (empty($event->ticket_image))-->
-                            <!--        background-color:{{ $bg_color }};-->
-                            <!--        @else-->
-                            <!--        background: url('{{ asset('assets/admin/img/event_ticket_logo/' . $event->ticket_logo) }}') no-repeat center center;-->
-                            <!--        background-size: cover;-->
-                            <!--        @endif-->
-                                
-                            <!--    ">-->
-
-                            <!--    {{-- @if (!empty($event->ticket_image))-->
-                            <!--        <img alt="image" width="100%"-->
-                            <!--            src="{{ asset('assets/admin/img/event_ticket/' . $event->ticket_image) }}" />-->
-                            <!--    @endif --}}-->
-
-                            <!--</td>-->
-                        @endif
-                        
-                        
                         @if ($language->direction == 1)
-                            <td class="center"
-                                style="width:100%; @if (empty($event->ticket_image)) background-color:{{ $bg_color }}; @endif">
+                            <td class="left"
+                                style="width:33.333333%; @if (empty($event->ticket_image)) background-color:{{ $bg_color }}; @endif">
                                 @if (!empty($event->ticket_image))
                                     <img alt="image" width="100%"
                                         src="{{ asset('assets/admin/img/event_ticket/' . $event->ticket_image) }}" />
                                 @endif
-                                
-                                @if (!empty($event->ticket_logo))
-                <p class="text-center">
-                    <span>
-                        <img class="img-fluid" alt="image"
-                            src="{{ asset('assets/admin/img/event_ticket_logo/' . $event->ticket_logo) }}" />
-                    </span>
-                </p>
-            @endif
                             </td>
-                        <!--@else-->
-                        <!--    <td class="right p-3" style="width:16.666667%;">-->
-                        <!--        <p class="text-center">-->
-                        <!--            <img width="111" height="111" alt="image"-->
-                        <!--                src="{{ asset('assets/admin/qrcodes/' . $bookingInfo->booking_id . '__' . $variation['unique_id'] . '.svg') }}"-->
-                        <!--                alt="">-->
-                        <!--        </p>-->
-                        <!--    </td>-->
+                        @else
+                            <td class="right p-3" style="width:16.666667%;">
+                                <p class="text-center">
+                                    <img width="111" height="111" alt="image"
+                                        src="{{ asset('assets/admin/qrcodes/' . $bookingInfo->booking_id . '__' . $variation['unique_id'] . '.svg') }}"
+                                        alt="">
+                                </p>
+                            </td>
                         @endif
                     </tr>
                 </tbody>
             </table>
-            
-             
 
             {{-- Information --}}
             @if (!empty($event->instructions))

@@ -1,5 +1,6 @@
 @extends('backend.layout')
 
+
 @section('content')
     <div class="page-header">
         <h4 class="page-title">{{ __('Permissions') }}</h4>
@@ -225,7 +226,7 @@
                                         <label class="selectgroup-item">
                                             <input type="checkbox" class="selectgroup-input" name="permissions[]"
                                                 value="Mobile Interface" @if (is_array($rolePermissions) && in_array('Mobile Interface', $rolePermissions)) checked @endif>
-                                            <span class="selectgroup-button">{{ __('Mobile Interface') }}</span>
+                                            <span class="selectgroup-button">{{ __('Mobile App Settings') }}</span>
                                         </label>
 
                                     </div>

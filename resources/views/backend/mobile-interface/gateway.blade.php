@@ -16,7 +16,7 @@
                 <i class="flaticon-right-arrow"></i>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.mobile_interface') }}">{{ __('Mobile Interface') }}</a>
+                <a href="{{ route('admin.mobile_interface') }}">{{ __('Mobile App Settings') }}</a>
             </li>
             <li class="separator">
                 <i class="flaticon-right-arrow"></i>

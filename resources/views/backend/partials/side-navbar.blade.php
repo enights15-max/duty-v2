@@ -1265,7 +1265,7 @@
                             request()->routeIs('admin.mobile_interface_gsetting')) active @endif">
                         <a href="{{ route('admin.mobile_interface',['language' => $defaultLang->code]) }}">
                             <i class="fas fa-mobile-alt"></i>
-                            <p>{{ __('Mobile Interface') }}</p>
+                            <p>{{ __('Mobile App Settings') }}</p>
                         </a>
                     </li>
                 @endif

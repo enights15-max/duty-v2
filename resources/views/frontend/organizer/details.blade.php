@@ -1,5 +1,4 @@
 @extends('frontend.layout')
-
 @section('pageHeading')
     {{ $admin == true ? $organizer->username : $organizer->username }}
 @endsection
@@ -160,10 +159,10 @@
                                                                 @endif
                                                             </a>
                                                         </h5>
-
                                                         @php
                                                             $desc = strip_tags(@$event->information->description);
                                                         @endphp
+
                                                         @if (strlen($desc) > 100)
                                                             <p class="event-description">
                                                                 {{ mb_substr($desc, 0, 100) . '....' }}</p>
@@ -306,7 +305,8 @@
                                                                                                     </del>
                                                                                                 </span>
                                                                                             @endif
-                                                                                        @elseif($ticket->early_bird_discount_type == 'percentage' && !$discount_date->isPast())
+                                                                                            @elseif
+                                                                                            ($ticket->early_bird_discount_type == 'percentage' && !$discount_date->isPast())
                                                                                             @php
                                                                                                 $p_price =
                                                                                                     ($price *
@@ -385,7 +385,8 @@
                                                                                                 </del>
                                                                                             </span>
                                                                                         @endif
-                                                                                    @elseif($ticket->early_bird_discount_type == 'percentage' && !$discount_date->isPast())
+                                                                                        @elseif
+                                                                                        ($ticket->early_bird_discount_type == 'percentage' && !$discount_date->isPast())
                                                                                         @php
                                                                                             $p_price =
                                                                                                 ($ticketPrice *
@@ -590,7 +591,8 @@
                                                                                         <del>
                                                                                             {{ symbolPrice($ticket->price) }}
                                                                                         </del>
-                                                                                    @elseif($ticket->early_bird_discount == 'enable' && $ticket->early_bird_discount_type == 'percentage')
+                                                                                        @elseif
+                                                                                        ($ticket->early_bird_discount == 'enable' && $ticket->early_bird_discount_type == 'percentage')
                                                                                         @php
                                                                                             $p_price =
                                                                                                 ($ticket->price *
@@ -694,7 +696,8 @@
                                                                                                         </del>
                                                                                                     </span>
                                                                                                 @endif
-                                                                                            @elseif($ticket->early_bird_discount_type == 'percentage' && !$discount_date->isPast())
+                                                                                                @elseif
+                                                                                                ($ticket->early_bird_discount_type == 'percentage' && !$discount_date->isPast())
                                                                                                 @php
                                                                                                     $p_price =
                                                                                                         ($price *
@@ -775,7 +778,8 @@
                                                                                                     </del>
                                                                                                 </span>
                                                                                             @endif
-                                                                                        @elseif($ticket->early_bird_discount_type == 'percentage' && !$discount_date->isPast())
+                                                                                            @elseif
+                                                                                            ($ticket->early_bird_discount_type == 'percentage' && !$discount_date->isPast())
                                                                                             @php
                                                                                                 $p_price =
                                                                                                     ($ticketPrice *
@@ -823,6 +827,7 @@
                                                                     @endif
                                                                 </span>
                                                             </div>
+
                                                         </div>
                                                         @if (Auth::guard('customer')->check())
                                                             @php

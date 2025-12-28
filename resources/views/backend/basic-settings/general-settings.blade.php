@@ -232,7 +232,7 @@
                                             <label>{{ __('Base Currency Rate') . '*' }}</label>
                                             <div class="input-group mb-2">
                                                 <div class="input-group-prepend">
-                                                    <span class="input-group-text">{{ __('1 DOP =') }}</span>
+                                                    <span class="input-group-text">{{ __('1 USD =') }}</span>
                                                 </div>
                                                 <input type="text" name="base_currency_rate" class="form-control ltr"
                                                     value="{{ $data->base_currency_rate }}">

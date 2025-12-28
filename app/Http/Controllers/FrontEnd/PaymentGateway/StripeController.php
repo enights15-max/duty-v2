@@ -59,12 +59,12 @@ class StripeController extends Controller
     $commission_amount = ($total * $basicSetting->commission) / 100;
 
     // changing the currency before redirect to Stripe
-    if ($currencyInfo->base_currency_text !== 'DOP') {
+    if ($currencyInfo->base_currency_text !== 'USD') {
       $rate = floatval($currencyInfo->base_currency_rate);
       $convertedTotal = round(((Session::get('grand_total') + $tax_amount) / $rate), 2);
     }
 
-    $stripeTotal = $currencyInfo->base_currency_text === 'DOP' ? ($total + $tax_amount) : $convertedTotal;
+    $stripeTotal = $currencyInfo->base_currency_text === 'USD' ? ($total + $tax_amount) : $convertedTotal;
 
     $arrData = array(
       'event_id' => $eventId,
@@ -104,7 +104,7 @@ class StripeController extends Controller
           $charge = $stripe->charges()->create([
             // 'source' => $token['id'],
             'source' => $request->stripeToken,
-            'currency' => 'DOP',
+            'currency' => 'USD',
             'amount'   => $stripeTotal
           ]);
         } catch (\Exception $th) {

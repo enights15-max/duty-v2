@@ -707,7 +707,7 @@ if (!function_exists('paytabInfo')) {
     $paytabsInfo = json_decode($paytabs->information, true);
     if ($paytabsInfo['country'] == 'global') {
       // $url = 'https://secure-global.paytabs.com/payment/request';
-      $currency = 'DOP';
+      $currency = 'USD';
     } elseif ($paytabsInfo['country'] == 'sa') {
       // $url = 'https://secure.paytabs.sa/payment/request';
       $currency = 'SAR';
@@ -728,7 +728,7 @@ if (!function_exists('paytabInfo')) {
       $currency = 'IQD';
     } else {
       // $url = 'https://secure-global.paytabs.com/payment/request';
-      $currency = 'DOP';
+      $currency = 'USD';
     }
     return [
       'server_key' => $paytabsInfo['server_key'],

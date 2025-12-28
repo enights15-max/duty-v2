@@ -5,7 +5,7 @@
 
 @section('content')
     <div class="page-header">
-        <h4 class="page-title">{{ __('Mobile Interface') }}</h4>
+        <h4 class="page-title">{{ __('Plugins') }}</h4>
         <ul class="breadcrumbs">
             <li class="nav-home">
                 <a href="{{ route('admin.dashboard') }}">
@@ -16,7 +16,7 @@
                 <i class="flaticon-right-arrow"></i>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.mobile_interface') }}">{{ __('Mobile Interface') }}</a>
+                <a href="{{ route('admin.mobile_interface') }}">{{ __('Mobile App Settings') }}</a>
             </li>
             <li class="separator">
                 <i class="flaticon-right-arrow"></i>

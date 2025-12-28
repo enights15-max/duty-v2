@@ -5,7 +5,7 @@ return array (
   'AUTHORIZE_LOGIN_ID' => '3Ca5hYQ6h',
   'AUTHORIZE_TRANSACTION_KEY' => '8bt8Kr5gPZ3ZE23C',
   'AUTHORIZE_ENV' => 'sandbox',
-  'STRIPE_SECRET_KEY' => 'rr',
+  'STRIPE_SECRET_KEY' => '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',
   'MIDTRANS_SERVER_KEY' => 'rr',
   'MIDTRANS_BASE' => 'https://app.midtrans.com/snap/v1/transactions',
   'MOLLIE_API_KEY' => 'rr',

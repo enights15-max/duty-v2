@@ -5,7 +5,7 @@
 
 @section('content')
     <div class="page-header">
-        <h4 class="page-title">{{ __('Mobile Interface') }}</h4>
+        <h4 class="page-title">{{ __('Mobile App Settings') }}</h4>
         <ul class="breadcrumbs">
             <li class="nav-home">
                 <a href="{{ route('admin.dashboard') }}">
@@ -16,7 +16,7 @@
                 <i class="flaticon-right-arrow"></i>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.mobile_interface') }}">{{ __('Mobile Interface') }}</a>
+                <a href="{{ route('admin.mobile_interface') }}">{{ __('Mobile App Settings') }}</a>
             </li>
         </ul>
     </div>
@@ -24,14 +24,14 @@
     <div class="row">
         <div class="col-md-12">
             <div class="alert alert-warning text-dark">
-                {{ __('This section is for configuring the mobile app interface. All This options may not apply to the web version.') }}
+                {{ __('This section is for configuring the mobile app settings. All This options may not apply to the web version.') }}
             </div>
 
             <div class="card">
                 <div class="card-header">
                     <div class="row">
                         <div class="col-lg-10">
-                            <div class="card-title">{{ __('Mobile Interface') }}</div>
+                            <div class="card-title">{{ __('Mobile App Settings') }}</div>
                         </div>
 
                         <div class="col-lg-2">
