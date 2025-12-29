@@ -139,7 +139,7 @@
                         </div>
                     </div>
                     <div class="col-lg-4">
-                        <div class="sidebar">
+                        <div id="couponReload" class="sidebar">
                             <input type="hidden" name="event" value="{{ $event }}">
                             <input type="hidden" name="total" value="{{ $total }}">
                             <input type="hidden" name="quantity" value="{{ $quantity }}">
@@ -175,7 +175,7 @@
                             <hr>
                             <h5 class="from-title mb-10">{{ __('Order Summary') }}</h5>
                             <div>
-                                <div id="couponReload">
+                                <div >
                                     @php
                                         $selTickets = Session::get('selTickets');
                                     @endphp
