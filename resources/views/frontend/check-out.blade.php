@@ -139,7 +139,7 @@
                         </div>
                     </div>
                     <div class="col-lg-4">
-                        <div id="couponReload" class="sidebar">
+                        <div class="sidebar">
                             <input type="hidden" name="event" value="{{ $event }}">
                             <input type="hidden" name="total" value="{{ $total }}">
                             <input type="hidden" name="quantity" value="{{ $quantity }}">
@@ -175,7 +175,7 @@
                             <hr>
                             <h5 class="from-title mb-10">{{ __('Order Summary') }}</h5>
                             <div>
-                                <div >
+                                <div id="couponReload">
                                     @php
                                         $selTickets = Session::get('selTickets');
                                     @endphp
@@ -360,6 +360,7 @@
                                 </div>
                             </div>
 
+                            <div id="couponReload">
                             @if ($total != 0 || Session::get('sub_total') != 0)
                                 <div class="coupon">
                                     <h4 class="mb-3">{{ __('Coupon') }}</h4>
@@ -457,6 +458,7 @@
                             @else
                                 <button type="submit" class="theme-btn w-100">{{ __('Submit') }}</button>
                             @endif
+                            </div>
                         </div>
                     </div>
                 </div>
