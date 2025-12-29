@@ -360,7 +360,7 @@
                                 </div>
                             </div>
 
-                            <div id="couponReload">
+                            <div id="">
                             @if ($total != 0 || Session::get('sub_total') != 0)
                                 <div class="coupon">
                                     <h4 class="mb-3">{{ __('Coupon') }}</h4>
