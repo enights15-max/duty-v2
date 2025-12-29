@@ -138,7 +138,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-4" id="couponReload2">
                         <div class="sidebar">
                             <input type="hidden" name="event" value="{{ $event }}">
                             <input type="hidden" name="total" value="{{ $total }}">
