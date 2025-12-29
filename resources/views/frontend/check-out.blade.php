@@ -43,7 +43,8 @@
                             <div class="row mt-35">
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <label for="fname">{{ __('First Name') }} <span class="text-danger">*</span></label>
+                                        <label for="fname">{{ __('First Name') }} <span
+                                                class="text-danger">*</span></label>
                                         <input type="text" name="fname"
                                             value="{{ old('fname', $authUser != null ? $authUser->fname : '') }}"
                                             id="fname" class="form-control"
@@ -56,10 +57,12 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <label for="lname">{{ __('Last Name') }}<span class="text-danger">*</span></label>
+                                        <label for="lname">{{ __('Last Name') }}<span
+                                                class="text-danger">*</span></label>
                                         <input type="text" name="lname"
                                             value="{{ old('lname', $authUser != null ? $authUser->lname : '') }}"
-                                            id="lname" class="form-control" placeholder="{{ __('Enter Your Last Name') }}">
+                                            id="lname" class="form-control"
+                                            placeholder="{{ __('Enter Your Last Name') }}">
                                         @error('lname')
                                             <p class="text-danger">{{ $message }}</p>
                                         @enderror
@@ -78,7 +81,8 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <label for="address">{{ __('Phone') }} <span class="text-danger">*</span></label>
+                                        <label for="address">{{ __('Phone') }} <span
+                                                class="text-danger">*</span></label>
                                         <input type="text" name="phone" id="phone" class="form-control"
                                             value="{{ old('phone', $authUser != null ? $authUser->phone : '') }}"
                                             placeholder="{{ __('Phone Number') }}">
@@ -89,7 +93,8 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <label for="state">{{ __('Country') }} <span class="text-danger">*</span></label>
+                                        <label for="state">{{ __('Country') }} <span
+                                                class="text-danger">*</span></label>
                                         <input type="text" name="country"
                                             value="{{ old('country', $authUser != null ? $authUser->country : '') }}"
                                             class="form-control" placeholder="{{ __('Country') }}">
@@ -139,7 +144,7 @@
                         </div>
                     </div>
                     <div class="col-lg-4">
-                        <div id="couponReload" class="sidebar">
+                        <div class="sidebar">
                             <input type="hidden" name="event" value="{{ $event }}">
                             <input type="hidden" name="total" value="{{ $total }}">
                             <input type="hidden" name="quantity" value="{{ $quantity }}">
@@ -182,7 +187,6 @@
                                     <ul class="package-summary mb-25">
                                         <ul class="slot-box-list">
                                             @if ($selTickets != null)
-
                                                 <h6 class="title"><strong>{{ __('Tickets Info') }}</strong></h6>
                                                 <div class="slot-box-wrap">
                                                     @foreach ($selTickets as $selTicket)
@@ -193,18 +197,22 @@
                                                             )->first();
 
                                                             if ($ticket->pricing_type == 'variation') {
-                                                                $varition_key = App\Models\Event\VariationContent::where([
-                                                                    ['ticket_id', $selTicket['ticket_id']],
-                                                                    ['name', $selTicket['name']],
-                                                                ])
+                                                                $varition_key = App\Models\Event\VariationContent::where(
+                                                                    [
+                                                                        ['ticket_id', $selTicket['ticket_id']],
+                                                                        ['name', $selTicket['name']],
+                                                                    ],
+                                                                )
                                                                     ->select('key')
                                                                     ->first();
 
-                                                                $varition_name = App\Models\Event\VariationContent::where([
-                                                                    ['ticket_id', $ticket->id],
-                                                                    ['language_id', $currentLanguageInfo->id],
-                                                                    ['key', $varition_key->key],
-                                                                ])->first();
+                                                                $varition_name = App\Models\Event\VariationContent::where(
+                                                                    [
+                                                                        ['ticket_id', $ticket->id],
+                                                                        ['language_id', $currentLanguageInfo->id],
+                                                                        ['key', $varition_key->key],
+                                                                    ],
+                                                                )->first();
 
                                                                 if ($varition_name) {
                                                                     $name = $varition_name->name;
@@ -212,14 +220,16 @@
                                                                     $name = '';
                                                                 }
                                                             } else {
-                                                                $ticket_content = App\Models\Event\TicketContent::where([
-                                                                    ['ticket_id', $ticket->id],
-                                                                    ['language_id', $currentLanguageInfo->id],
-                                                                ])->first();
-                                                                if (empty($ticket_content)) {
-                                                                    $ticket_content = App\Models\Event\TicketContent::where([
+                                                                $ticket_content = App\Models\Event\TicketContent::where(
+                                                                    [
                                                                         ['ticket_id', $ticket->id],
-                                                                    ])->first();
+                                                                        ['language_id', $currentLanguageInfo->id],
+                                                                    ],
+                                                                )->first();
+                                                                if (empty($ticket_content)) {
+                                                                    $ticket_content = App\Models\Event\TicketContent::where(
+                                                                        [['ticket_id', $ticket->id]],
+                                                                    )->first();
                                                                 }
                                                                 $name = $ticket_content->title;
                                                             }
@@ -232,14 +242,13 @@
                                                                 array_key_exists('qty', $selTicket) &&
                                                                 array_key_exists('payable_price', $selTicket) &&
                                                                 array_key_exists('name', $selTicket))
-
-
                                                             <div class="slot-box slot-box2">
                                                                 <div class="row d-flex justify-content-between align-items-end"
                                                                     style="font-family: italic">
                                                                     <div class="col-9">
                                                                         <h6 class="text">
-                                                                            {{ $selTicket['qty'] }} * {{ $selTicket['name'] }}
+                                                                            {{ $selTicket['qty'] }} *
+                                                                            {{ $selTicket['name'] }}
                                                                         </h6>
                                                                         <span>
                                                                             {{ __('Slot Name') }}:{{ $selTicket['slot_name'] }}
@@ -251,17 +260,14 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-
                                                         @else
                                                             <li class="slot-box slot-box2 slot-box2-header">
                                                                 <span class="text">{{ $name }}</span>
                                                                 <span class="number">{{ $selTicket['qty'] }}x</span>
                                                             </li>
                                                         @endif
-
                                                     @endforeach
                                                 </div>
-
                                             @endif
                                         </ul>
 
@@ -284,8 +290,8 @@
                                         </li>
 
                                         @if (Session::get('discount') != '')
-                                            <li><span class="text">{{ __('Coupon Discount') }}</span> <span class="number"
-                                                    dir="ltr">
+                                            <li><span class="text">{{ __('Coupon Discount') }}</span> <span
+                                                    class="number" dir="ltr">
                                                     <span class="text-success"><strong>-</strong>
                                                         {{ symbolPrice(Session::get('discount')) }}
                                                     </span>
@@ -316,7 +322,8 @@
                                             if (Session::get('total_early_bird_dicount') != '') {
                                                 $subtotal =
                                                     Session::get('sub_total') -
-                                                    (Session::get('total_early_bird_dicount') + Session::get('discount'));
+                                                    (Session::get('total_early_bird_dicount') +
+                                                        Session::get('discount'));
                                             } else {
                                                 $subtotal = Session::get('sub_total') - Session::get('discount');
                                             }
@@ -324,8 +331,8 @@
                                             $tax = round($tax, 2);
                                         @endphp
                                         <li><span class="text">{{ __('Tax') }} (<span
-                                                    dir="ltr">{{ $basicData->tax }}%</span>)</span> <span class="number"
-                                                dir="ltr">
+                                                    dir="ltr">{{ $basicData->tax }}%</span>)</span> <span
+                                                class="number" dir="ltr">
                                                 <span class="text-danger">
                                                     <strong>+</strong>
                                                     {{ symbolPrice($tax) }}
@@ -362,7 +369,7 @@
 
 
 
-                            @if ($total != 0 || Session::get('sub_total') != 0)
+                            @if ($total = 0 || Session::get('sub_total') = 0)
                                 <div class="coupon">
                                     <h4 class="mb-3">{{ __('Coupon') }}</h4>
                                     <div class="input-group d-flex">
