@@ -360,20 +360,10 @@
                                 </div>
                             </div>
 
-                            <div class="coupon">
-                                    <h4 class="mb-3">{{ __('Coupon') }}</h4>
-                                    <div class="input-group d-flex">
-                                        <input type="text" onsubmit="event.preventDefault();" class="form-control"
-                                            name="coupon" id="coupon-code" value="">
-                                        <div class="input-group-append">
-                                            <button class="btn theme-btn base-btn"
-                                                type="button">{{ __('Apply') }}</button>
-                                        </div>
-                                    </div>
-                            </div>
+
 
                             @if ($total != 0 || Session::get('sub_total') != 0)
-                                {{-- <div class="coupon">
+                                <div class="coupon">
                                     <h4 class="mb-3">{{ __('Coupon') }}</h4>
                                     <div class="input-group d-flex">
                                         <input type="text" onsubmit="event.preventDefault();" class="form-control"
@@ -383,7 +373,7 @@
                                                 type="button">{{ __('Apply') }}</button>
                                         </div>
                                     </div>
-                                </div> --}}
+                                </div>
                                 <h5 class="from-title mt-20 mb-15">{{ __('Payment Method') }}</h5>
                                 @if (Session::has('paypal_error'))
                                     <p class="text-danger">{{ Session::get('paypal_error') }}</p>
@@ -465,7 +455,11 @@
                                     </div>
                                 @endforeach
 
+                                @if ($total == 0 || Session::get('sub_total') == 0)
+                                <button type="submit" class="theme-btn w-100">{{ __('Submit') }}</button>
+                                @else
                                 <button type="submit" class="theme-btn w-100 payBtn">{{ __('Proceed to Pay') }}</button>
+                                @endif
                             @else
                                 <button type="submit" class="theme-btn w-100">{{ __('Submit') }}</button>
                             @endif
