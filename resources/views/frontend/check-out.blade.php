@@ -48,7 +48,7 @@
                                             value="{{ old('fname', $authUser != null ? $authUser->fname : '') }}"
                                             id="fname" class="form-control"
                                             placeholder="{{ __('Enter Your First Name') }}">
-    
+
                                         @error('fname')
                                             <p class="text-danger">{{ $message }}</p>
                                         @enderror
@@ -182,7 +182,7 @@
                                     <ul class="package-summary mb-25">
                                         <ul class="slot-box-list">
                                             @if ($selTickets != null)
-                                                
+
                                                 <h6 class="title"><strong>{{ __('Tickets Info') }}</strong></h6>
                                                 <div class="slot-box-wrap">
                                                     @foreach ($selTickets as $selTicket)
@@ -191,7 +191,7 @@
                                                                 'id',
                                                                 $selTicket['ticket_id'],
                                                             )->first();
-            
+
                                                             if ($ticket->pricing_type == 'variation') {
                                                                 $varition_key = App\Models\Event\VariationContent::where([
                                                                     ['ticket_id', $selTicket['ticket_id']],
@@ -199,13 +199,13 @@
                                                                 ])
                                                                     ->select('key')
                                                                     ->first();
-            
+
                                                                 $varition_name = App\Models\Event\VariationContent::where([
                                                                     ['ticket_id', $ticket->id],
                                                                     ['language_id', $currentLanguageInfo->id],
                                                                     ['key', $varition_key->key],
                                                                 ])->first();
-            
+
                                                                 if ($varition_name) {
                                                                     $name = $varition_name->name;
                                                                 } else {
@@ -224,7 +224,7 @@
                                                                 $name = $ticket_content->title;
                                                             }
                                                         @endphp
-            
+
                                                         @if (array_key_exists('seat_id', $selTicket) &&
                                                                 array_key_exists('slot_id', $selTicket) &&
                                                                 array_key_exists('seat_name', $selTicket) &&
@@ -232,8 +232,8 @@
                                                                 array_key_exists('qty', $selTicket) &&
                                                                 array_key_exists('payable_price', $selTicket) &&
                                                                 array_key_exists('name', $selTicket))
-    
-                                                            
+
+
                                                             <div class="slot-box slot-box2">
                                                                 <div class="row d-flex justify-content-between align-items-end"
                                                                     style="font-family: italic">
@@ -251,17 +251,17 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            
+
                                                         @else
                                                             <li class="slot-box slot-box2 slot-box2-header">
                                                                 <span class="text">{{ $name }}</span>
                                                                 <span class="number">{{ $selTicket['qty'] }}x</span>
                                                             </li>
                                                         @endif
-            
+
                                                     @endforeach
                                                 </div>
-                                              
+
                                             @endif
                                         </ul>
 
@@ -282,7 +282,7 @@
                                                 @endif
                                             </span>
                                         </li>
-    
+
                                         @if (Session::get('discount') != '')
                                             <li><span class="text">{{ __('Coupon Discount') }}</span> <span class="number"
                                                     dir="ltr">
@@ -292,12 +292,12 @@
                                                 </span>
                                             </li>
                                         @endif
-    
-    
+
+
                                         @if (Session::get('total_early_bird_dicount') != '')
                                             <li><span class="text">{{ __('Subtotal') }}</span> <span class="number"
                                                     dir="ltr">
-    
+
                                                     @if (Session::get('total_early_bird_dicount') != '')
                                                         @php
                                                             $symbol_subtotal =
@@ -311,7 +311,7 @@
                                                     @endif
                                             </li>
                                         @endif
-    
+
                                         @php
                                             if (Session::get('total_early_bird_dicount') != '') {
                                                 $subtotal =
@@ -348,7 +348,7 @@
                                             $sub_total = Session::get('sub_total');
                                             $discount = Session::get('discount');
                                             $total_early_bird_dicount = Session::get('total_early_bird_dicount');
-    
+
                                             $grand_total = $sub_total + $tax - ($discount + $total_early_bird_dicount);
                                             Session::put('tax', $tax);
                                             Session::put(
@@ -359,9 +359,8 @@
                                     </ul>
                                 </div>
                             </div>
-    
-                            @if ($total != 0 || Session::get('sub_total') != 0)
-                                <div class="coupon">
+
+                            <div class="coupon">
                                     <h4 class="mb-3">{{ __('Coupon') }}</h4>
                                     <div class="input-group d-flex">
                                         <input type="text" onsubmit="event.preventDefault();" class="form-control"
@@ -371,7 +370,20 @@
                                                 type="button">{{ __('Apply') }}</button>
                                         </div>
                                     </div>
-                                </div>
+                            </div>
+
+                            @if ($total != 0 || Session::get('sub_total') != 0)
+                                {{-- <div class="coupon">
+                                    <h4 class="mb-3">{{ __('Coupon') }}</h4>
+                                    <div class="input-group d-flex">
+                                        <input type="text" onsubmit="event.preventDefault();" class="form-control"
+                                            name="coupon" id="coupon-code" value="">
+                                        <div class="input-group-append">
+                                            <button class="btn theme-btn base-btn"
+                                                type="button">{{ __('Apply') }}</button>
+                                        </div>
+                                    </div>
+                                </div> --}}
                                 <h5 class="from-title mt-20 mb-15">{{ __('Payment Method') }}</h5>
                                 @if (Session::has('paypal_error'))
                                     <p class="text-danger">{{ Session::get('paypal_error') }}</p>
@@ -403,7 +415,7 @@
                                         <p class="text-danger">{{ Session::get('currency_error') }}</p>
                                     @endif
                                 </div>
-    
+
                                 <div class="iyzico-element {{ old('gateway') == 'iyzico' ? '' : 'd-none' }}">
                                     <input type="text" name="identity_number" class="form_control"
                                         placeholder="Identity Number">
@@ -411,15 +423,15 @@
                                         <p class="text-danger">{{ $message }}</p>
                                     @enderror
                                 </div>
-    
+
                                 <div id="stripe-element" class="mb-2">
                                     <!-- A Stripe Element will be inserted here. -->
                                 </div>
-    
-    
+
+
                                 <!-- Used to display form errors -->
                                 <div id="stripe-errors" role="alert" class="mb-2"></div>
-    
+
                                 @foreach ($offline_gateways as $offlineGateway)
                                     <div class="@if ($errors->has('attachment') && request()->session()->get('gatewayId') == $offlineGateway->id) d-block @else d-none @endif offline-gateway-info"
                                         id="{{ 'offline-gateway-' . $offlineGateway->id }}">
@@ -429,7 +441,7 @@
                                                 <p>{{ $offlineGateway->short_description }}</p>
                                             </div>
                                         @endif
-    
+
                                         @if (!is_null($offlineGateway->instructions))
                                             <div class="form-group mb-4">
                                                 <label>{{ __('Instructions') }}</label>
@@ -438,7 +450,7 @@
                                                 </div>
                                             </div>
                                         @endif
-    
+
                                         @if ($offlineGateway->has_attachment == 1)
                                             <div class="form-group mb-4">
                                                 <label>{{ __('Attachment') . '*' }}</label>
@@ -452,7 +464,7 @@
                                         @endif
                                     </div>
                                 @endforeach
-    
+
                                 <button type="submit" class="theme-btn w-100 payBtn">{{ __('Proceed to Pay') }}</button>
                             @else
                                 <button type="submit" class="theme-btn w-100">{{ __('Submit') }}</button>
