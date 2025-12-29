@@ -431,9 +431,9 @@
                             <div class="mt-4">
                             </div>
                         </td>
-                        
+
                          @if ($language->direction == 1)
-                            
+
                         <!--@else-->
                             <!--<td class="left" -->
                             <!--    style="width:33.333333%;-->
@@ -443,7 +443,7 @@
                             <!--        background: url('{{ asset('assets/admin/img/event_ticket_logo/' . $event->ticket_logo) }}') no-repeat center center;-->
                             <!--        background-size: cover;-->
                             <!--        @endif-->
-                                
+
                             <!--    ">-->
 
                             <!--    {{-- @if (!empty($event->ticket_image))-->
@@ -453,8 +453,8 @@
 
                             <!--</td>-->
                         @endif
-                        
-                        
+
+
                         @if ($language->direction == 1)
                             <td class="center"
                                 style="width:100%; @if (empty($event->ticket_image)) background-color:{{ $bg_color }}; @endif">
@@ -462,12 +462,12 @@
                                     <img alt="image" width="100%"
                                         src="{{ asset('assets/admin/img/event_ticket/' . $event->ticket_image) }}" />
                                 @endif
-                                
+
                                 @if (!empty($event->ticket_logo))
                 <p class="text-center">
                     <span>
                         <img class="img-fluid" alt="image"
-                            src="{{ asset('assets/admin/img/event_ticket_logo/' . $event->ticket_logo) }}" />
+                            src="{{ asset('assets/admin/img/event_ticket/' . $event->ticket_image) }}" />
                     </span>
                 </p>
             @endif
@@ -484,8 +484,8 @@
                     </tr>
                 </tbody>
             </table>
-            
-             
+
+
 
             {{-- Information --}}
             @if (!empty($event->instructions))
@@ -505,7 +505,7 @@
                 <p class="text-center">
                     <span>
                         <img class="img-fluid" alt="image"
-                            src="{{ asset('assets/admin/img/event_ticket_logo/' . $event->ticket_logo) }}" />
+                            src="{{ asset('assets/admin/img/event_ticket/' . $event->ticket_image) }}" />
                     </span>
                 </p>
             @endif
