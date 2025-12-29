@@ -138,8 +138,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4" id="couponReload2">
-                        <div class="sidebar">
+                    <div class="col-lg-4">
+                        <div id="couponReload" class="sidebar">
                             <input type="hidden" name="event" value="{{ $event }}">
                             <input type="hidden" name="total" value="{{ $total }}">
                             <input type="hidden" name="quantity" value="{{ $quantity }}">
@@ -454,12 +454,7 @@
                                         @endif
                                     </div>
                                 @endforeach
-
-                                @if ($total == 0 || Session::get('sub_total') == 0)
-                                <button type="submit" class="theme-btn w-100">{{ __('Submit') }}</button>
-                                @else
                                 <button type="submit" class="theme-btn w-100 payBtn">{{ __('Proceed to Pay') }}</button>
-                                @endif
                             @else
                                 <button type="submit" class="theme-btn w-100">{{ __('Submit') }}</button>
                             @endif

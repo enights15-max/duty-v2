@@ -63,7 +63,6 @@ $('#coupon-code').on('keypress', function (event) {
       success: function (data) {
         $("#coupon-code").val('');
         $("#couponReload").load(location.href + " #couponReload");
-        $("#couponReload2").load(location.href + " #couponReload2");
         if (data.status == 'success') {
           toastr['success'](data.message);
         } else {
@@ -86,7 +85,6 @@ $(".base-btn").on('click', function (e) {
     success: function (data) {
       $("#coupon-code").val('');
       $("#couponReload").load(location.href + " #couponReload");
-      $("#couponReload2").load(location.href + " #couponReload2");
       if (data.status == 'success') {
         toastr['success'](data.message);
       } else {
