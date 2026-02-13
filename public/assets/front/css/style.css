@@ -1074,7 +1074,7 @@ a.theme-btn:hover {
 .event-details-information {
   padding: 40px;
   background: white;
-  margin: -210px 30px 0 70px;
+  margin: 0px 30px 0 70px;
   box-shadow: 0px 5px 50px rgba(0, 0, 0, 0.1);
 }
 

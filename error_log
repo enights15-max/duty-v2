@@ -2,3 +2,9 @@
 [26-Dec-2025 15:44:25 UTC] PHP Deprecated:  urldecode(): Passing null to parameter #1 ($string) of type string is deprecated in /home2/dutyrdco/public_html/v2/server.php on line 10
 [27-Dec-2025 11:16:41 UTC] PHP Deprecated:  urldecode(): Passing null to parameter #1 ($string) of type string is deprecated in /home2/dutyrdco/public_html/v2/server.php on line 10
 [28-Dec-2025 22:37:27 America/Santo_Domingo] PHP Fatal error:  Can't use method return value in write context in /home2/dutyrdco/public_html/v2/storage/framework/views/b9062d9e498994323d519607bc30e62311bf29a7.php on line 439
+[31-Jan-2026 08:15:49 UTC] PHP Deprecated:  urldecode(): Passing null to parameter #1 ($string) of type string is deprecated in /home2/dutyrdco/public_html/v2/server.php on line 10
+[01-Feb-2026 11:17:03 UTC] PHP Deprecated:  urldecode(): Passing null to parameter #1 ($string) of type string is deprecated in /home2/dutyrdco/public_html/v2/server.php on line 10
+[04-Feb-2026 11:44:48 UTC] PHP Deprecated:  urldecode(): Passing null to parameter #1 ($string) of type string is deprecated in /home2/dutyrdco/public_html/v2/server.php on line 10
+[06-Feb-2026 12:32:16 UTC] PHP Deprecated:  urldecode(): Passing null to parameter #1 ($string) of type string is deprecated in /home2/dutyrdco/public_html/v2/server.php on line 10
+[08-Feb-2026 16:44:34 UTC] PHP Deprecated:  urldecode(): Passing null to parameter #1 ($string) of type string is deprecated in /home2/dutyrdco/public_html/v2/server.php on line 10
+[12-Feb-2026 16:41:58 UTC] PHP Deprecated:  urldecode(): Passing null to parameter #1 ($string) of type string is deprecated in /home2/dutyrdco/public_html/v2/server.php on line 10
