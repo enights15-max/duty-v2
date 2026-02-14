@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "344416525839",
+    "project_id": "evento-4df74",
+    "storage_bucket": "evento-4df74.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:344416525839:android:4af94da0d6cc53d2674d7a",
+        "android_client_info": {
+          "package_name": "com.example.evento_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLnbe1IedScsDrXdbZkqXdNIebrx0QETE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Event Details with Description Block</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8c06f9",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#0a050e",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'neon': '0 0 15px rgba(140, 6, 249, 0.4)',
+                        'neon-strong': '0 0 25px rgba(140, 6, 249, 0.6)',
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                font-family: 'Spline Sans', sans-serif;
+                -webkit-tap-highlight-color: transparent;
+                min-height: max(884px, 100dvh);
+            }
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        #desc-toggle:checked ~ .desc-content {
+            max-height: none;
+        }
+        #desc-toggle:checked ~ .desc-gradient {
+            display: none;
+        }
+        #desc-toggle:checked ~ label .read-more-text::before {
+            content: "Read Less";
+        }
+        .read-more-text::before {
+            content: "Read More";
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen pb-32">
+<header class="relative w-full h-[45vh] overflow-hidden">
+<img alt="Event Header" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMOKWHREJ8bRW58ME99Fe5shubHYkFBQVOw2XUztc63-m1xVT_2wKLlBn7rZTjKjj2lbaF6T5jBTkxDwwu6IqcjZaRmRzdVny0JTy1x2s1ckpXd7LpAtk9rZcJB2yPDcoYfqREo47LRS2uyJZNjSKE84j4MNATTN5dypBTxZot6abGHhDnOGhiAm2Z_4zkoqI2JUWKS0aEQK4O92et3VfUNaCgwkHZuHwkmw3KPvQjEGRvzPabDGnCCkhqfUh5ZeRmwCO67s3kR2Tx"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-black/40"></div>
+<nav class="absolute top-12 left-0 right-0 px-6 flex justify-between items-center">
+<button class="w-12 h-12 flex items-center justify-center rounded-full glass text-white">
+<span class="material-icons">chevron_left</span>
+</button>
+<div class="flex gap-3">
+<button class="w-12 h-12 flex items-center justify-center rounded-full glass text-white">
+<span class="material-icons">share</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center rounded-full glass text-white">
+<span class="material-icons text-primary">favorite</span>
+</button>
+</div>
+</nav>
+<div class="absolute bottom-6 left-6 right-6">
+<span class="bg-primary/20 text-primary border border-primary/30 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase mb-3 inline-block">
+            Sold Out Fast
+        </span>
+<h1 class="text-4xl font-bold text-white tracking-tight">Neon Horizon Festival</h1>
+<div class="flex items-center gap-2 text-slate-300 mt-2">
+<span class="material-icons text-sm">calendar_today</span>
+<span class="text-sm font-medium">Saturday, Oct 24 • 9:00 PM</span>
+</div>
+</div>
+</header>
+<main class="px-6 space-y-8 mt-6">
+<section>
+<div class="p-[1px] rounded-full bg-gradient-to-r from-primary to-purple-400 shadow-neon">
+<div class="bg-background-dark rounded-full py-4 px-8 flex justify-between items-center">
+<div class="text-center">
+<span class="block text-2xl font-bold text-white">04</span>
+<span class="text-[10px] text-slate-400 uppercase tracking-widest">Days</span>
+</div>
+<div class="h-8 w-[1px] bg-slate-800"></div>
+<div class="text-center">
+<span class="block text-2xl font-bold text-white">12</span>
+<span class="text-[10px] text-slate-400 uppercase tracking-widest">Hours</span>
+</div>
+<div class="h-8 w-[1px] bg-slate-800"></div>
+<div class="text-center">
+<span class="block text-2xl font-bold text-white">48</span>
+<span class="text-[10px] text-slate-400 uppercase tracking-widest">Mins</span>
+</div>
+</div>
+</div>
+</section>
+<section class="glass p-6 rounded-2xl relative">
+<h2 class="text-sm font-bold uppercase tracking-[0.2em] text-primary mb-4">About the Experience</h2>
+<input class="hidden" id="desc-toggle" type="checkbox"/>
+<div class="desc-content max-h-24 overflow-hidden transition-all duration-300 relative">
+<div class="space-y-4 text-slate-300 text-sm leading-relaxed">
+<p>
+                    Step into a world where digital art meets high-energy soundscapes. Neon Horizon is Tokyo's premier immersive audio-visual festival, featuring state-of-the-art laser installations and world-class acoustics.
+                </p>
+<div class="grid grid-cols-2 gap-4 pt-2">
+<div>
+<span class="block text-[10px] uppercase tracking-widest text-slate-500 mb-1">Dress Code</span>
+<p class="text-white font-medium">Cyberpunk / Avant-Garde</p>
+</div>
+<div>
+<span class="block text-[10px] uppercase tracking-widest text-slate-500 mb-1">Entry</span>
+<p class="text-white font-medium">QR Ticket + Photo ID</p>
+</div>
+</div>
+<p class="pt-2">
+                    Experience exclusive VIP lounges, curated mixology bars, and interactive NFT galleries. Entry is strictly restricted to ticket holders aged 21 and above. Pro-tip: Arrive early for the kinetic light show starting at 9:30 PM.
+                </p>
+</div>
+</div>
+<div class="desc-gradient absolute bottom-12 left-0 right-0 h-12 bg-gradient-to-t from-[#140b1e]/80 to-transparent pointer-events-none"></div>
+<label class="mt-4 block cursor-pointer" for="desc-toggle">
+<span class="read-more-text text-primary text-xs font-bold uppercase tracking-wider flex items-center gap-1"></span>
+</label>
+</section>
+<section>
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-xl font-bold">Lineup</h2>
+<button class="text-primary text-sm font-semibold">View All</button>
+</div>
+<div class="flex overflow-x-auto no-scrollbar gap-6 pb-2">
+<div class="flex-shrink-0 text-center space-y-2">
+<div class="relative p-1 rounded-full border-2 border-primary">
+<img alt="Artist" class="w-20 h-20 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO4HQwjTDZXccNhhElnKQq0nSPrcJ89jSf9Fve8QBV-EJtiH4OKYSnZmyW2GV8p70yI_MTvu4XGXdsBMw3M6iLg_JXWlBL4SuLQ7IMBbOF-yiJMY9Hh4AVjgwAASzTt0zVPVzbEPCGZ9Ig25zYbJEOb5QH1slOJBRU_95MIiUug6S1JykMfu1bqNdsz8keXkT3CzOeJXcGEYP_WyUjINjK2P25LQGWNrXSTEFoKxV9Sns_2l4u4X-Xq1SuD45vdejKvGKNXRmS-lEN"/>
+</div>
+<p class="text-xs font-semibold text-slate-200">ZEDD</p>
+</div>
+<div class="flex-shrink-0 text-center space-y-2">
+<div class="p-1">
+<img alt="Artist" class="w-20 h-20 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOPaE26wsOc6-7KNNo5Hrb3PEL6YsG_qVhIDqL6Steo-VNudZOFFrdJPFqmj7s8xb3lvMMVfbNIQbuvQkZUnkon7QbNg-K3UFjxWkO2HL4CgQsOgkEqJ66hFHes1tu-BuFF9V63HIXeDpFVqMWo-1WPnlHPJi3lhDTqAKyqViNdQFeaAQA1MuHs6ypQBQiZkXxLee_UjtNwWGwMVdjkeVAp8E4UTMIBquyOcpiOroiX2ML_H8-eFtHIy2mUzq9fIsMsd2WwyE4P_Fb"/>
+</div>
+<p class="text-xs font-semibold text-slate-400">ANNA</p>
+</div>
+<div class="flex-shrink-0 text-center space-y-2">
+<div class="p-1">
+<img alt="Artist" class="w-20 h-20 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFHtP6R3BkxuRhhKSbDlzZ49a7M09Ub6Ib3y6oyNiinh_lEgb_FVn7jgGzVQceIzbIjK6_FrVhIh3OdbjqfwoCshP5Z0ltdLXEds-7NnXCYWI1e9SxTLajlhajdGKVNHYif3hdwDzDVmoJHK-PiFv28mr-WuAghhmsshY4v5RPjP36TlF29E5SzlRfsRYpm0uGzBeYAx4Fw0ygV0ny5BDd5a5hYvRUJgFvmlFnmwsN8oRe1QayVCBjEX55PujD3a809Iko8hUUwBjd"/>
+</div>
+<p class="text-xs font-semibold text-slate-400">KAYLA</p>
+</div>
+<div class="flex-shrink-0 text-center space-y-2">
+<div class="p-1">
+<img alt="Artist" class="w-20 h-20 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyhptKsMPVIfutC5i_-VjR4dhKrysBKIYMS4pNH9yC4FjWowApv2hOwlApskpKGmNZK5cU6RnG7f3ZyAkTZTRN3DcFDRzvaR_QkhR54aZiqF5jOzFo3P5sUdPVW6Jm-fqrgD_v8WJXQyI9Idec_8xIELBw6FrhgdOOV4LgXiUnfy8D4V6AIPsQFXp-iaPfXslyq03G7W0Ai2AT3gfoIMQkzP44xs7pF5Zg0KVAalFuBHcNrtQyMUPexYpK6AWUH8TWcpN7--6Oy2vn"/>
+</div>
+<p class="text-xs font-semibold text-slate-400">MAKJ</p>
+</div>
+</div>
+</section>
+<section>
+<h2 class="text-xl font-bold mb-4">The Venue</h2>
+<div class="relative h-48 rounded-lg overflow-hidden glass group">
+<img alt="Map" class="w-full h-full object-cover opacity-60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwfz3Iu6hqMlOhHKQt30Cailbxv-Mgg5WtMdNai1hUMDfAcY-cj0k77W-QhbvMpPMTcWkLM3hlJ4DLRx53-o2tZ4kAxC7KS5fFFkj89YD_CydTNWVu2Fm6OD_P0tqg922fd5YHRQQm2JDxfTcCLRPHe7I11130rgspom_UMq8p4nhNlE7Ed_jtDzafPDfw9l9jTZjXjUmWs3m6I60-3W3mnoZLceEC4AyphFUiyvSEI-3zQQqIOW78Xkjf_e23C0-DlX9Cm5JBAHQa"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+<div>
+<h3 class="font-bold text-lg">Hangar 7 Warehouse</h3>
+<p class="text-xs text-slate-400">421 Industrial Blvd, Tokyo</p>
+</div>
+<button class="w-12 h-12 flex items-center justify-center rounded-full bg-primary text-white shadow-neon-strong">
+<span class="material-icons">near_me</span>
+</button>
+</div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+<div class="relative flex items-center justify-center">
+<div class="absolute w-8 h-8 bg-primary rounded-full animate-ping opacity-20"></div>
+<div class="z-10 bg-primary w-4 h-4 rounded-full border-2 border-white shadow-neon"></div>
+</div>
+</div>
+</div>
+</section>
+<section>
+<h2 class="text-xl font-bold mb-4">Promoted By</h2>
+<div class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Organizer" class="w-12 h-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZXJEJDTbmEqCgviTsV9Y5vizeg4T5kL8M5fCyPg_3QKpevCL4pNLqTo-j05g7lbKWjbv5828M7oUv7qaUVmEOtJ-s2mOQAsZ4kuz2QefuB27gugXqjstry6Ko8_8H3CTCTdGIqTjogRMPsSndb2pwnr4jGe-kvje6eOJdKQAfmN7X7UEt5WqBxM8_8X-BpUJv4POneRxzmkj72gYLh7lldQ2ZkqDzwFlkjCh4nnJjFe5iFDokHmWKF4rWgUaS7rMs2uCOMhNX9s6-"/>
+<div class="absolute -bottom-1 -right-1 bg-blue-500 rounded-full w-5 h-5 flex items-center justify-center border-2 border-[#1a0f23]">
+<span class="material-icons text-[10px] text-white">verified</span>
+</div>
+</div>
+<div>
+<h4 class="font-bold text-sm">Electric Dreams Ent.</h4>
+<p class="text-[10px] text-slate-500 uppercase tracking-tighter">1.2M Followers</p>
+</div>
+</div>
+<button class="px-6 py-2 rounded-full border border-primary text-primary text-xs font-bold hover:bg-primary hover:text-white transition-all">
+                Follow
+            </button>
+</div>
+</section>
+<section class="py-2 border-y border-white/5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="flex -space-x-3">
+<img alt="Friend 1" class="w-10 h-10 rounded-full border-2 border-background-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO4HQwjTDZXccNhhElnKQq0nSPrcJ89jSf9Fve8QBV-EJtiH4OKYSnZmyW2GV8p70yI_MTvu4XGXdsBMw3M6iLg_JXWlBL4SuLQ7IMBbOF-yiJMY9Hh4AVjgwAASzTt0zVPVzbEPCGZ9Ig25zYbJEOb5QH1slOJBRU_95MIiUug6S1JykMfu1bqNdsz8keXkT3CzOeJXcGEYP_WyUjINjK2P25LQGWNrXSTEFoKxV9Sns_2l4u4X-Xq1SuD45vdejKvGKNXRmS-lEN"/>
+<img alt="Friend 2" class="w-10 h-10 rounded-full border-2 border-background-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOPaE26wsOc6-7KNNo5Hrb3PEL6YsG_qVhIDqL6Steo-VNudZOFFrdJPFqmj7s8xb3lvMMVfbNIQbuvQkZUnkon7QbNg-K3UFjxWkO2HL4CgQsOgkEqJ66hFHes1tu-BuFF9V63HIXeDpFVqMWo-1WPnlHPJi3lhDTqAKyqViNdQFeaAQA1MuHs6ypQBQiZkXxLee_UjtNwWGwMVdjkeVAp8E4UTMIBquyOcpiOroiX2ML_H8-eFtHIy2mUzq9fIsMsd2WwyE4P_Fb"/>
+<img alt="Friend 3" class="w-10 h-10 rounded-full border-2 border-background-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFHtP6R3BkxuRhhKSbDlzZ49a7M09Ub6Ib3y6oyNiinh_lEgb_FVn7jgGzVQceIzbIjK6_FrVhIh3OdbjqfwoCshP5Z0ltdLXEds-7NnXCYWI1e9SxTLajlhajdGKVNHYif3hdwDzDVmoJHK-PiFv28mr-WuAghhmsshY4v5RPjP36TlF29E5SzlRfsRYpm0uGzBeYAx4Fw0ygV0ny5BDd5a5hYvRUJgFvmlFnmwsN8oRe1QayVCBjEX55PujD3a809Iko8hUUwBjd"/>
+<div class="w-10 h-10 rounded-full border-2 border-background-dark bg-primary flex items-center justify-center text-[10px] font-bold text-white">
+                        +12
+                    </div>
+</div>
+<div class="flex flex-col">
+<p class="text-xs text-slate-300 leading-tight">
+<span class="font-bold text-white">Alex</span>, <span class="font-bold text-white">Maria</span> and 
+                        <span class="text-primary font-bold">12 others</span>
+</p>
+<p class="text-[10px] text-slate-500 uppercase tracking-wider font-medium">are attending</p>
+</div>
+</div>
+<button class="text-primary text-xs font-bold tracking-tight px-3 py-1 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors">
+                See All
+            </button>
+</div>
+</section>
+<section class="pb-12">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-xl font-bold">Past Editions</h2>
+<div class="flex items-center gap-1 text-primary">
+<span class="text-xs font-bold uppercase tracking-widest">History</span>
+<span class="material-icons text-sm">history_edu</span>
+</div>
+</div>
+<div class="flex overflow-x-auto no-scrollbar gap-4 -mx-6 px-6">
+<div class="relative flex-shrink-0 w-64 h-40 rounded-xl overflow-hidden group">
+<img alt="Past Event" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO4HQwjTDZXccNhhElnKQq0nSPrcJ89jSf9Fve8QBV-EJtiH4OKYSnZmyW2GV8p70yI_MTvu4XGXdsBMw3M6iLg_JXWlBL4SuLQ7IMBbOF-yiJMY9Hh4AVjgwAASzTt0zVPVzbEPCGZ9Ig25zYbJEOb5QH1slOJBRU_95MIiUug6S1JykMfu1bqNdsz8keXkT3CzOeJXcGEYP_WyUjINjK2P25LQGWNrXSTEFoKxV9Sns_2l4u4X-Xq1SuD45vdejKvGKNXRmS-lEN"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+<div class="absolute bottom-3 left-3 right-3 flex justify-between items-center">
+<span class="text-white font-bold text-sm">Edition 2023</span>
+<div class="glass px-2 py-1 rounded-lg flex items-center gap-1">
+<span class="text-[10px] text-white/90 font-medium">View All</span>
+<span class="material-icons text-[12px] text-primary">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="relative flex-shrink-0 w-64 h-40 rounded-xl overflow-hidden group">
+<img alt="Past Event" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOPaE26wsOc6-7KNNo5Hrb3PEL6YsG_qVhIDqL6Steo-VNudZOFFrdJPFqmj7s8xb3lvMMVfbNIQbuvQkZUnkon7QbNg-K3UFjxWkO2HL4CgQsOgkEqJ66hFHes1tu-BuFF9V63HIXeDpFVqMWo-1WPnlHPJi3lhDTqAKyqViNdQFeaAQA1MuHs6ypQBQiZkXxLee_UjtNwWGwMVdjkeVAp8E4UTMIBquyOcpiOroiX2ML_H8-eFtHIy2mUzq9fIsMsd2WwyE4P_Fb"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+<div class="absolute bottom-3 left-3 right-3 flex justify-between items-center">
+<span class="text-white font-bold text-sm">Edition 2022</span>
+<div class="glass px-2 py-1 rounded-lg flex items-center gap-1">
+<span class="text-[10px] text-white/90 font-medium">View All</span>
+<span class="material-icons text-[12px] text-primary">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="relative flex-shrink-0 w-64 h-40 rounded-xl overflow-hidden group">
+<img alt="Past Event" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFHtP6R3BkxuRhhKSbDlzZ49a7M09Ub6Ib3y6oyNiinh_lEgb_FVn7jgGzVQceIzbIjK6_FrVhIh3OdbjqfwoCshP5Z0ltdLXEds-7NnXCYWI1e9SxTLajlhajdGKVNHYif3hdwDzDVmoJHK-PiFv28mr-WuAghhmsshY4v5RPjP36TlF29E5SzlRfsRYpm0uGzBeYAx4Fw0ygV0ny5BDd5a5hYvRUJgFvmlFnmwsN8oRe1QayVCBjEX55PujD3a809Iko8hUUwBjd"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+<div class="absolute bottom-3 left-3 right-3 flex justify-between items-center">
+<span class="text-white font-bold text-sm">Edition 2021</span>
+<div class="glass px-2 py-1 rounded-lg flex items-center gap-1">
+<span class="text-[10px] text-white/90 font-medium">View All</span>
+<span class="material-icons text-[12px] text-primary">arrow_forward</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<div class="fixed bottom-0 left-0 right-0 p-6 glass border-t border-white/5 z-50">
+<div class="flex items-center justify-between gap-6 max-w-md mx-auto">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-400 uppercase tracking-widest">Starting at</span>
+<span class="text-2xl font-bold text-white">$89.00</span>
+</div>
+<button class="flex-1 bg-primary text-white font-bold py-4 rounded-full shadow-neon-strong active:scale-95 transition-transform flex items-center justify-center gap-2">
+<span>Buy Tickets</span>
+<span class="material-icons text-sm">confirmation_number</span>
+</button>
+</div>
+<div class="h-4"></div>
+</div>
+
+</body></html>

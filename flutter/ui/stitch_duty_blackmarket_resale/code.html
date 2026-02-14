@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DUTY Discover Neon</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#7f0df2",
+                "background-light": "#f7f5f8",
+                "background-dark": "#0a0510",
+                "neon-cyan": "#00f3ff",
+                "neon-pink": "#ff00e5",
+              },
+              fontFamily: {
+                "display": ["Space Grotesk"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .neon-glow-primary {
+            box-shadow: 0 0 15px rgba(127, 13, 242, 0.4);
+        }
+        .neon-border-pink {
+            border: 1px solid rgba(255, 0, 229, 0.5);
+            box-shadow: 0 0 10px rgba(255, 0, 229, 0.2);
+        }
+        .neon-border-cyan {
+            border: 1px solid rgba(0, 243, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+        .neon-border-violet {
+            border: 1px solid rgba(127, 13, 242, 0.5);
+            box-shadow: 0 0 10px rgba(127, 13, 242, 0.2);
+        }
+        .glass-card {
+            background: rgba(25, 16, 34, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .bg-mesh {
+            background: radial-gradient(circle at 10% 20%, rgba(127, 13, 242, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(0, 243, 255, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 50%, rgba(255, 0, 229, 0.05) 0%, transparent 50%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display min-h-screen">
+<!-- Background Decorative Glows -->
+<div class="fixed inset-0 pointer-events-none bg-mesh z-0"></div>
+<!-- Main Container (iPhone Form Factor Simulation) -->
+<div class="relative z-10 max-w-md mx-auto min-h-screen flex flex-col pb-24">
+<!-- Header / Search Section -->
+<header class="p-6 pt-12 space-y-6">
+<div class="flex justify-between items-center">
+<div class="space-y-1">
+<p class="text-xs uppercase tracking-widest text-primary font-bold">Discovery</p>
+<h1 class="text-3xl font-bold tracking-tight">DUTY<span class="text-primary">.</span></h1>
+</div>
+<div class="relative">
+<img alt="User Profile" class="w-10 h-10 rounded-full border-2 border-primary p-0.5" data-alt="Modern portrait of a young man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3_0rsOPfy71A-PUeihBuEIyNH-qMBvbHu82L8QrZQrA8P0G5MB1YUVLIfOVFzbqGD-5qvZqGKn7cTjVOCdjnewr3cTf82A9bZ9efiJ9gKKReC4SNguZKNikthUBVqILQ-lAHY4L0I-Z2sD7s9Buk_IGyZtG7OcmFyXKdNhom1YTZ2toCcLtch-Zy3XvsxYJngP6ccn6_kll8282j91W19X7Ugiun_3YJUJfO2U6goT82m6kRJHy6SDVqH0pbryddWSbiKn7mzSMn_"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-neon-cyan rounded-full border-2 border-background-dark"></div>
+</div>
+</div>
+<!-- Search Bar -->
+<div class="relative group">
+<div class="absolute inset-0 bg-primary/20 rounded-xl blur-md group-focus-within:bg-primary/40 transition-all"></div>
+<div class="relative flex items-center bg-background-dark/80 border border-primary/30 rounded-xl px-4 py-3 glass-card">
+<span class="material-icons text-primary mr-3">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder-slate-500" placeholder="Search festivals, artists, or wallets..." type="text"/>
+<span class="material-icons text-slate-500 text-xl">tune</span>
+</div>
+</div>
+</header>
+<!-- Quick Actions Grid -->
+<section class="px-6 mb-8 grid grid-cols-4 gap-4">
+<div class="flex flex-col items-center space-y-2">
+<div class="w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group active:scale-95 transition-transform">
+<span class="material-icons">account_balance_wallet</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter opacity-70">Wallet</span>
+</div>
+<div class="flex flex-col items-center space-y-2">
+<div class="w-14 h-14 rounded-xl bg-neon-cyan/10 border border-neon-cyan/20 flex items-center justify-center text-neon-cyan active:scale-95 transition-transform">
+<span class="material-icons">confirmation_number</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter opacity-70">Pass</span>
+</div>
+<div class="flex flex-col items-center space-y-2">
+<div class="w-14 h-14 rounded-xl bg-neon-pink/10 border border-neon-pink/20 flex items-center justify-center text-neon-pink active:scale-95 transition-transform">
+<span class="material-icons">bolt</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter opacity-70">Drops</span>
+</div>
+<div class="flex flex-col items-center space-y-2">
+<div class="w-14 h-14 rounded-xl bg-slate-500/10 border border-slate-500/20 flex items-center justify-center text-slate-400 active:scale-95 transition-transform">
+<span class="material-icons">more_horiz</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter opacity-70">More</span>
+</div>
+</section>
+<!-- Trending Now Carousel -->
+<section class="mb-10">
+<div class="flex justify-between items-center px-6 mb-4">
+<h2 class="text-xl font-bold">Trending Now</h2>
+<span class="text-primary text-sm font-semibold">See All</span>
+</div>
+<div class="flex overflow-x-auto hide-scrollbar space-x-4 px-6 snap-x">
+<!-- Card 1 -->
+<div class="flex-shrink-0 w-64 snap-center glass-card rounded-xl p-4 neon-border-pink relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 w-16 h-16 bg-neon-pink/10 rounded-full blur-2xl"></div>
+<div class="flex justify-between items-start mb-4">
+<div class="bg-neon-pink/20 text-neon-pink text-[10px] font-bold px-2 py-1 rounded-full border border-neon-pink/30 uppercase">LIVE DROP</div>
+<span class="material-icons text-slate-400 text-lg">bookmark_border</span>
+</div>
+<h3 class="text-lg font-bold leading-tight mb-1">Cyber Resonance 2024</h3>
+<p class="text-xs text-slate-400 mb-4">Tokyo, Shibuya District</p>
+<div class="flex items-center justify-between">
+<div class="flex -space-x-2">
+<img class="w-6 h-6 rounded-full border border-background-dark" data-alt="User avatar 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBURQJ_dNe82YfIawuoI9L8MJ_5jE6xsksT-Aio0v2RLqzer6g0dw02u5FKLjgW-q4I0xYPSqBVOr086mz1Ii0qeTyT8fGYmbTzTxLxNAlKRSrT52cFP05GuiX3OO5_LAguZTePW-a6Up8Goes6JBqX3ixxxhv_4KxTbaBRYk-tMejWydn6fI2DEN_ZpmIE9r9O39eOxkOH6ZMEVlLyxdY97cIbvesLebypcxZEyb_Tfa-0-_vg05I6LFxtaQfqxRgxoI1DWuaQVkNg"/>
+<img class="w-6 h-6 rounded-full border border-background-dark" data-alt="User avatar 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGXlegTkuGhvrcMxS4G6v00xurEsajOvXhxptlYRlupI4GpPYYh9yFzATWoWmSVrOMnKQeJND1e248vfoOyJ2yzUvc9Yl3Vx5fJfTRnk5wrxoswfBx-iYAehhZC7d3y9iEGCvdbwnVILGcpq2KBZdQ0QKOjnOo8N2SteJSA2OnpFPk4QDrMeRFzzyDRHvMlWj_4HqXctMNRSpl-r8O8meqh_HpwEZsAQRt_fD2N8MLnYJGUj1QHpX1Hf3Us58o9i1d_AQIBRKY9pVw"/>
+<div class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[8px] border border-background-dark">+12k</div>
+</div>
+<button class="bg-neon-pink text-white text-xs font-bold px-4 py-2 rounded-lg neon-glow-pink">JOIN</button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="flex-shrink-0 w-64 snap-center glass-card rounded-xl p-4 neon-border-cyan relative overflow-hidden">
+<div class="absolute -right-4 -top-4 w-16 h-16 bg-neon-cyan/10 rounded-full blur-2xl"></div>
+<div class="flex justify-between items-start mb-4">
+<div class="bg-neon-cyan/20 text-neon-cyan text-[10px] font-bold px-2 py-1 rounded-full border border-neon-cyan/30 uppercase">VIP ACCESS</div>
+<span class="material-icons text-slate-400 text-lg">bookmark_border</span>
+</div>
+<h3 class="text-lg font-bold leading-tight mb-1">Etheric Waves Vol. 2</h3>
+<p class="text-xs text-slate-400 mb-4">Digital Metaverse Stadium</p>
+<div class="flex items-center justify-between">
+<div class="text-sm font-bold text-neon-cyan">0.45 ETH</div>
+<button class="bg-neon-cyan text-background-dark text-xs font-bold px-4 py-2 rounded-lg">MINT</button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="flex-shrink-0 w-64 snap-center glass-card rounded-xl p-4 neon-border-violet relative overflow-hidden">
+<div class="absolute -right-4 -top-4 w-16 h-16 bg-primary/10 rounded-full blur-2xl"></div>
+<div class="flex justify-between items-start mb-4">
+<div class="bg-primary/20 text-primary text-[10px] font-bold px-2 py-1 rounded-full border border-primary/30 uppercase">EARLY BIRD</div>
+<span class="material-icons text-slate-400 text-lg">bookmark_border</span>
+</div>
+<h3 class="text-lg font-bold leading-tight mb-1">Neon Jungle Party</h3>
+<p class="text-xs text-slate-400 mb-4">Berlin, Kraftwerk</p>
+<div class="flex items-center justify-between">
+<div class="text-sm font-bold text-primary">$89.00</div>
+<button class="bg-primary text-white text-xs font-bold px-4 py-2 rounded-lg">BUY</button>
+</div>
+</div>
+</div>
+</section>
+<!-- For You / Feed Section -->
+<section class="px-6 space-y-6">
+<h2 class="text-xl font-bold mb-4">For You</h2>
+<!-- Feed Item 1 -->
+<div class="relative group rounded-2xl overflow-hidden aspect-[4/5]">
+<img alt="Festival Crowds" class="absolute inset-0 w-full h-full object-cover" data-alt="Crowd cheering at a dark music festival with purple neon lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXl0Sh0p3utNHy8OtGdI4quAETxqsAjNhhIeGNDlSm_UzvN-ESV2sr751vdUk3mjmS4UMZuhyF3deGhkzO5p6eOyQ6TyajBxrP3NHCCRZW9hUvTv6UqkcrryXx_oRxcMYaFzz4opjtKGbjhRkmTz_suS0espJBBhsz4aRlSpsW_ro6nM360bgBFYzqfifIadf-_1xf2GnvWHTeyDuDbvgj9L8KrG_xjmKSkWQvyCjpmx7MTuVoBt7jfM_oBjWmH4n4Q0EbSK3OpYms"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-90"></div>
+<div class="absolute inset-0 bg-primary/10 mix-blend-overlay"></div>
+<div class="absolute bottom-0 left-0 right-0 p-6 space-y-4">
+<div class="flex items-center space-x-3">
+<img class="w-10 h-10 rounded-full border-2 border-primary" data-alt="Creator avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFYe-eaugiAJY6pblr-M_rxGMMIoMLa5RAEJpwvdCIL6oUVFntg4HAESEYhu7qZ1ffxbSv6_2oQ2fSv7x9Du_sMLJZkVwAMg3dJkvG97Fs0kDjLq6Ljm7KCmSNO6bhIAZ2yd2p95FX_mhccn7O0ZwMrvhPrwcBaAlP6Sqb7tggG1mnwsDbLsqCXffgirGy8DQDqhgeEWaNEOSOar92RCVMAtVZI6esfbJeT97FHVrvVGjdqBDYwhrp3fgVkrBMzWXLMbk-BzfioJcV"/>
+<div>
+<p class="font-bold text-sm">Afterlife Collective</p>
+<p class="text-[10px] text-slate-300">2 hours ago • Amsterdam</p>
+</div>
+</div>
+<p class="text-lg font-bold leading-snug">The biggest techno event of the year is selling out fast. Get your tickets now!</p>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center space-x-6">
+<div class="flex items-center space-x-1">
+<span class="material-icons text-neon-pink text-xl">favorite</span>
+<span class="text-xs font-bold">14.2k</span>
+</div>
+<div class="flex items-center space-x-1">
+<span class="material-icons text-slate-300 text-xl">chat_bubble_outline</span>
+<span class="text-xs font-bold">842</span>
+</div>
+</div>
+<button class="bg-primary text-white px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider neon-glow-primary active:scale-95 transition-all">Quick Buy</button>
+</div>
+</div>
+</div>
+<!-- Feed Item 2 -->
+<div class="relative group rounded-2xl overflow-hidden aspect-[4/5]">
+<img alt="DJ Performance" class="absolute inset-0 w-full h-full object-cover" data-alt="Close up of a DJ hand on a mixer with neon lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyeb8gY7tLoLMxKizWnKbDSbzCV5rr5VHe4miqa-d_ZBbSuDCyE57hIO-9WTEhnh9DDPogewnqKEbeGrVHX9T23ZpTMk4rhCmbkdXgDbSwZB-QZRtvKxtuJqo8L1_mUpVKG_J9CsQytMOfufUzLb-0n11EBvT3xa434GkAVj_diS7G1FeXj7T4YDoBPwfi7Jarqz6eJ78-f_iO71cYaYfUkwmDSjvhwvXxnmNHYRzYbKlt3wpHr0_nRXqmBd3nEyBvYPCxpVtuy1a7"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-90"></div>
+<div class="absolute bottom-0 left-0 right-0 p-6 space-y-4">
+<div class="flex items-center space-x-3">
+<img class="w-10 h-10 rounded-full border-2 border-neon-cyan" data-alt="Artist avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArRBJU8_ZOHvtZu4nODCd7sz5QXrafYA1dG02fYeIHJ06CAn_s3YGdgt1RuPHSXj3h2AEXLSwANoGWk8CjPgUm4wThPAj8mr7pF6One-CIDWW53w_7aWj0emqIYvycv7J-TS6s88DW9KOFDBuO9PwgITkkjcVkLBCsTNN-abqblnr9M1hX3YURC8Yyizdfh-S9NLkx16wEbpBfdHugjq03c8XisXJpIoHHBVa4mXjDlAmDF7MOYtGzv4rbAq6p7eaUugU_axi0oMEe"/>
+<div>
+<p class="font-bold text-sm">SynthWave Official</p>
+<p class="text-[10px] text-slate-300">Exclusive Behind-the-Scenes</p>
+</div>
+</div>
+<p class="text-lg font-bold leading-snug">Exclusive NFT holders get backstage access at the upcoming London show. Minting ends Friday.</p>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center space-x-6">
+<div class="flex items-center space-x-1">
+<span class="material-icons text-neon-cyan text-xl">bolt</span>
+<span class="text-xs font-bold">2.1k</span>
+</div>
+<div class="flex items-center space-x-1">
+<span class="material-icons text-slate-300 text-xl">ios_share</span>
+<span class="text-xs font-bold">Share</span>
+</div>
+</div>
+<button class="bg-neon-cyan text-background-dark px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider active:scale-95 transition-all">Claim NFT</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass-card border border-primary/20 rounded-full py-4 px-8 flex justify-between items-center z-50 shadow-2xl">
+<div class="flex flex-col items-center text-primary">
+<span class="material-icons">home</span>
+<div class="w-1 h-1 bg-primary rounded-full mt-1"></div>
+</div>
+<div class="flex flex-col items-center text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">explore</span>
+</div>
+<div class="relative -top-10">
+<div class="absolute -inset-2 bg-primary/30 blur-xl rounded-full"></div>
+<button class="relative w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-lg active:scale-90 transition-transform">
+<span class="material-icons text-3xl">qr_code_scanner</span>
+</button>
+</div>
+<div class="flex flex-col items-center text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">account_balance</span>
+</div>
+<div class="flex flex-col items-center text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">person</span>
+</div>
+</nav>
+<style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</body></html>
