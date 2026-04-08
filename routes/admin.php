@@ -86,6 +86,8 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('/event/{id}/update-featured', 'BackEnd\Event\EventController@updateFeatured')->name('admin.event_management.event.update_featured');
     Route::post('/delete-event/{id}', 'BackEnd\Event\EventController@destroy')->name('admin.event_management.delete_event');
     Route::get('/edit-event/{id}', 'BackEnd\Event\EventController@edit')->name('admin.event_management.edit_event');
+    Route::get('/event/{id}/qr', 'BackEnd\Event\EventController@qr')->name('admin.event_management.qr');
+    Route::get('/event/{id}/qr/download', 'BackEnd\Event\EventController@downloadQr')->name('admin.event_management.qr_download');
     Route::post('/event-img-dbrmv', 'BackEnd\Event\EventController@imagedbrmv')->name('admin.event.imgdbrmv');
     //ticket settings
     Route::get('/edit-ticket-setting/{id}', 'BackEnd\Event\EventController@editTicketSetting')->name('admin.event_management.ticket_setting');

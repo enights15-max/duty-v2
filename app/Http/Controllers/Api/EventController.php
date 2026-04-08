@@ -774,7 +774,7 @@ class EventController extends Controller
         ->orderBy('events.id', 'desc')
         ->get();
 
-      $related_events = $related_events_data->map(function ($event, $customer) {
+      $related_events = $related_events_data->map(function ($event, $customer) use ($language) {
         $event_date = $event->date_type == 'multiple' ? eventLatestDates($event->id) : null;
 
         $start_date = $event->date_type == 'multiple' ? @$event_date->start_date : $event->start_date;
@@ -991,6 +991,7 @@ class EventController extends Controller
     }
 
     //send notification
+<<<<<<< Updated upstream
     $firebase_admin_json = DB::table('basic_settings')
       ->where('uniqid', 12345)
       ->value('firebase_admin_json');
@@ -1011,6 +1012,43 @@ class EventController extends Controller
     }
 
     if(!empty($bookingInfo->invoice)){
+=======
+    if ($customerId !== 'guest') {
+      $customerActor = $authCustomer ?: \App\Models\Customer::find($customerId);
+
+      $this->notificationService->notifyUser(
+        $customerActor,
+        __('Ticket Purchase Successful'),
+        'You have successfully purchased tickets for ' . ($firstBooking->evnt->title ?? 'an event') . '. View your tickets in the app.'
+      );
+    }
+
+    // Pass info back - maybe just the first one or a summary
+    $bookingInfo = $firstBooking;
+    $bookingEvent = Event::with('venue')->find($bookingInfo->event_id);
+
+    if ($bookingEvent) {
+      if (($bookingEvent->owner_identity_id ?? null) != null || ($bookingEvent->organizer_id ?? null) != null) {
+        $bookingInfo->organizer_name = $this->organizerPublicProfileService->organizerNameForEvent(
+          $bookingEvent->owner_identity_id ?? null,
+          $bookingEvent->organizer_id ?? null,
+          null
+        );
+      } else {
+        $bookingInfo->organizer_name = optional(Admin::first())->username ?? __('Duty host');
+      }
+
+      $bookingInfo->event_title = $bookingEvent->title ?? ($bookingInfo->evnt->title ?? null);
+      $bookingInfo->thumbnail = $bookingEvent->thumbnail ? asset('assets/admin/img/event/thumbnail/' . $bookingEvent->thumbnail) : null;
+      $bookingInfo->venue_name = optional($bookingEvent->venue)->name ?: ($bookingEvent->venue_name_snapshot ?: null);
+      $bookingInfo->event_end_date = $bookingEvent->end_date_time;
+    }
+
+    $bookingInfo->total = (float) ($bookingInfo->price + $bookingInfo->tax - $bookingInfo->discount);
+    $bookingInfo->total_paid = number_format($bookingInfo->total, 2, '.', '');
+
+    if (!empty($bookingInfo->invoice)) {
+>>>>>>> Stashed changes
       $bookingInfo->invoice = asset('assets/admin/file/invoices/' . $bookingInfo->invoice);
     }
 
@@ -1036,6 +1074,7 @@ class EventController extends Controller
       }
       $variations = $info['selTickets'];
 
+<<<<<<< Updated upstream
       if (!empty($variations)) {
         foreach ($variations as $variation) {
           $ticket = Ticket::where('id', $variation['ticket_id'])->first();
@@ -1089,6 +1128,136 @@ class EventController extends Controller
             if ($ticket->ticket_available - $variation['qty'] >= 0) {
               $ticket->ticket_available = $ticket->ticket_available - $variation['qty'];
               $ticket->save();
+=======
+      return $bookings;
+    } catch (\Exception $e) {
+      \Illuminate\Support\Facades\Log::error('EventController storeData error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+      return collect();
+    }
+  }
+
+  private function createSingleBooking($info, $organizer_id, $organizerIdentityId, $event, $orderNumber, $specificVariation = null)
+  {
+    $totalQty = $info['quantity']; // Total order quantity
+
+    // If specific variation is passed, use it. Otherwise use info['variation'] logic (which was bulk)
+    // But we want to isolate.
+
+    // Calculate Unit Values
+    $unitPrice = $info['price'] / $totalQty;
+    $unitTax = $info['tax'] / $totalQty;
+    $unitCommission = $info['commission'] / $totalQty;
+    $unitDiscount = $info['discount'] / $totalQty;
+    $unitEarlyBird = $info['total_early_bird_dicount'] / $totalQty;
+
+    // Handle Variations / Ticket Stock Update
+    $variationsJson = null;
+    $ticketId = null;
+    if (!empty($specificVariation)) {
+      // Logic to update stock for this single variation unit
+      // Copied and adapted from original storeData stock logic
+      $this->updateStock($specificVariation, $event);
+
+      // Prepare variation JSON for this booking (qty 1)
+      // We need to generate unique IDs for slots/seats if applicable
+      $variationsJson = $this->processVariationsForBooking($specificVariation);
+      $ticketId = $specificVariation[0]['ticket_id'] ?? null;
+    } else {
+      // Simple ticket stock update
+      $ticket = $event->ticket()->first();
+      if ($ticket) {
+        $ticket->ticket_available = $ticket->ticket_available - 1;
+        $ticket->save();
+        $ticketId = $ticket->id;
+      }
+    }
+
+    $basic = Basic::where('uniqid', 12345)->select('tax', 'commission')->first();
+
+    return Booking::create([
+      'customer_id' => array_key_exists('customer_id', $info) ? $info['customer_id'] : null,
+      'booking_id' => uniqid(),
+      'order_number' => $orderNumber,
+      'fname' => $info['fname'],
+      'lname' => $info['lname'],
+      'email' => $info['email'],
+      'phone' => $info['phone'],
+      'country' => $info['country'],
+      'state' => $info['state'],
+      'city' => $info['city'],
+      'zip_code' => $info['zip_code'],
+      'address' => $info['address'],
+      'event_id' => $info['event_id'],
+      'organizer_id' => $organizer_id,
+      'organizer_identity_id' => $organizerIdentityId,
+      'variation' => $variationsJson,
+      'price' => round($unitPrice, 2),
+      'tax' => round($unitTax, 2),
+      'commission' => round($unitCommission, 2),
+      'tax_percentage' => $basic->tax,
+      'commission_percentage' => $basic->commission,
+      'quantity' => 1, // Always 1
+      'discount' => round($unitDiscount, 2),
+      'early_bird_discount' => round($unitEarlyBird, 2),
+      'currencyText' => $info['currencyText'],
+      'currencyTextPosition' => $info['currencyTextPosition'],
+      'currencySymbol' => $info['currencySymbol'],
+      'currencySymbolPosition' => $info['currencySymbolPosition'],
+      'paymentMethod' => $info['paymentMethod'],
+      'gatewayType' => $info['gatewayType'],
+      'paymentStatus' => $info['paymentStatus'],
+      'invoice' => array_key_exists('invoice', $info) ? $info['invoice'] : null,
+      'attachmentFile' => array_key_exists('attachmentFile', $info) ? $info['attachmentFile'] : null,
+      'event_date' => $info['event_date'],
+      'conversation_id' => array_key_exists('conversation_id', $info) ? $info['conversation_id'] : null,
+      'fcm_token' => array_key_exists('fcm_token', $info) ? $info['fcm_token'] : null,
+    ]);
+  }
+
+  private function resolveOrganizerActorForEvent(?Event $event): array
+  {
+    if (!$event) {
+      return [
+        'organizer_id' => null,
+        'organizer_identity_id' => null,
+      ];
+    }
+
+    $legacyOrganizerId = $event->organizer_id ?: null;
+    $organizerIdentityId = $event->owner_identity_id ?: null;
+
+    if ($organizerIdentityId === null && $legacyOrganizerId !== null) {
+      $identity = app(\App\Services\ProfessionalCatalogBridgeService::class)
+        ->findIdentityForLegacy('organizer', $legacyOrganizerId);
+
+      $organizerIdentityId = $identity?->id;
+    }
+
+    return [
+      'organizer_id' => $legacyOrganizerId,
+      'organizer_identity_id' => $organizerIdentityId,
+    ];
+  }
+
+  private function updateStock($variations, $event)
+  {
+    foreach ($variations as $variation) {
+      $ticket = Ticket::where('id', $variation['ticket_id'])->first();
+      if ($ticket->pricing_type == 'normal' && $ticket->ticket_available_type == 'limited') {
+        if ($ticket->ticket_available - $variation['qty'] >= 0) {
+          $ticket->ticket_available = $ticket->ticket_available - $variation['qty'];
+          $ticket->save();
+        }
+      } elseif ($ticket->pricing_type == 'variation') {
+        $ticket_variations = json_decode($ticket->variations, true);
+        $update_variation = [];
+        foreach ($ticket_variations as $ticket_variation) {
+          if ($ticket_variation['name'] == $variation['name']) {
+            if ($ticket_variation['ticket_available_type'] == 'limited') {
+              $ticket_available = intval($ticket_variation['ticket_available']) - intval($variation['qty']);
+            } else {
+              $ticket_available = $ticket_variation['ticket_available'];
+>>>>>>> Stashed changes
             }
           }
         }

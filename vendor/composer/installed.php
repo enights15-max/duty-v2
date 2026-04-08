@@ -3,7 +3,11 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
+<<<<<<< Updated upstream
         'reference' => '1db1791adb8b0b8e5fb0241b01dff990178db90a',
+=======
+        'reference' => '369b34ec5934c4c98a2397a7b4a93fbe84a6a4e0',
+>>>>>>> Stashed changes
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -679,6 +683,7 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+<<<<<<< Updated upstream
         'kreativdev/installer' => array(
             'pretty_version' => '1.1.0',
             'version' => '1.1.0.0',
@@ -688,6 +693,8 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+=======
+>>>>>>> Stashed changes
         'laravel-notification-channels/webpush' => array(
             'pretty_version' => '6.0.0',
             'version' => '6.0.0.0',
@@ -709,7 +716,11 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
+<<<<<<< Updated upstream
             'reference' => '1db1791adb8b0b8e5fb0241b01dff990178db90a',
+=======
+            'reference' => '369b34ec5934c4c98a2397a7b4a93fbe84a6a4e0',
+>>>>>>> Stashed changes
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -1268,15 +1279,6 @@
             'reference' => '750bf031a48fd07c673dbe3f11f72362ea306d0d',
             'type' => 'library',
             'install_path' => __DIR__ . '/../psy/psysh',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
-        'rachidlaasri/laravel-installer' => array(
-            'pretty_version' => '4.1.0',
-            'version' => '4.1.0.0',
-            'reference' => 'b751b4c23dba893e9a4a12f881a6fd8fa921d228',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../rachidlaasri/laravel-installer',
             'aliases' => array(),
             'dev_requirement' => false,
         ),

@@ -44,6 +44,12 @@ return [
     'secret' => env('STRIPE_SECRET'),
   ],
 
+  'duty_app' => [
+    'ios_url' => env('DUTY_IOS_APP_URL'),
+    'android_url' => env('DUTY_ANDROID_APP_URL'),
+    'deep_link_base' => env('DUTY_APP_DEEP_LINK_BASE', 'duty://'),
+  ],
+
   'facebook' => [
     'client_id' => env('FACEBOOK_CLIENT_ID'),
     'client_secret' => env('FACEBOOK_CLIENT_SECRET'),

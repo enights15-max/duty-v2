@@ -57,6 +57,8 @@ Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 
   Route::post('/event/{id}/update-featured', 'BackEnd\Organizer\EventController@updateFeatured')->name('organizer.event_management.event.update_featured');
   Route::post('/delete-event/{id}', 'BackEnd\Organizer\EventController@destroy')->name('organizer.event_management.delete_event');
   Route::get('/edit-event/{id}', 'BackEnd\Organizer\EventController@edit')->name('organizer.event_management.edit_event');
+  Route::get('/event/{id}/qr', 'BackEnd\Organizer\EventController@qr')->name('organizer.event_management.qr');
+  Route::get('/event/{id}/qr/download', 'BackEnd\Organizer\EventController@downloadQr')->name('organizer.event_management.qr_download');
   Route::post('/event-img-dbrmv', 'BackEnd\Organizer\EventController@imagedbrmv')->name('organizer.event.imgdbrmv');
 
 

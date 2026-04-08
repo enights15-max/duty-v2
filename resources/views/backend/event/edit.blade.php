@@ -74,6 +74,13 @@
                         </span>
                         {{ __('Preview') }}
                     </a>
+                    <a class="mr-2 btn btn-warning btn-sm float-right d-inline-block"
+                        href="{{ route('admin.event_management.qr', ['id' => $event->id]) }}">
+                        <span class="btn-label">
+                            <i class="fas fa-qrcode"></i>
+                        </span>
+                        {{ __('Event QR') }}
+                    </a>
                     @if ($event->event_type == 'venue')
                         <a class="mr-2 btn btn-secondary btn-sm float-right d-inline-block"
                             href="{{ route('admin.event.ticket', ['language' => $defaultLang->code, 'event_id' => $event->id, 'event_type' => $event->event_type]) }}"

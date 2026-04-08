@@ -20,6 +20,7 @@ use App\Traits\ApiFormatTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 
@@ -36,7 +37,336 @@ class CustomerController extends Controller
   public function __construct()
   {
     $admin = Admin::select('username')->first();
+<<<<<<< Updated upstream
     $this->admin_user_name = $admin->username;
+=======
+    $this->admin_user_name = $admin->username ?? '';
+    $this->organizerPublicProfileService = $organizerPublicProfileService ?? app(OrganizerPublicProfileService::class);
+  }
+
+  private function downloadProfilePhoto($url)
+  {
+    if (empty($url))
+      return null;
+
+    try {
+      $fileContents = @file_get_contents($url);
+      if (!$fileContents)
+        return null;
+
+      $extension = 'jpg'; // Default to jpg for social/firebase URLs
+      $fileName = uniqid() . '.' . $extension;
+      $directory = public_path('assets/admin/img/customer-profile/');
+
+      if (!file_exists($directory)) {
+        @mkdir($directory, 0775, true);
+      }
+
+      file_put_contents($directory . $fileName, $fileContents);
+      return $fileName;
+    } catch (\Exception $e) {
+      return null;
+    }
+  }
+
+  private function generateAvailableUsername(string $seed): string
+  {
+    $base = strtolower(preg_replace('/[^a-z0-9_]/', '_', $seed));
+    $base = trim($base, '_');
+    if ($base === '') {
+      $base = 'duty_user';
+    }
+
+    $candidate = $base;
+    while (User::where('username', $candidate)->exists()) {
+      $suffix = '_' . strtolower(Str::random(4));
+      $maxBaseLength = max(1, 60 - strlen($suffix));
+      $candidate = substr($base, 0, $maxBaseLength) . $suffix;
+    }
+
+    return $candidate;
+  }
+
+  private function firebaseAdminJsonPath(): ?string
+  {
+    $firebaseAdminJson = DB::table('basic_settings')
+      ->where('uniqid', 12345)
+      ->value('firebase_admin_json');
+
+    if (empty($firebaseAdminJson)) {
+      return null;
+    }
+
+    $path = public_path('assets/file/') . $firebaseAdminJson;
+
+    return file_exists($path) ? $path : null;
+  }
+
+  private function hasUsableFirebaseAdminJson(?string $path): bool
+  {
+    if (empty($path) || !file_exists($path)) {
+      return false;
+    }
+
+    $payload = json_decode(file_get_contents($path), true);
+    if (!is_array($payload)) {
+      return false;
+    }
+
+    $requiredKeys = ['project_id', 'private_key', 'client_email'];
+    foreach ($requiredKeys as $key) {
+      $value = $payload[$key] ?? null;
+      if (empty($value) || str_contains((string) $value, 'REPLACE_WITH_')) {
+        return false;
+      }
+    }
+
+    return str_contains((string) $payload['private_key'], 'BEGIN PRIVATE KEY');
+  }
+
+  private function resolveFirebaseWebApiKey(): ?string
+  {
+    $envKey = env('FIREBASE_WEB_API_KEY');
+    if (!empty($envKey)) {
+      return $envKey;
+    }
+
+    $androidConfigPath = base_path('flutter/cliente_v2/android/app/google-services.json');
+    if (file_exists($androidConfigPath)) {
+      $androidConfig = json_decode(file_get_contents($androidConfigPath), true);
+      $apiKey = $androidConfig['client'][0]['api_key'][0]['current_key'] ?? null;
+      if (!empty($apiKey)) {
+        return $apiKey;
+      }
+    }
+
+    return null;
+  }
+
+  private function lookupFirebaseIdentityViaApi(string $idToken): array
+  {
+    $apiKey = $this->resolveFirebaseWebApiKey();
+    if (empty($apiKey)) {
+      throw new \RuntimeException('Firebase API key is not configured for token lookup.');
+    }
+
+    $response = Http::timeout(15)
+      ->acceptJson()
+      ->post(
+        'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' . $apiKey,
+        ['idToken' => $idToken]
+      );
+
+    if (!$response->successful()) {
+      $message = data_get($response->json(), 'error.message') ?: 'Unable to validate Firebase token.';
+      throw new \RuntimeException($message);
+    }
+
+    $user = data_get($response->json(), 'users.0');
+    if (!is_array($user)) {
+      throw new \RuntimeException('Firebase token lookup returned no user payload.');
+    }
+
+    return [
+      'uid' => $user['localId'] ?? null,
+      'phone' => $user['phoneNumber'] ?? null,
+      'photo_url' => $user['photoUrl'] ?? null,
+    ];
+  }
+
+  private function resolveFirebaseIdentity(string $idToken): array
+  {
+    $adminJsonPath = $this->firebaseAdminJsonPath();
+
+    if ($this->hasUsableFirebaseAdminJson($adminJsonPath)) {
+      try {
+        $factory = (new Factory)->withServiceAccount($adminJsonPath);
+        $auth = $factory->createAuth();
+        $verifiedIdToken = $auth->verifyIdToken($idToken);
+        $uid = $verifiedIdToken->claims()->get('sub');
+        $firebaseUser = $auth->getUser($uid);
+
+        return [
+          'uid' => $uid,
+          'phone' => $firebaseUser->phoneNumber,
+          'photo_url' => $firebaseUser->photoUrl,
+        ];
+      } catch (\Throwable $e) {
+        \Log::warning('Firebase Admin verification failed, falling back to REST lookup: ' . $e->getMessage());
+      }
+    }
+
+    return $this->lookupFirebaseIdentityViaApi($idToken);
+  }
+
+  private function resolveOrCreateCoreUser(Customer $customer): ?User
+  {
+    if (empty($customer->email)) {
+      return null;
+    }
+
+    $seedUsername = $customer->username ?: ('duty_' . $customer->id);
+    $user = User::where('email', $customer->email)->first();
+
+    if (!$user) {
+      $user = User::create([
+        'first_name' => $customer->fname ?: 'User',
+        'last_name' => $customer->lname ?: '',
+        'username' => $this->generateAvailableUsername($seedUsername),
+        'email' => $customer->email,
+        'password' => $customer->password ?: Hash::make(Str::random(40)),
+        'contact_number' => $customer->phone,
+        'address' => $customer->address,
+        'city' => $customer->city,
+        'state' => $customer->state,
+        'country' => $customer->country,
+        'status' => (int) ($customer->status ?? 1) === 1 ? 1 : 0,
+        'email_verified_at' => $customer->email_verified_at,
+      ]);
+
+      return $user;
+    }
+
+    $updates = [];
+    if (empty($user->first_name) && !empty($customer->fname)) {
+      $updates['first_name'] = $customer->fname;
+    }
+    if (empty($user->last_name) && !empty($customer->lname)) {
+      $updates['last_name'] = $customer->lname;
+    }
+    if (empty($user->username)) {
+      $updates['username'] = $this->generateAvailableUsername($seedUsername);
+    }
+    if (empty($user->contact_number) && !empty($customer->phone)) {
+      $updates['contact_number'] = $customer->phone;
+    }
+    if (empty($user->address) && !empty($customer->address)) {
+      $updates['address'] = $customer->address;
+    }
+    if (empty($user->city) && !empty($customer->city)) {
+      $updates['city'] = $customer->city;
+    }
+    if (empty($user->state) && !empty($customer->state)) {
+      $updates['state'] = $customer->state;
+    }
+    if (empty($user->country) && !empty($customer->country)) {
+      $updates['country'] = $customer->country;
+    }
+
+    if (!empty($updates)) {
+      $user->fill($updates);
+      $user->save();
+    }
+
+    return $user;
+  }
+
+  private function ensurePersonalIdentity(User $user, Customer $customer): Identity
+  {
+    $identity = Identity::where('owner_user_id', $user->id)
+      ->where('type', 'personal')
+      ->first();
+
+    if (!$identity) {
+      $displayName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
+      if ($displayName === '') {
+        $displayName = $user->username ?: ('User ' . $user->id);
+      }
+
+      $slug = Str::slug($displayName);
+      $slugCount = Identity::where('slug', 'LIKE', "{$slug}%")->count();
+      $slug = $slugCount ? "{$slug}-{$slugCount}" : $slug;
+
+      $identity = Identity::create([
+        'type' => 'personal',
+        'status' => 'active',
+        'owner_user_id' => $user->id,
+        'display_name' => $displayName,
+        'slug' => $slug,
+        'meta' => [
+          'display_name' => $displayName,
+          'country' => $customer->country ?? $user->country ?? null,
+          'city' => $customer->city ?? $user->city ?? null,
+        ],
+      ]);
+    }
+
+    IdentityMember::firstOrCreate(
+      ['identity_id' => $identity->id, 'user_id' => $user->id],
+      ['role' => 'owner', 'status' => 'active']
+    );
+
+    return $identity;
+  }
+
+  private function buildIdentityPayload(Customer $customer): array
+  {
+    $user = $this->resolveOrCreateCoreUser($customer);
+    if (!$user) {
+      return [
+        'identities' => [],
+        'default_identity_id' => null,
+      ];
+    }
+
+    $this->ensurePersonalIdentity($user, $customer);
+
+    $identities = $user->usersIdentities()->get()->map(function ($identity) {
+      return [
+        'id' => $identity->id,
+        'type' => $identity->type,
+        'display_name' => $identity->display_name,
+        'status' => $identity->status,
+        'role' => $identity->pivot->role,
+      ];
+    })->values()->all();
+
+    $defaultIdentityId = null;
+    foreach ($identities as $identity) {
+      if (($identity['type'] ?? null) === 'personal') {
+        $defaultIdentityId = $identity['id'] ?? null;
+        break;
+      }
+    }
+
+    return [
+      'identities' => $identities,
+      'default_identity_id' => $defaultIdentityId,
+    ];
+  }
+
+  private function resolveBookingOrganizerTarget(Booking $booking, ?Event $event, ?int $languageId = null): ?array
+  {
+    return $this->organizerPublicProfileService->resolveFromOwnership(
+      $booking->organizer_identity_id ?? $event?->owner_identity_id,
+      $booking->organizer_id,
+      $languageId
+    );
+  }
+
+  private function resolveBookingOrganizerName(Booking $booking, ?Event $event, ?int $languageId = null): string
+  {
+    $target = $this->resolveBookingOrganizerTarget($booking, $event, $languageId);
+
+    return $target['name'] ?? '';
+  }
+
+  private function resolveBookingOrganizerPayload(Booking $booking, ?Event $event, ?int $languageId = null): array
+  {
+    $payload = $this->organizerPublicProfileService->organizerPayloadForEvent(
+      $booking->organizer_identity_id ?? $event?->owner_identity_id,
+      $booking->organizer_id,
+      $languageId
+    );
+
+    if ($payload) {
+      return $payload;
+    }
+
+    $admin = Admin::first();
+
+    return $this->format_organizer_data($admin, 'admin');
+>>>>>>> Stashed changes
   }
 
   /* ******************************
@@ -130,6 +460,350 @@ class CustomerController extends Controller
     ], 200);
   }
 
+<<<<<<< Updated upstream
+=======
+  /**
+   * Handle Login/Signup via Firebase verified token
+   */
+  public function firebaseLogin(Request $request)
+  {
+    $rules = [
+      'idToken' => 'required',
+    ];
+
+    $validator = Validator::make($request->all(), $rules);
+    if ($validator->fails()) {
+      return response()->json(['status' => 'validation_error', 'errors' => $validator->errors()], 422);
+    }
+
+    try {
+      $firebaseIdentity = $this->resolveFirebaseIdentity($request->idToken);
+      $uid = $firebaseIdentity['uid'] ?? null;
+      $phone = $firebaseIdentity['phone'] ?? null;
+      $firebasePhotoUrl = $firebaseIdentity['photo_url'] ?? null;
+
+      if (!$uid) {
+        return response()->json(['status' => 'error', 'message' => 'Firebase identity could not be resolved'], 400);
+      }
+
+      if (!$phone) {
+        return response()->json(['status' => 'error', 'message' => 'Phone number not found in token'], 400);
+      }
+
+      // 3. Find Customer
+      $customer = Customer::where('firebase_uid', $uid)
+        ->orWhere('phone', $phone)
+        ->first();
+
+      if (!$customer && strlen($phone) > 8) {
+        // Fallback: Check if the database phone ends with the last 10 digits of the Firebase phone
+        // This handles cases where the DB stores '8493538839' but Firebase provides '+18493538839'
+        $shortPhone = substr($phone, -10);
+        $customer = Customer::where('phone', 'like', '%' . $shortPhone)->first();
+      }
+      if (!$customer && strlen($phone) > 8) {
+        // Fallback: just strip the '+' sign
+        $noPlus = ltrim($phone, '+');
+        $customer = Customer::where('phone', $noPlus)->first();
+      }
+
+      if (!$customer) {
+        return response()->json([
+          'status' => 'user_not_found',
+          'message' => 'No user found with this phone number',
+          'uid' => $uid,
+          'phone' => $phone
+        ], 200);
+      }
+
+      // Update firebase_uid, photo and phone_verified_at if needed
+      $updates = ['phone_verified_at' => now()];
+      if (!$customer->firebase_uid) {
+        $updates['firebase_uid'] = $uid;
+      }
+      if (empty($customer->photo) && !empty($firebasePhotoUrl)) {
+        $localPhoto = $this->downloadProfilePhoto($firebasePhotoUrl);
+        if ($localPhoto) {
+          $updates['photo'] = $localPhoto;
+        }
+      }
+      $customer->update($updates);
+
+      if ($customer->status == 0) {
+        return response()->json(['status' => 'error', 'message' => 'Account deactivated'], 403);
+      }
+
+      if (empty($customer->email)) {
+        // Issue a temporary token to allow them to setup their email
+        $customer->tokens()->where('name', 'customer-email-setup')->delete();
+        $token = $customer->createToken('customer-email-setup')->plainTextToken;
+
+        return response()->json([
+          'status' => 'needs_email_setup',
+          'message' => 'Please provide an email to complete your profile.',
+          'customer' => $customer,
+          'setup_token' => $token
+        ], 200);
+      }
+
+      // 4. Issue Sanctum Token
+      $customer->tokens()->delete();
+      $token = $customer->createToken($request->device_name ?? 'mobile')->plainTextToken;
+
+      $identityPayload = $this->buildIdentityPayload($customer);
+
+      return response()->json([
+        'status' => 'success',
+        'customer' => $customer,
+        'token' => $token,
+        'identities' => $identityPayload['identities'],
+        'default_identity_id' => $identityPayload['default_identity_id']
+      ], 200);
+
+    } catch (\Exception $e) {
+      return response()->json(['status' => 'error', 'message' => 'Authentication failed: ' . $e->getMessage()], 401);
+    }
+  }
+
+  /**
+   * Register new user via Firebase
+   */
+  public function firebaseSignup(Request $request)
+  {
+    $rules = [
+      'idToken' => 'required',
+      'email' => 'required|email|unique:customers',
+      'fname' => 'required',
+      'lname' => 'required',
+    ];
+
+    $validator = Validator::make($request->all(), $rules);
+    if ($validator->fails()) {
+      return response()->json(['status' => 'validation_error', 'errors' => $validator->errors()], 422);
+    }
+
+    try {
+      $firebaseIdentity = $this->resolveFirebaseIdentity($request->idToken);
+      $uid = $firebaseIdentity['uid'] ?? null;
+      $phone = $firebaseIdentity['phone'] ?? null;
+      $firebasePhotoUrl = $firebaseIdentity['photo_url'] ?? null;
+
+      if (!$uid) {
+        return response()->json(['status' => 'error', 'message' => 'Firebase identity could not be resolved'], 400);
+      }
+
+      if (!$phone) {
+        return response()->json(['status' => 'error', 'message' => 'Phone number not found in token'], 400);
+      }
+
+      // 3. Check if phone already exists
+      $customer = Customer::where('firebase_uid', $uid)
+        ->orWhere('phone', $phone)
+        ->first();
+
+      if (!$customer && strlen($phone) > 8) {
+        $shortPhone = substr($phone, -10);
+        $customer = Customer::where('phone', 'like', '%' . $shortPhone)->first();
+      }
+      if (!$customer && strlen($phone) > 8) {
+        $noPlus = ltrim($phone, '+');
+        $customer = Customer::where('phone', $noPlus)->first();
+      }
+
+      if (!$customer) {
+        // Create Customer
+        $customer = Customer::create([
+          'fname' => $request->fname,
+          'lname' => $request->lname,
+          'email' => $request->email,
+          'username' => 'user_' . Str::random(8),
+          'photo' => $this->downloadProfilePhoto($firebasePhotoUrl) ?? '',
+          'phone' => $phone,
+          'firebase_uid' => $uid,
+          'status' => 1,
+          'email_verified_at' => now(),
+          'phone_verified_at' => now(),
+        ]);
+      } else {
+        // Customer already exists (maybe they changed their email or signed up again)
+        // Ensure firebase_uid is updated
+        if (!$customer->firebase_uid) {
+          $customer->update(['firebase_uid' => $uid, 'phone_verified_at' => now()]);
+        }
+      }
+
+      // 4. Issue Sanctum Token
+      $token = $customer->createToken($request->device_name ?? 'mobile')->plainTextToken;
+
+      $identityPayload = $this->buildIdentityPayload($customer);
+
+      return response()->json([
+        'status' => 'success',
+        'customer' => $customer,
+        'token' => $token,
+        'identities' => $identityPayload['identities'],
+        'default_identity_id' => $identityPayload['default_identity_id']
+      ], 200);
+
+    } catch (\Exception $e) {
+      return response()->json(['status' => 'error', 'message' => 'Signup failed: ' . $e->getMessage()], 401);
+    }
+  }
+
+  /**
+   * Complete Email Setup after Phone Login
+   */
+  public function setupEmail(Request $request)
+  {
+    $customer = Auth::guard('sanctum')->user();
+    if (!$customer) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthenticated.'], 401);
+    }
+
+    $rules = [
+      'email' => 'required|email|unique:customers',
+      'fname' => 'required',
+      'lname' => 'required',
+    ];
+
+    $validator = Validator::make($request->all(), $rules);
+    if ($validator->fails()) {
+      return response()->json(['status' => 'validation_error', 'errors' => $validator->errors()], 422);
+    }
+
+    $customer->update([
+      'email' => $request->email,
+      'fname' => $request->fname,
+      'lname' => $request->lname,
+    ]);
+
+    // Issue the real token now that setup is complete
+    $customer->tokens()->where('name', 'customer-email-setup')->delete();
+    $token = $customer->createToken($request->device_name ?? 'mobile')->plainTextToken;
+
+    $identityPayload = $this->buildIdentityPayload($customer);
+
+    return response()->json([
+      'status' => 'success',
+      'customer' => $customer,
+      'token' => $token,
+      'identities' => $identityPayload['identities'],
+      'default_identity_id' => $identityPayload['default_identity_id']
+    ], 200);
+  }
+
+  /**
+   * Complete Phone Verification Link after Email Login
+   */
+  public function verifyPhoneLink(Request $request)
+  {
+    $customer = Auth::guard('sanctum')->user();
+    if (!$customer) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthenticated.'], 401);
+    }
+
+    $rules = [
+      'idToken' => 'required',
+    ];
+
+    $validator = Validator::make($request->all(), $rules);
+    if ($validator->fails()) {
+      return response()->json(['status' => 'validation_error', 'errors' => $validator->errors()], 422);
+    }
+
+    try {
+      $firebaseIdentity = $this->resolveFirebaseIdentity($request->idToken);
+      $uid = $firebaseIdentity['uid'] ?? null;
+      $phone = $firebaseIdentity['phone'] ?? null;
+      $firebasePhotoUrl = $firebaseIdentity['photo_url'] ?? null;
+
+      if (!$uid) {
+        return response()->json(['status' => 'error', 'message' => 'Firebase identity could not be resolved'], 400);
+      }
+
+      if (!$phone) {
+        return response()->json(['status' => 'error', 'message' => 'Phone number not found in token'], 400);
+      }
+
+      // 3. Make sure phone isn't already used by someone else
+      $existingPhoneUser = Customer::where('phone', $phone)->where('id', '!=', $customer->id)->first();
+      if ($existingPhoneUser) {
+        return response()->json(['status' => 'error', 'message' => 'This phone number is already linked to another account.'], 400);
+      }
+
+      // 4. Update customer
+      $updates = [
+        'phone' => $phone,
+        'firebase_uid' => $uid,
+        'phone_verified_at' => now(),
+      ];
+
+      if (empty($customer->photo) && !empty($firebasePhotoUrl)) {
+        $localPhoto = $this->downloadProfilePhoto($firebasePhotoUrl);
+        if ($localPhoto) {
+          $updates['photo'] = $localPhoto;
+        }
+      }
+
+      $customer->update($updates);
+
+      // 5. Issue real Sanctum token
+      $customer->tokens()->where('name', 'customer-phone-verification')->delete();
+      $customer->tokens()->where('name', 'customer-login')->delete();
+      $token = $customer->createToken($request->device_name ?? 'mobile')->plainTextToken;
+
+      $identityPayload = $this->buildIdentityPayload($customer);
+
+      return response()->json([
+        'status' => 'success',
+        'customer' => $customer,
+        'token' => $token,
+        'identities' => $identityPayload['identities'],
+        'default_identity_id' => $identityPayload['default_identity_id']
+      ], 200);
+
+    } catch (\Exception $e) {
+      \Log::error('verifyPhoneLink exception: ' . $e->getMessage());
+      return response()->json(['status' => 'error', 'message' => 'Phone verification failed: ' . $e->getMessage()], 401);
+    }
+  }
+
+  /**
+   * Check if Email or Phone Number or Username is available for registration
+   */
+  public function checkAvailability(Request $request)
+  {
+    $rules = [];
+    if ($request->has('email')) {
+      $rules['email'] = 'email';
+    }
+    // We don't enforce format here for phone or username, just uniqueness check
+
+    $validator = Validator::make($request->all(), $rules);
+    if ($validator->fails()) {
+      return response()->json(['status' => 'validation_error', 'errors' => $validator->errors()], 422);
+    }
+
+    $response = ['status' => 'success'];
+
+    if ($request->has('username')) {
+      $usernameExists = Customer::where('username', $request->username)->exists();
+      $response['is_username_available'] = !$usernameExists;
+    }
+
+    if ($request->has('email')) {
+      $emailExists = Customer::where('email', $request->email)->exists();
+      $response['is_email_available'] = !$emailExists;
+    }
+
+    if ($request->has('phone')) {
+      $phoneExists = Customer::where('phone', $request->phone)->exists();
+      $response['is_phone_available'] = !$phoneExists;
+    }
+
+    return response()->json($response, 200);
+  }
+>>>>>>> Stashed changes
 
   /* ******************************
      * forget password
@@ -533,7 +1207,23 @@ class CustomerController extends Controller
     //calculation total_paid
     $booking->total_paid = number_format($booking->price + $booking->tax, 2);
     // attached invoice with path
+<<<<<<< Updated upstream
     $booking->invoice = !empty($booking->invoice) ? asset('assets/admin/file/invoices/'.$booking->invoice) : null;
+=======
+    $booking->invoice = !empty($booking->invoice) ? asset('assets/admin/file/invoices/' . $booking->invoice) : null;
+
+    // Load venue info
+    $event = Event::with('venue')->find($booking->event_id);
+    $thumbnail = $event?->thumbnail;
+    $organizerName = $this->resolveBookingOrganizerName($booking, $event, $language->id);
+
+    $booking->event_title = $event?->title ?? $booking->event_title ?? null;
+    $booking->thumbnail = $thumbnail ? asset('assets/admin/img/event/thumbnail/' . $thumbnail) : null;
+    $booking->organizer_name = $organizerName;
+    $booking->venue_name = $event && $event->venue ? $event->venue->name : ($event?->venue_name_snapshot ?: null);
+    $booking->event_end_date = $event ? $event->end_date_time : null;
+
+>>>>>>> Stashed changes
     $data['booking'] = $booking;
 
     //organizer

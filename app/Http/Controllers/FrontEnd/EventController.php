@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use Carbon\Carbon;
+use App\Models\Admin;
 use App\Models\Event;
 use App\Models\Organizer;
 use App\Models\Event\Coupon;
@@ -21,6 +22,11 @@ use App\Models\Event\EventCategory;
 use App\Http\Controllers\Controller;
 use App\Models\Event\Slot;
 use App\Models\Event\SlotImage;
+<<<<<<< Updated upstream
+=======
+use App\Services\OrganizerPublicProfileService;
+use Illuminate\Support\Collection;
+>>>>>>> Stashed changes
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
@@ -268,9 +274,202 @@ class EventController extends Controller
     $min = Ticket::min('f_price');
     $information['max'] = $max;
     $information['min'] = $min;
-    $information['events'] = $events;
+    $information['eventSignals'] = [
+      'result_count' => method_exists($events, 'total') ? (int) $events->total() : collect($events)->count(),
+      'active_categories' => $categories->count(),
+      'active_filters' => collect([
+        $request->input('search-input'),
+        $request->input('category'),
+        $request->input('event'),
+        $request->input('location'),
+        $request->input('dates'),
+        $request->input('country'),
+        $request->input('state'),
+        $request->input('city'),
+        $request->input('min'),
+        $request->input('max'),
+      ])->filter(fn($value) => $value !== null && $value !== '')->count(),
+    ];
+    $information['events'] = $this->transformEventListingPaginator($events, $language->id);
 
     return view('frontend.event.event', compact('information'));
+  }
+
+  private function transformEventListingPaginator($events, ?int $languageId = null)
+  {
+    $collection = method_exists($events, 'getCollection')
+      ? $events->getCollection()
+      : collect($events);
+
+    if ($collection->isEmpty()) {
+      return $events;
+    }
+
+    $eventIds = $collection->pluck('id')->filter()->unique()->values();
+    $ticketGroups = Ticket::query()
+      ->whereIn('event_id', $eventIds->all())
+      ->get([
+        'event_id',
+        'event_type',
+        'pricing_type',
+        'price',
+        'f_price',
+        'variations',
+        'normal_ticket_slot_enable',
+        'slot_seat_min_price',
+      ])
+      ->groupBy('event_id');
+
+    $organizerProfileService = app(OrganizerPublicProfileService::class);
+    $admin = null;
+
+    $transformed = $collection->map(function ($event) use ($ticketGroups, $organizerProfileService, $languageId, &$admin) {
+      $eventDate = null;
+      if (($event->date_type ?? null) === 'multiple') {
+        $eventDate = eventLatestDates($event->id);
+      }
+
+      $startDate = $eventDate?->start_date ?: ($event->start_date ?? null);
+      $duration = $eventDate?->duration ?: ($event->duration ?? null);
+      $startDateTime = null;
+      if (!empty($startDate) && !empty($event->start_time)) {
+        try {
+          $startDateTime = Carbon::parse(trim($startDate . ' ' . $event->start_time));
+        } catch (\Throwable $throwable) {
+          $startDateTime = null;
+        }
+      }
+
+      $statusLabel = __('Upcoming');
+      $statusClass = 'upcoming';
+      if ($startDateTime && $startDateTime->isPast()) {
+        $statusLabel = __('Live');
+        $statusClass = 'live';
+      }
+
+      $ticketPreview = $this->buildEventTicketPreview(collect($ticketGroups->get($event->id, collect())));
+      $description = trim(strip_tags((string) ($event->description ?? '')));
+      $organizerProfile = $organizerProfileService->organizerPayloadForEvent(
+        $event->owner_identity_id ?? null,
+        $event->organizer_id ?? null,
+        $languageId
+      );
+
+      if ($organizerProfile) {
+        $organizerName = $organizerProfile['organizer_name'] ?? $organizerProfile['username'];
+        $organizerRoute = route('frontend.organizer.details', [
+          $organizerProfile['id'],
+          str_replace(' ', '-', $organizerProfile['username'] ?? $organizerName),
+        ]);
+      } else {
+        $admin = $admin ?: Admin::first();
+        $organizerName = $admin?->username ?? __('Duty');
+        $organizerRoute = $admin
+          ? route('frontend.organizer.details', [$admin->id, str_replace(' ', '-', $admin->username), 'admin' => 'true'])
+          : '#';
+      }
+
+      $event->listing_badge = ($event->event_type ?? null) === 'online' ? __('Online event') : __('Venue event');
+      $event->status_label = $statusLabel;
+      $event->status_class = $statusClass;
+      $event->date_badge = $startDate ? Carbon::parse($startDate)->translatedFormat('M d') : __('Date TBD');
+      $event->date_full = $startDate ? Carbon::parse($startDate)->translatedFormat('D, M d') : __('Date TBD');
+      $event->time_badge = !empty($event->start_time)
+        ? Carbon::parse($event->start_time)->translatedFormat('h:i A')
+        : __('Time TBD');
+      $event->duration_badge = $duration ?: __('Schedule TBD');
+      $event->short_description = mb_strlen($description) > 140
+        ? mb_substr($description, 0, 140) . '...'
+        : ($description ?: __('More details will be announced soon.'));
+      $event->location_badge = ($event->event_type ?? null) === 'venue'
+        ? ($event->address ?: __('Venue to be announced'))
+        : __('Online event');
+      $event->price_display = $ticketPreview['price_display'];
+      $event->price_hint = $ticketPreview['price_hint'];
+      $event->ticket_count = $ticketPreview['ticket_count'];
+      $event->organizer_name = $organizerName;
+      $event->organizer_route = $organizerRoute;
+      $event->distance_km = !empty($event->distance) ? number_format($event->distance / 1000, 2) : null;
+
+      return $event;
+    });
+
+    if (method_exists($events, 'setCollection')) {
+      $events->setCollection($transformed);
+
+      return $events;
+    }
+
+    return $transformed;
+  }
+
+  private function buildEventTicketPreview(Collection $tickets): array
+  {
+    if ($tickets->isEmpty()) {
+      return [
+        'price_display' => __('Tickets soon'),
+        'price_hint' => __('Lineup and ticket drops coming next.'),
+        'ticket_count' => 0,
+      ];
+    }
+
+    $ticket = $tickets
+      ->sort(function (Ticket $first, Ticket $second) {
+        return $this->eventTicketComparablePrice($first) <=> $this->eventTicketComparablePrice($second);
+      })
+      ->first();
+
+    $price = $this->eventTicketComparablePrice($ticket);
+    if ($price <= 0) {
+      return [
+        'price_display' => __('Free'),
+        'price_hint' => __('Open access'),
+        'ticket_count' => $tickets->count(),
+      ];
+    }
+
+    return [
+      'price_display' => symbolPrice($price),
+      'price_hint' => $tickets->count() > 1 ? __('From the lowest ticket tier') : __('Current starting tier'),
+      'ticket_count' => $tickets->count(),
+    ];
+  }
+
+  private function eventTicketComparablePrice(Ticket $ticket): float
+  {
+    if ($ticket->pricing_type === 'variation') {
+      $variations = json_decode($ticket->variations ?? '[]', true);
+      if (is_array($variations) && !empty($variations)) {
+        $variationPrices = collect($variations)
+          ->map(function ($variation) {
+            if (!empty($variation['slot_enable'])) {
+              return (float) ($variation['slot_seat_min_price'] ?? 0);
+            }
+
+            return (float) ($variation['price'] ?? 0);
+          })
+          ->filter(fn($price) => $price >= 0)
+          ->values();
+
+        if ($variationPrices->isNotEmpty()) {
+          return (float) $variationPrices->min();
+        }
+      }
+    }
+
+    if ((int) $ticket->normal_ticket_slot_enable === 1 && $ticket->slot_seat_min_price !== null) {
+      return (float) $ticket->slot_seat_min_price;
+    }
+
+    if ($ticket->price !== null) {
+      return (float) $ticket->price;
+    }
+
+    if ($ticket->f_price !== null) {
+      return (float) $ticket->f_price;
+    }
+
+    return 0.0;
   }
 
   //details

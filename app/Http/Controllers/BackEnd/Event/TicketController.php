@@ -168,6 +168,13 @@ class TicketController extends Controller
     $in['ticket_available'] = $request->ticket_available_type == 'limited' ? $request->ticket_available : null;
 
     $in['max_buy_ticket'] = $request->max_ticket_buy_type == 'limited' ? $request->max_buy_ticket : null;
+    
+    // Handle Reservation Fields
+    $in['reservation_enabled'] = $request->input('reservation_enabled', 0);
+    $in['reservation_deposit_type'] = $request->reservation_deposit_type;
+    $in['reservation_deposit_value'] = $request->reservation_deposit_value;
+    $in['reservation_final_due_date'] = $request->reservation_final_due_date;
+    $in['reservation_min_installment_amount'] = $request->reservation_min_installment_amount;
 
     if ($request->pricing_type_2 == 'free') {
       $in['pricing_type'] = 'free';

@@ -25,6 +25,12 @@ use App\Http\Requests\Event\StoreRequest;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\Event\UpdateRequest;
 use App\Http\Requests\TicketSettingRequest;
+<<<<<<< Updated upstream
+=======
+use App\Services\EventAuthoringService;
+use App\Services\EventCloneService;
+use App\Services\EventQrCodeService;
+>>>>>>> Stashed changes
 
 class EventController extends Controller
 {
@@ -216,6 +222,7 @@ class EventController extends Controller
       }
     }
 
+<<<<<<< Updated upstream
     //event content
     $languages = Language::all();
     foreach ($languages as $language) {
@@ -238,6 +245,10 @@ class EventController extends Controller
       $event_content->meta_description = $request[$language->code . '_meta_description'];
       $event_content->save();
     }
+=======
+    $authoring->syncLocalizedContent($event, $request, Language::all());
+    app(EventQrCodeService::class)->ensureSvg($event);
+>>>>>>> Stashed changes
 
     Session::flash('success', 'Added Successfully');
     return response()->json(['status' => 'success'], 200);
@@ -317,6 +328,37 @@ class EventController extends Controller
 
     return view('backend.event.edit', $information);
   }
+
+  public function qr($id, EventQrCodeService $qrCodeService)
+  {
+    $event = Event::findOrFail($id);
+    $defaultLanguage = Language::query()->where('is_default', 1)->first();
+
+    return view('backend.event.qr-preview', [
+      'layout' => 'backend.layout',
+      'dashboardRoute' => route('admin.dashboard'),
+      'listingRoute' => route('admin.event_management.event', ['language' => $defaultLanguage?->code]),
+      'editRoute' => route('admin.event_management.edit_event', ['id' => $event->id]),
+      'downloadSvgUrl' => route('admin.event_management.qr_download', ['id' => $event->id]),
+      'eventTitle' => $qrCodeService->resolveTitle($event),
+      'eventRecord' => $event,
+      'qrSvgUrl' => $qrCodeService->svgUrl($event),
+      'scanLink' => $qrCodeService->buildScanUrl($event),
+      'workspaceLabel' => __('Admin workspace'),
+      'workspaceKicker' => __('Event QR'),
+    ]);
+  }
+
+  public function downloadQr($id, EventQrCodeService $qrCodeService)
+  {
+    $event = Event::findOrFail($id);
+    $path = $qrCodeService->ensureSvg($event);
+
+    return response()->download($path, $qrCodeService->downloadFilename($event), [
+      'Content-Type' => 'image/svg+xml',
+    ]);
+  }
+
   public function imagedbrmv(Request $request)
   {
     $pi = EventImage::where('id', $request->fileid)->first();
@@ -458,6 +500,15 @@ class EventController extends Controller
 
 
     $event->update($in);
+<<<<<<< Updated upstream
+=======
+    $event->refresh();
+    $authoring->syncLocalizedContent($event, $request, Language::all());
+    app(EventQrCodeService::class)->ensureSvg($event);
+
+    $authoring->syncLineup($event, $request);
+
+>>>>>>> Stashed changes
     Session::flash('success', 'Updated Successfully');
 
     return response()->json(['status' => 'success'], 200);
@@ -471,6 +522,7 @@ class EventController extends Controller
   public function destroy($id)
   {
     $event = Event::find($id);
+    app(EventQrCodeService::class)->delete($event);
 
     @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
 
@@ -523,6 +575,7 @@ class EventController extends Controller
   {
     foreach ($request->ids as $id) {
       $event = Event::find($id);
+      app(EventQrCodeService::class)->delete($event);
 
       @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
 
@@ -577,6 +630,24 @@ class EventController extends Controller
     $information['event'] = $event;
     return view('backend.event.ticket-settings', $information);
   }
+<<<<<<< Updated upstream
+=======
+
+  public function cloneEvent(Request $request, $id)
+  {
+    $event = Event::findOrFail($id);
+    $clonedEvent = app(EventCloneService::class)->duplicate($event);
+    app(EventQrCodeService::class)->ensureSvg($clonedEvent);
+
+    Session::flash('success', 'Event cloned successfully. Review the draft before publishing.');
+
+    return redirect()->route('admin.event_management.edit_event', [
+      'id' => $clonedEvent->id,
+      'language' => $request->input('language'),
+    ]);
+  }
+
+>>>>>>> Stashed changes
   public function updateTicketSetting(TicketSettingRequest $request)
   {
     $ticket_image = $request->file('ticket_image');

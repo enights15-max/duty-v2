@@ -397,6 +397,55 @@
                   </div>
                 @endif
 
+                <div class="col-lg-12">
+                  <div class="form-group mt-1">
+                    <label for="">{{ __('Reservation Enabled') . '*' }}</label>
+                    <div class="selectgroup w-100">
+                      <label class="selectgroup-item">
+                        <input type="radio" name="reservation_enabled" value="0" class="selectgroup-input" checked>
+                        <span class="selectgroup-button">{{ __('Disable') }}</span>
+                      </label>
+
+                      <label class="selectgroup-item">
+                        <input type="radio" name="reservation_enabled" value="1" class="selectgroup-input">
+                        <span class="selectgroup-button">{{ __('Enable') }}</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-lg-12 d-none" id="reservation_settings">
+                  <div class="row">
+                    <div class="col-lg-3">
+                      <div class="form-group">
+                        <label for="">{{ __('Deposit Type') . '*' }}</label>
+                        <select name="reservation_deposit_type" class="form-control">
+                          <option value="fixed">{{ __('Fixed') }}</option>
+                          <option value="percentage">{{ __('Percentage') }}</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-lg-3">
+                      <div class="form-group">
+                        <label for="">{{ __('Deposit Value') . '*' }}</label>
+                        <input type="number" name="reservation_deposit_value" value="" class="form-control">
+                      </div>
+                    </div>
+                    <div class="col-lg-3">
+                      <div class="form-group">
+                        <label for="">{{ __('Final Due Date') . '*' }}</label>
+                        <input type="date" name="reservation_final_due_date" value="" class="form-control">
+                      </div>
+                    </div>
+                    <div class="col-lg-3">
+                      <div class="form-group">
+                        <label for="">{{ __('Min Installment') }}</label>
+                        <input type="number" name="reservation_min_installment_amount" value="" class="form-control">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div id="accordion" class="mt-3">
                   @foreach ($languages as $language)
                     <div class="version">

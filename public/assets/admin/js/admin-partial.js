@@ -417,6 +417,58 @@ $(document).ready(function () {
     }
   });
 
+<<<<<<< Updated upstream
+=======
+  // reservation settings toggle
+  $('input:radio[name="reservation_enabled"]').on('change', function () {
+    let radioBtnVal = $('input:radio[name="reservation_enabled"]:checked').val();
+
+    if (radioBtnVal == 1) {
+      $('#reservation_settings').removeClass('d-none');
+    } else {
+      $('#reservation_settings').addClass('d-none');
+    }
+  });
+
+  $('body').on('click', '.addPriceScheduleRow', function () {
+    const rows = $('#priceScheduleRows');
+    if (!rows.length) {
+      return;
+    }
+
+    const index = parseInt(rows.data('next-index') || 0, 10);
+    rows.data('next-index', index + 1);
+
+    rows.append(`
+      <tr>
+        <td>
+          <input type="text" name="price_schedules[${index}][label]" class="form-control" placeholder="Presale Phase 2">
+        </td>
+        <td>
+          <input type="datetime-local" name="price_schedules[${index}][effective_from]" class="form-control">
+        </td>
+        <td>
+          <input type="number" step="0.01" min="0.01" name="price_schedules[${index}][price]" class="form-control" placeholder="0.00">
+        </td>
+        <td class="text-center align-middle">
+          <input type="hidden" name="price_schedules[${index}][is_active]" value="0">
+          <input type="checkbox" name="price_schedules[${index}][is_active]" value="1" checked>
+          <input type="hidden" name="price_schedules[${index}][sort_order]" value="${index}">
+        </td>
+        <td class="text-center align-middle">
+          <button type="button" class="btn btn-sm btn-outline-danger removePriceScheduleRow">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>
+      </tr>
+    `);
+  });
+
+  $('body').on('click', '.removePriceScheduleRow', function () {
+    $(this).closest('tr').remove();
+  });
+
+>>>>>>> Stashed changes
   $('thead').on('click', '.addRow', function () {
     var id = Math.random(1, 999999);
     var id = parseInt(id * 100);

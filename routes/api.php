@@ -119,6 +119,34 @@ Route::prefix('/customers')->middleware('auth:sanctum')->group(function () {
   //update password
   Route::post('/update/password', [CustomerController::class, 'updated_password'])->name('api.customers.updated_password');
 
+<<<<<<< Updated upstream
+=======
+  /* ************************************
+   * Ticket Marketplace (Phase 6 & 7)
+   * ************************************/
+  Route::get('/marketplace/tickets', [\App\Http\Controllers\Api\MarketplaceController::class, 'index']);
+  Route::post('/marketplace/purchase/{id}', [\App\Http\Controllers\Api\MarketplaceController::class, 'purchase']);
+  Route::post('/bookings/{id}/transfer', [\App\Http\Controllers\Api\MarketplaceController::class, 'transfer']);
+  Route::get('/bookings/{id}/transfer-qr', [\App\Http\Controllers\Api\MarketplaceController::class, 'transferQr']);
+  Route::post('/bookings/{id}/list', [\App\Http\Controllers\Api\MarketplaceController::class, 'listForSale']);
+
+  // Transfer approval flow
+  Route::post('/transfers/verify-recipient', [\App\Http\Controllers\Api\MarketplaceController::class, 'verifyRecipient']);
+  Route::post('/transfers/request-from-scan', [\App\Http\Controllers\Api\MarketplaceController::class, 'requestFromTicketScan']);
+  Route::get('/transfers/pending', [\App\Http\Controllers\Api\MarketplaceController::class, 'pendingTransfers']);
+  Route::get('/transfers/outbox', [\App\Http\Controllers\Api\MarketplaceController::class, 'outboxTransfers']);
+  Route::get('/transfers/{id}', [\App\Http\Controllers\Api\MarketplaceController::class, 'transferDetails']);
+  Route::post('/transfers/{id}/accept', [\App\Http\Controllers\Api\MarketplaceController::class, 'acceptTransfer']);
+  Route::post('/transfers/{id}/reject', [\App\Http\Controllers\Api\MarketplaceController::class, 'rejectTransfer']);
+  Route::post('/transfers/{id}/cancel', [\App\Http\Controllers\Api\MarketplaceController::class, 'cancelTransfer']);
+
+  /* ************************************
+   * Subscriptions
+   * ************************************/
+  Route::get('/subscriptions/plans', [\App\Http\Controllers\Api\SubscriptionController::class, 'index']);
+  Route::post('/subscriptions/subscribe', [\App\Http\Controllers\Api\SubscriptionController::class, 'subscribe']);
+
+>>>>>>> Stashed changes
   Route::post('/logout', [CustomerController::class, 'logoutSubmit'])->name('api.customers.logout');
 });
 

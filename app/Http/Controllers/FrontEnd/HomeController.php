@@ -28,9 +28,13 @@ use App\Models\HomePage\Section;
 use App\Models\HomePage\Testimonial;
 use App\Models\HomePage\TestimonialSection;
 use App\Models\Language;
+use App\Services\OrganizerPublicProfileService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
 class HomeController extends Controller
@@ -40,7 +44,7 @@ class HomeController extends Controller
   {
     $this->now_date_time = Carbon::now();
   }
-  public function index()
+  public function index(OrganizerPublicProfileService $organizerProfileService)
   {
     $tickets = Ticket::get();
      $tController = new TicketController;
@@ -81,6 +85,23 @@ class HomeController extends Controller
     }
     $queryResult['heroSection'] = HeroSection::where('language_id', $language->id)->first();
     $queryResult['eventCategories'] = EventCategory::where([['language_id', $language->id], ['status', 1], ['is_featured', 'yes']])->orderBy('serial_number', 'asc')->get();
+    $queryResult['featuredEvents'] = $this->buildFeaturedEvents($language->id);
+    $queryResult['sceneEvents'] = $this->buildSceneEvents($language->id);
+    $queryResult['categorySignals'] = $this->buildCategorySignals($queryResult['eventCategories'], $language->id);
+    $queryResult['hostSpotlights'] = $this->buildHostSpotlights(
+      $queryResult['featuredEvents']->concat($queryResult['sceneEvents']),
+      $organizerProfileService,
+      $language->id
+    );
+    $queryResult['socialSnapshot'] = [
+      'upcoming_events' => Event::query()
+        ->where('status', 1)
+        ->where('end_date_time', '>=', $this->now_date_time)
+        ->count(),
+      'categories' => $queryResult['eventCategories']->count(),
+      'featured_events' => $queryResult['featuredEvents']->count(),
+      'hosts' => collect($queryResult['hostSpotlights'])->count(),
+    ];
 
     $queryResult['aboutUsSection'] = AboutUsSection::where('language_id', $language->id)->first();
 
@@ -102,6 +123,197 @@ class HomeController extends Controller
     $queryResult['quickLinkInfos'] = QuickLink::orderBy('serial_number', 'asc')->get();
 
     return view('frontend.home.index-v1', $queryResult);
+  }
+
+  private function baseHomeEventsQuery(int $languageId)
+  {
+    return DB::table('event_contents')
+      ->join('events', 'events.id', '=', 'event_contents.event_id')
+      ->leftJoin('event_categories', 'event_categories.id', '=', 'event_contents.event_category_id')
+      ->where([
+        ['event_contents.language_id', '=', $languageId],
+        ['events.status', '=', 1],
+        ['events.end_date_time', '>=', $this->now_date_time],
+      ])
+      ->select(
+        'event_contents.id as content_id',
+        'event_contents.title',
+        'event_contents.slug',
+        'event_contents.description',
+        'event_contents.event_category_id',
+        'events.id',
+        'events.thumbnail',
+        'events.start_date',
+        'events.start_time',
+        'events.end_date_time',
+        'event_contents.address',
+        'events.event_type',
+        'events.date_type',
+        'events.owner_identity_id',
+        'events.organizer_id',
+        'events.is_featured',
+        'event_categories.name as categoryName'
+      );
+  }
+
+  private function buildFeaturedEvents(int $languageId, int $limit = 6): Collection
+  {
+    $events = (clone $this->baseHomeEventsQuery($languageId))
+      ->where('events.is_featured', '=', 'yes')
+      ->orderBy('events.start_date')
+      ->orderBy('events.start_time')
+      ->limit($limit)
+      ->get();
+
+    return $this->attachEventPricing($events);
+  }
+
+  private function buildSceneEvents(int $languageId, int $limit = 3): Collection
+  {
+    $baseQuery = $this->baseHomeEventsQuery($languageId);
+
+    if (Auth::guard('customer')->check()) {
+      $wishlistCategoryIds = DB::table('wishlists')
+        ->join('event_contents', 'event_contents.event_id', '=', 'wishlists.event_id')
+        ->where('wishlists.customer_id', Auth::guard('customer')->id())
+        ->pluck('event_contents.event_category_id')
+        ->filter()
+        ->unique()
+        ->values();
+
+      if ($wishlistCategoryIds->isNotEmpty()) {
+        $personalizedEvents = (clone $baseQuery)
+          ->whereIn('event_contents.event_category_id', $wishlistCategoryIds->all())
+          ->orderByDesc('events.is_featured')
+          ->orderBy('events.start_date')
+          ->limit($limit)
+          ->get();
+
+        if ($personalizedEvents->isNotEmpty()) {
+          return $this->attachEventPricing($personalizedEvents);
+        }
+      }
+    }
+
+    $events = (clone $baseQuery)
+      ->orderByDesc('events.is_featured')
+      ->orderBy('events.start_date')
+      ->orderByDesc('events.created_at')
+      ->limit($limit)
+      ->get();
+
+    return $this->attachEventPricing($events);
+  }
+
+  private function buildCategorySignals(Collection $categories, int $languageId): Collection
+  {
+    $categoryCounts = DB::table('event_contents')
+      ->join('events', 'events.id', '=', 'event_contents.event_id')
+      ->where([
+        ['event_contents.language_id', '=', $languageId],
+        ['events.status', '=', 1],
+        ['events.end_date_time', '>=', $this->now_date_time],
+      ])
+      ->groupBy('event_contents.event_category_id')
+      ->selectRaw('event_contents.event_category_id, COUNT(*) as total')
+      ->pluck('total', 'event_contents.event_category_id');
+
+    return $categories
+      ->take(6)
+      ->map(function ($category) use ($categoryCounts) {
+        $category->event_count = (int) ($categoryCounts[$category->id] ?? 0);
+
+        return $category;
+      });
+  }
+
+  private function buildHostSpotlights(Collection $events, OrganizerPublicProfileService $organizerProfileService, int $languageId): Collection
+  {
+    $hosts = collect();
+    $usedKeys = [];
+
+    foreach ($events as $event) {
+      $ownerIdentityId = $event->owner_identity_id ?? null;
+      $legacyOrganizerId = $event->organizer_id ?? null;
+      $lookupKey = $ownerIdentityId ? 'identity:' . $ownerIdentityId : 'legacy:' . $legacyOrganizerId;
+
+      if (!$ownerIdentityId && !$legacyOrganizerId) {
+        continue;
+      }
+
+      if (in_array($lookupKey, $usedKeys, true)) {
+        continue;
+      }
+
+      $profile = $organizerProfileService->organizerPayloadForEvent($ownerIdentityId, $legacyOrganizerId, $languageId);
+      if (!$profile) {
+        continue;
+      }
+
+      $usedKeys[] = $lookupKey;
+      $displayName = $profile['organizer_name'] ?? $profile['username'] ?? __('Organizer');
+
+      $hosts->push([
+        'name' => $displayName,
+        'username' => $profile['username'] ?? $displayName,
+        'route' => route('frontend.organizer.details', [
+          $profile['id'],
+          str_replace(' ', '-', $profile['username'] ?? $displayName),
+        ]),
+        'followers_count' => (int) ($profile['followers_count'] ?? 0),
+        'events_count' => (int) ($profile['events_count'] ?? 0),
+        'review_count' => (int) ($profile['review_count'] ?? 0),
+        'average_rating' => $profile['average_rating'] ?? '0.0',
+        'designation' => $profile['designation'] ?? null,
+        'city' => $profile['city'] ?? null,
+        'photo' => $profile['photo'] ?? null,
+      ]);
+
+      if ($hosts->count() >= 3) {
+        break;
+      }
+    }
+
+    return $hosts;
+  }
+
+  private function attachEventPricing(Collection $events): Collection
+  {
+    $eventIds = $events->pluck('id')->filter()->unique()->values();
+
+    if ($eventIds->isEmpty()) {
+      return $events;
+    }
+
+    $tickets = Ticket::query()
+      ->whereIn('event_id', $eventIds->all())
+      ->orderByRaw('CASE WHEN price IS NULL THEN 1 ELSE 0 END')
+      ->orderBy('price')
+      ->get(['event_id', 'price', 'f_price', 'pricing_type']);
+
+    $ticketMap = [];
+    foreach ($tickets as $ticket) {
+      if (!array_key_exists((int) $ticket->event_id, $ticketMap)) {
+        $ticketMap[(int) $ticket->event_id] = $ticket;
+      }
+    }
+
+    return $events->map(function ($event) use ($ticketMap) {
+      $ticket = $ticketMap[(int) $event->id] ?? null;
+
+      if (!$ticket) {
+        $event->price_display = null;
+        $event->is_free = false;
+
+        return $event;
+      }
+
+      $isPaidTicket = $ticket->price !== null || $ticket->pricing_type === 'variation';
+      $event->price_display = $isPaidTicket ? symbolPrice($ticket->price ?? 0) : __('FREE');
+      $event->is_free = !$isPaidTicket;
+
+      return $event;
+    });
   }
   //offline
   public function offline()

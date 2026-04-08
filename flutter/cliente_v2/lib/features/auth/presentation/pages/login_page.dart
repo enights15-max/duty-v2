@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/auth_status_card.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -15,7 +16,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _keepSignedIn = false;
+  bool _keepSignedIn = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final prefs = ref.read(sharedPreferencesProvider);
+    _keepSignedIn = prefs.getBool(AppConstants.keepSignedInKey) ?? true;
+  }
 
   @override
   void dispose() {
@@ -27,7 +35,100 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void _login() {
     ref
         .read(authControllerProvider.notifier)
+<<<<<<< Updated upstream
         .login(_usernameController.text, _passwordController.text);
+=======
+        .login(
+          _usernameController.text,
+          _passwordController.text,
+          keepSignedIn: _keepSignedIn,
+        );
+
+    if (mounted && result != null) {
+      final status = result['status'];
+      if (status == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Welcome back. Opening your scene...'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (!mounted) return;
+        context.go('/home');
+      } else if (status == 'needs_phone_verification') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['message'] ?? 'Please verify your phone number',
+            ),
+          ),
+        );
+        context.push('/verify-phone-link', extra: result['verification_token']);
+      }
+    }
+  }
+
+  Future<void> _loginWithBiometrics() async {
+    final auth = LocalAuthentication();
+    final isFaceIdEnabled = ref.read(faceIdEnabledProvider);
+
+    if (!isFaceIdEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, activa Face ID en Configuración primero.'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      final bool canAuthenticateWithBiometrics = await auth.canCheckBiometrics;
+      final bool canAuthenticate =
+          canAuthenticateWithBiometrics || await auth.isDeviceSupported();
+
+      if (!canAuthenticate) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Biometría no soportada en este dispositivo'),
+          ),
+        );
+        return;
+      }
+
+      final bool didAuthenticate = await auth.authenticate(
+        localizedReason: 'Autentícate para iniciar sesión',
+        biometricOnly: true,
+      );
+
+      if (didAuthenticate && mounted) {
+        final secureStorage = ref.read(flutterSecureStorageProvider);
+        final token = await secureStorage.read(
+          key: AppConstants.secureTokenKey,
+        );
+
+        if (!mounted) return;
+
+        if (token != null && token.isNotEmpty) {
+          // Ya hay sesión guardada y la biometría fue exitosa
+          context.go('/home');
+        } else {
+          // Biometría exitosa pero no hay token (debe hacer login manual primero)
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Sesión expirada. Inicia sesión manualmente.'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error de Face ID: $e')));
+    }
+>>>>>>> Stashed changes
   }
 
   @override
@@ -96,10 +197,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 8),
                   Text(
                     'Access your unified events ecosystem.',
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       color: Colors.white.withOpacity(0.5),
                       fontSize: 16,
                     ),
+                  ),
+                  const SizedBox(height: 18),
+                  AuthStatusCard(
+                    icon: ref.watch(faceIdEnabledProvider)
+                        ? Icons.verified_user_rounded
+                        : Icons.login_rounded,
+                    title: ref.watch(faceIdEnabledProvider)
+                        ? 'This device is ready for quick unlock'
+                        : 'Use email, password, or phone login',
+                    subtitle: ref.watch(faceIdEnabledProvider)
+                        ? 'Your saved session can reopen with Face ID when you keep this device signed in.'
+                        : 'Email login gets you in fast. Phone OTP is available when you need a code-based fallback.',
                   ),
                   const SizedBox(height: 40),
 
@@ -242,13 +356,35 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ],
                       ),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          final rawValue = _usernameController.text.trim();
+                          final email = rawValue.contains('@') ? rawValue : '';
+                          final query = email.isNotEmpty
+                              ? '?email=${Uri.encodeComponent(email)}'
+                              : '';
+                          context.push('/forgot-password$query');
+                        },
                         child: const Text(
                           'Forgot Password?',
                           style: TextStyle(color: Color(0xFF6200EE)),
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 14),
+                  AuthStatusCard(
+                    icon: _keepSignedIn
+                        ? Icons.lock_clock_rounded
+                        : Icons.timer_outlined,
+                    title: _keepSignedIn
+                        ? 'Session stays on this device'
+                        : 'Session ends when you relaunch',
+                    subtitle: _keepSignedIn
+                        ? 'We will keep your session available here and use Face ID lock if you enabled it.'
+                        : 'Good for shared or temporary devices. You will need to sign in again next time.',
+                    accentColor: _keepSignedIn
+                        ? const Color(0xFF8655F6)
+                        : const Color(0xFFF59E0B),
                   ),
 
                   const SizedBox(height: 24),
@@ -289,7 +425,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   Row(
                     children: [
                       Expanded(
+<<<<<<< Updated upstream
                         child: Divider(color: Colors.white.withOpacity(0.1)),
+=======
+                        child: Divider(
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
+>>>>>>> Stashed changes
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -304,7 +446,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       ),
                       Expanded(
+<<<<<<< Updated upstream
                         child: Divider(color: Colors.white.withOpacity(0.1)),
+=======
+                        child: Divider(
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
+>>>>>>> Stashed changes
                       ),
                     ],
                   ),
@@ -312,6 +460,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 32),
 
                   // Social
+<<<<<<< Updated upstream
                   Row(
                     children: [
                       Expanded(
@@ -332,6 +481,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                         ),
+=======
+                  const SizedBox(height: 32),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push('/phone-login'),
+                    icon: const Icon(Icons.phone_android, color: Colors.white),
+                    label: const Text(
+                      'Login with Phone Number',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.2),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+>>>>>>> Stashed changes
                       ),
                       const SizedBox(width: 16),
                       Expanded(

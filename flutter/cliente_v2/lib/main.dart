@@ -6,6 +6,23 @@ import 'core/routes/app_router.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
+<<<<<<< Updated upstream
+=======
+import 'package:firebase_core/firebase_core.dart';
+import 'core/services/stripe_service.dart';
+import 'core/services/app_link_service.dart';
+import 'core/services/notification_service.dart';
+import 'core/utils/app_logger.dart';
+import 'firebase_options.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Initialize Firebase for the background isolate
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  appLog("Handling a background message: ${message.messageId}");
+}
+>>>>>>> Stashed changes
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +51,8 @@ class MyApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: router,
+      builder: (context, child) =>
+          AppLinkListener(child: child ?? const SizedBox.shrink()),
     );
   }
 }

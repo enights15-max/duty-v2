@@ -24,6 +24,17 @@ class Kernel extends ConsoleKernel
    */
   protected function schedule(Schedule $schedule)
   {
+<<<<<<< Updated upstream
+=======
+    $schedule->command('reservations:expire')->hourly();
+    $schedule->command('reservations:send-reminders')->hourly();
+    $schedule->command('reviews:dispatch-prompts')->hourly();
+    $schedule->command('bonus-wallets:expire')->hourly();
+<<<<<<< Updated upstream
+=======
+    $schedule->command('tickets:activate-gated')->everyFiveMinutes();
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
   }
 
   /**

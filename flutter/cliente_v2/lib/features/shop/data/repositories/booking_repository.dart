@@ -28,4 +28,43 @@ class BookingRepository {
   ) async {
     return await _remoteDataSource.bookTicket(bookingData);
   }
+<<<<<<< Updated upstream
+=======
+
+  Future<Map<String, dynamic>> applyCoupon(Map<String, dynamic> data) async {
+    return await _remoteDataSource.applyCoupon(data);
+  }
+
+  Future<List<Map<String, dynamic>>> getPaymentMethods() async {
+    final response = await _remoteDataSource.getPaymentMethods();
+    if (response['status'] == 'success') {
+      return List<Map<String, dynamic>>.from(response['data']);
+    }
+    return [];
+  }
+
+  Future<String> createSetupIntent() async {
+    final response = await _remoteDataSource.createSetupIntent();
+    if (response['status'] == 'success') {
+      return response['client_secret'];
+    }
+    throw Exception(response['message'] ?? 'Failed to create SetupIntent');
+  }
+
+  Future<Map<String, dynamic>> getWallet() async {
+    final response = await _remoteDataSource.getWallet();
+    if (response['success'] == true) {
+      return response['wallet'];
+    }
+    throw Exception(response['message'] ?? 'Failed to fetch wallet info');
+  }
+
+  Future<Map<String, dynamic>> getBonusWallet() async {
+    final response = await _remoteDataSource.getBonusWallet();
+    if (response['success'] == true) {
+      return response['wallet'];
+    }
+    throw Exception(response['message'] ?? 'Failed to fetch bonus wallet info');
+  }
+>>>>>>> Stashed changes
 }

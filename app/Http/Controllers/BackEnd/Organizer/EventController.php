@@ -25,6 +25,12 @@ use App\Http\Requests\Event\StoreRequest;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\Event\UpdateRequest;
 use App\Http\Requests\TicketSettingRequest;
+<<<<<<< Updated upstream
+=======
+use App\Services\EventAuthoringService;
+use App\Services\EventQrCodeService;
+use App\Traits\HasIdentityActor;
+>>>>>>> Stashed changes
 
 class EventController extends Controller
 {
@@ -221,6 +227,7 @@ class EventController extends Controller
         $event_image->save();
       }
     }
+<<<<<<< Updated upstream
     $languages = Language::all();
 
     foreach ($languages as $language) {
@@ -243,6 +250,10 @@ class EventController extends Controller
       $event_content->meta_description = $request[$language->code . '_meta_description'];
       $event_content->save();
     }
+=======
+    $authoring->syncLocalizedContent($event, $request, Language::all());
+    app(EventQrCodeService::class)->ensureSvg($event);
+>>>>>>> Stashed changes
 
 
     Session::flash('success', 'Added Successfully');
@@ -327,6 +338,39 @@ class EventController extends Controller
 
     return view('organizer.event.edit', $information);
   }
+
+  public function qr($id, EventQrCodeService $qrCodeService)
+  {
+    $event = $this->findOrganizerOwnedEvent($id);
+    abort_if(!$event, 404);
+    $defaultLanguage = Language::query()->where('is_default', 1)->first();
+
+    return view('backend.event.qr-preview', [
+      'layout' => 'organizer.layout',
+      'dashboardRoute' => route('organizer.dashboard'),
+      'listingRoute' => route('organizer.event_management.event', ['language' => $defaultLanguage?->code]),
+      'editRoute' => route('organizer.event_management.edit_event', ['id' => $event->id]),
+      'downloadSvgUrl' => route('organizer.event_management.qr_download', ['id' => $event->id]),
+      'eventTitle' => $qrCodeService->resolveTitle($event),
+      'eventRecord' => $event,
+      'qrSvgUrl' => $qrCodeService->svgUrl($event),
+      'scanLink' => $qrCodeService->buildScanUrl($event),
+      'workspaceLabel' => __('Organizer workspace'),
+      'workspaceKicker' => __('Event QR'),
+    ]);
+  }
+
+  public function downloadQr($id, EventQrCodeService $qrCodeService)
+  {
+    $event = $this->findOrganizerOwnedEvent($id);
+    abort_if(!$event, 404);
+    $path = $qrCodeService->ensureSvg($event);
+
+    return response()->download($path, $qrCodeService->downloadFilename($event), [
+      'Content-Type' => 'image/svg+xml',
+    ]);
+  }
+
   public function imagedbrmv(Request $request)
   {
     $pi = EventImage::where('id', $request->fileid)->first();
@@ -470,6 +514,13 @@ class EventController extends Controller
     }
 
     $event->update($in);
+<<<<<<< Updated upstream
+=======
+    $event->refresh();
+    $authoring->syncLocalizedContent($event, $request, Language::all());
+    app(EventQrCodeService::class)->ensureSvg($event);
+    $authoring->syncLineup($event, $request);
+>>>>>>> Stashed changes
 
     Session::flash('success', 'Updated Successfully');
     return response()->json(['status' => 'success'], 200);
@@ -487,6 +538,7 @@ class EventController extends Controller
     if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
       return back();
     }
+    app(EventQrCodeService::class)->delete($event);
 
     @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
 
@@ -537,6 +589,7 @@ class EventController extends Controller
       if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
         return back();
       }
+      app(EventQrCodeService::class)->delete($event);
 
       @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
 

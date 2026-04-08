@@ -181,6 +181,15 @@ Route::post('/store-subscriber', 'Controller@storeSubscriber')->name('store_subs
 
 Route::middleware('change.lang')->group(function () {
   Route::get('/', 'FrontEnd\HomeController@index')->name('index');
+<<<<<<< Updated upstream
+=======
+  Route::get('/download-app', 'FrontEnd\ProductController@downloadApp')->name('frontend.download_app');
+  Route::get('/open/event/{id}/{slug?}', 'FrontEnd\ProductController@openEvent')->name('frontend.open_event');
+  Route::get('/for-organizers', 'FrontEnd\ProductController@forOrganizers')->name('frontend.for_organizers');
+  Route::get('/for-artists', 'FrontEnd\ProductController@forArtists')->name('frontend.for_artists');
+  Route::get('/for-venues', 'FrontEnd\ProductController@forVenues')->name('frontend.for_venues');
+  Route::get('events-filter', 'FrontEnd\EventController@filter')->name('events.filter');
+>>>>>>> Stashed changes
   Route::get('events', 'FrontEnd\EventController@index')->name('events');
   Route::get('event/{slug}/{id}', 'FrontEnd\EventController@details')->name('event.details');
   Route::get('event/slot-mapping-seat', 'FrontEnd\EventController@slotMapping')->name('event.slot-mapping-seat');

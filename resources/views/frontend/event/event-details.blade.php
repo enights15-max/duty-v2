@@ -7,6 +7,30 @@
     $og_title = $content->title;
     $og_description = strip_tags($content->description);
     $og_image = asset('assets/admin/img/event/thumbnail/' . $content->thumbnail);
+    $heroEventDate = $content->date_type == 'multiple' ? eventLatestDates($content->id) : null;
+    $detailDate = $content->date_type == 'multiple' ? strtotime(optional($heroEventDate)->start_date) : strtotime($content->start_date);
+    $detailNow = \Carbon\Carbon::now()->timezone($websiteInfo->timezone)->translatedFormat('Y-m-d H:i:s');
+    $heroStartDateTime = $content->date_type == 'multiple'
+        ? optional($heroEventDate)->start_date_time
+        : $content->start_date . ' ' . $content->start_time;
+    $heroEndDateTime = $content->date_type == 'multiple'
+        ? optional(eventLastEndDates($content->id))->end_date_time
+        : $content->end_date . ' ' . $content->end_time;
+    $heroStatusLabel = __('Live');
+    $heroStatusClass = 'is-live';
+    if ($heroStartDateTime && $heroStartDateTime >= $detailNow) {
+        $heroStatusLabel = __('Upcoming');
+        $heroStatusClass = 'is-upcoming';
+    } elseif ($heroEndDateTime && $heroEndDateTime < $detailNow) {
+        $heroStatusLabel = __('Over');
+        $heroStatusClass = 'is-over';
+    }
+    $heroOrganizerName = $organizer_profile['organizer_name'] ?? ($organizer_profile['username'] ?? null);
+    $heroOrganizerPhoto = $organizer_profile['photo'] ?? null;
+    $heroVenueName = $venue_summary['name'] ?? null;
+    $heroVenueAddress = $venue_summary['address'] ?? $content->address;
+    $heroLineupCount = ($lineup ?? collect())->count() > 0 ? ($lineup ?? collect())->count() : count($artists ?? []);
+    $appDownloadUrl = route('frontend.download_app', ['surface' => 'event', 'event' => $content->id]);
 @endphp
 
 @section('meta-keywords', "{{ $content->meta_keywords }}")
@@ -18,33 +42,758 @@
 @section('custom-style')
     <link rel="stylesheet" href="{{ asset('assets/admin/css/summernote-content.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/slot.css') }}">
+<<<<<<< Updated upstream
+=======
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+        .event-hero-web {
+            position: relative;
+            overflow: hidden;
+            padding: 152px 0 48px;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(140, 37, 244, 0.24), transparent 24%),
+                radial-gradient(circle at 82% 22%, rgba(255, 207, 90, 0.12), transparent 18%),
+                linear-gradient(180deg, rgba(18, 10, 28, 0.72), rgba(18, 10, 28, 0.94)),
+                url('{{ $og_image }}') center/cover;
+        }
+
+        .event-hero-web::before {
+            position: absolute;
+            inset: 0;
+            content: '';
+            background:
+                linear-gradient(180deg, rgba(20, 11, 30, 0.34), rgba(20, 11, 30, 0.94)),
+                linear-gradient(90deg, rgba(20, 11, 30, 0.76), rgba(20, 11, 30, 0.22));
+        }
+
+        .event-hero-web__grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 34px 34px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.74), transparent 86%);
+            opacity: 0.2;
+        }
+
+        .event-hero-web__content,
+        .event-hero-web__poster {
+            position: relative;
+            z-index: 1;
+        }
+
+        .event-hero-web__crumbs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 18px;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .event-hero-web__crumbs a {
+            color: rgba(255, 255, 255, 0.78);
+        }
+
+        .event-hero-web__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            margin-bottom: 18px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.84);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+        }
+
+        .event-hero-web__dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffcf5a, #8c25f4);
+            box-shadow: 0 0 18px rgba(140, 37, 244, 0.44);
+        }
+
+        .event-hero-web__title {
+            margin: 0;
+            color: #fff !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-size: clamp(2.7rem, 5vw, 5rem);
+            line-height: 0.96;
+            letter-spacing: -0.05em;
+            max-width: 720px;
+        }
+
+        .event-hero-web__summary {
+            max-width: 620px;
+            margin: 20px 0 0;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 17px;
+            line-height: 1.85;
+        }
+
+        .event-hero-web__chips,
+        .event-hero-web__host-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .event-hero-web__chips {
+            margin-top: 24px;
+        }
+
+        .event-hero-web__chip,
+        .event-detail-unified__price-accent {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.84);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .event-hero-web__chip--status.is-upcoming {
+            color: #d9ecff;
+            background: rgba(59, 130, 246, 0.18);
+        }
+
+        .event-hero-web__chip--status.is-live {
+            color: #dbffd8;
+            background: rgba(34, 197, 94, 0.16);
+        }
+
+        .event-hero-web__chip--status.is-over {
+            color: #ffd8de;
+            background: rgba(239, 68, 68, 0.16);
+        }
+
+        .event-hero-web__host {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 24px;
+            padding: 16px 18px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            max-width: 560px;
+            backdrop-filter: blur(16px);
+        }
+
+        .event-hero-web__host-avatar {
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .event-hero-web__host-label {
+            color: rgba(255, 255, 255, 0.56);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .event-hero-web__host-name {
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.05;
+        }
+
+        .event-hero-web__host-copy {
+            color: rgba(255, 255, 255, 0.72);
+            line-height: 1.65;
+            margin-top: 6px;
+        }
+
+        .event-hero-web__poster-card {
+            overflow: hidden;
+            border-radius: 30px;
+            background: rgba(18, 10, 28, 0.66);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 26px 90px rgba(8, 3, 14, 0.4);
+        }
+
+        .event-hero-web__poster-frame {
+            position: relative;
+            aspect-ratio: 4 / 5;
+            background:
+                linear-gradient(180deg, rgba(25, 16, 34, 0.08), rgba(25, 16, 34, 0.94)),
+                url('{{ $og_image }}') center/cover;
+        }
+
+        .event-hero-web__poster-badge,
+        .event-hero-web__poster-footer {
+            position: absolute;
+            z-index: 1;
+        }
+
+        .event-hero-web__poster-badge {
+            top: 18px;
+            left: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(10, 5, 17, 0.54);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.86);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            backdrop-filter: blur(14px);
+        }
+
+        .event-hero-web__poster-footer {
+            right: 18px;
+            bottom: 18px;
+            left: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 16px 18px;
+            border-radius: 22px;
+            background: rgba(10, 5, 17, 0.58);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+        }
+
+        .event-hero-web__poster-meta {
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+
+        .event-hero-web__poster-meta strong {
+            display: block;
+            color: #fff;
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .event-hero-web__poster-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 18px;
+            background: rgba(16, 10, 23, 0.94);
+        }
+
+        .event-hero-web__poster-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 52px;
+            padding: 0 18px;
+            border-radius: 18px;
+            text-decoration: none !important;
+            font-weight: 800;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .event-hero-web__poster-action--primary {
+            background: linear-gradient(135deg, #8c25f4 0%, #a95fff 100%);
+            color: #fff;
+            box-shadow: 0 16px 34px rgba(140, 37, 244, 0.28);
+        }
+
+        .event-hero-web__poster-action--secondary {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.84);
+        }
+
+        .event-detail-unified {
+            background: linear-gradient(180deg, #1a1225 0%, #140d1f 100%);
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .event-detail-unified .event-top {
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 18px 20px;
+            border-radius: 26px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .event-detail-unified .event-top-date {
+            min-width: 104px;
+            padding: 16px 14px;
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(140, 37, 244, 0.22), rgba(30, 20, 42, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .event-detail-unified .event-month,
+        .event-detail-unified .event-date {
+            color: #fff;
+        }
+
+        .event-detail-unified__summary-label {
+            display: inline-block;
+            margin-bottom: 10px;
+            color: rgba(199, 156, 255, 0.94);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+        }
+
+        .event-detail-unified__app-note {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(140, 37, 244, 0.08);
+            border: 1px solid rgba(140, 37, 244, 0.2);
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 14px;
+            line-height: 1.75;
+        }
+
+        .event-detail-unified__app-note a {
+            color: #fff;
+            font-weight: 800;
+        }
+
+        .event-detail-unified .event-details-header ul {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 0;
+        }
+
+        .event-detail-unified .event-details-header li {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 11px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .event-detail-unified .event-details-image {
+            position: relative;
+            overflow: hidden;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 26px 80px rgba(8, 3, 14, 0.28);
+        }
+
+        .event-detail-unified .event-details-images img,
+        .event-detail-unified .swiper-slide img {
+            min-height: 420px;
+            max-height: 560px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .event-detail-unified .event-details-image .buttons {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            display: flex;
+            gap: 10px;
+            z-index: 4;
+        }
+
+        .event-detail-unified .event-details-image .buttons a {
+            width: 46px;
+            height: 46px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            background: rgba(10, 5, 17, 0.58);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            backdrop-filter: blur(12px);
+        }
+
+        .event-detail-unified .event-details-content-inner,
+        .event-detail-unified .event-details-information {
+            padding: 26px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 22px 60px rgba(8, 3, 14, 0.18);
+        }
+
+        .event-detail-unified .event-details-content-inner {
+            margin-bottom: 18px;
+        }
+
+        .event-detail-unified .event-info span a,
+        .event-detail-unified .event-info span {
+            color: #d7adff;
+            font-weight: 700;
+        }
+
+        .event-detail-unified .inner-title,
+        .event-detail-unified h3 {
+            color: #fff !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 30px;
+            letter-spacing: -0.03em;
+        }
+
+        .event-detail-unified .summernote-content,
+        .event-detail-unified .summernote-content *,
+        .event-detail-unified .event-details-content-inner,
+        .event-detail-unified .event-details-content-inner p,
+        .event-detail-unified .event-details-content-inner li,
+        .event-detail-unified .event-details-content-inner strong,
+        .event-detail-unified .event-details-content-inner b {
+            color: rgba(255, 255, 255, 0.78) !important;
+        }
+
+        .event-detail-unified .summernote-content h1,
+        .event-detail-unified .summernote-content h2,
+        .event-detail-unified .summernote-content h3,
+        .event-detail-unified .summernote-content h4,
+        .event-detail-unified .summernote-content h5,
+        .event-detail-unified .summernote-content h6 {
+            color: #fff !important;
+            font-family: 'Outfit', sans-serif !important;
+        }
+
+        .event-detail-unified .our-location,
+        .event-detail-unified .our-location iframe {
+            border-radius: 26px;
+            overflow: hidden;
+        }
+
+        .event-detail-unified .sidebar-sticky {
+            top: 108px;
+        }
+
+        .event-detail-unified .event-details-information {
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .event-detail-unified .event-details-information b,
+        .event-detail-unified .event-details-information p,
+        .event-detail-unified .event-details-information strong,
+        .event-detail-unified .event-details-information h6,
+        .event-detail-unified .event-details-information .h4,
+        .event-detail-unified .event-details-information label,
+        .event-detail-unified .event-details-information .author h6,
+        .event-detail-unified .event-details-information .author h6 a,
+        .event-detail-unified .event-details-information .price-count h6,
+        .event-detail-unified .event-details-information .total,
+        .event-detail-unified .event-details-information .total span,
+        .event-detail-unified .event-details-information .click-show .show-content,
+        .event-detail-unified .event-details-information .click-show .show-content *,
+        .event-detail-unified .event-details-information .price-count h6 *,
+        .event-detail-unified .event-details-information .price-count > h6,
+        .event-detail-unified .event-details-information .price-count > h6 *,
+        .event-detail-unified .event-details-information .price-count p,
+        .event-detail-unified .event-details-information .price-count p *,
+        .event-detail-unified .event-details-information .mb-0 strong,
+        .event-detail-unified .event-details-information .mb-0 strong *,
+        .event-detail-unified .event-details-information .dropdown-toggle,
+        .event-detail-unified .event-details-information .dropdown-item {
+            color: #f6f1ff !important;
+        }
+
+        .event-detail-unified .event-details-information .author a,
+        .event-detail-unified .event-details-information .read-more-btn,
+        .event-detail-unified .event-details-information .dropdown-toggle {
+            color: #c79cff;
+        }
+
+        .event-detail-unified .event-details-information .dropdown-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+        }
+
+        .event-detail-unified .event-details-information .dropdown-menu {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 16px 32px rgba(8, 3, 14, 0.24);
+            border-radius: 14px;
+            padding: 0.45rem;
+            background: rgba(15, 9, 22, 0.98);
+        }
+
+        .event-detail-unified .event-details-information .dropdown-item {
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .event-detail-unified .event-details-information .dropdown-item:hover,
+        .event-detail-unified .event-details-information .dropdown-item:focus {
+            background: rgba(140, 37, 244, 0.16);
+            color: #fff;
+        }
+
+        .event-detail-unified .event-details-information hr,
+        .event-detail-unified hr {
+            border-top-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .event-detail-unified .event-details-information .price-count h6 {
+            font-size: 1.38rem;
+            font-weight: 800;
+        }
+
+        .event-detail-unified .event-details-information .price-count h6 del {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+
+        .event-detail-unified .event-details-information .badge.badge-warning {
+            color: #ffdcb7 !important;
+            background: rgba(217, 119, 6, 0.18);
+        }
+
+        .event-detail-unified .event-details-information .quantity-input {
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .event-detail-unified .event-details-information .quantity-input button,
+        .event-detail-unified .event-details-information .quantity-input input {
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .event-detail-unified .event-details-information .quantity-input button:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .event-detail-unified .event-details-information .quantity-input input {
+            font-weight: 800;
+        }
+
+        .event-detail-unified .event-details-information .text-warning {
+            color: #ffcf5a !important;
+        }
+
+        .event-detail-unified .event-details-information .total {
+            align-items: center;
+            gap: 0.75rem;
+            padding-top: 0.5rem;
+        }
+
+        .event-detail-unified .event-details-information .theme-btn {
+            color: #ffffff !important;
+            font-weight: 800;
+            min-height: 58px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #8c25f4 0%, #a95fff 100%);
+            box-shadow: 0 18px 34px rgba(140, 37, 244, 0.22);
+        }
+
+        .event-detail-unified .author {
+            padding: 12px 14px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .event-detail-unified .author img {
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+            object-fit: cover;
+        }
+
+        .event-detail-unified .releted-event-header h3 {
+            color: #fff;
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 30px;
+            letter-spacing: -0.03em;
+        }
+
+        .event-detail-unified .event-item {
+            overflow: hidden;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 18px 50px rgba(8, 3, 14, 0.18);
+        }
+
+        .event-detail-unified .event-item .event-content,
+        .event-detail-unified .event-item .event-image {
+            background: transparent;
+        }
+
+        .event-detail-unified .event-item .event-content {
+            padding: 18px;
+        }
+
+        .event-detail-unified .event-item h5 a,
+        .event-detail-unified .event-item .organizer,
+        .event-detail-unified .event-item p,
+        .event-detail-unified .event-item .location span,
+        .event-detail-unified .event-item .time-info li,
+        .event-detail-unified .event-item .price {
+            color: rgba(255, 255, 255, 0.82) !important;
+        }
+
+        .event-detail-unified .event-item h5 a {
+            color: #fff !important;
+        }
+
+        @media (max-width: 1199.98px) {
+            .event-hero-web {
+                padding-top: 138px;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .event-hero-web {
+                padding: 128px 0 40px;
+            }
+
+            .event-hero-web__host,
+            .event-hero-web__poster-footer,
+            .event-detail-unified .event-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .event-hero-web__poster-actions {
+                flex-direction: column;
+            }
+
+            .event-hero-web__poster-action {
+                width: 100%;
+            }
+        }
+    </style>
+>>>>>>> Stashed changes
 @endsection
 
 @section('hero-section')
-    <!-- Page Banner Start -->
-    <section class="page-banner overlay pt-120 pb-125 rpt-90 rpb-95 lazy"
-        data-bg="{{ asset('assets/admin/img/' . $basicInfo->breadcrumb) }}">
+    <section class="event-hero-web">
+        <div class="event-hero-web__grid"></div>
         <div class="container">
-            <div class="banner-inner">
-                <h2 class="page-title">
-                    {{ strlen($content->title) > 30 ? mb_substr($content->title, 0, 30, 'UTF-8') . '...' : $content->title }}
-                </h2>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('index') }}">{{ __('Home') }}</a></li>
-                        <li class="breadcrumb-item active">
-                            @if (!empty($pageHeading))
-                                {{ $pageHeading->event_details_page_title ?? __('Event Details') }}
-                            @else
-                                {{ __('Event Details') }}
-                            @endif
-                        </li>
-                    </ol>
-                </nav>
+            <div class="row align-items-end">
+                <div class="col-xl-7 event-hero-web__content">
+                    <div class="event-hero-web__crumbs">
+                        <a href="{{ route('index') }}">{{ __('Home') }}</a>
+                        <span>/</span>
+                        <span>{{ __('Event Detail') }}</span>
+                    </div>
+
+                    <span class="event-hero-web__eyebrow">
+                        <span class="event-hero-web__dot"></span>
+                        {{ $content->name ?? __('Event') }}
+                    </span>
+
+                    <h1 class="event-hero-web__title">{{ $content->title }}</h1>
+
+                    <p class="event-hero-web__summary">
+                        {{ \Illuminate\Support\Str::limit(strip_tags($content->description), 220) }}
+                    </p>
+
+                    <div class="event-hero-web__chips">
+                        <span class="event-hero-web__chip event-hero-web__chip--status {{ $heroStatusClass }}">
+                            <i class="fas fa-signal"></i>
+                            {{ $heroStatusLabel }}
+                        </span>
+                        <span class="event-hero-web__chip">
+                            <i class="far fa-calendar-alt"></i>
+                            {{ $detailDate ? \Carbon\Carbon::parse($detailDate)->timezone($websiteInfo->timezone)->translatedFormat('D, d M Y') : __('Date TBA') }}
+                        </span>
+                        <span class="event-hero-web__chip">
+                            <i class="far fa-clock"></i>
+                            {{ $content->date_type == 'multiple' ? optional($heroEventDate)->duration : $content->duration }}
+                        </span>
+                        <span class="event-hero-web__chip">
+                            <i class="fas fa-map-marker-alt"></i>
+                            {{ $content->event_type == 'online' ? __('Online Event') : ($heroVenueAddress ?: __('Venue TBA')) }}
+                        </span>
+                        <span class="event-hero-web__chip">
+                            <i class="fas fa-ticket-alt"></i>
+                            {{ number_format($tickets_count) }} {{ __('ticket options') }}
+                        </span>
+                        @if ($heroLineupCount > 0)
+                            <span class="event-hero-web__chip">
+                                <i class="fas fa-music"></i>
+                                {{ number_format($heroLineupCount) }} {{ __('artists') }}
+                            </span>
+                        @endif
+                    </div>
+
+                    <div class="event-hero-web__host">
+                        <img class="event-hero-web__host-avatar"
+                            src="{{ $heroOrganizerPhoto ?: asset('assets/front/images/user.png') }}"
+                            alt="{{ $heroOrganizerName ?: __('Organizer') }}">
+                        <div>
+                            <div class="event-hero-web__host-label">{{ __('Hosted by') }}</div>
+                            <div class="event-hero-web__host-name">{{ $heroOrganizerName ?: __('Duty host') }}</div>
+                            <div class="event-hero-web__host-copy">
+                                @if ($heroVenueName)
+                                    {{ $heroVenueName }}
+                                @else
+                                    {{ __('Discover the full lineup, venue and ticket options from the same immersive event surface.') }}
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-5 event-hero-web__poster" data-aos="fade-left" data-aos-delay="120">
+                    <div class="event-hero-web__poster-card">
+                        <div class="event-hero-web__poster-frame">
+                            <span class="event-hero-web__poster-badge">{{ $content->event_type == 'online' ? __('Online') : __('In person') }}</span>
+                            <div class="event-hero-web__poster-footer">
+                                <div class="event-hero-web__poster-meta">
+                                    <strong>{{ $heroStatusLabel }}</strong>
+                                    {{ $heroVenueAddress ?: __('Location will be announced') }}
+                                </div>
+                                <div class="event-detail-unified__price-accent">
+                                    <i class="fas fa-bolt"></i>
+                                    {{ __('Use the app for the final ticket flow') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="event-hero-web__poster-actions">
+                            <a href="{{ $appDownloadUrl }}" class="event-hero-web__poster-action event-hero-web__poster-action--primary">
+                                {{ __('Get the app for tickets') }}
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            <a href="#ticket-panel" class="event-hero-web__poster-action event-hero-web__poster-action--secondary">
+                                {{ __('Preview ticket options') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
-    <!-- Page Banner End -->
 @endsection
 @section('content')
     <!-- Event Page Start -->
@@ -54,7 +803,7 @@
         $map_address = str_replace('?', ' ', $map_address);
         $map_address = str_replace(',', ' ', $map_address);
     @endphp
-    <section class="event-details-section pt-110 rpt-90 pb-90 rpb-70">
+    <section id="event-story" class="event-details-section event-detail-unified pt-110 rpt-90 pb-90 rpb-70">
         <div class="container">
             <div class="event-details-content">
                 <div class="event-top d-flex flex-wrap-wrap has-gap">
@@ -100,46 +849,21 @@
 
                         @endphp
                         @if ($content->date_type == 'single' && $content->countdown_status == 1)
-                            <div class="event-details-top">
-                                @if ($startDateTime >= $now_time)
-                                    <h2 class="title">{{ $content->title }} <span
-                                            class="badge badge-info">{{ __('Upcoming') }}</span>
-                                    </h2>
-                                @elseif ($startDateTime <= $endDateTime && $endDateTime >= $now_time)
-                                    <h2 class="title">
-                                        {{ $content->title }}
-                                        <span class="badge badge-success">{{ __('Running') }}</span>
-                                    </h2>
-                                @else
-                                    @php
-                                        $over = true;
-                                    @endphp
-                                    <h2 class="title">
-                                        {{ $content->title }}
-                                        <span class="badge badge-danger">{{ __('Over') }}</span>
-                                    </h2>
-                                @endif
-                            </div>
+                            @if ($endDateTime < $now_time)
+                                @php
+                                    $over = true;
+                                @endphp
+                            @endif
+                            <span class="event-detail-unified__summary-label">{{ __('Quick facts') }}</span>
                         @elseif ($content->date_type == 'multiple')
-                            <div class="event-details-top">
-                                <h2 class="title">{{ $content->title }}
-                                    @if ($startDateTime >= $now_time)
-                                        <span class="badge badge-info">{{ __('Upcoming') }}</span>
-                                    @elseif ($startDateTime <= $last_end_date && $last_end_date >= $now_time)
-                                        <span class="badge badge-success">{{ __('Running') }}</span>
-                                    @else
-                                        @php
-                                            $over = true;
-                                        @endphp
-                                        <span class="badge badge-danger">{{ __('Over') }}</span>
-                                    @endif
-                                </h2>
-                            </div>
+                            @if ($startDateTime < $now_time && $last_end_date < $now_time)
+                                @php
+                                    $over = true;
+                                @endphp
+                            @endif
+                            <span class="event-detail-unified__summary-label">{{ __('Quick facts') }}</span>
                         @else
-                            <div class="event-details-top">
-                                <h2 class="title">{{ $content->title }}</h2>
-                            </div>
-
+                            <span class="event-detail-unified__summary-label">{{ __('Quick facts') }}</span>
                         @endif
 
                         <div class="event-details-header mb-25">
@@ -254,9 +978,14 @@
                                 @if ($over == true) onsubmit="return false" @endif>
                                 @csrf
                                 <input type="hidden" name="event_id" value="{{ $content->id }}" id="">
+<<<<<<< Updated upstream
                                 <input type="hidden" name="pricing_type" value="{{ $content->pricing_type }}"
                                     id="">
                                 <div class="event-details-information">
+=======
+                                <input type="hidden" name="pricing_type" value="{{ $content->pricing_type }}" id="">
+                                <div id="ticket-panel" class="event-details-information">
+>>>>>>> Stashed changes
                                     <input type="hidden" name="date_type" value="{{ $content->date_type }}">
                                     @if ($content->date_type == 'multiple')
                                         @php
@@ -1195,6 +1924,10 @@
                                         @endif
                                     @endif
                                     @if ($tickets_count > 0)
+                                        <div class="event-detail-unified__app-note">
+                                            {{ __('Duty is moving toward app-first ticket access. Use the app for the full entry experience, or keep using the beta web checkout below while we finish that transition.') }}
+                                            <a href="{{ $appDownloadUrl }}">{{ __('Open the download page') }}</a>.
+                                        </div>
                                         <div class="total">
                                             <b>{{ __('Total Price') . ' :' }} </b>
                                             <span class="h4" dir="ltr">
@@ -1205,8 +1938,12 @@
                                             </span>
                                             <input type="hidden" name="total" id="total">
                                         </div>
+<<<<<<< Updated upstream
                                         <button class="theme-btn w-100 mt-20"
                                             type="submit">{{ __('Book Now') }}</button>
+=======
+                                        <button class="theme-btn w-100 mt-20" type="submit">{{ __('Continue with beta web checkout') }}</button>
+>>>>>>> Stashed changes
                                     @endif
                                 </div>
                             </form>

@@ -40,6 +40,13 @@ class TicketRequest extends FormRequest
     $ruleArray['early_bird_discount_amount'] = 'required_if:early_bird_discount_type,enable';
     $ruleArray['early_bird_discount_date'] = 'required_if:early_bird_discount_type,enable';
     $ruleArray['early_bird_discount_time'] = 'required_if:early_bird_discount_type,enable';
+    
+    // Reservation Rules
+    $ruleArray['reservation_enabled'] = 'nullable|in:1,0';
+    $ruleArray['reservation_deposit_type'] = 'required_if:reservation_enabled,1|in:fixed,percentage';
+    $ruleArray['reservation_deposit_value'] = 'required_if:reservation_enabled,1|numeric|min:0';
+    $ruleArray['reservation_final_due_date'] = 'required_if:reservation_enabled,1|date';
+    $ruleArray['reservation_min_installment_amount'] = 'nullable|numeric|min:0';
 
     if ($this->pricing_type_2 == 'normal') {
       $ruleArray['price'] = 'required|numeric|min:0';
