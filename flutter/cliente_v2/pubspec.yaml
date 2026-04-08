@@ -1,4 +1,4 @@
-name: cliente_v2
+name: duty_client
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -34,37 +34,29 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  equatable: ^2.0.5
   flutter_riverpod: ^2.5.1
   dio: ^5.4.3
   go_router: ^14.0.1
   shared_preferences: ^2.2.3
-  google_fonts: ^6.2.1
+  google_fonts: ^8.0.1
   url_launcher: ^6.2.6
   qr_flutter: ^4.1.0
   webview_flutter: ^4.13.1
   flutter_html: ^3.0.0
   google_maps_flutter: ^2.14.2
-<<<<<<< Updated upstream
-=======
   flutter_stripe: ^12.2.0
   intl: ^0.20.2
   flutter_secure_storage: ^10.0.0
   share_plus: ^12.0.1
-  app_links: ^6.4.1
   firebase_core: ^3.0.0
   firebase_messaging: ^15.0.0
   firebase_auth: ^5.7.0
   intl_phone_field: ^3.2.0
   local_auth: ^3.0.0
   image_picker: ^1.2.1
+  flutter_image_compress: ^2.4.0
   cached_network_image: ^3.4.1
-  shimmer: ^3.0.0
-  carousel_slider: ^5.0.0
-  flutter_local_notifications: ^17.2.2
-  mobile_scanner: ^7.2.0
-dependency_overrides:
-  path_provider_foundation: 2.4.0
->>>>>>> Stashed changes
 
 dev_dependencies:
   flutter_test:

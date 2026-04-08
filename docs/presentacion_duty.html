@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Presentación Duty: Arquitectura y Módulos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Reveal.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    
+    <!-- Theme: moon offers a nice dark blue/grey technical feel -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/moon.min.css">
+    
+    <style>
+        /* Custom Adjustments */
+        .reveal h1, .reveal h2, .reveal h3 {
+            text-transform: none; /* Keep natural capitalization */
+            color: #eee;
+        }
+        .reveal p, .reveal li {
+            text-align: left;
+            font-size: 0.85em; /* slightly smaller for readability of lists */
+        }
+        .reveal .mermaid-container {
+            background-color: transparent; /* better blending */
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        /* Style for highlighted terms */
+        strong {
+            color: #93a1a1;
+        }
+        /* Hide Mermaid diagram lines being black in dark mode by applying filter or configuring mermaid */
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- Slide 0: Title Slide -->
+            <section>
+                <h1>Duty</h1>
+                <h3>Arquitectura y Funcionamiento por Módulos</h3>
+                <p>Presentación Oficial del Ecosistema</p>
+                <aside class="notes">
+                    "Duty no es solo una página para vender boletos; es un ecosistema. Hoy repasaremos el diseño, modelo de negocio y flujo tecnológico principal."
+                </aside>
+            </section>
+
+            <!-- Slide 1: The Big Picture -->
+            <section>
+                <section>
+                    <h2>1. Introducción: The Big Picture</h2>
+                    <p>Modular Monolith alojado en Laravel, sirviendo canales segmentados.</p>
+                    <ul>
+                        <li><strong>App (Flutter):</strong> Producto principal B2C (Consumidor).</li>
+                        <li><strong>Web Pública (Blade):</strong> Escaparate SEO, backoffice B2B.</li>
+                        <li><strong>Filosofía:</strong> <em>App-First</em> para la experiencia, <em>Web-First</em> para la captación profesional.</li>
+                    </ul>
+                    <aside class="notes">
+                        "Lo primero que debemos entender es nuestra filosofía multicanal: App-First para los compradores y Web-First para atraer público corporativo. Todos los clientes consultan APIs gobernadas por el mismo núcleo inteligente de Laravel."
+                    </aside>
+                </section>
+                <section>
+                    <h3>Topología del Ecosistema</h3>
+                    <div class="mermaid-container">
+                        <div class="mermaid">
+                        flowchart TB
+                            subgraph Canales
+                                M["📱 App Flutter (Usuarios)"]
+                                W["🌐 Web Blade (Profesionales)"]
+                                S["📟 Scanners (Portería)"]
+                            end
+                            subgraph Laravel Backend
+                                API["REST API"]
+                                DOM["Motores de Dominio"]
+                            end
+                            DB[("MySQL Database")]
+                            
+                            M --> API
+                            W --> API
+                            S --> API
+                            API --> DOM
+                            DOM --> DB
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Slide 2: Identidades -->
+            <section>
+                <h2>2. Identidades y Superficies de Control</h2>
+                <ul>
+                    <li><strong>Customer Auth Base:</strong> Entrada universal vía Sanctum. Todos son "Usuarios".</li>
+                    <li><strong>Sombreros (Identity Context):</strong> Inyección dinámica vía Header <code>X-Identity-Id</code>.</li>
+                    <li><strong>Perfiles Profesionales:</strong> El mismo usuario puede operar como Organizer, Artist, o Venue localmente sin crear multi-cuentas engorrosas.</li>
+                    <li><strong>Seguridad Multi-Guard:</strong> Islas de acceso hiper segmentadas en back-end para prevenir filtraciones de permisos.</li>
+                </ul>
+                <aside class="notes">
+                    "Para entender Duty, hay que entender los sombreros. Cualquier persona inicia como Usuario. Pero la arquitectura le permite 'ponerse el sombrero' de Organizador o Artista. El sistema sabe permanentemente qué rol opera y provee acceso seguro."
+                </aside>
+            </section>
+
+            <!-- Slide 3: Eventos y Booking -->
+            <section>
+                <h2>3. El Motor Comercial (Bookings)</h2>
+                <ul>
+                    <li><strong>Inventario y Discovery:</strong> Los negocios abren plazas ("Publishing"); los usuarios descubren la oferta (motores de Search + Home matching).</li>
+                    <li><strong>Transacción Atómica (Checkout):</strong> Proceso centralizado en App que integra gateways (Stripe) y valida asientos.</li>
+                    <li><strong>Propiedad Viva (Ownership):</strong> El ticket emitido NO es un simple archivo digital (PDF). Es un activo de Base de Datos inyectado a una Cartera Criptográfica ("Booking").</li>
+                </ul>
+                <aside class="notes">
+                    "El ciclo inicia publicando. Pero de cara a venta, somos radicales: el boleto *no existe* en papel virtual. Es un activo amarrado al usuario de forma oficial en nuestra BBDD. Si tu Booking consta, eres el dueño innegable del activo."
+                </aside>
+            </section>
+
+            <!-- Slide 4: Financiero, NFC y POS -->
+            <section>
+                <section>
+                    <h2>4. Sistema Financiero Custodiado</h2>
+                    <ul>
+                        <li><strong>WalletService Central:</strong> Billetera virtual blindada que gestiona los saldos in-house aislada de la lógica de usuario.</li>
+                        <li><strong>Integridad (`lockForUpdate`):</strong> Uso de selectores pesados de base de datos previniendo Double-Spend en concurrencia (condiciones de carrera).</li>
+                        <li><strong>Desagüe de Capital (Withdrawals):</strong> Ciclo para extraer capital recolectado del organizador al giro bancario tradicional (Settlements).</li>
+                    </ul>
+                    <aside class="notes">
+                        "Construimos un mini core bancario interno blindado contra gastos concurrentes. Nadie puede mágicamente gastar el doble de los 10 dólares que recargó por colisión de red."
+                    </aside>
+                </section>
+                <section>
+                    <h3>Ejecución In-Situ (La Noche del Evento)</h3>
+                    <ul>
+                        <li>Los fondeos previos conectan con pasarelas (Stripe).</li>
+                        <li>Alineación <strong>NFC Pasiva</strong> con el saldo vivo del usuario (manillas conectadas a la Billetera Digital).</li>
+                        <li>Hardware Terminal <strong>POS (Point Of Sale)</strong> propio de Duty para consumo físico de consumibles ultra veloz.</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- Slide 5: Marketplace Primario -->
+            <section>
+                <h2>5. Marketplace Secundario y P2P</h2>
+                <ul>
+                    <li><strong>Un Mercado Limpio:</strong> Reventas seguras totalmente intervenidas bajo las reglas de Duty.</li>
+                    <li><strong>Cápsula Transaccional Inseparable:</strong>
+                        <ol>
+                            <li>Lock Físico de ticket.</li>
+                            <li>Swap de Débito A ➜ Crédito B.</li>
+                            <li>Re-asociación técnica de Titular original a Comprador.</li>
+                        </ol>
+                    </li>
+                    <li><strong>Traspaso P2P Guiado:</strong> Las transferencias directas integran aceptación asíncrona del destinatario, limitando spam orgánico y acaparamiento.</li>
+                </ul>
+                <aside class="notes">
+                    "Si yo no asisto, Duty enlista el ticket y se vuelve árbitro. Simultáneamente debita, acredita e inyecta la propiedad al nuevo dueño. Cero PDFs estafadores. Mercado secundario con confianza primaria."
+                </aside>
+            </section>
+
+            <!-- Slide 6: Scanner -->
+            <section>
+                <h2>6. Operación de Acceso (Scanner API)</h2>
+                <ul>
+                    <li><strong>Ruteo Autopista:</strong> Endpoints paralelos aislados del tráfico del consumidor (`/api/scanner`).</li>
+                    <li><strong>Bóvedas Separadas:</strong> Uso de `admin_sanctum` y `organizer_sanctum` garantizan autenticación ciega (Solo expone Validez del Acceso, no datos económicos privados).</li>
+                    <li><strong>Mutación Terminal:</strong> En el instante de cruce el modelo cambia a `scan_status = 1`. Inutiliza global e instantáneamente copias fantasmas en otras instancias.</li>
+                </ul>
+                <aside class="notes">
+                    "La última milla, la portería. La API del escáner va por otra autopista digital. Un solo validado frente a la pantalla invalida al ticket instantáneamente logrando impermeabilidad frente a las entradas clonadas maliciosamente."
+                </aside>
+            </section>
+
+            <!-- Slide 7: Engagement -->
+            <section>
+                <h2>7. Engagement y Retención</h2>
+                <ul>
+                    <li><strong>Grafos Sociales Polimórficos:</strong> Arquitectura "Follows / Favorites" orientada a captar gustos del usuario con el circuito nocturno de Artistas y Lugares.</li>
+                    <li><strong>Mensajería Interna:</strong> Chats de fricción atómica, negociaciones, o contacto masivo con fans integrados de fábrica.</li>
+                    <li><strong>Merch & Shop Expansion:</strong> Expande el ticket más allá de la fecha incorporando compras previas embebidas nativas a los perfiles profesionales.</li>
+                </ul>
+                <aside class="notes">
+                    "Al salir del lugar la experiencia sigue. Mantienes tu lista de seguimiento, y nuestra App envía notificaciones push de los artistas para amarrar la retención mensual real construyendo un Loop social sólido."
+                </aside>
+            </section>
+
+            <!-- Slide 8: Visión Técnica y Roadmap -->
+            <section>
+                <h2>8. Roadmap de Ingeniería y Cierre</h2>
+                <ul>
+                    <li><strong>Migración a 'Actor-Type':</strong> La base de datos abandonó ataduras estáticas (`user_id`). Cada fila ahora es gobernada por entes abstractos permitiendo portabilidad absoluta B2B y B2C.</li>
+                    <li><strong>Erradicación del Checkout Web:</strong> Obligar a la conversión al ecosistema "App-First" de forma estricta, migrando todo flujo legado ("Deuda Técnica" visual y transaccional).</li>
+                    <li><strong>Hardening Sistémico:</strong> Reparación de viejos vectores expuestos y migración a API Contracts estricta para garantizar cero colisiones Multi-Canal con la red Flutter/Blade.</li>
+                </ul>
+                <aside class="notes">
+                    "Hacia adelante, estamos abandonando códigos rígidos por bases de datos de Entes Polimórficos Inteligentes, y liquidamos todo flujo ineficiente sobre web legacy forzando la excelencia móvil App-first."
+                </aside>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Scripts for Reveal.js and Mermaid -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js"></script>
+    
+    <!-- Mermaid library -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.min.js"></script>
+    
+    <script>
+        // Initialize Reveal
+        Reveal.initialize({
+            hash: true,
+            controls: true,
+            progress: true,
+            center: true,
+            hash: true,
+            transition: 'slide', // none/fade/slide/convex/concave/zoom
+            plugins: [ RevealNotes ]
+        });
+
+        // Initialize Mermaid with dark theme configurations to match Reveal 'moon' theme
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            securityLevel: 'loose'
+        });
+    </script>
+</body>
+</html>

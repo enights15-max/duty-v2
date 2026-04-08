@@ -228,7 +228,14 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4">
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label for="">{{ __('Age Limit') }}</label>
+                                            <input type="number" name="age_limit" class="form-control" placeholder="0 = All Ages" value="0" min="0">
+                                            <p class="text-warning mb-0">{{ __('Set 0 for All Ages') }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
                                         <div class="form-group">
                                             <label for="">{{ __('Is Feature') . '*' }}</label>
                                             <select name="is_featured" class="form-control">
@@ -238,7 +245,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4">
+                                    <div class="col-lg-3">
                                         <div class="form-group">
                                             <label for="">{{ __('Organizer') }}</label>
                                             <select name="organizer_id" class="form-control js-example-basic-single">
@@ -250,6 +257,17 @@
                                             </select>
                                             <p class="text-warning">{{ __("Please leave it blank for Admin's event") }}
                                             </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label for="">{{ __('Artists') }}</label>
+                                            <select name="artist_ids[]" class="form-control js-example-basic-single" multiple="multiple">
+                                                @foreach ($artists as $artist)
+                                                    <option value="{{ $artist->id }}">{{ $artist->username }}</option>
+                                                @endforeach
+                                            </select>
+                                            <p class="text-warning">{{ __('Select multiple artists if applicable') }}</p>
                                         </div>
                                     </div>
                                 </div>

@@ -70,13 +70,6 @@
                         </span>
                         {{ __('Preview') }}
                     </a>
-                    <a class="mr-2 btn btn-warning btn-sm float-right d-inline-block"
-                        href="{{ route('venue.event_management.qr', ['id' => $event->id]) }}">
-                        <span class="btn-label">
-                            <i class="fas fa-qrcode"></i>
-                        </span>
-                        {{ __('Event QR') }}
-                    </a>
                     @if ($event->event_type == 'venue')
                         <a class="mr-2 btn btn-secondary btn-sm float-right d-inline-block"
                             href="{{ route('venue.event.ticket', ['language' => $defaultLang->code, 'event_id' => $event->id, 'event_type' => $event->event_type]) }}"
@@ -379,7 +372,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                @include('backend.event.partials.lineup-fields')
 
                                 @if ($event->event_type == 'online')
                                     <div class="row">
@@ -853,7 +845,6 @@
             $('.js-example-basic-single').select2();
         });
     </script>
-    <script src="{{ asset('assets/admin/js/event-authoring.js') }}"></script>
     <script src="{{ asset('assets/admin/js/event_specification.js') }}"></script>
 @endsection
 

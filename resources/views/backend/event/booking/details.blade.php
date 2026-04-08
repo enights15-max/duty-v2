@@ -1,6 +1,18 @@
 @extends('backend.layout')
 
+@section('style')
+    @includeIf('backend.partials.scarlet-operations-workspace')
+@endsection
+
 @section('content')
+    @php
+        $bookingScopeLabel = match ($booking->paymentStatus) {
+            'completed' => __('Completed'),
+            'pending' => __('Pending'),
+            'rejected' => __('Rejected'),
+            default => ucfirst((string) $booking->paymentStatus),
+        };
+    @endphp
     <div class="page-header">
         <h4 class="page-title">{{ __('Booking Details') }}</h4>
         <ul class="breadcrumbs">
@@ -43,13 +55,38 @@
         </ul>
     </div>
 
+    <div class="ops-shell">
+        <div class="ops-hero">
+            <div class="ops-hero__grid">
+                <div>
+                    <span class="ops-hero__eyebrow">{{ __('Bookings') }}</span>
+                    <h1 class="ops-hero__title">{{ __('Customer payment and ticket ownership details') }}</h1>
+                    <p class="ops-hero__copy">
+                        {{ __('Use this view to verify payment context, customer billing details, scan status and the professional owner attached to the booking.') }}
+                    </p>
+                </div>
+                <div class="ops-hero__meta">
+                    <div class="ops-hero__stat">
+                        <span class="ops-hero__stat-label">{{ __('Booking reference') }}</span>
+                        <span class="ops-hero__stat-value">#{{ $booking->booking_id }}</span>
+                        <span class="ops-hero__stat-note">{{ __('Primary support reference for this purchase') }}</span>
+                    </div>
+                    <div class="ops-hero__stat">
+                        <span class="ops-hero__stat-label">{{ __('Payment scope') }}</span>
+                        <span class="ops-hero__stat-value">{{ $bookingScopeLabel }}</span>
+                        <span class="ops-hero__stat-note">{{ __('Current payment status and scanning context for the event day') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     <div class="row">
         @php
             $position = $booking->currencyTextPosition;
             $currency = $booking->currencyText;
         @endphp
         <div class="col-md-6">
-            <div class="card">
+            <div class="card ops-panel">
                 <div class="card-header">
                     <div class="row">
                         <div class="col-lg-8">
@@ -308,7 +345,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card">
+            <div class="card ops-panel">
                 <div class="card-header">
                     <div class="card-title d-inline-block">
                         {{ __('Billing Details') }}
@@ -412,7 +449,7 @@
         </div>
         @if (!empty($booking->organizer_id))
             <div class="col-md-3">
-                <div class="card">
+                <div class="card ops-panel">
                     <div class="card-header">
                         <div class="card-title d-inline-block">
                             {{ __('Organizer Details') }}
@@ -499,7 +536,7 @@
 
         @if ($booking->variation != null)
             <div class="col-md-6">
-                <div class="card">
+                <div class="card ops-panel">
                     <div class="card-header">
                         <div class="card-title d-inline-block">
                             {{ __('Tickets Info') }}

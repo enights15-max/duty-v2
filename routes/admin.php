@@ -24,6 +24,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
 
   // change admin-panel theme (dark/light) route
   Route::post('/change-theme', 'BackEnd\AdminController@changeTheme')->name('admin.change_theme');
+  Route::get('/change-navigation-layout/{layout}', 'BackEnd\AdminController@changeNavigationLayout')->name('admin.change_navigation_layout');
   // admin profile settings route start
   Route::get('/edit-profile', 'BackEnd\AdminController@editProfile')->name('admin.edit_profile');
 
@@ -86,6 +87,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('/event/{id}/update-featured', 'BackEnd\Event\EventController@updateFeatured')->name('admin.event_management.event.update_featured');
     Route::post('/delete-event/{id}', 'BackEnd\Event\EventController@destroy')->name('admin.event_management.delete_event');
     Route::get('/edit-event/{id}', 'BackEnd\Event\EventController@edit')->name('admin.event_management.edit_event');
+    Route::get('/event/{id}/collaboration-activity/export', 'BackEnd\Event\EventController@exportCollaborationActivity')->name('admin.event_management.collaboration_activity_export');
     Route::get('/event/{id}/qr', 'BackEnd\Event\EventController@qr')->name('admin.event_management.qr');
     Route::get('/event/{id}/qr/download', 'BackEnd\Event\EventController@downloadQr')->name('admin.event_management.qr_download');
     Route::post('/event-img-dbrmv', 'BackEnd\Event\EventController@imagedbrmv')->name('admin.event.imgdbrmv');
@@ -178,31 +180,54 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     });
   });
 
-  Route::prefix('/event-booking')->middleware('permission:Event Bookings')->group(function () {
+  Route::prefix('/event-booking')->middleware('permission:Event Bookings,Event Booking Economy,Event Booking Fee Policies')->group(function () {
 
-    Route::prefix('/settings')->middleware('permission:Event Bookings')->group(function () {
+    Route::prefix('/settings')->group(function () {
 
-      Route::get('/coupons', 'BackEnd\Event\CouponController@index')->name('admin.event_management.coupons');
-      Route::post('/store-coupon', 'BackEnd\Event\CouponController@store')->name('admin.event_management.store_coupon');
-      Route::post('/update-coupon', 'BackEnd\Event\CouponController@update')->name('admin.event_management.update_coupon');
-      Route::post('/delete-coupon/{id}', 'BackEnd\Event\CouponController@destroy')->name('admin.event_management.delete_coupon');
+      Route::get('/coupons', 'BackEnd\Event\CouponController@index')->middleware('permission:Event Bookings')->name('admin.event_management.coupons');
+      Route::post('/store-coupon', 'BackEnd\Event\CouponController@store')->middleware('permission:Event Bookings')->name('admin.event_management.store_coupon');
+      Route::post('/update-coupon', 'BackEnd\Event\CouponController@update')->middleware('permission:Event Bookings')->name('admin.event_management.update_coupon');
+      Route::post('/delete-coupon/{id}', 'BackEnd\Event\CouponController@destroy')->middleware('permission:Event Bookings')->name('admin.event_management.delete_coupon');
 
-      Route::get('/tax-commission', 'BackEnd\BasicSettings\BasicController@taxCommission')->name('admin.event_booking.settings.tax_commission');
+      Route::get('/tax-commission', 'BackEnd\BasicSettings\BasicController@taxCommission')->middleware('permission:Event Bookings')->name('admin.event_booking.settings.tax_commission');
 
-      Route::post('/update-tax-commission', 'BackEnd\BasicSettings\BasicController@updateEventTaxCommission')->name('admin.event_booking.settings.update_tax_commission');
+      Route::post('/update-tax-commission', 'BackEnd\BasicSettings\BasicController@updateEventTaxCommission')->middleware('permission:Event Bookings')->name('admin.event_booking.settings.update_tax_commission');
 
-      Route::get('/preference', 'BackEnd\BasicSettings\BasicController@preference')->name('admin.event_booking.settings.preference');
-      Route::post('/update-preference', 'BackEnd\BasicSettings\BasicController@updatePreference')->name('admin.event_booking.settings.update_preference');
+      Route::get('/fee-policies', 'BackEnd\EconomyController@feePolicies')->middleware('permission:Event Bookings,Event Booking Fee Policies')->name('admin.event_booking.settings.fee_policies');
+      Route::post('/update-fee-policies', 'BackEnd\EconomyController@updateFeePolicies')->middleware('permission:Event Bookings,Event Booking Fee Policies')->name('admin.event_booking.settings.update_fee_policies');
+
+      Route::get('/preference', 'BackEnd\BasicSettings\BasicController@preference')->middleware('permission:Event Bookings')->name('admin.event_booking.settings.preference');
+      Route::post('/update-preference', 'BackEnd\BasicSettings\BasicController@updatePreference')->middleware('permission:Event Bookings')->name('admin.event_booking.settings.update_preference');
     });
 
-    Route::get('', 'BackEnd\Event\EventBookingController@index')->name('admin.event.booking');
-    Route::post('/update/payment-status/{id}', 'BackEnd\Event\EventBookingController@updatePaymentStatus')->name('admin.event_booking.update_payment_status');
-    Route::get('/details/{id}', 'BackEnd\Event\EventBookingController@show')->name('admin.event_booking.details');
-    Route::post('/{id}/delete', 'BackEnd\Event\EventBookingController@destroy')->name('admin.event_booking.delete');
-    Route::post('/bulk-delete', 'BackEnd\Event\EventBookingController@bulkDestroy')->name('admin.event_booking.bulk_delete');
+    Route::get('', 'BackEnd\Event\EventBookingController@index')->middleware('permission:Event Bookings')->name('admin.event.booking');
+    Route::post('/update/payment-status/{id}', 'BackEnd\Event\EventBookingController@updatePaymentStatus')->middleware('permission:Event Bookings')->name('admin.event_booking.update_payment_status');
+    Route::get('/details/{id}', 'BackEnd\Event\EventBookingController@show')->middleware('permission:Event Bookings')->name('admin.event_booking.details');
+    Route::post('/{id}/delete', 'BackEnd\Event\EventBookingController@destroy')->middleware('permission:Event Bookings')->name('admin.event_booking.delete');
+    Route::post('/bulk-delete', 'BackEnd\Event\EventBookingController@bulkDestroy')->middleware('permission:Event Bookings')->name('admin.event_booking.bulk_delete');
 
-    Route::get('/report', 'BackEnd\Event\EventBookingController@report')->name('admin.event_booking.report');
-    Route::get('/export', 'BackEnd\Event\EventBookingController@export')->name('admin.event_bookings.export');
+    Route::prefix('/reservations')->middleware('permission:Event Bookings')->group(function () {
+      Route::get('', 'BackEnd\Event\ReservationController@index')->name('admin.event_reservation.index');
+      Route::get('/export', 'BackEnd\Event\ReservationController@export')->name('admin.event_reservation.export');
+      Route::get('/{id}', 'BackEnd\Event\ReservationController@show')->name('admin.event_reservation.details');
+      Route::post('/{id}/extend', 'BackEnd\Event\ReservationController@extend')->name('admin.event_reservation.extend');
+      Route::post('/{id}/cancel', 'BackEnd\Event\ReservationController@cancel')->name('admin.event_reservation.cancel');
+      Route::post('/{id}/default', 'BackEnd\Event\ReservationController@markDefaulted')->name('admin.event_reservation.default');
+      Route::post('/{id}/reactivate', 'BackEnd\Event\ReservationController@reactivate')->name('admin.event_reservation.reactivate');
+      Route::post('/{id}/convert', 'BackEnd\Event\ReservationController@convert')->name('admin.event_reservation.convert');
+      Route::post('/{id}/refund', 'BackEnd\Event\ReservationController@refund')->name('admin.event_reservation.refund');
+    });
+
+    Route::get('/report', 'BackEnd\Event\EventBookingController@report')->middleware('permission:Event Bookings')->name('admin.event_booking.report');
+    Route::get('/export', 'BackEnd\Event\EventBookingController@export')->middleware('permission:Event Bookings')->name('admin.event_bookings.export');
+    Route::get('/economy', 'BackEnd\EconomyController@dashboard')->middleware('permission:Event Bookings,Event Booking Economy')->name('admin.event_booking.economy');
+    Route::get('/economy/export', 'BackEnd\EconomyController@export')->middleware('permission:Event Bookings,Event Booking Economy')->name('admin.event_booking.economy.export');
+    Route::get('/economy/settlements', 'BackEnd\EconomyController@settlements')->middleware('permission:Event Bookings,Event Booking Economy')->name('admin.event_booking.economy.settlements');
+    Route::get('/economy/settlements/export', 'BackEnd\EconomyController@exportSettlements')->middleware('permission:Event Bookings,Event Booking Economy')->name('admin.event_booking.economy.settlements.export');
+    Route::get('/economy/settlements/{event}', 'BackEnd\EconomyController@settlementShow')->middleware('permission:Event Bookings,Event Booking Economy')->name('admin.event_booking.economy.settlements.show');
+    Route::get('/economy/settlements/{event}/export', 'BackEnd\EconomyController@exportSettlementEvent')->middleware('permission:Event Bookings,Event Booking Economy')->name('admin.event_booking.economy.settlements.event_export');
+    Route::post('/economy/settlements/{event}/approve', 'BackEnd\EconomyController@approveSettlement')->middleware('permission:Event Bookings,Event Booking Economy')->name('admin.event_booking.economy.settlements.approve');
+    Route::post('/economy/settlements/{event}/release', 'BackEnd\EconomyController@releaseSettlement')->middleware('permission:Event Bookings,Event Booking Economy')->name('admin.event_booking.economy.settlements.release');
   });
 
 
@@ -252,7 +277,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
 
 
 
-  Route::get('send-mail-template',  'BackEnd\Organizer\OrganizerManagementController@send_mail_template')->name('send.mail-tempalte');
+  Route::get('send-mail-template', 'BackEnd\Organizer\OrganizerManagementController@send_mail_template')->name('send.mail-tempalte');
 
   // organizer management route start
   Route::prefix('/organizer-management')->middleware('permission:Organizer Mangement')->group(function () {
@@ -347,6 +372,48 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
   });
   Route::post('bulk/delete-customer', 'BackEnd\CustomerManagementController@bulkDestroy')->name('admin.customer_management.bulk_delete_customer');
   // organizer management route end
+
+  // wallet management route start
+  Route::prefix('/wallet-management')->middleware('permission:Customer Management')->group(function () {
+    Route::get('/wallets', 'BackEnd\WalletController@index')->name('admin.wallet_management.wallets');
+    Route::get('/wallet/{id}/history', 'BackEnd\WalletController@history')->name('admin.wallet_management.wallet_history');
+    Route::post('/wallet/{id}/adjust', 'BackEnd\WalletController@adjustBalance')->name('admin.wallet_management.wallet_adjust');
+
+    // Withdrawal Management
+    Route::get('/withdrawals', 'BackEnd\WalletController@withdrawals')->name('admin.wallet_management.withdrawals');
+    Route::post('/withdrawals/approve/{id}', 'BackEnd\WalletController@approveWithdrawal')->name('admin.wallet_management.approve_withdrawal');
+    Route::post('/withdrawals/reject/{id}', 'BackEnd\WalletController@rejectWithdrawal')->name('admin.wallet_management.reject_withdrawal');
+  });
+  // wallet management route end
+
+  // venue management route start
+  Route::prefix('/venue-management')->middleware('permission:Venue Management')->group(function () {
+    Route::get('/registered-venues', 'BackEnd\Organizer\VenueManagementController@index')->name('admin.venue_management.registered_venue');
+    Route::get('/add-venue', 'BackEnd\Organizer\VenueManagementController@add')->name('admin.venue_management.add_venue');
+    Route::post('/save-venue', 'BackEnd\Organizer\VenueManagementController@create')->name('admin.venue_management.save_venue');
+
+    Route::prefix('/venue/{id}')->group(function () {
+      Route::get('/details', 'BackEnd\Organizer\VenueManagementController@show')->name('admin.venue_management.venue_details');
+      Route::get('/edit', 'BackEnd\Organizer\VenueManagementController@edit')->name('admin.venue_management.venue_edit');
+      Route::post('/update', 'BackEnd\Organizer\VenueManagementController@update')->name('admin.venue_management.venue_update');
+      Route::post('/delete', 'BackEnd\Organizer\VenueManagementController@delete')->name('admin.venue_management.venue_delete');
+    });
+    Route::post('/bulk-delete-venue', 'BackEnd\Organizer\VenueManagementController@bulk_delete')->name('admin.venue_management.bulk_delete_venue');
+  });
+
+  // artist management route start
+  Route::prefix('/artist-management')->middleware('permission:Artist Management')->group(function () {
+    Route::get('/registered-artists', 'BackEnd\Organizer\ArtistManagementController@index')->name('admin.artist_management.registered_artist');
+    Route::get('/add-artist', 'BackEnd\Organizer\ArtistManagementController@add')->name('admin.artist_management.add_artist');
+    Route::post('/save-artist', 'BackEnd\Organizer\ArtistManagementController@create')->name('admin.artist_management.save_artist');
+
+    Route::prefix('/artist/{id}')->group(function () {
+      Route::get('/edit', 'BackEnd\Organizer\ArtistManagementController@edit')->name('admin.artist_management.artist_edit');
+      Route::post('/update', 'BackEnd\Organizer\ArtistManagementController@update')->name('admin.artist_management.artist_update');
+      Route::post('/delete', 'BackEnd\Organizer\ArtistManagementController@delete')->name('admin.artist_management.artist_delete');
+    });
+    Route::post('/bulk-delete-artist', 'BackEnd\Organizer\ArtistManagementController@bulk_delete')->name('admin.artist_management.bulk_delete_artist');
+  });
 
 
   #====support tickets ============
@@ -476,7 +543,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('/update-theme-and-home', 'BackEnd\BasicSettings\BasicController@updateThemeAndHome')->name('admin.basic_settings.update_theme_and_home');
 
     // basic settings currency route
-    Route::get('/currency','BackEnd\BasicSettings\BasicController@currency')->name('admin.basic_settings.currency');
+    Route::get('/currency', 'BackEnd\BasicSettings\BasicController@currency')->name('admin.basic_settings.currency');
 
     Route::post('/update-currency', 'BackEnd\BasicSettings\BasicController@updateCurrency')->name('admin.basic_settings.update_currency');
 
@@ -505,7 +572,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     // basic settings mail route end
 
     // basic settings breadcrumb route
-    Route::get('/breadcrumb','BackEnd\BasicSettings\BasicController@breadcrumb')->name('admin.basic_settings.breadcrumb');
+    Route::get('/breadcrumb', 'BackEnd\BasicSettings\BasicController@breadcrumb')->name('admin.basic_settings.breadcrumb');
 
     Route::post('/update-breadcrumb', 'BackEnd\BasicSettings\BasicController@updateBreadcrumb')->name('admin.basic_settings.update_breadcrumb');
 
@@ -562,7 +629,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('/delete-social-media/{id}', 'BackEnd\BasicSettings\SocialMediaController@destroy')->name('admin.basic_settings.delete_social_media');
   });
 
- //mobile interface
+  //mobile interface
   Route::prefix('mobile-interface')->middleware('permission:Mobile Interface')->group(function () {
     Route::get('/', 'BackEnd\MobileInterfaceController@index')->name('admin.mobile_interface');
     Route::get('/home-page-content', 'BackEnd\MobileInterfaceController@content')->name('admin.mobile_interface_content');
@@ -706,7 +773,8 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('/update-perfect_money-info', 'BackEnd\PaymentGateway\OnlineGatewayController@updatePerfectMoneyInfo')->name('admin.payment_gateways.update_perfect_money_info');
 
     //mobile interface
-    Route::post('/anet', 'BackEnd\PaymentGateway\OnlineGatewayController@updateAnetInfo')->name('admin.payment_gateways.update_anet_info');;
+    Route::post('/anet', 'BackEnd\PaymentGateway\OnlineGatewayController@updateAnetInfo')->name('admin.payment_gateways.update_anet_info');
+    ;
     Route::post('/monify', 'BackEnd\PaymentGateway\OnlineGatewayController@updateMonify')->name('admin.payment_gateways.update_monify');
     Route::post('/nowpayments', 'BackEnd\PaymentGateway\OnlineGatewayController@updateNowPayments')->name('admin.payment_gateways.update_nowpayments');
 

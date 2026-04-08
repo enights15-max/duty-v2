@@ -1,0 +1,108 @@
+<svg width="1800" height="1320" viewBox="0 0 1800 1320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1800" y2="1320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0C0A10"/>
+      <stop offset="1" stop-color="#16121A"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="2200" height="1800" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000000" flood-opacity="0.22"/>
+    </filter>
+    <style>
+      .title{font:700 64px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#F5F1EB}
+      .sub{font:400 28px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#B5AFBD}
+      .section{font:700 30px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#F5F1EB}
+      .body{font:500 22px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#9E98A8}
+      .uiDarkTitle{font:700 34px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#F7F3EE}
+      .uiDarkBody{font:500 22px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#B4AFBB}
+      .uiLightTitle{font:700 34px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#16121A}
+      .uiLightBody{font:500 22px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#5F5A64}
+      .chipDark{font:600 18px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#FFF4F1}
+      .chipLight{font:600 18px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#16121A}
+      .tinyDark{font:600 17px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#D5D0D8}
+      .tinyLight{font:600 17px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#4A454D}
+      .hex{font:500 18px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#8E8898}
+    </style>
+  </defs>
+
+  <rect width="1800" height="1320" fill="url(#bg)"/>
+  <rect x="70" y="60" width="1660" height="170" rx="34" fill="#121018" stroke="#26212B" stroke-width="2"/>
+  <text x="110" y="136" class="title">DUTY · Scarlet Editorial System</text>
+  <text x="112" y="190" class="sub">One red-led identity with a switchable Light and Dark experience. Same brand, different surface logic.</text>
+
+  <rect x="1410" y="103" width="230" height="66" rx="33" fill="#1C1822" stroke="#2A2430" stroke-width="2"/>
+  <rect x="1524" y="111" width="108" height="50" rx="25" fill="#C1121F"/>
+  <text x="1450" y="145" class="tinyDark">Light</text>
+  <text x="1556" y="145" class="tinyDark">Dark</text>
+
+  <!-- Dark board -->
+  <g filter="url(#shadow)">
+    <rect x="80" y="280" width="800" height="860" rx="40" fill="#100E14" stroke="#29242F" stroke-width="2"/>
+  </g>
+  <text x="120" y="340" class="section">Dark mode</text>
+  <text x="120" y="378" class="body">Nightlife-first, immersive, premium contrast.</text>
+
+  <rect x="120" y="424" width="720" height="124" rx="30" fill="#18151D"/>
+  <text x="158" y="474" class="uiDarkTitle">[FUTURE] YJAM @ Perpetual Lab</text>
+  <text x="160" y="515" class="uiDarkBody">Editorial event card with red used as accent, not as background noise.</text>
+  <rect x="670" y="456" width="130" height="42" rx="21" fill="#C1121F"/>
+  <text x="704" y="484" class="chipDark">Live</text>
+
+  <rect x="120" y="588" width="345" height="210" rx="30" fill="#18151D"/>
+  <text x="150" y="640" class="uiDarkTitle">Primary CTA</text>
+  <text x="150" y="682" class="uiDarkBody">Use scarlet only for actions, tabs, badges, and featured states.</text>
+  <rect x="150" y="724" width="170" height="54" rx="27" fill="#C1121F"/>
+  <text x="196" y="758" class="chipDark">Buy tickets</text>
+
+  <rect x="495" y="588" width="345" height="210" rx="30" fill="#18151D"/>
+  <text x="525" y="640" class="uiDarkTitle">Secondary UI</text>
+  <text x="525" y="682" class="uiDarkBody">Graphite surfaces keep the red elegant instead of aggressive.</text>
+  <rect x="525" y="724" width="136" height="46" rx="23" fill="#2A2430"/>
+  <text x="560" y="753" class="tinyDark">Host venue</text>
+  <rect x="675" y="724" width="135" height="46" rx="23" fill="#231E28" stroke="#C1121F" stroke-width="2"/>
+  <text x="703" y="753" class="tinyDark">Waitlist</text>
+
+  <text x="120" y="860" class="section">Dark tokens</text>
+  <rect x="120" y="898" width="110" height="84" rx="18" fill="#C1121F"/><text x="120" y="1006" class="tinyDark">Primary</text><text x="120" y="1033" class="hex">#C1121F</text>
+  <rect x="248" y="898" width="110" height="84" rx="18" fill="#8A0F18"/><text x="248" y="1006" class="tinyDark">Hover</text><text x="248" y="1033" class="hex">#8A0F18</text>
+  <rect x="376" y="898" width="110" height="84" rx="18" fill="#100E14"/><text x="376" y="1006" class="tinyDark">Background</text><text x="376" y="1033" class="hex">#100E14</text>
+  <rect x="504" y="898" width="110" height="84" rx="18" fill="#18151D"/><text x="504" y="1006" class="tinyDark">Surface</text><text x="504" y="1033" class="hex">#18151D</text>
+  <rect x="632" y="898" width="110" height="84" rx="18" fill="#2A2430"/><text x="632" y="1006" class="tinyDark">Border</text><text x="632" y="1033" class="hex">#2A2430</text>
+  <rect x="760" y="898" width="80" height="84" rx="18" fill="#F5F1EB"/><text x="760" y="1006" class="tinyDark">Text</text><text x="760" y="1033" class="hex">#F5F1EB</text>
+
+  <!-- Light board -->
+  <g filter="url(#shadow)">
+    <rect x="920" y="280" width="800" height="860" rx="40" fill="#F6F2ED" stroke="#E4DCD8" stroke-width="2"/>
+  </g>
+  <text x="960" y="340" class="uiLightTitle">Light mode</text>
+  <text x="960" y="378" class="uiLightBody">Editorial and clean, with scarlet carrying the identity over pale surfaces.</text>
+
+  <rect x="960" y="424" width="720" height="124" rx="30" fill="#FFFFFF" stroke="#E7E0DB" stroke-width="2"/>
+  <text x="998" y="474" class="uiLightTitle">[FUTURE] YJAM @ Perpetual Lab</text>
+  <text x="1000" y="515" class="uiLightBody">Red accent stays premium when backgrounds stay warm and neutral.</text>
+  <rect x="1510" y="456" width="130" height="42" rx="21" fill="#C1121F"/>
+  <text x="1544" y="484" class="chipDark">Live</text>
+
+  <rect x="960" y="588" width="345" height="210" rx="30" fill="#FFFFFF" stroke="#E7E0DB" stroke-width="2"/>
+  <text x="990" y="640" class="uiLightTitle">Primary CTA</text>
+  <text x="990" y="682" class="uiLightBody">Great for admin tools, forms, dashboards, and daytime browsing.</text>
+  <rect x="990" y="724" width="170" height="54" rx="27" fill="#C1121F"/>
+  <text x="1036" y="758" class="chipDark">Buy tickets</text>
+
+  <rect x="1335" y="588" width="345" height="210" rx="30" fill="#FFFFFF" stroke="#E7E0DB" stroke-width="2"/>
+  <text x="1365" y="640" class="uiLightTitle">Secondary UI</text>
+  <text x="1365" y="682" class="uiLightBody">Use charcoal text and soft gray borders; avoid bright red backgrounds everywhere.</text>
+  <rect x="1365" y="724" width="136" height="46" rx="23" fill="#F1ECE7"/>
+  <text x="1399" y="753" class="tinyLight">Host venue</text>
+  <rect x="1515" y="724" width="135" height="46" rx="23" fill="#FFF6F4" stroke="#C1121F" stroke-width="2"/>
+  <text x="1543" y="753" class="tinyLight">Waitlist</text>
+
+  <text x="960" y="860" class="uiLightTitle">Light tokens</text>
+  <rect x="960" y="898" width="110" height="84" rx="18" fill="#C1121F"/><text x="960" y="1006" class="tinyLight">Primary</text><text x="960" y="1033" class="hex">#C1121F</text>
+  <rect x="1088" y="898" width="110" height="84" rx="18" fill="#8A0F18"/><text x="1088" y="1006" class="tinyLight">Hover</text><text x="1088" y="1033" class="hex">#8A0F18</text>
+  <rect x="1216" y="898" width="110" height="84" rx="18" fill="#F6F2ED" stroke="#E7E0DB" stroke-width="2"/><text x="1216" y="1006" class="tinyLight">Background</text><text x="1216" y="1033" class="hex">#F6F2ED</text>
+  <rect x="1344" y="898" width="110" height="84" rx="18" fill="#FFFFFF" stroke="#E7E0DB" stroke-width="2"/><text x="1344" y="1006" class="tinyLight">Surface</text><text x="1344" y="1033" class="hex">#FFFFFF</text>
+  <rect x="1472" y="898" width="110" height="84" rx="18" fill="#E4DCD8"/><text x="1472" y="1006" class="tinyLight">Border</text><text x="1472" y="1033" class="hex">#E4DCD8</text>
+  <rect x="1600" y="898" width="80" height="84" rx="18" fill="#16121A"/><text x="1600" y="1006" class="tinyLight">Text</text><text x="1600" y="1033" class="hex">#16121A</text>
+
+  <text x="80" y="1248" class="sub">Recommended system: keep one brand red, then switch surface families only. Dark for consumer/event discovery, Light for admin and dense professional workflows.</text>
+</svg>

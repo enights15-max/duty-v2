@@ -31,7 +31,10 @@ use Illuminate\Validation\Rule;
 class OrganizerController extends Controller
 {
   private $admin_user_name;
-  public function __construct()
+  public function __construct(
+    private ProfessionalCatalogBridgeService $catalogBridge,
+    private ProfessionalBalanceService $professionalBalanceService
+  )
   {
     $admin = Admin::select('username')->first();
     $this->admin_user_name = $admin->username;

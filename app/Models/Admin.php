@@ -29,7 +29,8 @@ class Admin extends Model implements AuthenticatableContract
     'address',
     'details',
     'password',
-    'status'
+    'status',
+    'navigation_layout'
   ];
 
   /**

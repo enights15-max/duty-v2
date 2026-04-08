@@ -125,7 +125,7 @@ class EnvironmentManager
         'PUSHER_APP_KEY='.''."\n".
         'PUSHER_APP_SECRET='.''."\n\n".
         'MOLLIE_KEY='.'test_5HcWVs9qc5pzy36H9Tu9mwAyats33J'."\n\n".
-        'APP_TIMEZONE='.'America/Maceio'."\n\n".
+        'TIMEZONE='.'America/Maceio'."\n\n".
         'VAPID_PUBLIC_KEY='.'BFvK_Vl5zh6g-8glfwClhH-1P37uZqEL3rgiWHMxlzTxtnd5y2DY06AaTpayCuGvG2Di7Kw6vqX6tf7F46pwqpw'."\n".
         'VAPID_PRIVATE_KEY='.'QHX2L0MHBmPUPHiq76zVgUiGhyOlZ42vssTh-YpDEbk'."\n\n".
         'ANET_API_LOGIN_ID='.'3Ca5hYQ6h'."\n".

@@ -1,21 +1,17 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-<<<<<<< Updated upstream
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async'; // For Countdown
 import 'package:flutter_html/flutter_html.dart' hide Marker;
-=======
-import 'dart:async'; // For Countdown
-import 'package:dio/dio.dart';
-import 'package:google_fonts/google_fonts.dart';
-// import 'package:flutter_html/flutter_html.dart' hide Marker;
-import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
-import '../../data/models/event_detail_model.dart';
->>>>>>> Stashed changes
 import '../providers/event_details_provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/providers/profile_state_provider.dart';
+import '../../../profile/presentation/providers/marketplace_provider.dart';
+import '../../../../core/constants/app_urls.dart';
+import '../../../../core/theme/colors.dart';
 
 class EventDetailsPage extends ConsumerStatefulWidget {
   final int eventId;
@@ -31,6 +27,163 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
   bool? _isWishlistedOverride;
   int? _wishlistCountOverride;
   bool _wishlistBusy = false;
+  bool? _waitlistSubscribedOverride;
+  int? _waitlistCountOverride;
+  bool _waitlistBusy = false;
+
+  void _openMarketplaceForEvent(EventDetailModel event) {
+    final search = event.title.trim();
+    ref
+        .read(marketplaceFiltersProvider.notifier)
+        .state = MarketplaceFilterState(
+      search: search.isEmpty ? null : search,
+      eventId: event.id,
+      eventTitle: event.title,
+      eventDate: event.date,
+    );
+    ref.invalidate(marketplaceTicketsProvider);
+    context.go('/marketplace');
+  }
+
+  Widget _buildRewardsSection(EventDetailModel event) {
+    final palette = context.dutyTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              Text(
+                'BENEFICIOS INCLUIDOS',
+                style: GoogleFonts.outfit(
+                  color: palette.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.auto_awesome, color: palette.primary, size: 14),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 110,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: event.rewards.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final reward = event.rewards[index];
+              return Container(
+                width: 220,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: palette.surface.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: palette.border.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: palette.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        _getRewardIcon(reward.rewardType),
+                        color: palette.primary,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            reward.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.outfit(
+                              color: palette.textPrimary,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (reward.sponsorName != null) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Text(
+                                  'por ',
+                                  style: GoogleFonts.inter(
+                                    color: palette.textMuted,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                Flexible(
+                                  child: Text(
+                                    reward.sponsorName!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.outfit(
+                                      color: palette.primary,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Cortesía del evento',
+                              style: GoogleFonts.inter(
+                                color: palette.textMuted,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 32),
+      ],
+    );
+  }
+
+  IconData _getRewardIcon(String type) {
+    switch (type) {
+      case 'drink':
+        return Icons.local_bar_rounded;
+      case 'merch':
+        return Icons.checkroom_rounded;
+      case 'perk_access':
+        return Icons.verified_user_rounded;
+      case 'voucher':
+        return Icons.confirmation_number_rounded;
+      default:
+        return Icons.card_giftcard_rounded;
+    }
+  }
 
   String _slugifyTitle(String value) {
     final normalized = value
@@ -39,6 +192,49 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
         .replaceAll(RegExp(r'-{2,}'), '-')
         .replaceAll(RegExp(r'^-|-$'), '');
     return normalized.isEmpty ? 'event' : normalized;
+  }
+
+  DateTime _resolveEventTargetDate(EventDetailModel event) {
+    final dateValue = event.date?.trim();
+    final timeValue = event.time?.trim();
+    final candidates = <String>[
+      if (dateValue != null &&
+          dateValue.isNotEmpty &&
+          timeValue != null &&
+          timeValue.isNotEmpty)
+        '$dateValue $timeValue',
+      if (dateValue != null && dateValue.isNotEmpty) dateValue,
+      if (timeValue != null && timeValue.isNotEmpty) timeValue,
+    ];
+
+    for (final candidate in candidates) {
+      final parsed = DateTime.tryParse(candidate);
+      if (parsed != null) return parsed;
+    }
+
+    return DateTime.now().add(const Duration(days: 7));
+  }
+
+  DateTime _resolveEventExpirationDate(EventDetailModel event) {
+    // If explicit end date is provided
+    final endDateValue = event.endDate?.trim();
+    final endTimeValue = event.endTime?.trim();
+    final endCandidates = <String>[
+      if (endDateValue != null &&
+          endDateValue.isNotEmpty &&
+          endTimeValue != null &&
+          endTimeValue.isNotEmpty)
+        '$endDateValue $endTimeValue',
+      if (endDateValue != null && endDateValue.isNotEmpty) endDateValue,
+    ];
+
+    for (final candidate in endCandidates) {
+      final parsed = DateTime.tryParse(candidate);
+      if (parsed != null) return parsed;
+    }
+
+    // Default fallback: 12 hours after the start date
+    return _resolveEventTargetDate(event).add(const Duration(hours: 12));
   }
 
   Future<void> _shareEvent(EventDetailModel event) async {
@@ -67,7 +263,9 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Log in to mark events as interested and shape your scene.'),
+            content: Text(
+              'Log in to mark events as interested and shape your scene.',
+            ),
           ),
         );
         context.push('/login');
@@ -118,7 +316,9 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('We could not update your interested state right now.'),
+            content: Text(
+              'We could not update your interested state right now.',
+            ),
           ),
         );
       }
@@ -129,37 +329,391 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
     }
   }
 
-  // Mock data for things not in API yet
-  final List<Map<String, String>> lineup = [
-    {'name': 'ZEDD', 'image': 'https://i.pravatar.cc/150?img=11'},
-    {'name': 'ANNA', 'image': 'https://i.pravatar.cc/150?img=5'},
-    {'name': 'KAYLA', 'image': 'https://i.pravatar.cc/150?img=9'},
-    {'name': 'MARK', 'image': 'https://i.pravatar.cc/150?img=3'},
-  ];
+  Future<void> _toggleWaitlist({
+    required EventDetailModel event,
+    required bool currentValue,
+    required int currentCount,
+  }) async {
+    if (_waitlistBusy) return;
+
+    final apiClient = ref.read(apiClientProvider);
+    if (!apiClient.hasToken) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Inicia sesión para unirte a la waitlist y enterarte si reaparecen entradas.',
+            ),
+          ),
+        );
+        context.push('/login');
+      }
+      return;
+    }
+
+    final nextValue = !currentValue;
+    final optimisticCount = nextValue
+        ? currentCount + 1
+        : (currentCount > 0 ? currentCount - 1 : 0);
+
+    setState(() {
+      _waitlistBusy = true;
+      _waitlistSubscribedOverride = nextValue;
+      _waitlistCountOverride = optimisticCount;
+    });
+
+    try {
+      final response = nextValue
+          ? await apiClient.dio.post(AppUrls.eventWaitlist(event.id))
+          : await apiClient.dio.delete(AppUrls.eventWaitlist(event.id));
+
+      final payload = response.data;
+      final map = payload is Map<String, dynamic>
+          ? payload
+          : payload is Map
+          ? Map<String, dynamic>.from(payload)
+          : const <String, dynamic>{};
+      final data = map['data'];
+      if (data is Map<String, dynamic>) {
+        final summary = EventWaitlistSummaryModel.fromJson(data);
+        if (mounted) {
+          setState(() {
+            _waitlistSubscribedOverride = summary.viewerSubscribed;
+            _waitlistCountOverride = summary.waitlistCount;
+          });
+        }
+      }
+
+      ref.invalidate(eventDetailsProvider(widget.eventId));
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              map['message']?.toString() ??
+                  (nextValue
+                      ? 'Te avisaremos si vuelven a aparecer entradas.'
+                      : 'Ya no estás en la waitlist de este evento.'),
+            ),
+          ),
+        );
+      }
+    } on DioException catch (error) {
+      final payload = error.response?.data;
+      final map = payload is Map<String, dynamic>
+          ? payload
+          : payload is Map
+          ? Map<String, dynamic>.from(payload)
+          : const <String, dynamic>{};
+      final message = map['message']?.toString().trim().isNotEmpty == true
+          ? map['message'].toString().trim()
+          : 'No pudimos actualizar la waitlist ahora mismo. Inténtalo de nuevo.';
+
+      if (mounted) {
+        setState(() {
+          _waitlistSubscribedOverride = currentValue;
+          _waitlistCountOverride = currentCount;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _waitlistSubscribedOverride = currentValue;
+          _waitlistCountOverride = currentCount;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'No pudimos actualizar la waitlist ahora mismo. Inténtalo de nuevo.',
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _waitlistBusy = false);
+      }
+    }
+  }
+
+  Color _availabilityColor(EventInventorySummaryModel? inventory) {
+    final palette = context.dutyTheme;
+    switch (inventory?.availabilityState) {
+      case 'sold_out_marketplace':
+        return palette.warning;
+      case 'sold_out':
+        return palette.danger;
+      case 'low_stock':
+        return palette.warning;
+      default:
+        return palette.primary;
+    }
+  }
+
+  Widget _buildAvailabilityBadge(
+    String label,
+    EventInventorySummaryModel? inventory,
+  ) {
+    final color = _availabilityColor(inventory);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.26),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: GoogleFonts.outfit(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroMetaChip(IconData icon, String label, Color accent) {
+    final palette = context.dutyTheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.28),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: accent.withValues(alpha: 0.24)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: accent, size: 15),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: GoogleFonts.outfit(
+              color: palette.textPrimary,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAvailabilityPanel(
+    BuildContext context,
+    EventInventorySummaryModel inventory,
+    EventWaitlistSummaryModel? waitlist,
+    bool isWaitlistSubscribed,
+    int waitlistCount,
+    EventDetailModel event,
+  ) {
+    final color = _availabilityColor(inventory);
+    final palette = context.dutyTheme;
+
+    String helperText;
+    switch (inventory.availabilityState) {
+      case 'sold_out_marketplace':
+        helperText =
+            'La taquilla oficial está agotada. Puedes revisar si otros usuarios tienen entradas disponibles en blackmarket.';
+        break;
+      case 'sold_out':
+        helperText = waitlistCount > 0
+            ? 'La taquilla oficial ya se agotó. ${waitlistCount == 1 ? '1 persona ya pidió alerta para este evento.' : '$waitlistCount personas ya pidieron alerta para este evento.'}'
+            : 'La taquilla oficial ya se agotó. Este sold out refuerza la demanda del evento y por ahora no hay reventa disponible.';
+        break;
+      case 'low_stock':
+        helperText = inventory.lowStockCount != null
+            ? 'Quedan solo ${inventory.lowStockCount} entradas oficiales. Si te interesa, este es el mejor momento para asegurar la tuya.'
+            : 'Quedan pocas entradas oficiales. Si te interesa, este es el mejor momento para asegurar la tuya.';
+        break;
+      default:
+        helperText = inventory.primarySellThroughPercent == null
+            ? 'La taquilla oficial sigue activa.'
+            : 'La preventa ya va por ${inventory.primarySellThroughPercent!.toStringAsFixed(1)}% del inventario trazable.';
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.local_activity_rounded, color: color, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  inventory.demandLabel,
+                  style: GoogleFonts.outfit(
+                    color: palette.textPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            helperText,
+            style: GoogleFonts.inter(
+              color: palette.textSecondary,
+              fontSize: 13,
+              height: 1.45,
+            ),
+          ),
+          if (inventory.primaryAvailableTickets != null ||
+              inventory.marketplaceAvailableCount > 0) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (inventory.primaryAvailableTickets != null)
+                  _buildAvailabilityFactChip(
+                    label: 'Oficial',
+                    value: '${inventory.primaryAvailableTickets}',
+                  ),
+                if (inventory.primarySellThroughPercent != null)
+                  _buildAvailabilityFactChip(
+                    label: 'Sell-through',
+                    value:
+                        '${inventory.primarySellThroughPercent!.toStringAsFixed(1)}%',
+                  ),
+                if (inventory.showMarketplaceFallback)
+                  _buildAvailabilityFactChip(
+                    label: 'Blackmarket',
+                    value: '${inventory.marketplaceAvailableCount}',
+                  ),
+                if (!inventory.showMarketplaceFallback &&
+                    inventory.primarySoldOut)
+                  _buildAvailabilityFactChip(
+                    label: 'Waitlist',
+                    value: '$waitlistCount',
+                  ),
+              ],
+            ),
+          ],
+          if (inventory.showMarketplaceFallback) ...[
+            const SizedBox(height: 14),
+            OutlinedButton(
+              onPressed: () => _openMarketplaceForEvent(event),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: color.withValues(alpha: 0.35)),
+                foregroundColor: color,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: const Text('Ver blackmarket'),
+            ),
+          ] else if (inventory.primarySoldOut) ...[
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: _waitlistBusy
+                  ? null
+                  : () => _toggleWaitlist(
+                      event: event,
+                      currentValue: isWaitlistSubscribed,
+                      currentCount: waitlist?.waitlistCount ?? waitlistCount,
+                    ),
+              style: FilledButton.styleFrom(
+                backgroundColor: isWaitlistSubscribed
+                    ? palette.surfaceAlt
+                    : color,
+                foregroundColor: palette.textPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              icon: Icon(
+                isWaitlistSubscribed
+                    ? Icons.notifications_active_rounded
+                    : Icons.notifications_rounded,
+              ),
+              label: Text(
+                _waitlistBusy
+                    ? 'Actualizando...'
+                    : isWaitlistSubscribed
+                    ? 'Salir de la waitlist'
+                    : 'Avísame si reaparecen entradas',
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAvailabilityFactChip({
+    required String label,
+    required String value,
+  }) {
+    final palette = context.dutyTheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: palette.surfaceAlt,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: palette.border),
+      ),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: '$label: ',
+              style: GoogleFonts.outfit(
+                color: palette.textMuted,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            TextSpan(
+              text: value,
+              style: GoogleFonts.outfit(
+                color: palette.textPrimary,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final eventAsync = ref.watch(eventDetailsProvider(widget.eventId));
+    final activeProfile = ref.watch(activeProfileProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A), // Dark Background
+      backgroundColor: palette.background,
       body: eventAsync.when(
         data: (event) {
-<<<<<<< Updated upstream
-          // debugPrint('EVENT DETAILS LOG: $event');
-=======
           final isWishlisted = _isWishlistedOverride ?? event.isWishlisted;
           final wishlistCount = _wishlistCountOverride ?? event.wishlistCount;
-          final socialInterestedCount =
-              event.social == null
-                  ? null
-                  : (wishlistCount > event.social!.interestedCount
-                      ? wishlistCount
-                      : event.social!.interestedCount);
-          final targetDate =
-              DateTime.tryParse('${event.date} ${event.time}') ??
-              DateTime.now().add(const Duration(days: 7));
-          final isPastEvent = targetDate.isBefore(DateTime.now());
+          final socialInterestedCount = event.social == null
+              ? null
+              : (wishlistCount > event.social!.interestedCount
+                    ? wishlistCount
+                    : event.social!.interestedCount);
+          final targetDate = _resolveEventTargetDate(event);
+          final expirationDate = _resolveEventExpirationDate(event);
+          final isPastEvent = expirationDate.isBefore(DateTime.now());
           final hasReservableTickets = event.tickets.any(
             (ticket) =>
                 ticket.available &&
@@ -194,9 +748,26 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
           final nextIncreaseLabel = nextIncreaseTicket == null
               ? null
               : 'Sube a \$${nextIncreaseTicket.nextPrice!.toStringAsFixed(2)} el ${DateFormat('MMM d').format(nextIncreaseTicket.nextPriceEffectiveFrom!.toLocal())}';
+          final inventory = event.inventory;
+          final availabilityLabel =
+              inventory?.demandLabel ?? 'Tickets disponibles';
+          final waitlist = event.waitlist;
+          final isWaitlistSubscribed =
+              _waitlistSubscribedOverride ??
+              waitlist?.viewerSubscribed ??
+              false;
+          final waitlistCount =
+              _waitlistCountOverride ?? waitlist?.waitlistCount ?? 0;
+          final showHeroWaitlistProof =
+              inventory?.primarySoldOut == true &&
+              inventory?.showMarketplaceFallback != true &&
+              waitlistCount > 0;
+          final showHeroWaitlistState =
+              inventory?.primarySoldOut == true &&
+              inventory?.showMarketplaceFallback != true &&
+              isWaitlistSubscribed;
 
           // Event data is already shaped by provider; keep UI render pure.
->>>>>>> Stashed changes
           return Stack(
             children: [
               // Scrollable Content
@@ -224,9 +795,9 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                                   end: Alignment.bottomCenter,
                                   colors: [
                                     Colors.transparent,
-                                    const Color(0xFF0F0F1A).withOpacity(0.2),
-                                    const Color(0xFF0F0F1A).withOpacity(0.8),
-                                    const Color(0xFF0F0F1A),
+                                    palette.background.withValues(alpha: 0.2),
+                                    palette.background.withValues(alpha: 0.8),
+                                    palette.background,
                                   ],
                                   stops: const [0.0, 0.5, 0.8, 1.0],
                                 ),
@@ -241,58 +812,97 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // "Sold Out" or Status Tag
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.purpleAccent.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: Colors.purpleAccent.withOpacity(
-                                        0.5,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'SELLING FAST',
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.purpleAccent,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
+                                _buildAvailabilityBadge(
+                                  availabilityLabel,
+                                  inventory,
                                 ),
+                                if (showHeroWaitlistProof ||
+                                    showHeroWaitlistState) ...[
+                                  const SizedBox(height: 10),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      if (showHeroWaitlistState)
+                                        _buildHeroMetaChip(
+                                          Icons.notifications_active_rounded,
+                                          'En waitlist',
+                                          palette.success,
+                                        ),
+                                      if (showHeroWaitlistProof)
+                                        _buildHeroMetaChip(
+                                          Icons.people_alt_rounded,
+                                          waitlistCount == 1
+                                              ? '1 persona esperando'
+                                              : '$waitlistCount personas esperando',
+                                          palette.primary,
+                                        ),
+                                    ],
+                                  ),
+                                ],
                                 const SizedBox(height: 12),
-                                Text(
-                                  event.title,
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white,
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    height: 1.1,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
                                 Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Icon(
-                                      Icons.calendar_today,
-                                      color: Colors.white70,
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      '${event.date} • ${event.time}',
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white70,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
+                                    Expanded(
+                                      child: Text(
+                                        event.title,
+                                        style: GoogleFonts.outfit(
+                                          color: palette.textPrimary,
+                                          fontSize: 32,
+                                          fontWeight: FontWeight.bold,
+                                          height: 1.1,
+                                        ),
                                       ),
                                     ),
+                                    if (event.policies?.adultAgeRestrictions ==
+                                        true) ...[
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: palette.danger.withValues(
+                                            alpha: 0.2,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                          border: Border.all(
+                                            color: palette.danger,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          '18+',
+                                          style: GoogleFonts.outfit(
+                                            color: palette.danger,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                const SizedBox(height: 14),
+                                Wrap(
+                                  spacing: 10,
+                                  runSpacing: 10,
+                                  children: [
+                                    _buildHeroMetaChip(
+                                      Icons.calendar_today_rounded,
+                                      '${event.date} • ${event.time}',
+                                      palette.primary,
+                                    ),
+                                    if (inventory?.showMarketplaceFallback ==
+                                        true)
+                                      _buildHeroMetaChip(
+                                        Icons.swap_horiz_rounded,
+                                        'Blackmarket activo',
+                                        palette.warning,
+                                      ),
                                   ],
                                 ),
                               ],
@@ -303,20 +913,61 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                     ),
 
                     // --- Countdown Timer ---
-                    Padding(
-<<<<<<< Updated upstream
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 20,
+                    if (!isPastEvent)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 20,
+                        ),
+                        child: _CountdownTimer(targetDate: targetDate),
+                      )
+                    else
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 20,
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 20,
+                            horizontal: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            color: palette.surface,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: palette.border),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'THIS EVENT HAS CONCLUDED',
+                              style: GoogleFonts.outfit(
+                                color: palette.textMuted,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                      child: _CountdownTimer(
-                        targetDate:
-                            DateTime.tryParse('${event.date} ${event.time}') ??
-                            DateTime.now().add(const Duration(days: 7)),
-                      ),
-                    ),
 
-=======
+                    if (inventory != null) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                        child: _buildAvailabilityPanel(
+                          context,
+                          inventory,
+                          waitlist,
+                          isWaitlistSubscribed,
+                          waitlistCount,
+                          event,
+                        ),
+                      ),
+                    ],
+
+                    // --- Action Buttons ---
+                    Padding(
                       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                       child: Row(
                         children: [
@@ -342,13 +993,16 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                                   'Organizer',
                               eventTitle: event.title,
                               supportsContact:
-                                  event.organizerModel?.supportsContact ??
-                                  true,
+                                  event.organizerModel?.supportsContact ?? true,
                             ),
                           ),
                         ],
                       ),
                     ),
+
+                    if (event.rewards.isNotEmpty) ...[
+                      _buildRewardsSection(event),
+                    ],
 
                     if (event.social?.hasAnyData == true) ...[
                       Padding(
@@ -356,7 +1010,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                         child: Text(
                           'THE CROWD',
                           style: GoogleFonts.outfit(
-                            color: Colors.purpleAccent,
+                            color: palette.primary,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1.5,
@@ -383,9 +1037,8 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                       const SizedBox(height: 32),
                     ],
 
->>>>>>> Stashed changes
                     // --- About Section ---
-/*
+                    /*
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Column(
@@ -394,7 +1047,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                           Text(
                             'ABOUT THE EXPERIENCE',
                             style: GoogleFonts.outfit(
-                              color: Colors.purpleAccent,
+                              color: kPrimaryColor,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.5,
@@ -405,7 +1058,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                             data: event.description,
                             style: {
                               "body": Style(
-                                color: Colors.white70,
+                                color: palette.textMuted,
                                 fontSize: FontSize(14),
                                 fontFamily: GoogleFonts.inter().fontFamily,
                                 lineHeight: LineHeight(1.6),
@@ -428,7 +1081,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                             child: Text(
                               'READ MORE',
                               style: GoogleFonts.outfit(
-                                color: Colors.purpleAccent,
+                                color: kPrimaryColor,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -438,12 +1091,8 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                       ),
                     ),
 */
-
                     const SizedBox(height: 32),
 
-<<<<<<< Updated upstream
-                    // --- Lineup Section ---
-=======
                     // --- Organizer Section ---
                     if (event.organizerModel != null) ...[
                       Padding(
@@ -451,7 +1100,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                         child: Text(
                           'Organizer',
                           style: GoogleFonts.outfit(
-                            color: Colors.white,
+                            color: palette.textPrimary,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -467,11 +1116,9 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E1E2C),
+                              color: palette.surface,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.05),
-                              ),
+                              border: Border.all(color: palette.border),
                             ),
                             child: Row(
                               children: [
@@ -479,21 +1126,18 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                                   radius: 24,
                                   backgroundImage:
                                       event.organizerModel!.photo != null
-                                      ? CachedNetworkImageProvider(
-                                          AppUrls.getAvatarUrl(
-                                                event.organizerModel!.photo!,
-                                                isOrganizer: true,
-                                              ) ??
-                                              '',
+                                      ? NetworkImage(
+                                          event.organizerModel!.photo!,
                                         )
                                       : null,
-                                  onBackgroundImageError: event.organizerModel!.photo != null
+                                  onBackgroundImageError:
+                                      event.organizerModel!.photo != null
                                       ? (_, _) {}
                                       : null,
                                   child: event.organizerModel!.photo == null
-                                      ? const Icon(
+                                      ? Icon(
                                           Icons.person,
-                                          color: Colors.white,
+                                          color: palette.textPrimary,
                                         )
                                       : null,
                                 ),
@@ -506,7 +1150,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                                       Text(
                                         event.organizerModel!.name,
                                         style: GoogleFonts.outfit(
-                                          color: Colors.white,
+                                          color: palette.textPrimary,
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -514,7 +1158,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                                       Text(
                                         'View Profile',
                                         style: GoogleFonts.inter(
-                                          color: const Color(0xFF8655F6),
+                                          color: palette.primary,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -522,10 +1166,10 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                                     ],
                                   ),
                                 ),
-                                const Icon(
+                                Icon(
                                   Icons.arrow_forward_ios,
                                   size: 16,
-                                  color: Colors.white24,
+                                  color: palette.textMuted,
                                 ),
                               ],
                             ),
@@ -536,224 +1180,140 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                     ],
 
                     // --- Venue Section ---
->>>>>>> Stashed changes
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Lineup',
+                            'The Venue',
                             style: GoogleFonts.outfit(
-                              color: Colors.white,
+                              color: palette.textPrimary,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
-                            'View All',
-                            style: GoogleFonts.outfit(
-                              color: Colors.purpleAccent,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
+                          if (event.venue != null)
+                            TextButton(
+                              onPressed: () => context.push(
+                                '/venue-profile/${event.venue!.id}',
+                              ),
+                              child: Text(
+                                'View Profile',
+                                style: GoogleFonts.inter(
+                                  color: palette.primary,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      height: 100,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        itemCount: lineup.length,
-                        itemBuilder: (context, index) {
-                          final artist = lineup[index];
-                          return Container(
-                            margin: const EdgeInsets.only(right: 20),
-                            child: Column(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: index == 0
-                                          ? Colors.purpleAccent
-                                          : Colors.transparent,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: CircleAvatar(
-                                    radius: 30,
-                                    backgroundImage: NetworkImage(
-                                      artist['image']!,
-                                    ),
-                                    onBackgroundImageError: (_, __) {},
-                                    child: const Icon(
-                                      Icons.person,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  artist['name']!,
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // --- Venue Section ---
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Text(
-                        'The Venue',
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
                     if (event.latitude != null && event.longitude != null)
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 24),
-                        height: 200,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: GoogleMap(
-                            initialCameraPosition: CameraPosition(
-                              target: LatLng(event.latitude!, event.longitude!),
-                              zoom: 15,
-                            ),
-                            markers: {
-                              Marker(
-                                markerId: const MarkerId('venue'),
-                                position: LatLng(
-                                  event.latitude!,
-                                  event.longitude!,
-                                ),
-                                infoWindow: InfoWindow(title: event.address),
-                              ),
-                            },
-                            liteModeEnabled:
-                                true, // Better performance for lists/scroll views
-                            mapToolbarEnabled: true,
-                            zoomControlsEnabled: false,
-                          ),
-                        ),
+                      EventLocationMap(
+                        latitude: event.latitude!,
+                        longitude: event.longitude!,
+                        address: event.address ?? 'TBA',
                       )
                     else
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 24),
-                        height: 200,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                              'https://docs.mapbox.com/mapbox-gl-js/assets/radar.gif',
+                      GestureDetector(
+                        onTap: event.venue != null
+                            ? () => context.push(
+                                '/venue-profile/${event.venue!.id}',
+                              )
+                            : null,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 24),
+                          height: 200,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            image: const DecorationImage(
+                              image: NetworkImage(
+                                'https://docs.mapbox.com/mapbox-gl-js/assets/radar.gif',
+                              ),
+                              fit: BoxFit.cover,
                             ),
-                            fit: BoxFit.cover,
+                            boxShadow: [
+                              BoxShadow(
+                                color: palette.shadow.withValues(alpha: 0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: Stack(
-                          children: [
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.vertical(
-                                    bottom: Radius.circular(24),
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.vertical(
+                                      bottom: Radius.circular(24),
+                                    ),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.bottomCenter,
+                                      end: Alignment.topCenter,
+                                      colors: [
+                                        palette.background.withValues(
+                                          alpha: 0.92,
+                                        ),
+                                        Colors.transparent,
+                                      ],
+                                    ),
                                   ),
-                                  gradient: LinearGradient(
-                                    begin: Alignment.bottomCenter,
-                                    end: Alignment.topCenter,
-                                    colors: [
-                                      Colors.black.withOpacity(0.9),
-                                      Colors.transparent,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              event.address ?? 'TBA',
+                                              style: GoogleFonts.outfit(
+                                                color: palette.textPrimary,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              'Location',
+                                              style: GoogleFonts.inter(
+                                                color: palette.textSecondary,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: palette.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.map,
+                                          color: palette.textPrimary,
+                                          size: 20,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            event.address ?? 'TBA',
-                                            style: GoogleFonts.outfit(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          Text(
-                                            'Location',
-                                            style: GoogleFonts.inter(
-                                              color: Colors.white70,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFF6200EE),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.map,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     const SizedBox(height: 100), // Extra space
@@ -776,15 +1336,12 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _buildGlassIcon(
-                          icon: Icons.arrow_back_ios_new,
-                          onTap: () => context.pop(),
+                          Icons.arrow_back_ios_new,
+                          () => context.pop(),
                         ),
                         Row(
                           children: [
-                            _buildGlassIcon(
-                              icon: Icons.share,
-                              onTap: () => _shareEvent(event),
-                            ),
+                            _buildGlassIcon(Icons.share, () {}),
                             const SizedBox(width: 12),
                             _buildGlassIcon(
                               icon: isWishlisted
@@ -795,14 +1352,14 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                                 currentCount: wishlistCount,
                               ),
                               iconColor: isWishlisted
-                                  ? Colors.purpleAccent
-                                  : Colors.white,
+                                  ? palette.primary
+                                  : palette.textPrimary,
                               backgroundColor: isWishlisted
-                                  ? Colors.purpleAccent.withValues(alpha: 0.18)
-                                  : Colors.white.withValues(alpha: 0.1),
+                                  ? palette.primarySurface
+                                  : palette.surfaceAlt.withValues(alpha: 0.92),
                               borderColor: isWishlisted
-                                  ? Colors.purpleAccent.withValues(alpha: 0.45)
-                                  : Colors.white.withValues(alpha: 0.1),
+                                  ? palette.borderStrong
+                                  : palette.border,
                             ),
                           ],
                         ),
@@ -820,21 +1377,117 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                 child: Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(
-                      0xFF0F0F1A,
-                    ).withOpacity(0.95), // Glassy dark
-                    border: Border(
-                      top: BorderSide(color: Colors.white.withOpacity(0.1)),
-                    ),
+                    color: palette.surfaceAlt.withValues(alpha: 0.95),
+                    border: Border(top: BorderSide(color: palette.border)),
                   ),
                   child: SafeArea(
                     top: false,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isCompact = constraints.maxWidth < 520;
+                        final stackButtons = constraints.maxWidth < 390;
+                        final showMarketplaceAction =
+                            inventory?.showMarketplaceFallback == true;
+                        final showWaitlistAction =
+                            inventory?.showWaitlistCta == true ||
+                            (inventory?.primarySoldOut == true &&
+                                inventory?.showMarketplaceFallback != true);
+
+                        if (isPastEvent) {
+                          return Align(
+                            alignment: Alignment.centerLeft,
+                            child: _buildBottomStatusPill('Ended'),
+                          );
+                        }
+
+                        if (isCompact) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    flex: 9,
+                                    child: _buildBottomPricePanel(
+                                      startingPrice: startingPrice,
+                                      nextIncreaseLabel: null,
+                                      compact: true,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    flex: 11,
+                                    child: _buildBottomActionButton(
+                                      label: showMarketplaceAction
+                                          ? 'Ver reventa'
+                                          : showWaitlistAction
+                                          ? (isWaitlistSubscribed
+                                                ? 'Salir de waitlist'
+                                                : 'Avísame')
+                                          : 'Buy Tickets',
+                                      icon: showMarketplaceAction
+                                          ? Icons.storefront_rounded
+                                          : showWaitlistAction
+                                          ? Icons.notifications_active_rounded
+                                          : Icons.confirmation_number,
+                                      onTap: showMarketplaceAction
+                                          ? () =>
+                                                _openMarketplaceForEvent(event)
+                                          : showWaitlistAction
+                                          ? () => _toggleWaitlist(
+                                              event: event,
+                                              currentValue:
+                                                  isWaitlistSubscribed,
+                                              currentCount: waitlistCount,
+                                            )
+                                          : () => context.push(
+                                              '/checkout',
+                                              extra: event,
+                                            ),
+                                      compact: stackButtons,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (nextIncreaseLabel != null) ...[
+                                const SizedBox(height: 8),
+                                _buildBottomNoticeChip(
+                                  nextIncreaseLabel,
+                                  icon: Icons.trending_up_rounded,
+                                  compact: true,
+                                ),
+                              ] else ...[
+                                const SizedBox(height: 8),
+                              ],
+                              if (showWaitlistAction && waitlistCount > 0) ...[
+                                _buildBottomNoticeChip(
+                                  waitlistCount == 1
+                                      ? '1 persona ya pidió alerta'
+                                      : '$waitlistCount personas ya pidieron alerta',
+                                  icon: Icons.group_rounded,
+                                  compact: true,
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                              if (hasReservableTickets) ...[
+                                _buildBottomActionButton(
+                                  label: 'Reservar',
+                                  icon: Icons.lock_clock_rounded,
+                                  onTap: () => context.push(
+                                    '/reservations/create',
+                                    extra: event,
+                                  ),
+                                  outlined: true,
+                                  compact: stackButtons,
+                                ),
+                              ],
+                            ],
+                          );
+                        }
+
+                        return Row(
                           children: [
                             Text(
                               'STARTING AT',
@@ -845,13 +1498,56 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                                 letterSpacing: 1,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '\$${event.tickets.isNotEmpty ? event.tickets.first.price : '89.00'}',
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              flex: hasReservableTickets ? 2 : 1,
+                              child: Row(
+                                children: [
+                                  if (hasReservableTickets) ...[
+                                    Expanded(
+                                      child: _buildBottomActionButton(
+                                        label: 'Reservar',
+                                        icon: Icons.lock_clock_rounded,
+                                        onTap: () => context.push(
+                                          '/reservations/create',
+                                          extra: event,
+                                        ),
+                                        outlined: true,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                  ],
+                                  Expanded(
+                                    child: _buildBottomActionButton(
+                                      label: showMarketplaceAction
+                                          ? 'Ver reventa'
+                                          : showWaitlistAction
+                                          ? (isWaitlistSubscribed
+                                                ? 'Salir de waitlist'
+                                                : 'Avísame')
+                                          : 'Buy Tickets',
+                                      icon: showMarketplaceAction
+                                          ? Icons.storefront_rounded
+                                          : showWaitlistAction
+                                          ? Icons.notifications_active_rounded
+                                          : Icons.confirmation_number,
+                                      onTap: showMarketplaceAction
+                                          ? () =>
+                                                _openMarketplaceForEvent(event)
+                                          : showWaitlistAction
+                                          ? () => _toggleWaitlist(
+                                              event: event,
+                                              currentValue:
+                                                  isWaitlistSubscribed,
+                                              currentCount: waitlistCount,
+                                            )
+                                          : () => context.push(
+                                              '/checkout',
+                                              extra: event,
+                                            ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -910,14 +1606,227 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
         error: (err, stack) => Center(
           child: Text(
             'Error: $err',
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: palette.textPrimary),
           ),
         ),
       ),
     );
   }
 
+  Widget _buildBottomPricePanel({
+    required double? startingPrice,
+    required String? nextIncreaseLabel,
+    bool compact = false,
+  }) {
+    final palette = context.dutyTheme;
+    final priceLabel = startingPrice == null
+        ? 'Free'
+        : '\$${startingPrice.toStringAsFixed(2)}';
+
+    return Container(
+      constraints: BoxConstraints(minHeight: compact ? 74 : 92),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 14 : 16,
+        vertical: compact ? 11 : 14,
+      ),
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: palette.border),
+        boxShadow: compact
+            ? null
+            : [
+                BoxShadow(
+                  color: palette.shadow.withValues(alpha: 0.22),
+                  blurRadius: 24,
+                  offset: const Offset(0, 16),
+                ),
+              ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'FROM',
+            style: GoogleFonts.outfit(
+              color: palette.textMuted,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.1,
+            ),
+          ),
+          SizedBox(height: compact ? 6 : 4),
+          if (compact)
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                priceLabel,
+                style: GoogleFonts.outfit(
+                  color: palette.textPrimary,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  height: 1,
+                ),
+              ),
+            )
+          else
+            Text(
+              priceLabel,
+              style: GoogleFonts.outfit(
+                color: palette.textPrimary,
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                height: 1,
+              ),
+            ),
+          if (nextIncreaseLabel != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              nextIncreaseLabel,
+              maxLines: compact ? 2 : 3,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(
+                color: palette.warning,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                height: 1.25,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomActionButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback onTap,
+    bool outlined = false,
+    bool compact = false,
+  }) {
+    final palette = context.dutyTheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        width: double.infinity,
+        constraints: BoxConstraints(minHeight: compact ? 74 : 92),
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 12 : 16,
+          vertical: compact ? 12 : 16,
+        ),
+        decoration: BoxDecoration(
+          color: outlined ? palette.surface : null,
+          gradient: outlined
+              ? null
+              : LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [palette.primary, palette.primaryGlow],
+                ),
+          borderRadius: BorderRadius.circular(24),
+          border: outlined
+              ? Border.all(color: palette.warning.withValues(alpha: 0.28))
+              : null,
+          boxShadow: outlined
+              ? null
+              : [
+                  BoxShadow(
+                    color: palette.primaryGlow.withValues(alpha: 0.30),
+                    blurRadius: 22,
+                    offset: const Offset(0, 12),
+                  ),
+                ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Icon(
+              icon,
+              color: outlined ? palette.warning : palette.textPrimary,
+              size: compact ? 16 : 18,
+            ),
+            SizedBox(width: compact ? 6 : 8),
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.outfit(
+                  color: palette.textPrimary,
+                  fontWeight: FontWeight.w800,
+                  fontSize: compact ? 15 : 15.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNoticeChip(
+    String label, {
+    required IconData icon,
+    bool compact = false,
+  }) {
+    final palette = context.dutyTheme;
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 12 : 14,
+        vertical: compact ? 8 : 10,
+      ),
+      decoration: BoxDecoration(
+        color: palette.warning.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: palette.warning.withValues(alpha: 0.22)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: compact ? 15 : 16, color: palette.warning),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: compact ? 2 : 3,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.outfit(
+                color: palette.warning,
+                fontSize: compact ? 11 : 12,
+                fontWeight: FontWeight.w700,
+                height: 1.25,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomStatusPill(String label) {
+    final palette = context.dutyTheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      decoration: BoxDecoration(
+        color: palette.surfaceAlt,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.outfit(
+          color: palette.textMuted,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+    );
+  }
+
   Widget _buildImageSlider(dynamic event) {
+    final palette = context.dutyTheme;
     // Determine which images to show
     final List<String> imagesToShow = [];
 
@@ -934,12 +1843,12 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
 
     if (imagesToShow.isEmpty) {
       return Container(
-        color: const Color(0xFF2A1B3D),
-        child: const Center(
+        color: palette.surfaceAlt,
+        child: Center(
           child: Icon(
             Icons.image_not_supported,
             size: 50,
-            color: Colors.white54,
+            color: palette.textMuted,
           ),
         ),
       );
@@ -955,16 +1864,25 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
             });
           },
           itemBuilder: (context, index) {
-            return Image.network(
-              imagesToShow[index],
+            return CachedNetworkImage(
+              imageUrl: imagesToShow[index],
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: const Color(0xFF2A1B3D),
-                child: const Center(
+              placeholder: (context, url) => Container(
+                color: palette.surfaceAlt,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: palette.textMuted,
+                  ),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                color: palette.surfaceAlt,
+                child: Center(
                   child: Icon(
                     Icons.broken_image,
                     size: 50,
-                    color: Colors.white54,
+                    color: palette.textMuted,
                   ),
                 ),
               ),
@@ -987,8 +1905,8 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: _currentImageIndex == index
-                        ? Colors.purpleAccent
-                        : Colors.white.withOpacity(0.5),
+                        ? palette.primary
+                        : palette.textMuted.withValues(alpha: 0.5),
                   ),
                 );
               }),
@@ -1005,25 +1923,18 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
     Color? backgroundColor,
     Color? borderColor,
   }) {
+    final palette = context.dutyTheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 44,
-        height: 44,
+        width: 48,
+        height: 48,
         decoration: BoxDecoration(
-<<<<<<< Updated upstream
-          color: Colors.white.withOpacity(0.1),
+          color: backgroundColor ?? palette.surfaceAlt.withValues(alpha: 0.85),
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
-=======
-          color: backgroundColor ?? Colors.white.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: borderColor ?? Colors.white.withValues(alpha: 0.1),
-          ),
->>>>>>> Stashed changes
+          border: Border.all(color: borderColor ?? palette.border),
         ),
-        child: Icon(icon, color: iconColor ?? Colors.white, size: 20),
+        child: Icon(icon, color: iconColor ?? palette.textPrimary, size: 21),
       ),
     );
   }
@@ -1071,12 +1982,13 @@ class _CountdownTimerState extends State<_CountdownTimer> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E2C),
+        color: palette.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.purpleAccent.withOpacity(0.3)),
+        border: Border.all(color: palette.primary.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1098,16 +2010,18 @@ class _CountdownTimerState extends State<_CountdownTimer> {
   }
 
   Widget _buildDivider() {
-    return Container(height: 30, width: 1, color: Colors.white24);
+    final palette = context.dutyTheme;
+    return Container(height: 30, width: 1, color: palette.borderStrong);
   }
 
   Widget _buildTimeItem(String value, String label) {
+    final palette = context.dutyTheme;
     return Column(
       children: [
         Text(
           value,
           style: GoogleFonts.outfit(
-            color: Colors.white,
+            color: palette.textPrimary,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -1115,7 +2029,7 @@ class _CountdownTimerState extends State<_CountdownTimer> {
         Text(
           label,
           style: GoogleFonts.inter(
-            color: Colors.purpleAccent,
+            color: palette.primary,
             fontSize: 10,
             fontWeight: FontWeight.bold,
             letterSpacing: 1,
@@ -1125,8 +2039,6 @@ class _CountdownTimerState extends State<_CountdownTimer> {
     );
   }
 }
-<<<<<<< Updated upstream
-=======
 
 class EventLocationMap extends StatefulWidget {
   final double latitude;
@@ -1173,6 +2085,7 @@ class _EventLocationMapState extends State<EventLocationMap> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       height: 200,
@@ -1180,7 +2093,7 @@ class _EventLocationMapState extends State<EventLocationMap> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: palette.shadow.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -1219,20 +2132,21 @@ class _FollowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitle = count == 1 ? '1 person interested' : '$count people interested';
+    final palette = context.dutyTheme;
+    final subtitle = count == 1
+        ? '1 person interested'
+        : '$count people interested';
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 56,
         decoration: BoxDecoration(
-          color: isWishlisted
-              ? Colors.purpleAccent.withValues(alpha: 0.1)
-              : const Color(0xFF1E1E2C),
+          color: isWishlisted ? palette.primarySurface : palette.surface,
           border: Border.all(
             color: isWishlisted
-                ? Colors.purpleAccent.withValues(alpha: 0.5)
-                : Colors.white24,
+                ? palette.primary.withValues(alpha: 0.5)
+                : palette.border,
             width: isWishlisted ? 1.5 : 1.0,
           ),
           borderRadius: BorderRadius.circular(16),
@@ -1246,12 +2160,12 @@ class _FollowButton extends StatelessWidget {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(kTextPrimary),
                     ),
                   )
                 : Icon(
                     isWishlisted ? Icons.favorite : Icons.favorite_border,
-                    color: isWishlisted ? Colors.purpleAccent : Colors.white,
+                    color: isWishlisted ? palette.primary : palette.textPrimary,
                     size: 20,
                   ),
             const SizedBox(width: 8),
@@ -1262,14 +2176,17 @@ class _FollowButton extends StatelessWidget {
                 Text(
                   isWishlisted ? 'Interested' : 'Mark Interested',
                   style: GoogleFonts.outfit(
-                    color: isWishlisted ? Colors.purpleAccent : Colors.white,
+                    color: isWishlisted ? palette.primary : palette.textPrimary,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: GoogleFonts.inter(color: Colors.white54, fontSize: 10),
+                  style: GoogleFonts.inter(
+                    color: palette.textMuted,
+                    fontSize: 10,
+                  ),
                 ),
               ],
             ),
@@ -1304,7 +2221,9 @@ class _ContactOrganizerButtonState
     if (widget.organizerId == null || !widget.supportsContact) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Direct contact is not available for this organizer yet.'),
+          content: Text(
+            'Direct contact is not available for this organizer yet.',
+          ),
         ),
       );
       return;
@@ -1324,6 +2243,7 @@ class _ContactOrganizerButtonState
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final isEnabled = widget.organizerId != null && widget.supportsContact;
 
     return GestureDetector(
@@ -1332,10 +2252,12 @@ class _ContactOrganizerButtonState
         height: 56,
         decoration: BoxDecoration(
           color: isEnabled
-              ? const Color(0xFF1E1E2C)
-              : const Color(0xFF1E1E2C).withValues(alpha: 0.55),
+              ? palette.surfaceAlt
+              : palette.surfaceAlt.withValues(alpha: 0.55),
           border: Border.all(
-            color: isEnabled ? Colors.white24 : Colors.white10,
+            color: isEnabled
+                ? palette.border
+                : palette.border.withValues(alpha: 0.6),
           ),
           borderRadius: BorderRadius.circular(16),
         ),
@@ -1344,14 +2266,14 @@ class _ContactOrganizerButtonState
           children: [
             Icon(
               Icons.chat_bubble_outline,
-              color: isEnabled ? Colors.white : Colors.white38,
+              color: isEnabled ? palette.textPrimary : palette.textSecondary,
               size: 20,
             ),
             const SizedBox(width: 8),
             Text(
               'Contact\nOrganizer',
               style: GoogleFonts.outfit(
-                color: isEnabled ? Colors.white : Colors.white38,
+                color: isEnabled ? palette.textPrimary : palette.textSecondary,
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
                 height: 1.1,
@@ -1396,10 +2318,10 @@ class _ContactOrganizerSheetState
     final currentUser = ref.read(currentUserProvider);
     final firstName = currentUser?['fname']?.toString().trim() ?? '';
     final lastName = currentUser?['lname']?.toString().trim() ?? '';
-    final fullName = [firstName, lastName]
-        .where((value) => value.isNotEmpty)
-        .join(' ')
-        .trim();
+    final fullName = [
+      firstName,
+      lastName,
+    ].where((value) => value.isNotEmpty).join(' ').trim();
 
     _nameController = TextEditingController(text: fullName);
     _emailController = TextEditingController(
@@ -1465,7 +2387,7 @@ class _ContactOrganizerSheetState
           content: Text(
             data['message']?.toString() ?? 'We could not send your message.',
           ),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: kDangerColor,
         ),
       );
     } on DioException catch (error) {
@@ -1489,17 +2411,14 @@ class _ContactOrganizerSheetState
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.redAccent,
-        ),
+        SnackBar(content: Text(message), backgroundColor: kDangerColor),
       );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Something went wrong while sending your message.'),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: kDangerColor,
         ),
       );
     } finally {
@@ -1511,14 +2430,16 @@ class _ContactOrganizerSheetState
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF12101E),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        decoration: BoxDecoration(
+          color: palette.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border.all(color: palette.border),
         ),
         child: SafeArea(
           top: false,
@@ -1535,7 +2456,7 @@ class _ContactOrganizerSheetState
                         width: 44,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: Colors.white24,
+                          color: palette.borderStrong,
                           borderRadius: BorderRadius.circular(999),
                         ),
                       ),
@@ -1544,7 +2465,7 @@ class _ContactOrganizerSheetState
                     Text(
                       'Contact ${widget.organizerName}',
                       style: GoogleFonts.outfit(
-                        color: Colors.white,
+                        color: palette.textPrimary,
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1553,7 +2474,7 @@ class _ContactOrganizerSheetState
                     Text(
                       'Send a direct question about this event. The organizer will receive it by email.',
                       style: GoogleFonts.inter(
-                        color: Colors.white60,
+                        color: palette.textSecondary,
                         fontSize: 14,
                         height: 1.5,
                       ),
@@ -1617,24 +2538,24 @@ class _ContactOrganizerSheetState
                       child: ElevatedButton(
                         onPressed: _isSending ? null : _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8F0DF2),
-                          foregroundColor: Colors.white,
-                          disabledBackgroundColor: const Color(
-                            0xFF8F0DF2,
-                          ).withValues(alpha: 0.45),
+                          backgroundColor: palette.primary,
+                          foregroundColor: palette.textPrimary,
+                          disabledBackgroundColor: palette.primary.withValues(
+                            alpha: 0.45,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18),
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: _isSending
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+                                    palette.textPrimary,
                                   ),
                                 ),
                               )
@@ -1677,13 +2598,14 @@ class _DutyField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: GoogleFonts.outfit(
-            color: Colors.white,
+            color: palette.textPrimary,
             fontWeight: FontWeight.w600,
             fontSize: 13,
           ),
@@ -1695,31 +2617,31 @@ class _DutyField extends StatelessWidget {
           keyboardType: keyboardType,
           minLines: minLines,
           maxLines: maxLines,
-          style: GoogleFonts.inter(color: Colors.white, fontSize: 15),
+          style: GoogleFonts.inter(color: palette.textPrimary, fontSize: 15),
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFF1B1830),
-            hintStyle: GoogleFonts.inter(color: Colors.white30),
-            errorStyle: GoogleFonts.inter(color: Colors.redAccent.shade100),
+            fillColor: palette.surfaceAlt,
+            hintStyle: GoogleFonts.inter(color: palette.textMuted),
+            errorStyle: GoogleFonts.inter(color: palette.danger),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
-              borderSide: const BorderSide(color: Colors.white12),
+              borderSide: BorderSide(color: palette.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
-              borderSide: const BorderSide(color: Color(0xFF8F0DF2), width: 1.4),
+              borderSide: BorderSide(color: palette.primary, width: 1.4),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
-              borderSide: const BorderSide(color: Colors.redAccent),
+              borderSide: BorderSide(color: palette.danger),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
-              borderSide: const BorderSide(color: Colors.redAccent),
+              borderSide: BorderSide(color: palette.danger),
             ),
           ),
         ),
@@ -1741,8 +2663,9 @@ class _EventSocialPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final interestedCount = interestedCountOverride ?? social.interestedCount;
-/*
+    /*
     final visibleInterestedCount =
         interestedCount < social.visibleInterestedCount
             ? interestedCount
@@ -1759,25 +2682,19 @@ class _EventSocialPanel extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.purpleAccent.withValues(alpha: 0.12),
+              color: palette.primarySurface,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: Colors.purpleAccent.withValues(alpha: 0.35),
-              ),
+              border: Border.all(color: palette.borderStrong),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.favorite,
-                  color: Colors.purpleAccent,
-                  size: 16,
-                ),
+                Icon(Icons.favorite, color: palette.primary, size: 16),
                 const SizedBox(width: 8),
                 Text(
                   'You are interested in this event',
                   style: GoogleFonts.inter(
-                    color: Colors.white,
+                    color: palette.textPrimary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1806,28 +2723,6 @@ class _EventSocialPanel extends StatelessWidget {
             ),
           ],
         ),
-        /*
-        if (interestedCount > 0) ...[
-          const SizedBox(height: 14),
-          _SocialPeopleStrip(
-            title: social.followedInterestedPeople.isNotEmpty
-                ? 'People you follow are into this'
-                : 'People interested',
-            totalCount: interestedCount,
-            visibleCount: visibleInterestedCount,
-            people: highlightedInterested,
-          ),
-        ],
-        if (social.attendingCount > 0) ...[
-          const SizedBox(height: 14),
-          _SocialPeopleStrip(
-            title: 'People going',
-            totalCount: social.attendingCount,
-            visibleCount: social.visibleAttendingCount,
-            people: social.attendingPeople,
-          ),
-        ],
-        */
       ],
     );
   }
@@ -1840,6 +2735,7 @@ class _EventLineupSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final sortedLineup = [...lineup]
       ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
     final headliner = sortedLineup.cast<EventLineupModel?>().firstWhere(
@@ -1856,7 +2752,7 @@ class _EventLineupSection extends StatelessWidget {
         Text(
           'LINEUP',
           style: GoogleFonts.outfit(
-            color: const Color(0xFFA855F7),
+            color: palette.primary,
             fontSize: 12,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
@@ -1866,7 +2762,7 @@ class _EventLineupSection extends StatelessWidget {
         Text(
           'Who is playing',
           style: GoogleFonts.outfit(
-            color: Colors.white,
+            color: palette.textPrimary,
             fontSize: 24,
             fontWeight: FontWeight.w700,
             height: 1.1,
@@ -1876,7 +2772,7 @@ class _EventLineupSection extends StatelessWidget {
         Text(
           'Discover the artists behind this date and jump into their profiles when available.',
           style: GoogleFonts.inter(
-            color: Colors.white60,
+            color: palette.textSecondary,
             fontSize: 13,
             height: 1.45,
           ),
@@ -1905,25 +2801,21 @@ class _EventHeadlinerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final card = Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         gradient: LinearGradient(
-          colors: [
-            const Color(0xFF20122C),
-            const Color(0xFF3B1D68).withValues(alpha: 0.95),
-          ],
+          colors: [palette.surfaceAlt, palette.surface],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(
-          color: const Color(0xFFA855F7).withValues(alpha: 0.32),
-        ),
+        border: Border.all(color: palette.borderStrong),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFA855F7).withValues(alpha: 0.16),
+            color: palette.primaryGlow.withValues(alpha: 0.16),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),
@@ -1936,12 +2828,12 @@ class _EventHeadlinerCard extends StatelessWidget {
             height: 58,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
-              color: Colors.white.withValues(alpha: 0.08),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              color: palette.surfaceMuted,
+              border: Border.all(color: palette.border),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.graphic_eq_rounded,
-              color: Color(0xFFFFC857),
+              color: palette.warning,
               size: 28,
             ),
           ),
@@ -1956,13 +2848,13 @@ class _EventHeadlinerCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFC857).withValues(alpha: 0.14),
+                    color: palette.warning.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     item.badgeLabel,
                     style: GoogleFonts.outfit(
-                      color: const Color(0xFFFFC857),
+                      color: palette.warning,
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.3,
@@ -1975,7 +2867,7 @@ class _EventHeadlinerCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.outfit(
-                    color: Colors.white,
+                    color: palette.textPrimary,
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     height: 1.1,
@@ -1987,7 +2879,7 @@ class _EventHeadlinerCard extends StatelessWidget {
                       ? 'Tap to open artist profile'
                       : 'Guest appearance listed by the organizer',
                   style: GoogleFonts.inter(
-                    color: Colors.white60,
+                    color: palette.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1996,11 +2888,11 @@ class _EventHeadlinerCard extends StatelessWidget {
             ),
           ),
           if (item.hasProfile)
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(left: 12),
               child: Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: Colors.white38,
+                color: palette.textMuted,
                 size: 18,
               ),
             ),
@@ -2026,13 +2918,14 @@ class _EventLineupChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final chip = Container(
       constraints: const BoxConstraints(minWidth: 152, maxWidth: 260),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF171727),
+        color: palette.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: palette.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -2041,14 +2934,14 @@ class _EventLineupChip extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: const Color(0xFFA855F7).withValues(alpha: 0.12),
+              color: palette.primarySurface,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
               item.sourceType == 'artist'
                   ? Icons.headphones_rounded
                   : Icons.mic_external_on_rounded,
-              color: const Color(0xFFA855F7),
+              color: palette.primary,
               size: 20,
             ),
           ),
@@ -2063,7 +2956,7 @@ class _EventLineupChip extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.outfit(
-                    color: Colors.white,
+                    color: palette.textPrimary,
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -2076,7 +2969,7 @@ class _EventLineupChip extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
-                    color: Colors.white54,
+                    color: palette.textMuted,
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
@@ -2085,11 +2978,7 @@ class _EventLineupChip extends StatelessWidget {
             ),
           ),
           if (item.hasProfile)
-            const Icon(
-              Icons.north_east_rounded,
-              color: Colors.white30,
-              size: 18,
-            ),
+            Icon(Icons.north_east_rounded, color: palette.textMuted, size: 18),
         ],
       ),
     );
@@ -2118,22 +3007,20 @@ class _SocialMetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            const Color(0xFF171625),
-            const Color(0xFF211A35).withValues(alpha: 0.95),
-          ],
+          colors: [palette.surfaceAlt, palette.surface],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        border: Border.all(color: palette.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
+            color: palette.shadow.withValues(alpha: 0.12),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -2145,11 +3032,11 @@ class _SocialMetricCard extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.07),
+              color: palette.surfaceMuted,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              border: Border.all(color: palette.border),
             ),
-            child: Icon(icon, color: const Color(0xFFA855F7)),
+            child: Icon(icon, color: palette.primary),
           ),
           const SizedBox(width: 12),
           Column(
@@ -2158,259 +3045,22 @@ class _SocialMetricCard extends StatelessWidget {
               Text(
                 '$value',
                 style: GoogleFonts.outfit(
-                  color: Colors.white,
+                  color: palette.textPrimary,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 label,
-                style: GoogleFonts.inter(color: Colors.white60, fontSize: 12),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SocialPeopleStrip extends StatelessWidget {
-  const _SocialPeopleStrip({
-    required this.title,
-    required this.totalCount,
-    required this.visibleCount,
-    required this.people,
-  });
-
-  final String title;
-  final int totalCount;
-  final int visibleCount;
-  final List<EventSocialPersonModel> people;
-
-  @override
-  Widget build(BuildContext context) {
-    final hiddenCount = totalCount - people.length;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFF171625),
-            const Color(0xFF1B1830).withValues(alpha: 0.96),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              if (totalCount > 0)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.purpleAccent.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: Colors.purpleAccent.withValues(alpha: 0.28),
-                    ),
-                  ),
-                  child: Text(
-                    '$totalCount in the scene',
-                    style: GoogleFonts.outfit(
-                      color: Colors.purpleAccent,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            totalCount > visibleCount
-                ? '$visibleCount visible now. Some profiles keep this private.'
-                : '$totalCount visible right now. Tap any profile to explore the crowd.',
-            style: GoogleFonts.inter(
-              color: Colors.white60,
-              fontSize: 12,
-              height: 1.35,
-            ),
-          ),
-          if (people.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            SizedBox(
-              height: 140,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: people.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 10),
-                itemBuilder: (context, index) {
-                  final person = people[index];
-                  final imageUrl = AppUrls.getAvatarUrl(person.photo);
-
-                  return InkWell(
-                    borderRadius: BorderRadius.circular(22),
-                    onTap: person.id > 0
-                        ? () => context.push('/user-profile/${person.id}')
-                        : null,
-                    child: Container(
-                      width: 112,
-                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1F1A32),
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(
-                          color: person.isFollowing
-                              ? Colors.purpleAccent.withValues(alpha: 0.36)
-                              : Colors.white.withValues(alpha: 0.08),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: person.isFollowing
-                                ? Colors.purpleAccent.withValues(alpha: 0.10)
-                                : Colors.black.withValues(alpha: 0.10),
-                            blurRadius: 14,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Stack(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: person.isFollowing
-                                      ? const LinearGradient(
-                                          colors: [
-                                            Color(0xFFA855F7),
-                                            Color(0xFFE879F9),
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        )
-                                      : null,
-                                  border: person.isFollowing
-                                      ? null
-                                      : Border.all(
-                                          color: Colors.white12,
-                                        ),
-                                ),
-                                child: CircleAvatar(
-                                  radius: 24,
-                                  backgroundColor: Colors.white10,
-                                  backgroundImage: imageUrl != null
-                                      ? CachedNetworkImageProvider(imageUrl)
-                                      : null,
-                                  child: imageUrl == null
-                                      ? const Icon(
-                                          Icons.person,
-                                          color: Colors.white54,
-                                        )
-                                      : null,
-                                ),
-                              ),
-                              if (person.isFollowing)
-                                Positioned(
-                                  right: 0,
-                                  bottom: 0,
-                                  child: Container(
-                                    width: 18,
-                                    height: 18,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFA855F7),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: const Color(0xFF1F1A32),
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.favorite,
-                                      size: 9,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            person.name,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            person.isFollowing
-                                ? 'You follow'
-                                : (person.username?.isNotEmpty == true
-                                      ? '@${person.username}'
-                                      : 'Open profile'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.inter(
-                              color: person.isFollowing
-                                  ? Colors.purpleAccent
-                                  : Colors.white54,
-                              fontSize: 10,
-                              fontWeight: person.isFollowing
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            if (hiddenCount > 0) ...[
-              const SizedBox(height: 12),
-              Text(
-                'And $hiddenCount more people in the scene.',
                 style: GoogleFonts.inter(
-                  color: Colors.white54,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
+                  color: palette.textSecondary,
+                  fontSize: 12,
                 ),
               ),
             ],
-          ],
+          ),
         ],
       ),
     );
   }
 }
->>>>>>> Stashed changes

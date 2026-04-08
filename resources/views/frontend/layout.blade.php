@@ -2,11 +2,6 @@
 <html lang="zxx" dir="{{ $currentLanguageInfo->direction == 1 ? 'rtl' : 'ltr' }}">
 
 <head>
-  @php
-    $defaultPageIcon = asset('assets/admin/img/' . $websiteInfo->favicon);
-    $pageIcon = trim($__env->yieldContent('page-icon')) ?: $defaultPageIcon;
-    $appleTouchIcon = trim($__env->yieldContent('apple-touch-icon')) ?: $pageIcon;
-  @endphp
   <!-- Required meta tags -->
   <meta charset="utf-8" />
   <meta http-equiv="x-ua-compatible" content="ie=edge" />
@@ -16,7 +11,6 @@
   <meta property="og:title" content="@yield('og-title')" />
   <meta property="og:description" content="@yield('og-description')" />
   <meta property="og:image" content="@yield('og-image')" />
-  <meta name="theme-color" content="#191022" />
 
 
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -25,36 +19,15 @@
   <!-- Title -->
   <title>@yield('pageHeading') {{ '| ' . $websiteInfo->website_title }}</title>
   <!-- Favicon Icon -->
-  <link rel="shortcut icon" href="{{ $pageIcon }}" type="image/x-icon">
-  <link rel="icon" href="{{ $pageIcon }}" type="image/png">
-  <link rel="apple-touch-icon" href="{{ $appleTouchIcon }}">
-  @yield('head-extra')
+  <link rel="shortcut icon" href="{{ asset('assets/admin/img/' . $websiteInfo->favicon) }}" type="image/x-icon">
   {{-- include styles --}}
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
   @includeIf('frontend.partials.styles')
   @yield('custom-style')
 </head>
 
-@php
-  $compactChrome = request()->routeIs(
-      'customer.login',
-      'customer.signup',
-      'customer.forget.password',
-      'customer.reset.password',
-      'organizer.login',
-      'organizer.signup',
-      'organizer.forget.password',
-      'organizer.reset.password',
-      'artist.login',
-      'artist.forget.password',
-      'artist.reset.password',
-      'venue.login',
-      'venue.forget.password',
-      'venue.reset.password'
-  );
-@endphp
-
-<body class="web-unified-body{{ $compactChrome ? ' web-unified-body--compact' : '' }}">
-  <div class="page-wrapper web-unified-shell">
+<body>
+  <div class="page-wrapper">
 
     <!-- Preloader -->
     <div class="preloader" style="background-image:url({{ asset('assets/admin/img/' . $websiteInfo->preloader) }})">
@@ -66,7 +39,7 @@
 
 
     <!-- Header Part Start -->
-    @includeIf($compactChrome ? 'frontend.partials.header.header-compact' : 'frontend.partials.header.header-nav')
+    @includeIf('frontend.partials.header.header-nav')
     <!-- Header Part End -->
 
     @yield('hero-section')
@@ -76,9 +49,7 @@
     @includeIf('frontend.partials.popups')
 
 
-    @unless ($compactChrome)
-      @includeIf('frontend.partials.footer.footer')
-    @endunless
+    @includeIf('frontend.partials.footer.footer')
 
   </div>
   <!--End pagewrapper-->
@@ -91,6 +62,16 @@
     var rtl = {{ $currentLanguageInfo->direction }};
   </script>
   @includeIf('frontend.partials.scripts')
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      duration: 800,
+      easing: 'ease-in-out',
+      once: true,
+      mirror: false
+    });
+  </script>
 
   {{-- additional script --}}
   @yield('script')

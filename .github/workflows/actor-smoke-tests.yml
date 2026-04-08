@@ -1,0 +1,64 @@
+name: Actor Smoke Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  actor-smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, dom, fileinfo, sqlite, pdo_sqlite, curl
+          coverage: none
+
+      - name: Validate composer files
+        run: composer validate --no-check-publish
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare Laravel app key
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run actor smoke suite
+        run: |
+          mkdir -p test-results
+          php artisan test \
+            --filter='(ActorScopeAndWalletServiceTest|NfcActorScopeTest|WebhookActorResolutionTest|PaymentMethodsActorApiTest|WalletControllerActorApiTest|MarketplacePurchaseActorTest|MarketplaceTransferActorTest|FollowControllerApiTest|SubscriptionControllerApiTest|ScannerContractSmokeTest|EventBookingContractSmokeTest)' \
+            --stop-on-failure \
+            --log-junit=test-results/actor-smoke-junit.xml
+
+      - name: Upload smoke test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: actor-smoke-junit
+          path: test-results/actor-smoke-junit.xml
+          if-no-files-found: warn
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Actor Smoke Gate"
+            echo ""
+            echo "- Suite: actor + marketplace + API alignment + scanner/booking contracts"
+            echo "- Report: \`test-results/actor-smoke-junit.xml\`"
+            echo "- Artifact: \`actor-smoke-junit\`"
+          } >> "$GITHUB_STEP_SUMMARY"

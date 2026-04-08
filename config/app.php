@@ -137,8 +137,8 @@ return [
   'providers' => [
 
     /*
-    * Laravel Framework Service Providers...
-    */
+     * Laravel Framework Service Providers...
+     */
     Illuminate\Auth\AuthServiceProvider::class,
     Illuminate\Broadcasting\BroadcastServiceProvider::class,
     Illuminate\Bus\BusServiceProvider::class,
@@ -163,25 +163,26 @@ return [
     Illuminate\View\ViewServiceProvider::class,
 
     /*
-    * Package Service Providers...
-    */
+     * Package Service Providers...
+     */
     Barryvdh\DomPDF\ServiceProvider::class,
     // KingFlamez\Rave\RaveServiceProvider::class,
     Anand\LaravelPaytmWallet\PaytmWalletServiceProvider::class,
     Cartalyst\Stripe\Laravel\StripeServiceProvider::class,
 
     /*
-    * Application Service Providers...
-    */
+     * Application Service Providers...
+     */
     App\Providers\AppServiceProvider::class,
     App\Providers\AuthServiceProvider::class,
     App\Providers\EventServiceProvider::class,
     App\Providers\RouteServiceProvider::class,
 
     /*
-    *Laravel socialite package
-    */
+     *Laravel socialite package
+     */
     Laravel\Socialite\SocialiteServiceProvider::class,
+    Anhskohbo\NoCaptcha\NoCaptchaServiceProvider::class,
 
   ],
 
@@ -240,6 +241,7 @@ return [
     'Stripe' => Cartalyst\Stripe\Laravel\Facades\Stripe::class,
 
     'Socialite' => Laravel\Socialite\Facades\Socialite::class,
+    'NoCaptcha' => Anhskohbo\NoCaptcha\Facades\NoCaptcha::class,
 
   ],
 

@@ -12,7 +12,7 @@ void main() {
 
     test('parses event qr links behind a prefixed web path', () {
       final result = DutyScanParser.parse(
-        'http://10.0.1.19/v2/open/event/141?source=event-qr',
+        'http://localhost/v2/open/event/141?source=event-qr',
       );
 
       expect(result.type, DutyScanType.event);
@@ -28,7 +28,7 @@ void main() {
 
     test('parses transfer recipient links behind a prefixed web path', () {
       final result = DutyScanParser.parse(
-        'http://10.0.1.19/v2/open/transfer-recipient/44',
+        'http://localhost/v2/open/transfer-recipient/44',
       );
 
       expect(result.type, DutyScanType.transferRecipient);

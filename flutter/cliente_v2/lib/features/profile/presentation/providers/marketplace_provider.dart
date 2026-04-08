@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/marketplace_remote_data_source.dart';
@@ -15,47 +16,56 @@ final marketplaceRepositoryProvider = Provider((ref) {
 });
 
 class MarketplaceFilterState {
-  final String? sortBy; // 'price_asc', 'price_desc', 'date_asc'
   final String? search;
   final int? categoryId;
   final double? minPrice;
   final double? maxPrice;
+  final int? eventId;
+  final String? eventTitle;
+  final String? eventDate;
 
   MarketplaceFilterState({
-    this.sortBy,
     this.search,
     this.categoryId,
     this.minPrice,
     this.maxPrice,
+    this.eventId,
+    this.eventTitle,
+    this.eventDate,
   });
 
   MarketplaceFilterState copyWith({
-    String? sortBy,
     String? search,
     int? categoryId,
     double? minPrice,
     double? maxPrice,
+    int? eventId,
+    String? eventTitle,
+    String? eventDate,
     bool clearSort = false,
     bool clearSearch = false,
     bool clearCategory = false,
     bool clearMinPrice = false,
     bool clearMaxPrice = false,
+    bool clearEventContext = false,
   }) {
     return MarketplaceFilterState(
-      sortBy: clearSort ? null : (sortBy ?? this.sortBy),
       search: clearSearch ? null : (search ?? this.search),
       categoryId: clearCategory ? null : (categoryId ?? this.categoryId),
       minPrice: clearMinPrice ? null : (minPrice ?? this.minPrice),
       maxPrice: clearMaxPrice ? null : (maxPrice ?? this.maxPrice),
+      eventId: clearEventContext ? null : (eventId ?? this.eventId),
+      eventTitle: clearEventContext ? null : (eventTitle ?? this.eventTitle),
+      eventDate: clearEventContext ? null : (eventDate ?? this.eventDate),
     );
   }
 
   bool get hasFilters =>
-      sortBy != null ||
       (search != null && search!.isNotEmpty) ||
       categoryId != null ||
       minPrice != null ||
-      maxPrice != null;
+      maxPrice != null ||
+      eventId != null;
 }
 
 final marketplaceFiltersProvider = StateProvider<MarketplaceFilterState>(
@@ -67,7 +77,7 @@ final marketplaceTicketsProvider = FutureProvider<List<dynamic>>((ref) async {
   final token = ref.watch(authTokenProvider).valueOrNull;
   final filters = ref.watch(marketplaceFiltersProvider);
 
-  final tickets = await repository.getMarketplaceTickets(
+  return await repository.getMarketplaceTickets(
     token: token,
     search: filters.search,
     categoryId: filters.categoryId,
@@ -75,10 +85,18 @@ final marketplaceTicketsProvider = FutureProvider<List<dynamic>>((ref) async {
     maxPrice: filters.maxPrice,
   );
 
-  if (filters.sortBy == null) return tickets;
+  final filteredByEvent = filters.eventId == null
+      ? tickets
+      : tickets.where((ticket) {
+          final event = ticket['event'];
+          final eventId = int.tryParse(event?['id']?.toString() ?? '');
+          return eventId == filters.eventId;
+        }).toList();
+
+  if (filters.sortBy == null) return filteredByEvent;
 
   // Sorting logic
-  final List<dynamic> sortedTickets = List.from(tickets);
+  final List<dynamic> sortedTickets = List.from(filteredByEvent);
   switch (filters.sortBy) {
     case 'price_asc':
       sortedTickets.sort(
@@ -106,41 +124,6 @@ final marketplaceTicketsProvider = FutureProvider<List<dynamic>>((ref) async {
   return sortedTickets;
 });
 
-/// Provider for pending transfer requests (incoming)
-final pendingTransfersProvider = FutureProvider<List<dynamic>>((ref) async {
-  final repository = ref.watch(marketplaceRepositoryProvider);
-  final token = ref.watch(authTokenProvider).valueOrNull;
-  return await repository.getPendingTransfers(token: token);
-});
-
-final pendingTransfersCountProvider = Provider<int>((ref) {
-  final asyncTransfers = ref.watch(pendingTransfersProvider);
-  return asyncTransfers.maybeWhen(
-    data: (transfers) => transfers.length,
-    orElse: () => 0,
-  );
-});
-
-final outboxTransfersProvider = FutureProvider<List<dynamic>>((ref) async {
-  final repository = ref.watch(marketplaceRepositoryProvider);
-  final token = ref.watch(authTokenProvider).valueOrNull;
-  return await repository.getOutboxTransfers(token: token);
-});
-
-final transferDetailsProvider =
-    FutureProvider.family<Map<String, dynamic>?, int>((ref, transferId) async {
-      final repository = ref.watch(marketplaceRepositoryProvider);
-      final token = ref.watch(authTokenProvider).valueOrNull;
-      final result = await repository.getTransferDetails(
-        transferId: transferId,
-        token: token,
-      );
-      if (result['success'] == true) {
-        return result['data'] as Map<String, dynamic>;
-      }
-      return null;
-    });
-
 final marketplaceProvider =
     StateNotifierProvider<MarketplaceNotifier, AsyncValue<void>>((ref) {
       final repository = ref.watch(marketplaceRepositoryProvider);
@@ -150,9 +133,38 @@ final marketplaceProvider =
 class MarketplaceNotifier extends StateNotifier<AsyncValue<void>> {
   final MarketplaceRepository _repository;
   final Ref _ref;
+  String? _lastError;
+  String? get lastError => _lastError;
 
   MarketplaceNotifier(this._repository, this._ref)
     : super(const AsyncValue.data(null));
+
+  String _friendlyMarketplaceError(Object error, {bool forPreview = false}) {
+    if (error is DioException) {
+      final payload = error.response?.data;
+      if (payload is Map && payload['message'] != null) {
+        return payload['message'].toString();
+      }
+
+      return switch (error.response?.statusCode) {
+        402 =>
+          forPreview
+              ? 'No tienes fondos suficientes para cubrir esta reventa con la configuración actual.'
+              : 'No tienes fondos suficientes para completar esta reventa.',
+        404 => 'Esta reventa ya no está disponible.',
+        422 =>
+          payload is Map && payload['message'] != null
+              ? payload['message'].toString()
+              : 'Revisa la tarjeta seleccionada y vuelve a intentarlo.',
+        _ =>
+          forPreview
+              ? 'No pudimos preparar el resumen de esta reventa ahora mismo.'
+              : 'No pudimos completar la compra de reventa ahora mismo.',
+      };
+    }
+
+    return error.toString();
+  }
 
   /// Verify if a recipient user exists
   Future<Map<String, dynamic>?> verifyRecipient({
@@ -178,8 +190,7 @@ class MarketplaceNotifier extends StateNotifier<AsyncValue<void>> {
   /// Send a transfer request (now creates a pending request)
   Future<void> transferTicket({
     required int bookingId,
-    String? recipient,
-    int? recipientId,
+    required String recipient,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -187,94 +198,9 @@ class MarketplaceNotifier extends StateNotifier<AsyncValue<void>> {
       await _repository.transferTicket(
         bookingId: bookingId,
         recipient: recipient,
-        recipientId: recipientId,
         token: token,
       );
       state = const AsyncValue.data(null);
-      _ref.invalidate(outboxTransfersProvider);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-    }
-  }
-
-  Future<Map<String, dynamic>?> getTransferTicketQr({
-    required int bookingId,
-  }) async {
-    try {
-      final token = _ref.read(authTokenProvider).valueOrNull;
-      final result = await _repository.getTransferTicketQr(
-        bookingId: bookingId,
-        token: token,
-      );
-      if (result['success'] == true) {
-        return result['data'] as Map<String, dynamic>;
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  Future<Map<String, dynamic>?> requestTransferFromScan({
-    required String transferToken,
-  }) async {
-    state = const AsyncValue.loading();
-    try {
-      final token = _ref.read(authTokenProvider).valueOrNull;
-      final result = await _repository.requestTransferFromScan(
-        transferToken: transferToken,
-        token: token,
-      );
-      state = const AsyncValue.data(null);
-      _ref.invalidate(pendingTransfersProvider);
-      _ref.invalidate(outboxTransfersProvider);
-      return result['data'] as Map<String, dynamic>?;
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-      return null;
-    }
-  }
-
-  /// Accept an incoming transfer request
-  Future<void> acceptTransfer({required int transferId}) async {
-    state = const AsyncValue.loading();
-    try {
-      final token = _ref.read(authTokenProvider).valueOrNull;
-      await _repository.acceptTransfer(transferId: transferId, token: token);
-      state = const AsyncValue.data(null);
-      _ref.invalidate(pendingTransfersProvider);
-      _ref.invalidate(outboxTransfersProvider);
-      _ref.invalidate(transferDetailsProvider(transferId));
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-    }
-  }
-
-  /// Reject an incoming transfer request
-  Future<void> rejectTransfer({required int transferId}) async {
-    state = const AsyncValue.loading();
-    try {
-      final token = _ref.read(authTokenProvider).valueOrNull;
-      await _repository.rejectTransfer(transferId: transferId, token: token);
-      state = const AsyncValue.data(null);
-      _ref.invalidate(pendingTransfersProvider);
-      _ref.invalidate(outboxTransfersProvider);
-      _ref.invalidate(transferDetailsProvider(transferId));
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-    }
-  }
-
-  /// Cancel a transfer request (sender side)
-  Future<void> cancelTransfer({required int transferId}) async {
-    state = const AsyncValue.loading();
-    try {
-      final token = _ref.read(authTokenProvider).valueOrNull;
-      await _repository.cancelTransfer(transferId: transferId, token: token);
-      state = const AsyncValue.data(null);
-      _ref.invalidate(pendingTransfersProvider);
-      _ref.invalidate(outboxTransfersProvider);
-      _ref.invalidate(transferDetailsProvider(transferId));
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
@@ -300,53 +226,87 @@ class MarketplaceNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
-  Future<void> purchaseTicket({required int bookingId}) async {
+  Future<void> purchaseTicket({
+    required int bookingId,
+    bool? applyWalletBalance,
+    String? stripePaymentMethodId,
+  }) async {
     state = const AsyncValue.loading();
+    _lastError = null;
     try {
       final token = _ref.read(authTokenProvider).valueOrNull;
       await _repository.purchaseMarketplaceTicket(
         bookingId: bookingId,
+        applyWalletBalance: applyWalletBalance,
+        stripePaymentMethodId: stripePaymentMethodId,
         token: token,
       );
       state = const AsyncValue.data(null);
       // Refresh tickets list after purchase
       _ref.invalidate(marketplaceTicketsProvider);
     } catch (e, stack) {
+      var shouldRefreshListings = false;
+      if (e is DioException) {
+        final payload = e.response?.data;
+        if (payload is Map && payload['message'] != null) {
+          _lastError = payload['message'].toString();
+        } else if (e.response?.statusCode == 402 ||
+            e.response?.statusCode == 404) {
+          _lastError = _friendlyMarketplaceError(e);
+        } else {
+          _lastError = _friendlyMarketplaceError(e);
+        }
+        if (e.response?.statusCode == 404) {
+          shouldRefreshListings = true;
+        }
+      } else {
+        _lastError = e.toString();
+      }
+
+      if (shouldRefreshListings) {
+        _ref.invalidate(marketplaceTicketsProvider);
+        try {
+          await _ref.read(marketplaceTicketsProvider.future);
+        } catch (_) {
+          // Keep the friendly purchase error and swallow the refresh failure.
+        }
+        state = const AsyncValue.data(null);
+        return;
+      }
+
       state = AsyncValue.error(e, stack);
     }
   }
-}
 
-final favoritesProvider = StateNotifierProvider<FavoritesNotifier, Set<String>>(
-  (ref) {
-    return FavoritesNotifier();
-  },
-);
+  Future<Map<String, dynamic>?> previewPurchase({
+    required int bookingId,
+    bool? applyWalletBalance,
+    String? stripePaymentMethodId,
+  }) async {
+    _lastError = null;
+    try {
+      final token = _ref.read(authTokenProvider).valueOrNull;
+      final result = await _repository.previewMarketplaceTicketPurchase(
+        bookingId: bookingId,
+        applyWalletBalance: applyWalletBalance,
+        stripePaymentMethodId: stripePaymentMethodId,
+        token: token,
+      );
 
-class FavoritesNotifier extends StateNotifier<Set<String>> {
-  static const _key = 'marketplace_favorites';
+      if (result['success'] == true && result['data'] is Map) {
+        return Map<String, dynamic>.from(result['data'] as Map);
+      }
 
-  FavoritesNotifier() : super({}) {
-    _loadFavorites();
-  }
-
-  Future<void> _loadFavorites() async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = prefs.getStringList(_key) ?? [];
-    state = list.toSet();
-  }
-
-  Future<void> toggleFavorite(String ticketId) async {
-    final newState = Set<String>.from(state);
-    if (newState.contains(ticketId)) {
-      newState.remove(ticketId);
-    } else {
-      newState.add(ticketId);
+      _lastError =
+          result['message']?.toString() ??
+          'No pudimos preparar el resumen de esta reventa ahora mismo.';
+      return null;
+    } catch (error) {
+      _lastError = _friendlyMarketplaceError(error, forPreview: true);
+      if (error is DioException && error.response?.statusCode == 404) {
+        _ref.invalidate(marketplaceTicketsProvider);
+      }
+      return null;
     }
-    state = newState;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_key, newState.toList());
   }
-
-  bool isFavorite(String ticketId) => state.contains(ticketId);
 }

@@ -18,6 +18,12 @@ use Illuminate\Support\Facades\Validator;
 
 class OrganizerWithdrawController extends Controller
 {
+  public function __construct(
+    private ProfessionalCatalogBridgeService $catalogBridge,
+    private ProfessionalBalanceService $professionalBalanceService
+  ) {
+  }
+
   public function index()
   {
     $currencyInfo = $this->getCurrencyInfo();

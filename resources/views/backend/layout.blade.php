@@ -22,7 +22,12 @@
     @yield('style')
   </head>
 
-  <body data-background-color="{{ $settings->admin_theme_version == 'light' ? 'white' : 'dark' }}">
+  @php
+    $persistedAdminLayout = optional(Auth::guard('admin')->user())->navigation_layout;
+    $adminNavigationLayout = session('admin_navigation_layout', $persistedAdminLayout ?: 'sidebar');
+  @endphp
+  <body data-background-color="{{ $settings->admin_theme_version == 'light' ? 'white' : 'dark' }}"
+    class="{{ $adminNavigationLayout === 'topbar' ? 'admin-topnav-layout' : 'admin-sidebar-layout' }}">
     {{-- loader start --}}
     <div class="request-loader">
       <img src="{{ asset('assets/admin/img/loader.gif') }}" alt="loader">
@@ -35,7 +40,9 @@
       {{-- top navbar area end --}}
 
       {{-- side navbar area start --}}
-      @includeIf('backend.partials.side-navbar')
+      @if ($adminNavigationLayout === 'sidebar')
+        @includeIf('backend.partials.side-navbar')
+      @endif
       {{-- side navbar area end --}}
 
       <div class="main-panel">

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/providers/profile_state_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -25,16 +26,15 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
     // Determine the next route based on current state
     final onboardingSeen = ref.read(onboardingSeenProvider);
-    final token = ref.read(authTokenProvider).valueOrNull;
+    final token = await ref.read(authTokenProvider.future);
+    if (!mounted) return;
     final isLoggedIn = token != null;
     final faceIdEnabled = ref.read(faceIdEnabledProvider);
     final keepSignedIn = ref.read(keepSignedInProvider);
-    final userType = ref.read(userTypeProvider);
+    final landingRoute = ref.read(activeProfileLandingRouteProvider);
 
     if (!onboardingSeen) {
       context.go('/onboarding');
-    } else if (userType == null) {
-      context.go('/user-type-selection');
     } else if (isLoggedIn) {
       if (!keepSignedIn) {
         await ref.read(authControllerProvider.notifier).logout();
@@ -43,7 +43,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       } else if (faceIdEnabled) {
         context.go('/auth-lock');
       } else {
-        context.go('/home');
+        context.go(landingRoute);
       }
     } else {
       context.go('/login');

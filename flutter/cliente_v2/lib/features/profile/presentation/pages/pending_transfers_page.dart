@@ -2,56 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../../../../core/theme/colors.dart';
 import '../providers/marketplace_provider.dart';
 
 class PendingTransfersPage extends ConsumerWidget {
   const PendingTransfersPage({super.key});
 
-  static const Color kPrimaryColor = Color(0xFF8655F6);
-  static const Color kDarkBackground = Color(0xFF0D0812);
-  static const Color kCardColor = Color(0xFF151022);
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = context.dutyTheme;
     final pendingAsync = ref.watch(pendingTransfersProvider);
 
     return Scaffold(
-      backgroundColor: kDarkBackground,
+      backgroundColor: palette.background,
       appBar: AppBar(
-        backgroundColor: kDarkBackground,
+        backgroundColor: palette.background,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: IconThemeData(color: palette.textPrimary),
         title: Text(
           'Transfer Inbox',
           style: GoogleFonts.manrope(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: palette.textPrimary,
           ),
         ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 0,
       ),
       body: pendingAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: kPrimaryColor),
-        ),
+        loading: () =>
+            Center(child: CircularProgressIndicator(color: palette.primary)),
         error: (error, _) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.redAccent,
-                size: 48,
-              ),
+              Icon(Icons.error_outline, color: palette.danger, size: 48),
               const SizedBox(height: 16),
               Text(
                 'Failed to load transfers',
-                style: GoogleFonts.manrope(color: Colors.white54),
+                style: GoogleFonts.manrope(color: palette.textSecondary),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () => ref.invalidate(pendingTransfersProvider),
-                style: ElevatedButton.styleFrom(backgroundColor: kPrimaryColor),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: palette.primary,
+                  foregroundColor: palette.textPrimary,
+                ),
                 child: const Text('Retry'),
               ),
             ],
@@ -66,13 +63,13 @@ class PendingTransfersPage extends ConsumerWidget {
                   Icon(
                     Icons.swap_horiz_rounded,
                     size: 64,
-                    color: Colors.white.withValues(alpha: 0.15),
+                    color: palette.textMuted.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No pending transfers',
                     style: GoogleFonts.manrope(
-                      color: Colors.white54,
+                      color: palette.textSecondary,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
@@ -81,7 +78,7 @@ class PendingTransfersPage extends ConsumerWidget {
                   Text(
                     'Approvals and incoming transfer requests will appear here.',
                     style: GoogleFonts.manrope(
-                      color: Colors.white24,
+                      color: palette.textMuted,
                       fontSize: 13,
                     ),
                     textAlign: TextAlign.center,
@@ -93,7 +90,8 @@ class PendingTransfersPage extends ConsumerWidget {
 
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(pendingTransfersProvider),
-            color: kPrimaryColor,
+            color: palette.primary,
+            backgroundColor: palette.surface,
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: transfers.length,
@@ -120,12 +118,10 @@ class _TransferRequestCard extends ConsumerStatefulWidget {
 }
 
 class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
-  static const Color kPrimaryColor = Color(0xFF8655F6);
-  static const Color kCardColor = Color(0xFF151022);
-
   bool _isProcessing = false;
 
   Future<void> _handleAccept() async {
+    final palette = context.dutyTheme;
     setState(() => _isProcessing = true);
 
     await ref
@@ -133,56 +129,58 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
         .acceptTransfer(transferId: widget.transfer['id']);
 
     final state = ref.read(marketplaceProvider);
-    if (mounted) {
-      if (state.hasError) {
-        setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to accept transfer'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Transfer accepted! The ticket is now yours.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+    if (!mounted) return;
+
+    if (state.hasError) {
+      setState(() => _isProcessing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Failed to accept transfer'),
+          backgroundColor: palette.danger,
+        ),
+      );
+      return;
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Transfer accepted! The ticket is now yours.'),
+        backgroundColor: palette.success,
+      ),
+    );
   }
 
   Future<void> _handleReject() async {
+    final palette = context.dutyTheme;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: kCardColor,
+        backgroundColor: palette.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Reject Transfer?',
           style: GoogleFonts.manrope(
-            color: Colors.white,
+            color: palette.textPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
           'The ticket will remain with the sender.',
-          style: GoogleFonts.manrope(color: Colors.white54),
+          style: GoogleFonts.manrope(color: palette.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'Cancel',
-              style: GoogleFonts.manrope(color: Colors.white54),
+              style: GoogleFonts.manrope(color: palette.textMuted),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               'Reject',
-              style: GoogleFonts.manrope(color: Colors.redAccent),
+              style: GoogleFonts.manrope(color: palette.danger),
             ),
           ),
         ],
@@ -198,28 +196,30 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
         .rejectTransfer(transferId: widget.transfer['id']);
 
     final state = ref.read(marketplaceProvider);
-    if (mounted) {
-      if (state.hasError) {
-        setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to reject transfer'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Transfer rejected.'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      }
+    if (!mounted) return;
+
+    if (state.hasError) {
+      setState(() => _isProcessing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Failed to reject transfer'),
+          backgroundColor: palette.danger,
+        ),
+      );
+      return;
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Transfer rejected.'),
+        backgroundColor: palette.warning,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final sender = widget.transfer['sender'] ?? {};
     final event = widget.transfer['event'] ?? {};
     final flow = widget.transfer['flow']?.toString() ?? 'owner_offer';
@@ -243,23 +243,22 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: kCardColor,
+          color: palette.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: kPrimaryColor.withValues(alpha: 0.2)),
+          border: Border.all(color: palette.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Sender info row
             Row(
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor: kPrimaryColor.withValues(alpha: 0.2),
+                  backgroundColor: palette.primarySurface,
                   child: Text(
-                    senderName.toString().substring(0, 1).toUpperCase(),
+                    senderName.substring(0, 1).toUpperCase(),
                     style: GoogleFonts.manrope(
-                      color: kPrimaryColor,
+                      color: palette.primary,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -273,7 +272,7 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
                       Text(
                         senderName,
                         style: GoogleFonts.manrope(
-                          color: Colors.white,
+                          color: palette.textPrimary,
                           fontWeight: FontWeight.w600,
                           fontSize: 15,
                         ),
@@ -282,7 +281,7 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
                         Text(
                           '@$senderUsername',
                           style: GoogleFonts.manrope(
-                            color: Colors.white38,
+                            color: palette.textMuted,
                             fontSize: 12,
                           ),
                         ),
@@ -295,13 +294,13 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withValues(alpha: 0.15),
+                    color: palette.warning.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     'Pending',
                     style: GoogleFonts.manrope(
-                      color: Colors.amber,
+                      color: palette.warning,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -309,12 +308,11 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
                 ),
               ],
             ),
-
             const SizedBox(height: 14),
             Text(
               messageTitle,
               style: GoogleFonts.manrope(
-                color: Colors.white,
+                color: palette.textPrimary,
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
               ),
@@ -323,25 +321,23 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
             Text(
               messageBody,
               style: GoogleFonts.manrope(
-                color: Colors.white60,
+                color: palette.textSecondary,
                 fontSize: 13,
                 height: 1.45,
               ),
             ),
             const SizedBox(height: 16),
-
-            // Event info
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.03),
+                color: palette.surfaceAlt,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.confirmation_num,
-                    color: kPrimaryColor,
+                    color: palette.primary,
                     size: 20,
                   ),
                   const SizedBox(width: 10),
@@ -352,7 +348,7 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
                         Text(
                           eventTitle,
                           style: GoogleFonts.manrope(
-                            color: Colors.white,
+                            color: palette.textPrimary,
                             fontWeight: FontWeight.w500,
                             fontSize: 14,
                           ),
@@ -363,7 +359,7 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
                           Text(
                             eventDate,
                             style: GoogleFonts.manrope(
-                              color: Colors.white38,
+                              color: palette.textMuted,
                               fontSize: 12,
                             ),
                           ),
@@ -373,16 +369,13 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
                 ],
               ),
             ),
-
             const SizedBox(height: 16),
-
-            // Action buttons
             if (_isProcessing)
-              const Center(
+              Center(
                 child: Padding(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   child: CircularProgressIndicator(
-                    color: kPrimaryColor,
+                    color: palette.primary,
                     strokeWidth: 2,
                   ),
                 ),
@@ -394,8 +387,8 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
                     width: double.infinity,
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white12),
+                        foregroundColor: palette.textPrimary,
+                        side: BorderSide(color: palette.border),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -416,9 +409,9 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
                       Expanded(
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.redAccent,
+                            foregroundColor: palette.danger,
                             side: BorderSide(
-                              color: Colors.redAccent.withValues(alpha: 0.5),
+                              color: palette.danger.withValues(alpha: 0.5),
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
@@ -439,7 +432,8 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
                         flex: 2,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: kPrimaryColor,
+                            backgroundColor: palette.primary,
+                            foregroundColor: palette.textPrimary,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -450,7 +444,6 @@ class _TransferRequestCardState extends ConsumerState<_TransferRequestCard> {
                             'Accept Ticket',
                             style: GoogleFonts.manrope(
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
                             ),
                           ),
                         ),

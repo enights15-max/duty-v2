@@ -1,4 +1,7 @@
 @extends('backend.layout')
+@section('style')
+    @includeIf('backend.partials.scarlet-operations-workspace')
+@endsection
 @section('content')
     <div class="page-header">
         <h4 class="page-title">{{ __('Form Builder') }}</h4>
@@ -23,8 +26,27 @@
         </ul>
     </div>
 
+    <div class="ops-shell">
+        <div class="ops-hero">
+            <div class="ops-hero__grid">
+                <div>
+                    <span class="ops-hero__eyebrow">{{ __('Payout form builder') }}</span>
+                    <h1 class="ops-hero__title">{{ __('Refine the withdrawal form field') }}</h1>
+                    <p class="ops-hero__copy">
+                        {{ __('Update the field rules, labels and options so payout requests keep collecting only what operations really needs.') }}
+                    </p>
+                </div>
+                <div class="ops-hero__meta">
+                    <div class="ops-hero__stat">
+                        <span class="ops-hero__stat-label">{{ __('Field type') }}</span>
+                        <span class="ops-hero__stat-value">{{ $input->type }}</span>
+                        <span class="ops-hero__stat-note">{{ __('Editing an existing payout form component') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div class="card">
+    <div class="card ops-panel">
         <div class="card-header">
             <div class="card-title">
                 <div class="row">
@@ -44,6 +66,9 @@
                         {{ csrf_field() }}
                         <input type="hidden" name="input_id" value="{{ $input->id }}">
                         <input type="hidden" name="type" value="{{ $input->type }}">
+                        <div class="scarlet-inline-note mb-4">
+                            {{ __('Changes here affect future withdrawal requests for this payout method. Keep labels explicit and avoid collecting information that finance does not need.') }}
+                        </div>
 
                         <div class="form-group">
                             <label>{{ __('Required') }}</label>
@@ -115,6 +140,7 @@
 
         </div>
 
+    </div>
     </div>
 @endsection
 

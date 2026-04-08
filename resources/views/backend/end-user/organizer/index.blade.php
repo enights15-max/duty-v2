@@ -65,6 +65,8 @@
                         <th scope="col">{{ __('Username') }}</th>
                         <th scope="col">{{ __('Email ID') }}</th>
                         <th scope="col">{{ __('Phone') }}</th>
+                        <th scope="col">{{ __('Professional Profile') }}</th>
+                        <th scope="col">{{ __('Owner') }}</th>
                         <th scope="col">{{ __('Account Status') }}</th>
                         <th scope="col">{{ __('Email Status') }}</th>
                         <th scope="col">{{ __('Actions') }}</th>
@@ -79,6 +81,30 @@
                           <td>{{ $organizer->username }}</td>
                           <td>{{ $organizer->email }}</td>
                           <td>{{ empty($organizer->phone) ? '-' : $organizer->phone }}</td>
+                          <td>
+                            @php
+                              $identityContext = $organizer->identity_context ?? [];
+                              $linkedIdentity = $organizer->linked_identity ?? null;
+                            @endphp
+                            <span class="badge badge-{{ $identityContext['status_class'] ?? 'secondary' }}">
+                              {{ __($identityContext['status_label'] ?? 'Not linked') }}
+                            </span>
+                            @if ($linkedIdentity)
+                              <div class="small text-muted mt-1">
+                                #{{ $linkedIdentity->id }} · {{ $linkedIdentity->display_name }}
+                              </div>
+                            @else
+                              <div class="small text-muted mt-1">{{ __('Legacy-only organizer record') }}</div>
+                            @endif
+                          </td>
+                          <td>
+                            @if ($linkedIdentity)
+                              <div>{{ $identityContext['owner_name'] ?: __('Owner not assigned') }}</div>
+                              <div class="small text-muted">{{ $identityContext['owner_email'] ?: __('No owner email') }}</div>
+                            @else
+                              <span class="text-muted">{{ __('No linked owner') }}</span>
+                            @endif
+                          </td>
                           <td>
                             <form id="accountStatusForm-{{ $organizer->id }}" class="d-inline-block"
                               action="{{ route('admin.organizer_management.organizer.update_account_status', ['id' => $organizer->id]) }}"
@@ -127,6 +153,13 @@
                                   class="dropdown-item">
                                   {{ __('Details') }}
                                 </a>
+
+                                @if ($linkedIdentity)
+                                  <a href="{{ route('admin.identity_management.show', ['id' => $linkedIdentity->id]) }}"
+                                    class="dropdown-item">
+                                    {{ __('View Professional Profile') }}
+                                  </a>
+                                @endif
 
                                 <a href="{{ route('admin.edit_management.organizer_edit', ['id' => $organizer->id]) }}"
                                   class="dropdown-item">

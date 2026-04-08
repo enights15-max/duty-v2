@@ -13,6 +13,10 @@ use App\Models\HomePage\Section;
 use App\Models\Language;
 use App\Models\Organizer;
 use App\Models\PaymentGateway\OnlineGateway;
+use App\Services\EventInventorySummaryService;
+use App\Services\EventWaitlistService;
+use App\Services\OrganizerPublicProfileService;
+use App\Services\RegionalSettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +24,14 @@ use Illuminate\Support\Facades\Validator;
 
 class HomeController extends Controller
 {
+  public function __construct(
+    private OrganizerPublicProfileService $organizerPublicProfileService,
+    private RegionalSettingsService $regionalSettingsService,
+    private EventInventorySummaryService $eventInventorySummaryService,
+    private EventWaitlistService $eventWaitlistService
+  ) {
+  }
+
   /* ***************************
      * Home page
      * ***************************/
@@ -145,6 +157,7 @@ class HomeController extends Controller
      * *****************************/
   private function formatEventForApi($event, $language)
   {
+    $eventModel = Event::query()->with('tickets')->find($event->id);
     $event_date = $event->date_type == 'multiple' ? eventLatestDates($event->id) : null;
 
     $start_date = $event->date_type == 'multiple' ? @$event_date->start_date : $event->start_date;
@@ -178,6 +191,14 @@ class HomeController extends Controller
     } else {
       $wishlist = null;
     }
+
+    $inventorySummary = $eventModel
+      ? $this->eventInventorySummaryService->summarizeEvent($eventModel)
+      : [];
+    $waitlistSummary = $eventModel
+      ? $this->eventWaitlistService->summaryForEvent($eventModel, $customer)
+      : ['waitlist_count' => 0, 'viewer_waitlist_subscribed' => false];
+
     $dates = null;
     if ($event->date_type == 'multiple') {
       $dates = EventDates::where('event_id', $event->id)->get();
@@ -198,6 +219,15 @@ class HomeController extends Controller
       'start_price' => $ticket->pricing_type == 'free' ? $ticket->pricing_type : $start_price,
       'wishlist' => !is_null($wishlist) ? 'yes' : 'no',
       'dates' => $dates,
+      'inventory_summary' => $inventorySummary,
+      'waitlist' => $waitlistSummary,
+      'availability_state' => $inventorySummary['availability_state'] ?? 'available',
+      'show_marketplace_fallback' => (bool) ($inventorySummary['show_marketplace_fallback'] ?? false),
+      'show_waitlist_cta' => (bool) ($inventorySummary['show_waitlist_cta'] ?? false),
+      'marketplace_available_count' => (int) ($inventorySummary['marketplace_available_count'] ?? 0),
+      'waitlist_count' => (int) ($waitlistSummary['waitlist_count'] ?? 0),
+      'viewer_waitlist_subscribed' => (bool) ($waitlistSummary['viewer_waitlist_subscribed'] ?? false),
+      'demand_label' => $inventorySummary['demand_label'] ?? 'Tickets disponibles',
     ];
   }
 
@@ -249,6 +279,7 @@ class HomeController extends Controller
     $stripe = OnlineGateway::where('keyword', 'stripe')->first();
     $stripeInfo = $stripe ? json_decode($stripe->mobile_information, true) : null;
     $data['stripe_public_key'] = $stripeInfo['key'] ?? null;
+    $data['regional_settings'] = $this->regionalSettingsService->getSettings();
 
     $razorpay = OnlineGateway::where('keyword', 'razorpay')->first();
     $data['razorpayInfo'] = $razorpay ? json_decode($razorpay->mobile_information, true) : null;

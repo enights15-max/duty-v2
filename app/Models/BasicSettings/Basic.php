@@ -79,10 +79,13 @@ class Basic extends Model
     'google_client_secret',
     'preloader',
     'commission',
+    'marketplace_commission',
     'organizer_email_verification',
     'organizer_admin_approval',
     'admin_approval_notice',
     'timezone',
+    'app_default_country_iso2',
+    'app_supported_country_iso2s',
     'event_guest_checkout_status',
     'how_ticket_will_be_send',
     'google_map_status',
@@ -100,6 +103,6 @@ class Basic extends Model
   // when user not set is work default
   public function getTimezoneAttribute($value)
   {
-    return $value ?? 'Asia/Dhaka';
+    return $value ?? 'America/Santo_Domingo';
   }
 }

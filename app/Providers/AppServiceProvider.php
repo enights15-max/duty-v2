@@ -38,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
   {
 
     if (!app()->runningInConsole()) {
+      set_time_limit(300);
       # code...
       Paginator::useBootstrap();
 
@@ -55,16 +56,16 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $language = Language::where('is_default', 1)->first();
-        $websiteSettings =  Basic::select(
-            'event_country_status',
-            'event_state_status',
-            'admin_theme_version',
-            'base_currency_symbol_position',
-            'base_currency_symbol',
-            'base_currency_text',
-            'google_map_status',
-            'google_map_api_key'
-          )
+        $websiteSettings = Basic::select(
+          'event_country_status',
+          'event_state_status',
+          'admin_theme_version',
+          'base_currency_symbol_position',
+          'base_currency_symbol',
+          'base_currency_text',
+          'google_map_status',
+          'google_map_api_key'
+        )
           ->first();
 
         $footerText = $language->footerContent()->first();
@@ -109,31 +110,31 @@ class AppServiceProvider extends ServiceProvider
       View::composer('frontend.*', function ($view) {
         // get basic info
         $basicData = Basic::select(
-            'theme_version',
-            'footer_logo',
-            'primary_color',
-            'breadcrumb_overlay_color',
-            'breadcrumb_overlay_opacity',
-            'breadcrumb',
-            'email_address',
-            'contact_number',
-            'address',
-            'latitude',
-            'longitude',
-            'base_currency_symbol',
-            'base_currency_symbol_position',
-            'base_currency_text',
-            'base_currency_text_position',
-            'base_currency_rate',
-            'is_shop_rating',
-            'facebook_login_status',
-            'google_login_status',
-            'google_recaptcha_status',
-            'event_country_status',
-            'event_state_status',
-            'google_map_status',
-            'google_map_api_key',
-          )->first();
+          'theme_version',
+          'footer_logo',
+          'primary_color',
+          'breadcrumb_overlay_color',
+          'breadcrumb_overlay_opacity',
+          'breadcrumb',
+          'email_address',
+          'contact_number',
+          'address',
+          'latitude',
+          'longitude',
+          'base_currency_symbol',
+          'base_currency_symbol_position',
+          'base_currency_text',
+          'base_currency_text_position',
+          'base_currency_rate',
+          'is_shop_rating',
+          'facebook_login_status',
+          'google_login_status',
+          'google_recaptcha_status',
+          'event_country_status',
+          'event_state_status',
+          'google_map_status',
+          'google_map_api_key',
+        )->first();
 
 
         // get all the languages of this system
@@ -228,7 +229,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with('newsletterTitle', $newsletterTitle);
           }
         }
-        
+
       });
 
 

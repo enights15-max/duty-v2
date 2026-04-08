@@ -5,6 +5,7 @@ namespace Tests\Feature\Api;
 use App\Http\Controllers\Api\EventController;
 use App\Models\BonusWallet;
 use App\Models\Customer;
+use App\Models\TicketTransfer;
 use App\Models\Wallet;
 use App\Services\BonusWalletService;
 use App\Services\CheckoutFundingAllocatorService;
@@ -21,8 +22,10 @@ use Tests\Support\ActorFeatureTestCase;
 
 class EventBookingFundingSmokeTest extends ActorFeatureTestCase
 {
-    protected array $baselineSchema = ['users_customers', 'identities'];
+    protected array $baselineSchema = ['users_customers', 'identities', 'economy'];
     protected array $baselineTruncate = [
+        'platform_revenue_events',
+        'fee_policies',
         'transactions',
         'organizers',
         'identity_balances',
@@ -312,6 +315,669 @@ class EventBookingFundingSmokeTest extends ActorFeatureTestCase
         );
     }
 
+    public function test_store_booking_records_platform_revenue_event_for_primary_sale(): void
+    {
+        $customer = $this->seedCustomer(1716, 'booking-fee-ledger@example.com');
+        $eventId = $this->seedEventWithTicket();
+        DB::table('basic_settings')->where('id', 1)->update([
+            'commission' => 10,
+        ]);
+
+        $controller = $this->makeController(
+            $customer,
+            [
+                'gateway' => 'wallet',
+                'mode' => 'wallet',
+                'payment_method' => 'wallet',
+                'wallet_amount' => 100.0,
+                'bonus_amount' => 0.0,
+                'card_amount' => 0.0,
+                'processing_fee' => 0.0,
+                'total_to_charge' => 100.0,
+                'is_fully_covered' => true,
+                'requires_card' => false,
+            ],
+            ['internal_capture' => 'wallet']
+        );
+
+        $request = Request::create('/api/event-booking', 'POST', $this->validPayload($eventId, [
+            'gateway' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'apply_wallet_balance' => true,
+        ]));
+
+        $response = $controller->store_booking($request);
+        $payload = $response->getData(true);
+        $bookingId = (int) DB::table('bookings')
+            ->where('customer_id', $customer->id)
+            ->where('event_id', $eventId)
+            ->value('id');
+
+        $this->assertTrue($payload['status']);
+        $this->assertDatabaseHas('platform_revenue_events', [
+            'operation_key' => 'primary_ticket_sale',
+            'booking_id' => $bookingId,
+            'event_id' => $eventId,
+            'actor_customer_id' => $customer->id,
+            'gross_amount' => '100.00',
+            'fee_amount' => '10.00',
+            'net_amount' => '90.00',
+        ]);
+    }
+
+    public function test_store_booking_creates_pending_transfer_for_assigned_friend_ticket(): void
+    {
+        $buyer = $this->seedCustomer(1707, 'booking-gift-buyer@example.com');
+        $recipient = $this->seedCustomer(1708, 'booking-gift-friend@example.com');
+        $eventId = $this->seedEventWithTicket();
+
+        $controller = $this->makeController(
+            $buyer,
+            [
+                'gateway' => 'wallet',
+                'mode' => 'wallet',
+                'payment_method' => 'wallet',
+                'wallet_amount' => 200.0,
+                'bonus_amount' => 0.0,
+                'card_amount' => 0.0,
+                'processing_fee' => 0.0,
+                'total_to_charge' => 200.0,
+                'is_fully_covered' => true,
+                'requires_card' => false,
+            ],
+            ['internal_capture' => 'wallet'],
+            function ($notificationService): void {
+                $notificationService->shouldReceive('notifyUser')
+                    ->twice()
+                    ->andReturnTrue();
+            }
+        );
+
+        $request = Request::create('/api/event-booking', 'POST', $this->validPayload($eventId, [
+            'gateway' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'apply_wallet_balance' => true,
+            'quantity' => 2,
+            'total' => 200,
+            'ticket_recipients' => [
+                [
+                    'slot_key' => '1:2',
+                    'ticket_id' => 1,
+                    'unit_index' => 2,
+                    'recipient_id' => $recipient->id,
+                ],
+            ],
+        ]));
+
+        $response = $controller->store_booking($request);
+        $payload = $response->getData(true);
+
+        $this->assertTrue($payload['status']);
+        $this->assertSame(1, $payload['gift_transfers_created']);
+        $this->assertDatabaseCount('bookings', 2);
+
+        $transfer = TicketTransfer::query()->first();
+        $this->assertNotNull($transfer);
+        $this->assertSame($buyer->id, (int) $transfer->from_customer_id);
+        $this->assertSame($recipient->id, (int) $transfer->to_customer_id);
+        $this->assertSame('pending', $transfer->status);
+
+        $this->assertDatabaseHas('bookings', [
+            'id' => $transfer->booking_id,
+            'customer_id' => $buyer->id,
+            'transfer_status' => 'transfer_pending',
+        ]);
+    }
+
+    public function test_store_booking_assigns_gift_to_the_selected_variation_slot_when_same_ticket_has_multiple_rows(): void
+    {
+        $buyer = $this->seedCustomer(1721, 'booking-variation-gift-buyer@example.com');
+        $recipient = $this->seedCustomer(1722, 'booking-variation-gift-recipient@example.com');
+        $eventId = $this->seedEventWithTicket();
+
+        DB::table('tickets')->where('id', 1)->update([
+            'title' => 'Access',
+            'pricing_type' => 'variation',
+            'price' => 0,
+            'variations' => json_encode([
+                [
+                    'name' => 'VIP',
+                    'price' => 150,
+                    'ticket_available_type' => 'limited',
+                    'ticket_available' => 10,
+                ],
+                [
+                    'name' => 'General',
+                    'price' => 50,
+                    'ticket_available_type' => 'limited',
+                    'ticket_available' => 10,
+                ],
+            ]),
+        ]);
+
+        $controller = $this->makeController(
+            $buyer,
+            [
+                'gateway' => 'wallet',
+                'mode' => 'wallet',
+                'payment_method' => 'wallet',
+                'wallet_amount' => 200.0,
+                'bonus_amount' => 0.0,
+                'card_amount' => 0.0,
+                'processing_fee' => 0.0,
+                'total_to_charge' => 200.0,
+                'is_fully_covered' => true,
+                'requires_card' => false,
+            ],
+            ['internal_capture' => 'wallet'],
+            function ($notificationService): void {
+                $notificationService->shouldReceive('notifyUser')
+                    ->twice()
+                    ->andReturnTrue();
+            }
+        );
+
+        $request = Request::create('/api/event-booking', 'POST', $this->validPayload($eventId, [
+            'gateway' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'apply_wallet_balance' => true,
+            'quantity' => 2,
+            'total' => 200,
+            'selTickets' => [
+                [
+                    'ticket_id' => 1,
+                    'name' => 'VIP',
+                    'qty' => 1,
+                    'price' => 150,
+                    'early_bird_dicount' => 0,
+                ],
+                [
+                    'ticket_id' => 1,
+                    'name' => 'General',
+                    'qty' => 1,
+                    'price' => 50,
+                    'early_bird_dicount' => 0,
+                ],
+            ],
+            'ticket_recipients' => [
+                [
+                    'slot_key' => '1:2:1',
+                    'ticket_id' => 1,
+                    'unit_index' => 1,
+                    'recipient_id' => $recipient->id,
+                ],
+            ],
+        ]));
+
+        $response = $controller->store_booking($request);
+        $payload = $response->getData(true);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($payload['status']);
+        $this->assertSame(1, $payload['gift_transfers_created']);
+
+        $transfer = TicketTransfer::query()->first();
+        $this->assertNotNull($transfer);
+
+        $giftBooking = DB::table('bookings')->where('id', $transfer->booking_id)->first();
+        $this->assertNotNull($giftBooking);
+        $giftVariation = json_decode((string) $giftBooking->variation, true);
+        $this->assertSame('General', $giftVariation[0]['name'] ?? null);
+    }
+
+    public function test_store_booking_rejects_ambiguous_legacy_slot_keys_for_mixed_variations_of_same_ticket(): void
+    {
+        $buyer = $this->seedCustomer(1723, 'booking-variation-ambiguous-buyer@example.com');
+        $recipient = $this->seedCustomer(1724, 'booking-variation-ambiguous-recipient@example.com');
+        $eventId = $this->seedEventWithTicket();
+
+        DB::table('tickets')->where('id', 1)->update([
+            'title' => 'Access',
+            'pricing_type' => 'variation',
+            'price' => 0,
+            'variations' => json_encode([
+                [
+                    'name' => 'VIP',
+                    'price' => 150,
+                    'ticket_available_type' => 'limited',
+                    'ticket_available' => 10,
+                ],
+                [
+                    'name' => 'General',
+                    'price' => 50,
+                    'ticket_available_type' => 'limited',
+                    'ticket_available' => 10,
+                ],
+            ]),
+        ]);
+
+        $walletService = Mockery::mock(WalletService::class);
+        $bonusWalletService = Mockery::mock(BonusWalletService::class);
+        $guardService = Mockery::mock(EventBookingGuardService::class);
+        $guardService->shouldReceive('resolveAuthenticatedBookingCustomer')
+            ->once()
+            ->andReturn(['authCustomer' => $buyer]);
+        $guardService->shouldReceive('validateEventDateWindow')
+            ->once()
+            ->andReturn(null);
+
+        $notificationService = Mockery::mock(NotificationService::class);
+
+        $controller = new EventController(
+            walletService: $walletService,
+            bonusWalletService: $bonusWalletService,
+            notificationService: $notificationService,
+            eventBookingGuardService: $guardService
+        );
+
+        $request = Request::create('/api/event-booking', 'POST', $this->validPayload($eventId, [
+            'gateway' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'quantity' => 2,
+            'total' => 200,
+            'selTickets' => [
+                [
+                    'ticket_id' => 1,
+                    'name' => 'VIP',
+                    'qty' => 1,
+                    'price' => 150,
+                    'early_bird_dicount' => 0,
+                ],
+                [
+                    'ticket_id' => 1,
+                    'name' => 'General',
+                    'qty' => 1,
+                    'price' => 50,
+                    'early_bird_dicount' => 0,
+                ],
+            ],
+            'ticket_recipients' => [
+                [
+                    'slot_key' => '1:1',
+                    'ticket_id' => 1,
+                    'unit_index' => 1,
+                    'recipient_id' => $recipient->id,
+                ],
+            ],
+        ]));
+
+        $response = $controller->store_booking($request);
+        $payload = $response->getData(true);
+
+        $this->assertSame(422, $response->getStatusCode());
+        $this->assertFalse($payload['status']);
+        $this->assertSame('ticket_recipient_assignment_ambiguous', $payload['error_type']);
+        $this->assertDatabaseCount('bookings', 0);
+        $this->assertDatabaseCount('ticket_transfers', 0);
+    }
+
+    public function test_store_booking_blocks_purchase_when_customer_exceeds_ticket_limit(): void
+    {
+        $customer = $this->seedCustomer(1709, 'booking-limit@example.com');
+        $eventId = $this->seedEventWithTicket();
+
+        DB::table('tickets')->where('id', 1)->update([
+            'max_ticket_buy_type' => 'limited',
+            'max_buy_ticket' => 2,
+        ]);
+
+        DB::table('bookings')->insert([
+            'customer_id' => $customer->id,
+            'booking_id' => 'existing-limit-booking',
+            'order_number' => 'existing-order',
+            'event_id' => $eventId,
+            'ticket_id' => 1,
+            'fname' => 'Limit',
+            'lname' => 'Buyer',
+            'email' => 'booking-limit@example.com',
+            'phone' => '8090000000',
+            'country' => 'DO',
+            'address' => 'Santo Domingo',
+            'price' => 100,
+            'quantity' => 1,
+            'paymentMethod' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'event_date' => now()->toDateString(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $walletService = Mockery::mock(WalletService::class);
+        $bonusWalletService = Mockery::mock(BonusWalletService::class);
+        $guardService = Mockery::mock(EventBookingGuardService::class);
+        $guardService->shouldReceive('resolveAuthenticatedBookingCustomer')
+            ->once()
+            ->andReturn(['authCustomer' => $customer]);
+        $guardService->shouldReceive('validateEventDateWindow')
+            ->once()
+            ->andReturn(null);
+        $guardService->shouldReceive('validateEventAgeRestriction')
+            ->once()
+            ->andReturn(null);
+
+        $controller = new EventController(
+            walletService: $walletService,
+            bonusWalletService: $bonusWalletService,
+            notificationService: Mockery::mock(NotificationService::class),
+            eventBookingGuardService: $guardService
+        );
+
+        $request = Request::create('/api/event-booking', 'POST', $this->validPayload($eventId, [
+            'gateway' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'quantity' => 2,
+            'total' => 200,
+            'selTickets' => [
+                ['ticket_id' => 1, 'qty' => 2],
+            ],
+        ]));
+
+        $response = $controller->store_booking($request);
+        $payload = $response->getData(true);
+
+        $this->assertSame(422, $response->getStatusCode());
+        $this->assertFalse($payload['status']);
+        $this->assertSame('purchase_limit_reached', $payload['error_type']);
+        $this->assertStringContainsString('solo puede recibir 1 entrada(s) más', strtolower($payload['message']));
+        $this->assertDatabaseCount('bookings', 1);
+    }
+
+    public function test_store_booking_allows_buyer_to_purchase_beyond_personal_limit_when_ticket_is_assigned_to_friend(): void
+    {
+        $buyer = $this->seedCustomer(1711, 'booking-limit-gift-buyer@example.com');
+        $recipient = $this->seedCustomer(1712, 'booking-limit-gift-recipient@example.com');
+        $eventId = $this->seedEventWithTicket();
+
+        DB::table('tickets')->where('id', 1)->update([
+            'max_ticket_buy_type' => 'limited',
+            'max_buy_ticket' => 2,
+        ]);
+
+        DB::table('bookings')->insert([
+            'customer_id' => $buyer->id,
+            'booking_id' => 'buyer-limit-1',
+            'order_number' => 'buyer-limit-1',
+            'event_id' => $eventId,
+            'ticket_id' => 1,
+            'fname' => 'Limit',
+            'lname' => 'Buyer',
+            'email' => 'booking-limit-gift-buyer@example.com',
+            'phone' => '8090000000',
+            'country' => 'DO',
+            'address' => 'Santo Domingo',
+            'price' => 100,
+            'quantity' => 2,
+            'paymentMethod' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'event_date' => now()->toDateString(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $controller = $this->makeController(
+            $buyer,
+            [
+                'gateway' => 'wallet',
+                'mode' => 'wallet',
+                'payment_method' => 'wallet',
+                'wallet_amount' => 100.0,
+                'bonus_amount' => 0.0,
+                'card_amount' => 0.0,
+                'processing_fee' => 0.0,
+                'total_to_charge' => 100.0,
+                'is_fully_covered' => true,
+                'requires_card' => false,
+            ],
+            ['internal_capture' => 'wallet'],
+            function ($notificationService): void {
+                $notificationService->shouldReceive('notifyUser')
+                    ->twice()
+                    ->andReturnTrue();
+            }
+        );
+
+        $request = Request::create('/api/event-booking', 'POST', $this->validPayload($eventId, [
+            'gateway' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'apply_wallet_balance' => true,
+            'quantity' => 1,
+            'total' => 100,
+            'ticket_recipients' => [
+                [
+                    'slot_key' => '1:1',
+                    'ticket_id' => 1,
+                    'unit_index' => 1,
+                    'recipient_id' => $recipient->id,
+                ],
+            ],
+        ]));
+
+        $response = $controller->store_booking($request);
+        $payload = $response->getData(true);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($payload['status']);
+        $this->assertSame(1, $payload['gift_transfers_created']);
+        $this->assertDatabaseHas('ticket_transfers', [
+            'to_customer_id' => $recipient->id,
+            'status' => 'pending',
+        ]);
+    }
+
+    public function test_store_booking_blocks_purchase_when_recipient_pending_gift_already_consumes_ticket_limit(): void
+    {
+        $buyer = $this->seedCustomer(1713, 'booking-limit-pending-buyer@example.com');
+        $donor = $this->seedCustomer(1714, 'booking-limit-pending-donor@example.com');
+        $recipient = $this->seedCustomer(1715, 'booking-limit-pending-recipient@example.com');
+        $eventId = $this->seedEventWithTicket();
+
+        DB::table('tickets')->where('id', 1)->update([
+            'max_ticket_buy_type' => 'limited',
+            'max_buy_ticket' => 1,
+        ]);
+
+        $pendingBookingId = DB::table('bookings')->insertGetId([
+            'customer_id' => $donor->id,
+            'booking_id' => 'pending-gift-booking',
+            'order_number' => 'pending-gift-booking',
+            'event_id' => $eventId,
+            'ticket_id' => 1,
+            'fname' => 'Pending',
+            'lname' => 'Donor',
+            'email' => 'booking-limit-pending-donor@example.com',
+            'phone' => '8090000000',
+            'country' => 'DO',
+            'address' => 'Santo Domingo',
+            'price' => 100,
+            'quantity' => 1,
+            'paymentMethod' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'transfer_status' => 'transfer_pending',
+            'event_date' => now()->toDateString(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('ticket_transfers')->insert([
+            'booking_id' => $pendingBookingId,
+            'from_customer_id' => $donor->id,
+            'to_customer_id' => $recipient->id,
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $walletService = Mockery::mock(WalletService::class);
+        $bonusWalletService = Mockery::mock(BonusWalletService::class);
+        $guardService = Mockery::mock(EventBookingGuardService::class);
+        $guardService->shouldReceive('resolveAuthenticatedBookingCustomer')
+            ->once()
+            ->andReturn(['authCustomer' => $buyer]);
+        $guardService->shouldReceive('validateEventDateWindow')
+            ->once()
+            ->andReturn(null);
+        $guardService->shouldReceive('validateEventAgeRestriction')
+            ->once()
+            ->andReturn(null);
+
+        $controller = new EventController(
+            walletService: $walletService,
+            bonusWalletService: $bonusWalletService,
+            notificationService: Mockery::mock(NotificationService::class),
+            eventBookingGuardService: $guardService
+        );
+
+        $request = Request::create('/api/event-booking', 'POST', $this->validPayload($eventId, [
+            'gateway' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'quantity' => 1,
+            'total' => 100,
+            'ticket_recipients' => [
+                [
+                    'slot_key' => '1:1',
+                    'ticket_id' => 1,
+                    'unit_index' => 1,
+                    'recipient_id' => $recipient->id,
+                ],
+            ],
+        ]));
+
+        $response = $controller->store_booking($request);
+        $payload = $response->getData(true);
+
+        $this->assertSame(422, $response->getStatusCode());
+        $this->assertFalse($payload['status']);
+        $this->assertSame('purchase_limit_reached', $payload['error_type']);
+        $this->assertStringContainsString('ya alcanzó el máximo', strtolower($payload['message']));
+    }
+
+    public function test_store_booking_does_not_count_receiver_request_transfers_against_final_holder_purchase_limit(): void
+    {
+        $buyer = $this->seedCustomer(1717, 'booking-limit-receiver-request-buyer@example.com');
+        $owner = $this->seedCustomer(1718, 'booking-limit-receiver-request-owner@example.com');
+        $eventId = $this->seedEventWithTicket();
+
+        DB::table('tickets')->where('id', 1)->update([
+            'max_ticket_buy_type' => 'limited',
+            'max_buy_ticket' => 1,
+        ]);
+
+        $pendingBookingId = DB::table('bookings')->insertGetId([
+            'customer_id' => $owner->id,
+            'booking_id' => 'receiver-request-booking',
+            'order_number' => 'receiver-request-booking',
+            'event_id' => $eventId,
+            'ticket_id' => 1,
+            'fname' => 'Owner',
+            'lname' => 'Customer',
+            'email' => 'booking-limit-receiver-request-owner@example.com',
+            'phone' => '8090000000',
+            'country' => 'DO',
+            'address' => 'Santo Domingo',
+            'price' => 100,
+            'quantity' => 1,
+            'paymentMethod' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'transfer_status' => 'transfer_pending',
+            'event_date' => now()->toDateString(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('ticket_transfers')->insert([
+            'booking_id' => $pendingBookingId,
+            'from_customer_id' => $buyer->id,
+            'to_customer_id' => $owner->id,
+            'status' => 'pending',
+            'flow' => 'receiver_request',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $controller = $this->makeController(
+            $buyer,
+            [
+                'gateway' => 'wallet',
+                'mode' => 'wallet',
+                'payment_method' => 'wallet',
+                'wallet_amount' => 100.0,
+                'bonus_amount' => 0.0,
+                'card_amount' => 0.0,
+                'processing_fee' => 0.0,
+                'total_to_charge' => 100.0,
+                'is_fully_covered' => true,
+                'requires_card' => false,
+            ],
+            ['internal_capture' => 'wallet']
+        );
+
+        $request = Request::create('/api/event-booking', 'POST', $this->validPayload($eventId, [
+            'gateway' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'apply_wallet_balance' => true,
+            'quantity' => 1,
+            'total' => 100,
+        ]));
+
+        $response = $controller->store_booking($request);
+        $payload = $response->getData(true);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($payload['status']);
+        $this->assertDatabaseCount('bookings', 2);
+    }
+
+    public function test_store_booking_persists_ticket_id_for_future_purchase_limit_checks(): void
+    {
+        $customer = $this->seedCustomer(1710, 'booking-ticket-id@example.com');
+        $eventId = $this->seedEventWithTicket();
+        $controller = $this->makeController(
+            $customer,
+            [
+                'gateway' => 'wallet',
+                'mode' => 'wallet',
+                'payment_method' => 'wallet',
+                'wallet_amount' => 100.0,
+                'bonus_amount' => 0.0,
+                'card_amount' => 0.0,
+                'processing_fee' => 0.0,
+                'total_to_charge' => 100.0,
+                'is_fully_covered' => true,
+                'requires_card' => false,
+            ],
+            ['internal_capture' => 'wallet']
+        );
+
+        $request = Request::create('/api/event-booking', 'POST', $this->validPayload($eventId, [
+            'gateway' => 'wallet',
+            'gatewayType' => 'online',
+            'paymentStatus' => 'completed',
+            'apply_wallet_balance' => true,
+        ]));
+
+        $response = $controller->store_booking($request);
+        $payload = $response->getData(true);
+
+        $this->assertTrue($payload['status']);
+        $this->assertDatabaseHas('bookings', [
+            'customer_id' => $customer->id,
+            'event_id' => $eventId,
+            'ticket_id' => 1,
+        ]);
+    }
+
     private function makeController(Customer $customer, array $fundingPlan, array $paymentCapture, ?callable $configureNotification = null): EventController
     {
         $walletService = Mockery::mock(WalletService::class);
@@ -448,6 +1114,8 @@ class EventBookingFundingSmokeTest extends ActorFeatureTestCase
             'ticket_available_type' => 'limited',
             'ticket_available' => 10,
             'price' => 100,
+            'max_ticket_buy_type' => 'unlimited',
+            'max_buy_ticket' => 0,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -490,6 +1158,19 @@ class EventBookingFundingSmokeTest extends ActorFeatureTestCase
                 $table->string('base_currency_text_position')->nullable();
                 $table->decimal('base_currency_rate', 10, 2)->default(1);
                 $table->string('how_ticket_will_be_send')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('ticket_transfers')) {
+            Schema::create('ticket_transfers', function (Blueprint $table): void {
+                $table->id();
+                $table->unsignedBigInteger('booking_id');
+                $table->unsignedBigInteger('from_customer_id');
+                $table->unsignedBigInteger('to_customer_id');
+                $table->string('status')->default('pending');
+                $table->string('flow')->nullable();
+                $table->text('notes')->nullable();
                 $table->timestamps();
             });
         }
@@ -550,6 +1231,8 @@ class EventBookingFundingSmokeTest extends ActorFeatureTestCase
                 $table->unsignedBigInteger('customer_id')->nullable();
                 $table->unsignedBigInteger('organizer_id')->nullable();
                 $table->unsignedBigInteger('organizer_identity_id')->nullable();
+                $table->unsignedBigInteger('venue_id')->nullable();
+                $table->unsignedBigInteger('venue_identity_id')->nullable();
                 $table->string('payment_status')->nullable();
                 $table->string('payment_method')->nullable();
                 $table->decimal('grand_total', 15, 2)->default(0);
@@ -567,6 +1250,18 @@ class EventBookingFundingSmokeTest extends ActorFeatureTestCase
         if (!Schema::hasColumn('transactions', 'organizer_identity_id')) {
             Schema::table('transactions', function (Blueprint $table): void {
                 $table->unsignedBigInteger('organizer_identity_id')->nullable();
+            });
+        }
+
+        if (!Schema::hasColumn('transactions', 'venue_id')) {
+            Schema::table('transactions', function (Blueprint $table): void {
+                $table->unsignedBigInteger('venue_id')->nullable();
+            });
+        }
+
+        if (!Schema::hasColumn('transactions', 'venue_identity_id')) {
+            Schema::table('transactions', function (Blueprint $table): void {
+                $table->unsignedBigInteger('venue_identity_id')->nullable();
             });
         }
 
@@ -632,6 +1327,9 @@ class EventBookingFundingSmokeTest extends ActorFeatureTestCase
             'ticket_available_type' => fn (Blueprint $table) => $table->string('ticket_available_type')->nullable(),
             'ticket_available' => fn (Blueprint $table) => $table->integer('ticket_available')->default(0),
             'price' => fn (Blueprint $table) => $table->decimal('price', 15, 2)->default(0),
+            'variations' => fn (Blueprint $table) => $table->longText('variations')->nullable(),
+            'max_ticket_buy_type' => fn (Blueprint $table) => $table->string('max_ticket_buy_type')->nullable(),
+            'max_buy_ticket' => fn (Blueprint $table) => $table->integer('max_buy_ticket')->default(0),
         ] as $column => $definition) {
             if (!Schema::hasColumn('tickets', $column)) {
                 Schema::table('tickets', $definition);
@@ -647,6 +1345,7 @@ class EventBookingFundingSmokeTest extends ActorFeatureTestCase
                 $table->unsignedBigInteger('event_id')->nullable();
                 $table->unsignedBigInteger('organizer_id')->nullable();
                 $table->unsignedBigInteger('organizer_identity_id')->nullable();
+                $table->integer('transcation_type')->nullable();
                 $table->unsignedBigInteger('ticket_id')->nullable();
                 $table->string('fname')->nullable();
                 $table->string('lname')->nullable();
@@ -679,7 +1378,20 @@ class EventBookingFundingSmokeTest extends ActorFeatureTestCase
                 $table->unsignedBigInteger('conversation_id')->nullable();
                 $table->string('fcm_token')->nullable();
                 $table->integer('scan_status')->default(0);
+                $table->string('transfer_status')->nullable();
                 $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasColumn('bookings', 'transcation_type')) {
+            Schema::table('bookings', function (Blueprint $table): void {
+                $table->integer('transcation_type')->nullable();
+            });
+        }
+
+        if (!Schema::hasColumn('bookings', 'transfer_status')) {
+            Schema::table('bookings', function (Blueprint $table): void {
+                $table->string('transfer_status')->nullable();
             });
         }
 

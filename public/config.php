@@ -1,11 +1,11 @@
 <?php
 
-return array (
+return array(
   'PUBLIC_API_BASE' => 'https://v2.duty.do/pgw',
   'AUTHORIZE_LOGIN_ID' => '3Ca5hYQ6h',
   'AUTHORIZE_TRANSACTION_KEY' => '8bt8Kr5gPZ3ZE23C',
   'AUTHORIZE_ENV' => 'sandbox',
-  'STRIPE_SECRET_KEY' => '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',
+  'STRIPE_SECRET_KEY' => 'sk_test_51Qsd1rPvUycBozh2CRqY9XCE715ohMzCX0gxNiK2fSYGvfZziJOGlEBkAC9q6CDDqIA6puzNiZFFzgz0XQg4iWzU00eXUbJGp5',
   'MIDTRANS_SERVER_KEY' => 'rr',
   'MIDTRANS_BASE' => 'https://app.midtrans.com/snap/v1/transactions',
   'MOLLIE_API_KEY' => 'rr',

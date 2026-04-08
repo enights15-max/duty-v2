@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "frontend-design": {
+      "source": "anthropics/claude-code",
+      "sourceType": "github",
+      "computedHash": "e8118284a6365753790d44bb2758a6032b3af27fa84696428d9233f2be0f4e78"
+    },
+    "subagent-planificator": {
+      "source": "dimitrigilbert/ai-skills",
+      "sourceType": "github",
+      "computedHash": "8092f420d30b44f47c7ccc81ee26f01d86b90ede9d5efe46a895e3f5cc65bd42"
+    }
+  }
+}

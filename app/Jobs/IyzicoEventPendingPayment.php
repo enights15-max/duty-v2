@@ -74,12 +74,10 @@ class IyzicoEventPendingPayment implements ShouldQueue
 
                         storeTranscation($eventBooking);
 
-                        //store amount to organizer
-                        $organizerData['organizer_id'] = $eventBooking->organizer_id;
-                        $organizerData['price'] = $eventBooking->price;
-                        $organizerData['tax'] = $eventBooking->tax;
-                        $organizerData['commission'] = $eventBooking->commission;
-                        storeOrganizer($organizerData);
+                        // Store settlement in the active professional owner wallet.
+                        if (bookingHasProfessionalOwner($eventBooking)) {
+                            storeProfessionalOwner($eventBooking);
+                        }
                         \Artisan::call("queue:work --stop-when-empty");
                     }
                 }

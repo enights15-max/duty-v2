@@ -168,12 +168,10 @@ class StripeController extends Controller
 
           storeTranscation($bookingInfo);
 
-          //store amount to organizer
-          $organizerData['organizer_id'] = $bookingInfo['organizer_id'];
-          $organizerData['price'] = $arrData['price'];
-          $organizerData['tax'] = $bookingInfo->tax;
-          $organizerData['commission'] = $bookingInfo->commission;
-          storeOrganizer($organizerData);
+          // Store settlement in the active professional owner wallet.
+          if (bookingHasProfessionalOwner($bookingInfo)) {
+            storeProfessionalOwner($bookingInfo);
+          }
 
           // remove all session data
           $request->session()->forget('event_id');

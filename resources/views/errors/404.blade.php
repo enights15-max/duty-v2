@@ -14,7 +14,8 @@
   <title>404</title>
 
   {{-- fav icon --}}
-  <link rel="shortcut icon" type="image/png" href="{{ asset('assets/admin/img/' . $websiteInfo->favicon) }}">
+  @php($errorWebsiteInfo = $websiteInfo ?? null)
+  <link rel="shortcut icon" type="image/png" href="{{ asset('assets/admin/img/' . (optional($errorWebsiteInfo)->favicon ?: 'favicon.png')) }}">
 
   {{-- include styles --}}
   @includeIf('frontend.partials.styles')

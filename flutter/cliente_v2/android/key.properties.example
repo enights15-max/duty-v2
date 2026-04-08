@@ -1,0 +1,10 @@
+# Copy to:
+#   flutter/cliente_v2/android/key.properties
+#
+# This file is ignored by git.
+# Use absolute paths when possible.
+
+storeFile=/absolute/path/to/upload-keystore.jks
+storePassword=CHANGE_ME
+keyAlias=upload
+keyPassword=CHANGE_ME

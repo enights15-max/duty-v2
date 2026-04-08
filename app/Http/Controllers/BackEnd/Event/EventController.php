@@ -5,12 +5,14 @@ namespace App\Http\Controllers\BackEnd\Event;
 use Carbon\Carbon;
 use App\Models\City;
 use App\Models\Event;
+use App\Models\Identity;
 use App\Models\State;
 use App\Models\Country;
 use App\Models\Language;
 use App\Models\Organizer;
 use App\Models\Event\Ticket;
 use Illuminate\Http\Request;
+use App\Models\Artist;
 use App\Models\Event\EventCity;
 use App\Models\Event\EventDates;
 use App\Models\Event\EventImage;
@@ -18,6 +20,7 @@ use App\Models\Event\EventState;
 use App\Models\Event\EventContent;
 use App\Models\Event\EventCountry;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Mews\Purifier\Facades\Purifier;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
@@ -25,15 +28,26 @@ use App\Http\Requests\Event\StoreRequest;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\Event\UpdateRequest;
 use App\Http\Requests\TicketSettingRequest;
-<<<<<<< Updated upstream
-=======
 use App\Services\EventAuthoringService;
 use App\Services\EventCloneService;
+use App\Services\EventCollaboratorSplitService;
 use App\Services\EventQrCodeService;
->>>>>>> Stashed changes
+use App\Services\NotificationService;
 
 class EventController extends Controller
 {
+  protected NotificationService $notificationService;
+  protected EventCollaboratorSplitService $eventCollaboratorSplitService;
+
+  public function __construct(
+    NotificationService $notificationService,
+    EventCollaboratorSplitService $eventCollaboratorSplitService
+  )
+  {
+    $this->notificationService = $notificationService;
+    $this->eventCollaboratorSplitService = $eventCollaboratorSplitService;
+  }
+
   //index
   public function index(Request $request)
   {
@@ -41,6 +55,41 @@ class EventController extends Controller
 
     $language = Language::where('code', $request->language)->firstOrFail();
     $information['language'] = $language;
+    $lifecycle = $request->input('lifecycle', 'all');
+    $statusFilter = $request->input('status_filter', 'all');
+    $statusFilter = in_array($statusFilter, ['all', 'active', 'inactive'], true) ? $statusFilter : 'all';
+    $submissionFilter = $request->input('submission_filter', 'all');
+    $submissionFilter = in_array($submissionFilter, ['all', 'app_submitted', 'admin_authored'], true)
+      ? $submissionFilter
+      : 'all';
+    $viewMode = $request->filled('view_mode')
+      ? $request->input('view_mode')
+      : Session::get('admin.events.index.view_mode', 'list');
+    $viewMode = in_array($viewMode, ['list', 'grid'], true) ? $viewMode : 'list';
+
+    $gridColumns = $request->filled('grid_columns')
+      ? (int) $request->input('grid_columns')
+      : (int) Session::get('admin.events.index.grid_columns', 3);
+    $gridColumns = in_array($gridColumns, [2, 3, 4], true) ? $gridColumns : 3;
+
+    $gridDensity = $request->filled('grid_density')
+      ? $request->input('grid_density')
+      : Session::get('admin.events.index.grid_density', 'comfortable');
+    $gridDensity = in_array($gridDensity, ['comfortable', 'compact'], true) ? $gridDensity : 'comfortable';
+
+    $sortBy = $request->filled('sort_by')
+      ? $request->input('sort_by')
+      : Session::get('admin.events.index.sort_by', 'timeline');
+    $sortBy = in_array($sortBy, ['timeline', 'newest', 'oldest', 'title_asc', 'title_desc'], true) ? $sortBy : 'timeline';
+    $featuredOnly = $request->boolean('featured_only');
+
+    Session::put('admin.events.index.view_mode', $viewMode);
+    Session::put('admin.events.index.grid_columns', $gridColumns);
+    Session::put('admin.events.index.grid_density', $gridDensity);
+    Session::put('admin.events.index.sort_by', $sortBy);
+
+    $now = Carbon::now()->toDateTimeString();
+    $effectiveEndExpression = "COALESCE((SELECT MAX(event_dates.end_date_time) FROM event_dates WHERE event_dates.event_id = events.id), events.end_date_time)";
 
     $event_type = null;
     if (filled($request->event_type)) {
@@ -60,11 +109,117 @@ class EventController extends Controller
       ->when($event_type, function ($query) use ($event_type) {
         return $query->where('events.event_type', $event_type);
       })
+      ->when($statusFilter === 'active', function ($query) {
+        return $query->where('events.status', 1);
+      })
+      ->when($statusFilter === 'inactive', function ($query) {
+        return $query->where('events.status', 0);
+      })
+      ->when($featuredOnly, function ($query) {
+        return $query->where('events.is_featured', 'yes');
+      });
+
+    $information['lifecycleCounts'] = [
+      'all' => (clone $baseQuery)->count(),
+      'current' => (clone $baseQuery)
+        ->whereRaw("({$effectiveEndExpression} IS NULL OR {$effectiveEndExpression} >= ?)", [$now])
+        ->count(),
+      'expired' => (clone $baseQuery)
+        ->whereRaw("{$effectiveEndExpression} < ?", [$now])
+        ->count(),
+    ];
+
+    $information['submissionCounts'] = [
+      'all' => (clone $baseQuery)->count(),
+      'app_submitted' => (clone $baseQuery)
+        ->where(function ($query) {
+          $query->whereNotNull('events.owner_identity_id')
+            ->orWhereNotNull('events.venue_identity_id');
+        })
+        ->count(),
+      'admin_authored' => (clone $baseQuery)
+        ->whereNull('events.owner_identity_id')
+        ->whereNull('events.venue_identity_id')
+        ->count(),
+    ];
+
+    $events = (clone $baseQuery)
       ->select('events.*', 'event_contents.id as eventInfoId', 'event_contents.title', 'event_contents.slug', 'event_categories.name as category')
-      ->orderByDesc('events.id')
+      ->selectRaw("{$effectiveEndExpression} as effective_end_date_time")
+      ->selectRaw("CASE WHEN {$effectiveEndExpression} IS NOT NULL AND {$effectiveEndExpression} < ? THEN 1 ELSE 0 END as is_expired", [$now])
+      ->when($submissionFilter === 'app_submitted', function ($query) {
+        return $query->where(function ($builder) {
+          $builder->whereNotNull('events.owner_identity_id')
+            ->orWhereNotNull('events.venue_identity_id');
+        });
+      })
+      ->when($submissionFilter === 'admin_authored', function ($query) {
+        return $query->whereNull('events.owner_identity_id')
+          ->whereNull('events.venue_identity_id');
+      })
+      ->when($lifecycle === 'current', function ($query) use ($effectiveEndExpression, $now) {
+        return $query->whereRaw("({$effectiveEndExpression} IS NULL OR {$effectiveEndExpression} >= ?)", [$now]);
+      })
+      ->when($lifecycle === 'expired', function ($query) use ($effectiveEndExpression, $now) {
+        return $query->whereRaw("{$effectiveEndExpression} < ?", [$now]);
+      })
+      ->when($sortBy === 'timeline', function ($query) use ($effectiveEndExpression, $now) {
+        return $query
+          ->orderByRaw("CASE WHEN {$effectiveEndExpression} IS NOT NULL AND {$effectiveEndExpression} < ? THEN 1 ELSE 0 END ASC", [$now])
+          ->orderByRaw("CASE WHEN {$effectiveEndExpression} IS NULL OR {$effectiveEndExpression} >= ? THEN COALESCE({$effectiveEndExpression}, '9999-12-31 23:59:59') END ASC", [$now])
+          ->orderByRaw("CASE WHEN {$effectiveEndExpression} < ? THEN {$effectiveEndExpression} END DESC", [$now])
+          ->orderByDesc('events.id');
+      })
+      ->when($sortBy === 'newest', function ($query) {
+        return $query
+          ->orderByDesc('events.created_at')
+          ->orderByDesc('events.id');
+      })
+      ->when($sortBy === 'oldest', function ($query) {
+        return $query
+          ->orderBy('events.created_at')
+          ->orderBy('events.id');
+      })
+      ->when($sortBy === 'title_asc', function ($query) {
+        return $query
+          ->orderBy('event_contents.title')
+          ->orderByDesc('events.id');
+      })
+      ->when($sortBy === 'title_desc', function ($query) {
+        return $query
+          ->orderByDesc('event_contents.title')
+          ->orderByDesc('events.id');
+      })
       ->paginate(10);
 
+    if ($this->eventCollaboratorSplitService->supportsCollaboratorEconomy()) {
+      $events->getCollection()->transform(function ($event) {
+        $summary = $this->eventCollaboratorSplitService->eventSummary((int) $event->id);
+        $activity = collect($summary['activity'] ?? [])
+          ->sortByDesc('occurred_at')
+          ->values();
+
+        $event->collaboration_summary_preview = [
+          'claimable_count' => (int) ($summary['claimable_count'] ?? 0),
+          'reserved_for_collaborators' => round((float) ($summary['reserved_for_collaborators'] ?? 0), 2),
+          'distributable_amount' => round((float) ($summary['distributable_amount'] ?? 0), 2),
+          'latest_activity' => $activity->first(),
+          'has_activity' => $activity->isNotEmpty(),
+        ];
+
+        return $event;
+      });
+    }
+
     $information['events'] = $events;
+    $information['statusFilter'] = $statusFilter;
+    $information['submissionFilter'] = $submissionFilter;
+    $information['sortBy'] = $sortBy;
+    $information['featuredOnly'] = $featuredOnly;
+    $information['viewMode'] = $viewMode;
+    $information['gridColumns'] = $gridColumns;
+    $information['gridDensity'] = $gridDensity;
+    $information['getCurrencyInfo'] = $this->getCurrencyInfo();
     return view('backend.event.index', $information);
   }
   //choose_event_type
@@ -83,7 +238,10 @@ class EventController extends Controller
     $organizers = Organizer::get();
     $information['organizers'] = $organizers;
 
-    $information['getCurrencyInfo']  = $this->getCurrencyInfo();
+    $artists = Artist::where('status', 1)->get();
+    $information['artists'] = $artists;
+
+    $information['getCurrencyInfo'] = $this->getCurrencyInfo();
     return view('backend.event.create', $information);
   }
 
@@ -95,8 +253,8 @@ class EventController extends Controller
     ];
     $messages = [
       'file.required' => 'Please upload an image file.',
-      'file.image'    => 'The uploaded file must be an image.',
-      'file.mimes'    => 'Only jpg, jpeg, and png files are allowed.'
+      'file.image' => 'The uploaded file must be an image.',
+      'file.mimes' => 'Only jpg, jpeg, and png files are allowed.'
     ];
 
     $validator = Validator::make($request->all(), $rules, $messages);
@@ -110,7 +268,7 @@ class EventController extends Controller
 
     if ($width != 1170 || $height != 570) {
       return response()->json([
-        'status'  => 'error',
+        'status' => 'error',
         'msg' => 'The image dimensions must be exactly 1170x570 pixels.'
       ]);
     }
@@ -128,7 +286,7 @@ class EventController extends Controller
     $pi->save();
 
     return response()->json([
-      'status'  => 'success',
+      'status' => 'success',
       'file_id' => $pi->id
     ]);
   }
@@ -148,7 +306,7 @@ class EventController extends Controller
     //calculate duration
     if ($request->date_type == 'single') {
       $start = Carbon::parse($request->start_date . $request->start_time);
-      $end =  Carbon::parse($request->end_date . $request->end_time);
+      $end = Carbon::parse($request->end_date . $request->end_time);
       $diffent = DurationCalulate($start, $end);
     }
     //calculate duration end
@@ -159,6 +317,27 @@ class EventController extends Controller
     $img = $request->file('thumbnail');
 
     $in['organizer_id'] = $request->organizer_id;
+
+    // Link to Identity from Organizer (if present)
+    if ($request->filled('organizer_id')) {
+      $identity = \App\Models\Identity::where('type', 'organizer')
+        ->where('meta->id', $request->organizer_id)
+        ->first();
+      if ($identity) {
+        $in['owner_identity_id'] = $identity->id;
+      }
+    }
+
+    // Link to Identity from Venue (if present)
+    if ($request->filled('venue_id')) {
+      $vIdentity = \App\Models\Identity::where('type', 'venue')
+        ->where('meta->id', $request->venue_id)
+        ->first();
+      if ($vIdentity) {
+        $in['venue_identity_id'] = $vIdentity->id;
+      }
+    }
+
     if ($request->hasFile('thumbnail')) {
       $filename = time() . '.' . $img->getClientOriginalExtension();
       $directory = public_path('assets/admin/img/event/thumbnail/');
@@ -170,11 +349,15 @@ class EventController extends Controller
     $in['end_date_time'] = Carbon::parse($request->end_date . ' ' . $request->end_time);
     $event = Event::create($in);
 
+    if ($request->filled('artist_ids')) {
+      $event->artists()->sync($request->artist_ids);
+    }
+
     if ($request->date_type == 'multiple') {
       $i = 1;
       foreach ($request->m_start_date as $key => $date) {
         $start = Carbon::parse($date . $request->m_start_time[$key]);
-        $end =  Carbon::parse($request->m_end_date[$key] . $request->m_end_time[$key]);
+        $end = Carbon::parse($request->m_end_date[$key] . $request->m_end_time[$key]);
         $diffent = DurationCalulate($start, $end);
 
         EventDates::create([
@@ -222,7 +405,6 @@ class EventController extends Controller
       }
     }
 
-<<<<<<< Updated upstream
     //event content
     $languages = Language::all();
     foreach ($languages as $language) {
@@ -245,10 +427,6 @@ class EventController extends Controller
       $event_content->meta_description = $request[$language->code . '_meta_description'];
       $event_content->save();
     }
-=======
-    $authoring->syncLocalizedContent($event, $request, Language::all());
-    app(EventQrCodeService::class)->ensureSvg($event);
->>>>>>> Stashed changes
 
     Session::flash('success', 'Added Successfully');
     return response()->json(['status' => 'success'], 200);
@@ -268,25 +446,133 @@ class EventController extends Controller
    *
    * @param  \Illuminate\Http\Request  $request
    * @param  int  $id
-   * @return \Illuminate\Http\Response
+   * @return \Illuminate\Http\RedirectResponse
    */
   public function updateStatus(Request $request, $id)
   {
-    $event = Event::find($id);
+    $event = Event::with(['information', 'ownerIdentity.owner', 'venueIdentity.owner'])->findOrFail($id);
+    $previousStatus = (int) $event->status;
+    $nextStatus = (int) $request->input('status');
+    $reviewAction = $request->input('review_action');
+    $reviewNotes = trim((string) $request->input('review_notes', ''));
+    $isProfessionalSubmission = !empty($event->owner_identity_id) || !empty($event->venue_identity_id);
 
-    $event->update([
-      'status' => $request['status']
-    ]);
-    Session::flash('success', 'Deleted Successfully');
+    $updates = [
+      'status' => $nextStatus,
+    ];
+
+    $resolvedReviewStatus = $event->review_status;
+    if ($isProfessionalSubmission) {
+      if ($nextStatus === 1) {
+        $resolvedReviewStatus = 'approved';
+      } else {
+        $resolvedReviewStatus = in_array($reviewAction, ['changes_requested', 'rejected', 'pending'], true)
+          ? $reviewAction
+          : 'changes_requested';
+      }
+
+      $updates['review_status'] = $resolvedReviewStatus;
+      $updates['review_notes'] = $reviewNotes !== '' ? $reviewNotes : null;
+      $updates['reviewed_at'] = now();
+      $updates['reviewed_by_admin_id'] = Auth::guard('admin')->id();
+    }
+
+    $event->update($updates);
+
+    if ($previousStatus !== $nextStatus) {
+      $event->refresh();
+      $this->notifyProfessionalEventStatusChange(
+        $event,
+        $nextStatus,
+        $resolvedReviewStatus,
+        $reviewNotes
+      );
+    } elseif ($isProfessionalSubmission && $reviewAction !== null) {
+      $event->refresh();
+      $this->notifyProfessionalEventStatusChange(
+        $event,
+        $nextStatus,
+        $resolvedReviewStatus,
+        $reviewNotes
+      );
+    }
+
+    Session::flash('success', 'Updated Successfully');
 
     return redirect()->back();
+  }
+
+  protected function notifyProfessionalEventStatusChange(
+    Event $event,
+    int $nextStatus,
+    ?string $reviewStatus = null,
+    ?string $reviewNotes = null
+  ): void
+  {
+    if (empty($event->owner_identity_id) && empty($event->venue_identity_id)) {
+      return;
+    }
+
+    $title = data_get($event, 'information.title') ?: ('Event #' . $event->id);
+    $resolvedReviewStatus = $reviewStatus ?: ($nextStatus === 1 ? 'approved' : 'changes_requested');
+    [$messageTitle, $messageBody] = match ($resolvedReviewStatus) {
+      'approved' => [
+        'Duty: event approved',
+        'Your event "' . $title . '" has been approved and is now live.',
+      ],
+      'rejected' => [
+        'Duty: event rejected',
+        'Your event "' . $title . '" was rejected by the Duty review team.' . ($reviewNotes ? ' Reason: ' . $reviewNotes : ''),
+      ],
+      'changes_requested' => [
+        'Duty: changes requested',
+        'Your event "' . $title . '" needs updates before approval.' . ($reviewNotes ? ' Notes: ' . $reviewNotes : ''),
+      ],
+      default => [
+        'Duty: event updated by review',
+        'Your event "' . $title . '" changed review status to ' . $resolvedReviewStatus . '.',
+      ],
+    };
+
+    $recipientUsers = collect([
+      optional($event->ownerIdentity)->owner,
+      optional($event->venueIdentity)->owner,
+    ])
+      ->filter()
+      ->unique('id')
+      ->values();
+
+    if ($recipientUsers->isEmpty()) {
+      return;
+    }
+
+    $identityId = $event->owner_identity_id ?: $event->venue_identity_id;
+    $identityType = null;
+    if ($event->ownerIdentity instanceof Identity) {
+      $identityType = $event->ownerIdentity->type;
+    } elseif ($event->venueIdentity instanceof Identity) {
+      $identityType = $event->venueIdentity->type;
+    }
+
+    foreach ($recipientUsers as $user) {
+      $this->notificationService->notifyUser($user, $messageTitle, $messageBody, [
+        'type' => 'event_review_status',
+        'event_id' => (string) $event->id,
+        'identity_id' => (string) ($identityId ?? ''),
+        'identity_type' => (string) ($identityType ?? ''),
+        'status' => (string) $nextStatus,
+        'action' => (string) $resolvedReviewStatus,
+        'review_status' => (string) $resolvedReviewStatus,
+        'review_notes' => (string) ($reviewNotes ?? ''),
+      ]);
+    }
   }
   /**
    * Update featured status of a specified resource.
    *
    * @param  \Illuminate\Http\Request  $request
    * @param  int  $id
-   * @return \Illuminate\Http\Response
+   * @return \Illuminate\Http\RedirectResponse
    */
   public function updateFeatured(Request $request, $id)
   {
@@ -309,7 +595,7 @@ class EventController extends Controller
 
   public function edit($id)
   {
-    $event = Event::with('ticket')->findOrFail($id);
+    $event = Event::with(['ticket', 'artists'])->findOrFail($id);
     $information['event'] = $event;
 
     $mapStatus = DB::table('basic_settings')->pluck('google_map_status')->first();
@@ -324,9 +610,76 @@ class EventController extends Controller
     $organizers = Organizer::get();
     $information['organizers'] = $organizers;
 
-    $information['getCurrencyInfo']  = $this->getCurrencyInfo();
+    $artists = Artist::where('status', 1)->get();
+    $information['artists'] = $artists;
+
+    $information['getCurrencyInfo'] = $this->getCurrencyInfo();
+
+    $collaborationSummary = $this->eventCollaboratorSplitService->eventSummary($event);
+    $collaborationActivityFilter = request()->input('collaboration_activity', 'all');
+    $collaborationActivityFrom = request()->input('collaboration_activity_from');
+    $collaborationActivityTo = request()->input('collaboration_activity_to');
+    [$collaborationActivityFilter, $collaborationActivityFilters, $filteredCollaborationActivity] = $this->resolveCollaborationActivityFilters(
+      collect($collaborationSummary['activity'] ?? []),
+      $collaborationActivityFilter,
+      $collaborationActivityFrom,
+      $collaborationActivityTo
+    );
+
+    $information['collaborationSummary'] = $collaborationSummary;
+    $information['collaborationActivityFilter'] = $collaborationActivityFilter;
+    $information['collaborationActivityFrom'] = $collaborationActivityFrom;
+    $information['collaborationActivityTo'] = $collaborationActivityTo;
+    $information['collaborationActivityFilters'] = $collaborationActivityFilters;
+    $information['collaborationActivityItems'] = $filteredCollaborationActivity->all();
 
     return view('backend.event.edit', $information);
+  }
+
+  public function exportCollaborationActivity(Request $request, $id)
+  {
+    $event = Event::findOrFail($id);
+    $collaborationSummary = $this->eventCollaboratorSplitService->eventSummary($event);
+    $requestedFilter = $request->input('collaboration_activity', 'all');
+    $from = $request->input('collaboration_activity_from');
+    $to = $request->input('collaboration_activity_to');
+
+    [$resolvedFilter, $collaborationActivityFilters, $filteredCollaborationActivity] = $this->resolveCollaborationActivityFilters(
+      collect($collaborationSummary['activity'] ?? []),
+      $requestedFilter,
+      $from,
+      $to
+    );
+
+    $selectedFilterLabel = collect($collaborationActivityFilters)
+      ->firstWhere('key', $resolvedFilter)['label'] ?? __('All activity');
+
+    $filename = 'event-collaboration-activity-' . $event->id . '-' . now()->format('Ymd-His') . '.csv';
+
+    return response()->streamDownload(function () use ($filteredCollaborationActivity, $event, $selectedFilterLabel, $from, $to) {
+      $handle = fopen('php://output', 'w');
+      fputcsv($handle, ['Event ID', $event->id]);
+      fputcsv($handle, ['Filter', $selectedFilterLabel]);
+      fputcsv($handle, ['From', $from ?: '']);
+      fputcsv($handle, ['To', $to ?: '']);
+      fputcsv($handle, []);
+      fputcsv($handle, ['Type', 'Title', 'Subtitle', 'Amount', 'Automatic', 'Occurred At']);
+
+      foreach ($filteredCollaborationActivity as $activityItem) {
+        fputcsv($handle, [
+          data_get($activityItem, 'type'),
+          data_get($activityItem, 'title'),
+          data_get($activityItem, 'subtitle'),
+          number_format((float) data_get($activityItem, 'amount', 0), 2, '.', ''),
+          data_get($activityItem, 'is_automatic') ? 'yes' : 'no',
+          data_get($activityItem, 'occurred_at'),
+        ]);
+      }
+
+      fclose($handle);
+    }, $filename, [
+      'Content-Type' => 'text/csv; charset=UTF-8',
+    ]);
   }
 
   public function qr($id, EventQrCodeService $qrCodeService)
@@ -383,7 +736,7 @@ class EventController extends Controller
     //calculate duration
     if ($request->date_type == 'single') {
       $start = Carbon::parse($request->start_date . $request->start_time);
-      $end =  Carbon::parse($request->end_date . $request->end_time);
+      $end = Carbon::parse($request->end_date . $request->end_time);
       $diffent = DurationCalulate($start, $end);
     }
     //calculate duration end
@@ -454,7 +807,7 @@ class EventController extends Controller
       $i = 1;
       foreach ($request->m_start_date as $key => $date) {
         $start = Carbon::parse($date . $request->m_start_time[$key]);
-        $end =  Carbon::parse($request->m_end_date[$key] . $request->m_end_time[$key]);
+        $end = Carbon::parse($request->m_end_date[$key] . $request->m_end_time[$key]);
         $diffent = DurationCalulate($start, $end);
 
         if (!empty($request->date_ids[$key])) {
@@ -499,16 +852,34 @@ class EventController extends Controller
     }
 
 
+    // Link to Identity from Organizer (if present)
+    if ($request->filled('organizer_id')) {
+      $identity = \App\Models\Identity::where('type', 'organizer')
+        ->where('meta->id', $request->organizer_id)
+        ->first();
+      if ($identity) {
+        $in['owner_identity_id'] = $identity->id;
+      }
+    }
+
+    // Link to Identity from Venue (if present)
+    if ($request->filled('venue_id')) {
+      $vIdentity = \App\Models\Identity::where('type', 'venue')
+        ->where('meta->id', $request->venue_id)
+        ->first();
+      if ($vIdentity) {
+        $in['venue_identity_id'] = $vIdentity->id;
+      }
+    }
+
     $event->update($in);
-<<<<<<< Updated upstream
-=======
-    $event->refresh();
-    $authoring->syncLocalizedContent($event, $request, Language::all());
-    app(EventQrCodeService::class)->ensureSvg($event);
 
-    $authoring->syncLineup($event, $request);
+    if ($request->filled('artist_ids')) {
+      $event->artists()->sync($request->artist_ids);
+    } else {
+      $event->artists()->detach();
+    }
 
->>>>>>> Stashed changes
     Session::flash('success', 'Updated Successfully');
 
     return response()->json(['status' => 'success'], 200);
@@ -517,12 +888,11 @@ class EventController extends Controller
    * Remove the specified resource from storage.
    *
    * @param  int  $id
-   * @return \Illuminate\Http\Response
+   * @return \Illuminate\Http\RedirectResponse
    */
   public function destroy($id)
   {
     $event = Event::find($id);
-    app(EventQrCodeService::class)->delete($event);
 
     @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
 
@@ -575,7 +945,6 @@ class EventController extends Controller
   {
     foreach ($request->ids as $id) {
       $event = Event::find($id);
-      app(EventQrCodeService::class)->delete($event);
 
       @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
 
@@ -630,24 +999,6 @@ class EventController extends Controller
     $information['event'] = $event;
     return view('backend.event.ticket-settings', $information);
   }
-<<<<<<< Updated upstream
-=======
-
-  public function cloneEvent(Request $request, $id)
-  {
-    $event = Event::findOrFail($id);
-    $clonedEvent = app(EventCloneService::class)->duplicate($event);
-    app(EventQrCodeService::class)->ensureSvg($clonedEvent);
-
-    Session::flash('success', 'Event cloned successfully. Review the draft before publishing.');
-
-    return redirect()->route('admin.event_management.edit_event', [
-      'id' => $clonedEvent->id,
-      'language' => $request->input('language'),
-    ]);
-  }
-
->>>>>>> Stashed changes
   public function updateTicketSetting(TicketSettingRequest $request)
   {
     $ticket_image = $request->file('ticket_image');
@@ -777,5 +1128,104 @@ class EventController extends Controller
       'results' => $results,
       'more' => $hasMore
     ]);
+  }
+
+  private function collaborationActivityFilterMap(): array
+  {
+    return [
+      'all' => [
+        'label' => __('All activity'),
+        'types' => null,
+      ],
+      'configurations' => [
+        'label' => __('Configurations'),
+        'types' => ['split_configured'],
+      ],
+      'mode_changes' => [
+        'label' => __('Mode changes'),
+        'types' => ['mode_changed'],
+      ],
+      'manual_payouts' => [
+        'label' => __('Manual payouts'),
+        'types' => ['manual_claim_completed'],
+      ],
+      'auto_release' => [
+        'label' => __('Auto release'),
+        'types' => ['auto_release_completed'],
+      ],
+    ];
+  }
+
+  private function resolveCollaborationActivityFilters(
+    \Illuminate\Support\Collection $activities,
+    ?string $requestedFilter,
+    ?string $from,
+    ?string $to
+  ): array {
+    $activityFilterMap = $this->collaborationActivityFilterMap();
+    $resolvedFilter = array_key_exists((string) $requestedFilter, $activityFilterMap)
+      ? (string) $requestedFilter
+      : 'all';
+
+    $dateFilteredActivities = $activities->values();
+
+    if (!empty($from)) {
+      try {
+        $fromDate = Carbon::parse($from)->startOfDay();
+        $dateFilteredActivities = $dateFilteredActivities
+          ->filter(function (array $activityItem) use ($fromDate) {
+            $occurredAt = data_get($activityItem, 'occurred_at');
+            if (empty($occurredAt)) {
+              return false;
+            }
+
+            return Carbon::parse($occurredAt)->greaterThanOrEqualTo($fromDate);
+          })
+          ->values();
+      } catch (\Throwable $th) {
+      }
+    }
+
+    if (!empty($to)) {
+      try {
+        $toDate = Carbon::parse($to)->endOfDay();
+        $dateFilteredActivities = $dateFilteredActivities
+          ->filter(function (array $activityItem) use ($toDate) {
+            $occurredAt = data_get($activityItem, 'occurred_at');
+            if (empty($occurredAt)) {
+              return false;
+            }
+
+            return Carbon::parse($occurredAt)->lessThanOrEqualTo($toDate);
+          })
+          ->values();
+      } catch (\Throwable $th) {
+      }
+    }
+
+    $filteredActivities = $dateFilteredActivities;
+    $activeFilterConfig = $activityFilterMap[$resolvedFilter];
+
+    if (is_array($activeFilterConfig['types'])) {
+      $filteredActivities = $dateFilteredActivities
+        ->whereIn('type', $activeFilterConfig['types'])
+        ->values();
+    }
+
+    $filters = collect($activityFilterMap)->map(
+      function (array $config, string $key) use ($dateFilteredActivities): array {
+        $count = is_array($config['types'])
+          ? $dateFilteredActivities->whereIn('type', $config['types'])->count()
+          : $dateFilteredActivities->count();
+
+        return [
+          'key' => $key,
+          'label' => $config['label'],
+          'count' => $count,
+        ];
+      }
+    )->values();
+
+    return [$resolvedFilter, $filters, $filteredActivities];
   }
 }

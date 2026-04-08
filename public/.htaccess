@@ -1,4 +1,12 @@
 <IfModule mod_rewrite.c>
+  # Increase upload limits
+  php_value upload_max_filesize 10M
+  php_value post_max_size 10M
+
+  # Pass Authorization header to PHP
+  SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+  CGIPassAuth On
+
   <IfModule mod_negotiation.c>
     Options -MultiViews -Indexes
   </IfModule>
@@ -7,7 +15,12 @@
         Require all denied
     </Files>
   RewriteEngine On
-  # Handle Authorization Header
+
+  # Pass Authorization header to PHP
+  SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+  CGIPassAuth On
+
+  # Handle Authorization Header (RewriteRule fallback)
   RewriteCond %{HTTP:Authorization} .
   RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
   # Redirect Trailing Slashes If Not A Folder...

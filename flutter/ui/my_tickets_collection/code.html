@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Tickets Collection - DUTY</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8c06f9",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#0a050e",
+                        "surface-dark": "#1a0f23",
+                        "glass-dark": "rgba(26, 15, 35, 0.7)",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Spline Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(140, 6, 249, 0.5);
+        }
+        .card-glow:hover {
+            box-shadow: 0 0 25px rgba(140, 6, 249, 0.15);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen flex justify-center">
+<!-- Mobile Container (iPhone Aspect Ratio Emulation for Demo) -->
+<div class="relative flex h-full min-h-screen w-full max-w-[430px] flex-col bg-background-light dark:bg-background-dark shadow-2xl overflow-x-hidden border-x border-white/5">
+<!-- Header Section -->
+<header class="sticky top-0 z-30 px-6 pt-12 pb-4 glass-effect bg-background-light/80 dark:bg-background-dark/80">
+<div class="flex items-center justify-between mb-6">
+<button class="p-2 -ml-2 rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
+</button>
+<h1 class="text-xl font-bold tracking-tight">My Tickets</h1>
+<button class="p-2 -mr-2 rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-2xl">search</span>
+</button>
+</div>
+<!-- Segmented Control (Tabs) -->
+<div class="flex p-1 bg-slate-200 dark:bg-surface-dark/50 rounded-full border border-white/5">
+<button class="flex-1 py-2 text-sm font-semibold rounded-full bg-white dark:bg-primary text-slate-900 dark:text-white shadow-sm transition-all">
+                    Upcoming
+                </button>
+<button class="flex-1 py-2 text-sm font-semibold rounded-full text-slate-500 dark:text-slate-400 hover:text-primary transition-all">
+                    Past
+                </button>
+</div>
+</header>
+<!-- Main Content (Ticket List) -->
+<main class="flex-1 px-6 py-4 space-y-6 pb-32">
+<!-- Ticket Card 1 (Live Today) -->
+<div class="relative group">
+<div class="overflow-hidden rounded-xl bg-surface-dark/40 border border-white/10 card-glow transition-all duration-300">
+<div class="relative aspect-[4/5] w-full">
+<img alt="Techno music event with violet lighting" class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A crowded music festival with neon purple lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBn7mJ_Rk--OTWdOo2vjSgXUIliWn0yMDCCYwJMStd9Wn9lJHrZp6U40DLdgXjsHFH-Qpf5eBA4GI-evFtuinQu4qN1SjU2yuDAYstT8qW7VcOf9XRm2CyNrapqG__nEefGhA1-2Y6R2Fol_J2ecxKQnl3NgXXBanZDVoqBl2Yz12JnfmOP87KaYj-LqKC5P74kaNKjWny6boRfE8hdyZ2WhJR149Y1cs3c0c1h0ZANp9A0PmrixlVdPbmbggUMISqlWV7Nf0mFCBDp"/>
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent"></div>
+<!-- Badges -->
+<div class="absolute top-4 left-4">
+<span class="flex items-center gap-1.5 px-3 py-1 bg-primary text-[10px] font-bold uppercase tracking-widest text-white rounded-full shadow-[0_0_15px_rgba(140,6,249,0.5)]">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+</span>
+                                Live Today
+                            </span>
+</div>
+<!-- Ticket Details Overlaid -->
+<div class="absolute bottom-0 left-0 right-0 p-5">
+<p class="text-primary text-xs font-bold uppercase tracking-widest mb-1">Electronic • Miami</p>
+<h3 class="text-2xl font-bold text-white mb-2 leading-tight">Afterlife: Genesis 2024</h3>
+<div class="flex items-center gap-4 text-slate-300 text-sm mb-4">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base">calendar_today</span>
+<span>Oct 24</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base">schedule</span>
+<span>10:00 PM</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-white/10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-base">location_on</span>
+<span class="text-slate-400 text-xs">Hialeah Park, FL</span>
+</div>
+<button class="px-6 py-2.5 bg-white dark:bg-white text-black text-xs font-bold rounded-full hover:bg-slate-200 transition-colors uppercase tracking-wider">
+                                    View QR
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Ticket Card 2 -->
+<div class="relative group">
+<div class="overflow-hidden rounded-xl bg-surface-dark/40 border border-white/10 card-glow transition-all duration-300">
+<div class="relative aspect-[4/5] w-full">
+<img alt="Professional DJ performing at a luxury event" class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Modern high-end nightclub interior with blue accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2VRxr-iiPhYRMcb5MhpRiy3vom-3vN6HsPHavuip7BIaVV5tVXFNl1OBM2fOCHeK2vN21GjxQKy9hkziPDHsBAs-XnnlBm5vXc9VybId-6NHAH5fL5RY-WgzgNu-23PuUBtS_xb7WF2Gh1ibROMFxBMiq6Dw7vxvHWLT70lj2BX31vykcnZmAoD07jlQzg9lKVSzNdqZ8Hp7hoZvzMEzNly4zGkVYujFvM2RJomuCj0vR3t441xqv_2WMpGIdaFGC7d2h64lUoAWc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-5">
+<p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">House • Los Angeles</p>
+<h3 class="text-2xl font-bold text-white mb-2 leading-tight">Framework: Solomun</h3>
+<div class="flex items-center gap-4 text-slate-300 text-sm mb-4">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base">calendar_today</span>
+<span>Dec 01</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base">schedule</span>
+<span>9:00 PM</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-white/10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-base">location_on</span>
+<span class="text-slate-400 text-xs">Exposition Park, LA</span>
+</div>
+<button class="px-6 py-2.5 bg-primary/20 backdrop-blur-md border border-primary/30 text-white text-xs font-bold rounded-full hover:bg-primary/40 transition-colors uppercase tracking-wider">
+                                    View QR
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Ticket Card 3 (Fintech / Private Event Style) -->
+<div class="relative group">
+<div class="overflow-hidden rounded-xl bg-surface-dark/40 border border-white/10 card-glow transition-all duration-300">
+<div class="relative aspect-[4/5] w-full">
+<div class="absolute inset-0 bg-primary/10"></div>
+<img alt="Modern corporate architectural background" class="absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-overlay transition-transform duration-500 group-hover:scale-110" data-alt="Abstract architectural lines and neon light reflections" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6zOn1S-Ps61SkJrkrxRAk8GmguBRE2qXWdDXitUiKwZM1F-gV6gFgxMv_utFYWDFF8WKGSDQeAgJcTwEwm9H_MoCjhPCj3GB1PkpvFJfrCoFU8GEaiswB3nsRUKDl8cmbFkJt2fJnsmd_90jJPUlpNgpK159cgP9-xanLEAGpx7ONfrpxY07LbrIiXr65SIH2ZTyVee2oQhMJpFTTuNywh9G4BFtBQqV2AbDIXTkmuDH3sahxAWih69RChZhXf8vOLt7p87Nz6RJV"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent/20 to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-5">
+<p class="text-primary text-xs font-bold uppercase tracking-widest mb-1">Fintech • New York</p>
+<h3 class="text-2xl font-bold text-white mb-2 leading-tight">DUTY Founders Circle</h3>
+<div class="flex items-center gap-4 text-slate-300 text-sm mb-4">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base">calendar_today</span>
+<span>Jan 12</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base">verified</span>
+<span>VIP Invite Only</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-white/10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-base">location_on</span>
+<span class="text-slate-400 text-xs">One World Trade, NY</span>
+</div>
+<button class="px-6 py-2.5 bg-white text-black text-xs font-bold rounded-full hover:bg-slate-200 transition-colors uppercase tracking-wider shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                                    Access Pass
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 px-4 pb-6 pt-2 glass-effect bg-background-light/70 dark:bg-background-dark/70 border-t border-white/5">
+<div class="flex items-center justify-around py-2">
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">home</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">calendar_month</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary">Events</span>
+</a>
+<a class="flex flex-col items-center gap-1 -mt-4 relative" href="#">
+<div class="p-3 bg-primary rounded-full shadow-[0_0_15px_rgba(140,6,249,0.4)] border-4 border-background-dark">
+<span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings: 'FILL' 1">confirmation_number</span>
+</div>
+<span class="text-[10px] font-bold text-primary mt-1">Tickets</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">account_balance_wallet</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary">Wallet</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">person</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary">Profile</span>
+</a>
+</div>
+</nav>
+<!-- iPhone Notch Emulation (Optional Styling) -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-background-dark rounded-b-2xl z-50"></div>
+</div>
+</body></html>

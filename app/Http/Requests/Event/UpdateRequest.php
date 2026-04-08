@@ -11,6 +11,8 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRequest extends FormRequest
 {
+  protected bool $rewardDefinitionsPayloadInvalid = false;
+
   /**
    * Determine if the user is authorized to make this request.
    *
@@ -19,6 +21,25 @@ class UpdateRequest extends FormRequest
   public function authorize()
   {
     return true;
+  }
+
+  protected function prepareForValidation()
+  {
+    $payload = $this->input('reward_definitions_payload');
+
+    if (!is_string($payload) || trim($payload) === '') {
+      return;
+    }
+
+    $decoded = json_decode($payload, true);
+    if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+      $this->rewardDefinitionsPayloadInvalid = true;
+      return;
+    }
+
+    $this->merge([
+      'reward_definitions' => $decoded,
+    ]);
   }
   /**
    * Get the validation rules that apply to the request.
@@ -30,20 +51,52 @@ class UpdateRequest extends FormRequest
     $request = $this->request->all();
     $event_galleries = EventImage::where('event_id', $this->event_id)->get()->count();
     $ruleArray = [
-      'gallery_images' => $event_galleries == 0 ? 'numeric|min:1' : '',
+      'gallery_images' => $event_galleries == 0 ? 'numeric|min:1|required_without:slider_files' : '',
+      'slider_files' => 'nullable|array',
+      'slider_files.*' => [
+        'image',
+        'mimes:jpg,jpeg,png',
+      ],
       'status' => 'required',
       'is_featured' => 'required',
+      'age_limit' => 'nullable|integer|min:0',
       'thumbnail' => $this->hasFile('thumbnail') ? [
         new ImageMimeTypeRule(),
-        function ($attribute, $value, $fail) {
-          if ($value && is_file($value->getPathname())) {
-            [$width, $height] = getimagesize($value->getPathname());
-            if ($width != 320 || $height != 230) {
-              $fail('The thumbnail image dimensions must be exactly 320x230 pixels.');
-            }
-          }
-        }
       ] : [],
+      'artist_ids' => 'nullable|array',
+      'owner_identity_id' => 'nullable|exists:identities,id',
+      'venue_identity_id' => 'nullable|exists:identities,id',
+      'hold_mode' => 'nullable|in:manual_admin,auto_after_grace_period',
+      'grace_period_hours' => 'nullable|required_if:hold_mode,auto_after_grace_period|integer|min:1|max:720',
+      'refund_window_hours' => 'nullable|integer|min:0|max:720',
+      'auto_release_owner_share' => 'nullable|boolean',
+      'auto_release_collaborator_shares' => 'nullable|boolean',
+      'require_admin_approval' => 'nullable|boolean',
+      'settlement_notes' => 'nullable|string|max:1000',
+      'reservation_enabled' => 'nullable|boolean',
+      'reservation_deposit_type' => 'nullable|required_if:reservation_enabled,1|in:fixed,percentage',
+      'reservation_deposit_value' => 'nullable|required_if:reservation_enabled,1|numeric|min:0.01',
+      'reservation_final_due_date' => 'nullable|required_if:reservation_enabled,1|date',
+      'reservation_min_installment_amount' => 'nullable|numeric|min:0.01',
+      'price_schedules' => 'nullable|array',
+      'price_schedules.*.label' => 'nullable|string|max:255',
+      'price_schedules.*.effective_from' => 'nullable|required_with:price_schedules.*.price|date',
+      'price_schedules.*.price' => 'nullable|required_with:price_schedules.*.effective_from|numeric|min:0.01',
+      'price_schedules.*.sort_order' => 'nullable|integer|min:0',
+      'price_schedules.*.is_active' => 'nullable|boolean',
+      'reward_definitions_payload' => 'nullable|string',
+      'reward_definitions' => 'nullable|array|max:12',
+      'reward_definitions.*.id' => 'nullable|integer|min:1',
+      'reward_definitions.*.title' => 'required|string|max:255',
+      'reward_definitions.*.description' => 'nullable|string|max:500',
+      'reward_definitions.*.reward_type' => 'nullable|in:welcome_drink,drink_voucher,merch,perk_access,custom,perk',
+      'reward_definitions.*.trigger_mode' => 'nullable|in:on_ticket_scan,on_booking_completed,manual_issue',
+      'reward_definitions.*.fulfillment_mode' => 'nullable|in:qr_claim',
+      'reward_definitions.*.inventory_limit' => 'nullable|integer|min:1|max:100000',
+      'reward_definitions.*.per_ticket_quantity' => 'nullable|integer|min:1|max:10',
+      'reward_definitions.*.status' => 'nullable|in:active,inactive',
+      'reward_definitions.*.meta' => 'nullable|array',
+      'reward_definitions.*.meta.claim_code_prefix' => 'nullable|string|max:8|regex:/^[A-Za-z0-9]+$/',
     ];
 
     if ($this->date_type == 'single') {
@@ -152,5 +205,53 @@ class UpdateRequest extends FormRequest
     $messageArray['m_end_date.required'] = 'The end date feild is required.!';
     $messageArray['m_end_time.required'] = 'The end time feild is required.!';
     return $messageArray;
+  }
+
+  public function withValidator($validator)
+  {
+    $validator->after(function ($validator) {
+      if ($this->rewardDefinitionsPayloadInvalid) {
+        $validator->errors()->add(
+          'reward_definitions_payload',
+          'The reward definitions payload must be a valid JSON array.'
+        );
+      }
+    });
+  }
+
+  protected function usesResolvedVenueSource(): bool
+  {
+    $venueSource = (string) $this->input('venue_source');
+
+    if (in_array($venueSource, ['registered', 'external'], true)) {
+      return true;
+    }
+
+    return $venueSource === 'manual' && $this->usesManualVenueSnapshot();
+  }
+
+  protected function usesManualVenueSnapshot(): bool
+  {
+    if ((string) $this->input('venue_source') !== 'manual') {
+      return false;
+    }
+
+    foreach ([
+      'venue_name',
+      'venue_address',
+      'venue_city',
+      'venue_state',
+      'venue_country',
+      'venue_postal_code',
+      'venue_google_place_id',
+      'latitude',
+      'longitude',
+    ] as $field) {
+      if ($this->filled($field)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

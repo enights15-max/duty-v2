@@ -65,6 +65,18 @@
                   @endif
                 </div>
               </div>
+              <div class="col-lg-6 offset-lg-3">
+                <div class="form-group">
+                  <label for="">{{ __('Marketplace Commission') }} (%)</label>
+                  <input type="number" step="0.01" class="form-control" name="marketplace_commission"
+                    value="{{ $content ? $content->marketplace_commission : '5' }}"
+                    placeholder="{{ __('Enter Marketplace Commission') }}">
+                  <small class="form-text text-muted">{{ __('Platform fee charged on resale ticket purchases.') }}</small>
+                  @if ($errors->has('marketplace_commission'))
+                    <p class="mb-0 text-danger">{{ $errors->first('marketplace_commission') }}</p>
+                  @endif
+                </div>
+              </div>
             </div>
           </div>
 

@@ -11,6 +11,10 @@ use App\Models\Event\Ticket;
 use App\Models\Event\Wishlist;
 use App\Models\Language;
 use App\Models\Organizer;
+use App\Services\BookingScanService;
+use App\Services\EventTicketRewardService;
+use App\Services\OrganizerPublicProfileService;
+use App\Services\ProfessionalCatalogBridgeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -19,6 +23,12 @@ use Illuminate\Support\Facades\DB;
 
 class OrganizerScannerController extends Controller
 {
+  public function __construct(
+    private ProfessionalCatalogBridgeService $catalogBridge,
+    private OrganizerPublicProfileService $organizerPublicProfileService,
+    private EventTicketRewardService $rewardService
+  ) {
+  }
 
   /* ********************************
      * Submit login for authentication
@@ -68,8 +78,6 @@ class OrganizerScannerController extends Controller
     $token = $organizer->createToken($request->device_name ?? 'unknown-device')->plainTextToken;
 
     // Add full photo URL if exists
-    Auth::guard('organizer_sanctum')->user($organizer);
-
     $organizer->photo = !empty($organizer->photo) ?  asset('assets/admin/img/organizer-photo/' . $organizer->photo)  : asset('assets/admin/img/blank_user.jpg');
 
     return response()->json([
@@ -157,6 +165,46 @@ class OrganizerScannerController extends Controller
       ]);
     }
 
+  }
+
+  public function claimReward(Request $request)
+  {
+    $actor = $this->currentOrganizerActor();
+    $claimCode = trim((string) ($request->input('claim_code') ?: $request->input('reward_claim_code')));
+    $request->merge(['claim_code' => $claimCode]);
+
+    $rules = [
+      'claim_code' => 'required|string',
+    ];
+
+    $validator = Validator::make($request->all(), $rules);
+    if ($validator->fails()) {
+      return response()->json([
+        'status' => 'validation_error',
+        'alert_type' => 'error',
+        'errors' => $validator->errors(),
+      ], 422);
+    }
+
+    $result = $this->rewardService->claimByCode(
+      $request->claim_code,
+      $actor
+    );
+
+    if ($result['status'] === 'error') {
+      return response()->json([
+        'status' => 'error',
+        'alert_type' => 'error',
+        'message' => $result['message'],
+      ], 422);
+    }
+
+    return response()->json([
+      'status' => 'success',
+      'alert_type' => 'success',
+      'message' => $result['message'],
+      'data' => $result['instance'],
+    ]);
   }
 
   public function logoutSubmit(Request $request)

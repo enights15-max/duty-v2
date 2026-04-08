@@ -56,12 +56,10 @@ class BookingBackendInvoiceJob implements ShouldQueue
 
             storeTranscation($bookingInfo);
 
-            //store amount to organizer
-            $organizerData['organizer_id'] = $booking->organizer_id;
-            $organizerData['price'] = $booking->price;
-            $organizerData['commission'] = $booking->commission;
-            $organizerData['organizer_id'] = $booking->organizer_id;
-            storeOrganizer($organizerData);
+            // Store settlement in the active professional owner wallet.
+            if (bookingHasProfessionalOwner($booking)) {
+                storeProfessionalOwner($booking);
+            }
 
             //unlink qr code
             if (

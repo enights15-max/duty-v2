@@ -60,7 +60,7 @@ return [
       'driver' => 'sanctum',
       'provider' => 'admins',
     ],
-    
+
     'admin' => [
       'driver' => 'session',
       'provider' => 'admins'
@@ -68,6 +68,14 @@ return [
     'organizer' => [
       'driver' => 'session',
       'provider' => 'organizers'
+    ],
+    'venue' => [
+      'driver' => 'session',
+      'provider' => 'venues'
+    ],
+    'artist' => [
+      'driver' => 'session',
+      'provider' => 'artists'
     ],
     'customer' => [
       'driver' => 'session',
@@ -105,6 +113,14 @@ return [
     'organizers' => [
       'driver' => 'eloquent',
       'model' => App\Models\Organizer::class
+    ],
+    'venues' => [
+      'driver' => 'eloquent',
+      'model' => App\Models\Venue::class
+    ],
+    'artists' => [
+      'driver' => 'eloquent',
+      'model' => App\Models\Artist::class
     ],
     'customers' => [
       'driver' => 'eloquent',

@@ -3,11 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-<<<<<<< Updated upstream
-        'reference' => '1db1791adb8b0b8e5fb0241b01dff990178db90a',
-=======
-        'reference' => '369b34ec5934c4c98a2397a7b4a93fbe84a6a4e0',
->>>>>>> Stashed changes
+        'reference' => 'f62a589bf1f2ee11362709e1e5f1127e2e97c05f',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -683,18 +679,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-<<<<<<< Updated upstream
         'kreativdev/installer' => array(
-            'pretty_version' => '1.1.0',
-            'version' => '1.1.0.0',
-            'reference' => 'd43d50386f91bea3c09b19695235331a19bf6f2c',
+            'pretty_version' => '1.0.9',
+            'version' => '1.0.9.0',
+            'reference' => '9b90c5f28e3a84b699a254460f090b6e9200d0f3',
             'type' => 'library',
             'install_path' => __DIR__ . '/../kreativdev/installer',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-=======
->>>>>>> Stashed changes
         'laravel-notification-channels/webpush' => array(
             'pretty_version' => '6.0.0',
             'version' => '6.0.0.0',
@@ -716,11 +709,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-<<<<<<< Updated upstream
-            'reference' => '1db1791adb8b0b8e5fb0241b01dff990178db90a',
-=======
-            'reference' => '369b34ec5934c4c98a2397a7b4a93fbe84a6a4e0',
->>>>>>> Stashed changes
+            'reference' => 'f62a589bf1f2ee11362709e1e5f1127e2e97c05f',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -1282,6 +1271,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'rachidlaasri/laravel-installer' => array(
+            'pretty_version' => '4.1.0',
+            'version' => '4.1.0.0',
+            'reference' => 'b751b4c23dba893e9a4a12f881a6fd8fa921d228',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../rachidlaasri/laravel-installer',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'ralouphie/getallheaders' => array(
             'pretty_version' => '3.0.3',
             'version' => '3.0.3.0',
@@ -1564,6 +1562,15 @@
             'reference' => '7752ce931ec285da4ed1f4c5aa27e45e097be61d',
             'type' => 'library',
             'install_path' => __DIR__ . '/../spomky-labs/base64url',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'stripe/stripe-php' => array(
+            'pretty_version' => 'v19.3.0',
+            'version' => '19.3.0.0',
+            'reference' => '462272ae7560ee29bb891763fd0967d5a77784e5',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../stripe/stripe-php',
             'aliases' => array(),
             'dev_requirement' => false,
         ),

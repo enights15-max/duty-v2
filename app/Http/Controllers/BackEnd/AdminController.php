@@ -320,6 +320,24 @@ class AdminController extends Controller
     return redirect()->back();
   }
 
+  public function changeNavigationLayout(Request $request, string $layout)
+  {
+    $allowedLayouts = ['sidebar', 'topbar'];
+
+    if (!in_array($layout, $allowedLayouts, true)) {
+      abort(404);
+    }
+
+    $admin = Auth::guard('admin')->user();
+    if ($admin) {
+      $admin->update(['navigation_layout' => $layout]);
+    }
+
+    $request->session()->put('admin_navigation_layout', $layout);
+
+    return redirect()->back();
+  }
+
   public function editProfile()
   {
     $adminInfo = Auth::guard('admin')->user();

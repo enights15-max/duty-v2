@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Frontend;
 
 use Carbon\Carbon;
-use App\Models\Admin;
 use App\Models\Event;
 use App\Models\Organizer;
 use App\Models\Event\Coupon;
@@ -22,11 +21,6 @@ use App\Models\Event\EventCategory;
 use App\Http\Controllers\Controller;
 use App\Models\Event\Slot;
 use App\Models\Event\SlotImage;
-<<<<<<< Updated upstream
-=======
-use App\Services\OrganizerPublicProfileService;
-use Illuminate\Support\Collection;
->>>>>>> Stashed changes
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
@@ -41,13 +35,13 @@ class EventController extends Controller
   public function index(Request $request)
   {
     $language = $this->getLanguage();
-    $information  = [];
+    $information = [];
     $categories = EventCategory::where([['language_id', $language->id], ['status', 1]])->orderBy('serial_number', 'asc')->get();
     $information['categories'] = $categories;
 
 
     //for filter
-    $category = $location =  $event_type = $min = $max = $keyword = $date1 = $date2 = $country_id = $state_id = $city_id = null;
+    $category = $location = $event_type = $min = $max = $keyword = $date1 = $date2 = $country_id = $state_id = $city_id = null;
 
     if ($request->country) {
       $country_id = EventCountry::where('language_id', $language->id)
@@ -235,7 +229,7 @@ class EventController extends Controller
 
           return $item;
         })->filter(function ($item) use ($radius) {
-          $item =  floatval($item->distance) <= $radius;
+          $item = floatval($item->distance) <= $radius;
           return $item;
         });
 
@@ -274,23 +268,7 @@ class EventController extends Controller
     $min = Ticket::min('f_price');
     $information['max'] = $max;
     $information['min'] = $min;
-    $information['eventSignals'] = [
-      'result_count' => method_exists($events, 'total') ? (int) $events->total() : collect($events)->count(),
-      'active_categories' => $categories->count(),
-      'active_filters' => collect([
-        $request->input('search-input'),
-        $request->input('category'),
-        $request->input('event'),
-        $request->input('location'),
-        $request->input('dates'),
-        $request->input('country'),
-        $request->input('state'),
-        $request->input('city'),
-        $request->input('min'),
-        $request->input('max'),
-      ])->filter(fn($value) => $value !== null && $value !== '')->count(),
-    ];
-    $information['events'] = $this->transformEventListingPaginator($events, $language->id);
+    $information['events'] = $events;
 
     return view('frontend.event.event', compact('information'));
   }
@@ -307,6 +285,7 @@ class EventController extends Controller
 
     $eventIds = $collection->pluck('id')->filter()->unique()->values();
     $ticketGroups = Ticket::query()
+      ->sellable()
       ->whereIn('event_id', $eventIds->all())
       ->get([
         'event_id',
@@ -523,6 +502,10 @@ class EventController extends Controller
       $images = EventImage::where('event_id', $id)->get();
       $information['images'] = $images;
 
+      $event_model = Event::with(['artists', 'venue'])->find($id);
+      $information['artists'] = $event_model ? $event_model->artists : [];
+      $information['venue_profile'] = $event_model ? $event_model->venue : null;
+
       $information['organizer'] = '';
       if ($content) {
         if ($content->organizer_id != NULL) {
@@ -538,12 +521,12 @@ class EventController extends Controller
         ->where('event_contents.event_category_id', $category_id)
         ->where('events.id', '!=', $event_id)
         ->whereDate('events.end_date_time', '>=', $this->now_date_time)
-        ->select('events.*', 'event_contents.title', 'event_contents.description', 'event_contents.slug', 'event_contents.city', 'event_contents.country','event_contents.address')
+        ->select('events.*', 'event_contents.title', 'event_contents.description', 'event_contents.slug', 'event_contents.city', 'event_contents.country', 'event_contents.address')
         ->orderBy('events.id', 'desc')
         ->get();
 
 
-      $information['event_id'] =  $event_id;
+      $information['event_id'] = $event_id;
       $information['related_events'] = $related_events;
       return view('frontend.event.event-details', $information); //code...
     } catch (\Exception $th) {
@@ -774,7 +757,7 @@ class EventController extends Controller
       ]);
     }
 
-    $bookedTicketData =  app(\App\Services\BookingServices::class)->getBookingDeactiveData($event_id);
+    $bookedTicketData = app(\App\Services\BookingServices::class)->getBookingDeactiveData($event_id);
 
     $data['cover_image'] = $seatMappingImage->image;
     $data['pricing_type'] = $ticket->pricing_type;
@@ -798,7 +781,7 @@ class EventController extends Controller
             $c_price = ($item->price * $ticket->early_bird_discount_amount) / 100;
             $calculate_price = $item->price - $c_price;
           } else {
-            $calculate_price =  $item->price;
+            $calculate_price = $item->price;
           }
         } else {
           $calculate_price = $item->price;
@@ -806,16 +789,16 @@ class EventController extends Controller
         $item->payable_price = $calculate_price;
         $item->seat_type = $slot->type;
         //when seat is deactive
-        $seat_check_booked =  $item->is_deactive;
+        $seat_check_booked = $item->is_deactive;
         //when check is_booked
         if ($seat_check_booked == 0) {
-          $seat_check_booked =  in_array($item->id, $bookedTicketData['seat_ids']) ? 1 : 0;
+          $seat_check_booked = in_array($item->id, $bookedTicketData['seat_ids']) ? 1 : 0;
         }
         $item->is_booked = $seat_check_booked;
         return $item;
       });
 
-      $check_booked =  $slot->is_deactive;
+      $check_booked = $slot->is_deactive;
       if ($check_booked == 0) {
         if ($slot->type == 2) {
           $check_booked = in_array($slot->id, $bookedTicketData['slot_ids']) ? 1 : 0;
@@ -823,7 +806,7 @@ class EventController extends Controller
           $check_booked = $slot->seats->count() == $slot->seats->where('is_booked', 1)->count() ? 1 : 0;
         }
       }
-      
+
       $slot->is_booked = $check_booked;
       return $slot;
     });
@@ -835,5 +818,35 @@ class EventController extends Controller
       'slots' => json_encode($slots->toArray()),
       'view' => view('frontend.event.slots.slot-mapping-seat', $data)->render()
     ]);
+  }
+
+  // filter for AJAX
+  public function filter(Request $request)
+  {
+    $language = $this->getLanguage();
+    $category_id = $request->category_id;
+
+    $events = EventContent::join('events', 'events.id', 'event_contents.event_id')
+      ->where('event_contents.language_id', $language->id)
+      ->when($category_id, function ($query, $category_id) {
+        return $query->where('event_contents.event_category_id', '=', $category_id);
+      })
+      ->where('events.status', 1)
+      ->whereDate('events.end_date_time', '>=', $this->now_date_time)
+      ->select('events.*', 'event_contents.title', 'event_contents.description', 'event_contents.slug', 'event_contents.city', 'event_contents.country', 'event_contents.address')
+      ->orderBy('events.id', 'desc')
+      ->take(9)
+      ->get();
+
+    $html = '';
+    if ($events->count() > 0) {
+      foreach ($events as $event) {
+        $html .= view('frontend.partials.event-card', compact('event'))->render();
+      }
+    } else {
+      $html = '<div class="col-12 text-center"><h3>' . __('No Events Found') . '</h3></div>';
+    }
+
+    return response()->json(['html' => $html]);
   }
 }

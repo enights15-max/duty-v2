@@ -14,4 +14,8 @@ class EventRepository {
   Future<EventDetailModel> getEventDetails(int id) async {
     return await _remoteDataSource.getEventDetails(id);
   }
+
+  Future<List<dynamic>> getCategories() async {
+    return await _remoteDataSource.getCategories();
+  }
 }

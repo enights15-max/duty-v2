@@ -3,38 +3,67 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:dio/dio.dart';
-import 'package:duty_client/core/utils/app_logger.dart';
+import '../constants/app_urls.dart';
 
 class StripeService {
   StripeService._();
 
   static final StripeService instance = StripeService._();
-  static const String _publishableKey = String.fromEnvironment(
-    'STRIPE_PUBLISHABLE_KEY',
-    defaultValue: 'pk_test_51Qsd1rPvUycBozh2w7L4Jn8IqnGPGk1mRxGVyDiOLRxJpJirPn9vHugIyyQRHHq52OlymC8Lm3A62cbmoylmoAIm00hi7nrStl',
-  );
 
   Future<void> initialize() async {
     if (kIsWeb || (!Platform.isIOS && !Platform.isAndroid)) {
-      appLog('Stripe initialization skipped: Unsupported platform.');
+      debugPrint('Stripe initialization skipped: Unsupported platform.');
       return;
     }
-    if (_publishableKey.isEmpty) {
-      appLog(
-        'Stripe initialization skipped: STRIPE_PUBLISHABLE_KEY is not configured.',
-      );
-      return;
-    }
-
-    Stripe.publishableKey = _publishableKey;
-    Stripe.merchantIdentifier = 'merchant.com.duty.app';
+    // Use the live publishable key from the backend environment
+    Stripe.publishableKey =
+        "pk_test_51Qsd1rPvUycBozh2w7L4Jn8IqnGPGk1mRxGVyDiOLRxJpJirPn9vHugIyyQRHHq52OlymC8Lm3A62cbmoylmoAIm00hi7nrStl";
     await Stripe.instance.applySettings();
   }
 
+  // Updated to call your backend instead of the Stripe API directly.
+  Future<String> createTestPaymentIntent(int amount, String currency) async {
+    final dio = Dio();
+    try {
+      final response = await dio.post(
+        '${AppUrls.pgwBaseUrl}/create-payment-intent.php',
+        data: {'amount': amount, 'currency': currency},
+      );
+      return response.data['client_secret'];
+    } on DioException catch (e) {
+      debugPrint(
+        "Error fetching payment intent from backend: ${e.response?.data}",
+      );
+      rethrow;
+    } catch (e) {
+      debugPrint("Error fetching payment intent from backend: $e");
+      rethrow;
+    }
+  }
+
+  // TEMPORARY: For testing only. NEVER do this in production.
   Future<String> createTestSetupIntent(String customerId) async {
-    throw UnsupportedError(
-      'Setup intents must be created by the backend endpoint /customers/payment-methods/setup-intent.',
-    );
+    final dio = Dio();
+    try {
+      final response = await dio.post(
+        'https://api.stripe.com/v1/setup_intents',
+        options: Options(
+          headers: {
+            'Authorization':
+                'Bearer sk_test_51Qsd1rPvUycBozh2CRqY9XCE715ohMzCX0gxNiK2fSYGvfZziJOGlEBkAC9q6CDDqIA6puzNiZFFzgz0XQg4iWzU00eXUbJGp5',
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        ),
+        data: {'customer': customerId, 'payment_method_types[]': 'card'},
+      );
+      return response.data['client_secret'];
+    } on DioException catch (e) {
+      debugPrint("Error creating test setup intent: ${e.response?.data}");
+      rethrow;
+    } catch (e) {
+      debugPrint("Error creating test setup intent: $e");
+      rethrow;
+    }
   }
 
   Future<bool> makePayment({
@@ -46,7 +75,7 @@ class StripeService {
     String? amount, // Optional now
   }) async {
     try {
-      appLog("StripeService: Initializing Payment Sheet");
+      debugPrint("StripeService: Initializing Payment Sheet");
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: paymentIntentClientSecret,
@@ -54,12 +83,7 @@ class StripeService {
           customerEphemeralKeySecret: customerEphemeralKeySecret,
           customerId: customerId,
           merchantDisplayName: 'Duty',
-          style: ThemeMode.dark,
-          applePay: const PaymentSheetApplePay(merchantCountryCode: 'DO'),
-          googlePay: const PaymentSheetGooglePay(
-            merchantCountryCode: 'DO',
-            testEnv: true,
-          ),
+          style: ThemeMode.dark, // Updated to match requested dark theme
           billingDetailsCollectionConfiguration:
               const BillingDetailsCollectionConfiguration(
                 address: AddressCollectionMode.never,
@@ -71,20 +95,20 @@ class StripeService {
         ),
       );
 
-      appLog("StripeService: Presenting Payment Sheet");
+      debugPrint("StripeService: Presenting Payment Sheet");
       await Stripe.instance.presentPaymentSheet();
 
-      appLog("StripeService: Payment Confirmed");
+      debugPrint("StripeService: Payment Confirmed");
       return true;
     } on StripeException catch (e) {
       if (e.error.code == FailureCode.Canceled) {
-        appLog("StripeService: Payment Canceled by user");
+        debugPrint("StripeService: Payment Canceled by user");
         return false;
       }
-      appLog("StripeService Error: ${e.error.localizedMessage}");
+      debugPrint("StripeService Error: ${e.error.localizedMessage}");
       rethrow;
     } catch (e) {
-      appLog("StripeService Unexpected Error: $e");
+      debugPrint("StripeService Unexpected Error: $e");
       rethrow;
     }
   }
@@ -128,87 +152,10 @@ class StripeService {
 
       return true;
     } on DioException catch (e) {
-      appLog("Custom Payment Dio Error: ${e.response?.data}");
+      debugPrint("Custom Payment Dio Error: ${e.response?.data}");
       rethrow;
     } catch (e) {
-      appLog("Custom Payment Error: $e");
-      rethrow;
-    }
-  }
-
-  Future<bool> confirmSavedCardPayment({
-    required String clientSecret,
-    required String paymentMethodId,
-  }) async {
-    try {
-      await Stripe.instance.confirmPayment(
-        paymentIntentClientSecret: clientSecret,
-        data: PaymentMethodParams.cardFromMethodId(
-          paymentMethodData: PaymentMethodDataCardFromMethod(
-            paymentMethodId: paymentMethodId,
-          ),
-        ),
-      );
-      return true;
-    } on StripeException catch (e) {
-      if (e.error.code == FailureCode.Canceled) {
-        appLog("StripeService: Payment Canceled by user");
-        return false;
-      }
-      appLog("StripeService Error: ${e.error.localizedMessage}");
-      rethrow;
-    } catch (e) {
-      appLog("StripeService Unexpected Error: $e");
-      rethrow;
-    }
-  }
-
-  Future<bool> confirmCustomSetupIntent({
-    required String clientSecret,
-    required String number,
-    required int expMonth,
-    required int expYear,
-    required String cvc,
-    required String name,
-  }) async {
-    try {
-      // 1. Create PaymentMethod using Stripe API directly
-      final dio = Dio();
-      final response = await dio.post(
-        'https://api.stripe.com/v1/payment_methods',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer ${Stripe.publishableKey}',
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        ),
-        data: {
-          'type': 'card',
-          'card[number]': number,
-          'card[exp_month]': expMonth.toString(),
-          'card[exp_year]': expYear.toString(),
-          'card[cvc]': cvc,
-          'billing_details[name]': name,
-        },
-      );
-      final paymentMethodId = response.data['id'];
-
-      // 2. Confirm SetupIntent using PaymentMethod ID
-      await Stripe.instance.confirmSetupIntent(
-        paymentIntentClientSecret: clientSecret,
-        params: PaymentMethodParams.cardFromMethodId(
-          paymentMethodData: PaymentMethodDataCardFromMethod(
-            paymentMethodId: paymentMethodId,
-          ),
-        ),
-      );
-
-      return true;
-    } on DioException catch (e) {
-      appLog("Custom SetupIntent Dio Error: ${e.response?.data}");
-      rethrow;
-    } catch (e) {
-      appLog("Custom SetupIntent Error: $e");
+      debugPrint("Custom Payment Error: $e");
       rethrow;
     }
   }

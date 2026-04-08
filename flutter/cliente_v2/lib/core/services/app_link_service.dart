@@ -192,6 +192,33 @@ class AppLinkParser {
     return null;
   }
 
+  static String? rewardClaimCodeFromUri(Uri uri) {
+    final queryCode = uri.queryParameters['code']?.trim();
+    if (uri.scheme == 'duty' && uri.host == 'event-reward-claim') {
+      if (queryCode != null && queryCode.isNotEmpty) {
+        return queryCode;
+      }
+    }
+
+    final segments = uri.pathSegments
+        .where((segment) => segment.isNotEmpty)
+        .map((s) => s.trim())
+        .toList();
+
+    final rewardIndex = _indexOfSegmentSequence(segments, const [
+      'open',
+      'event-reward-claim',
+    ]);
+    if (rewardIndex != null && segments.length > rewardIndex + 2) {
+      final code = segments[rewardIndex + 2];
+      if (code.isNotEmpty) {
+        return code;
+      }
+    }
+
+    return null;
+  }
+
   static int? _indexOfSegmentSequence(
     List<String> segments,
     List<String> needle,

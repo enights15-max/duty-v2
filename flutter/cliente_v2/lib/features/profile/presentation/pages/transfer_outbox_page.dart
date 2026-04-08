@@ -3,56 +3,75 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/providers/profile_state_provider.dart';
+import '../../../../core/theme/colors.dart';
 import '../providers/marketplace_provider.dart';
 
 class TransferOutboxPage extends ConsumerWidget {
   const TransferOutboxPage({super.key});
 
-  static const Color kPrimaryColor = Color(0xFF8655F6);
-  static const Color kDarkBackground = Color(0xFF0D0812);
-  static const Color kCardColor = Color(0xFF151022);
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = context.dutyTheme;
     final outboxAsync = ref.watch(outboxTransfersProvider);
+    final landingRoute = ref.watch(activeProfileLandingRouteProvider);
+
+    void handleExit() {
+      final navigator = Navigator.of(context);
+      if (navigator.canPop()) {
+        context.pop();
+        return;
+      }
+      context.go(landingRoute);
+    }
 
     return Scaffold(
-      backgroundColor: kDarkBackground,
+      backgroundColor: palette.background,
       appBar: AppBar(
-        backgroundColor: kDarkBackground,
+        backgroundColor: palette.background,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_rounded, color: palette.textPrimary),
+          onPressed: handleExit,
+          tooltip: 'Volver',
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.home_rounded, color: palette.textPrimary),
+            onPressed: () => context.go(landingRoute),
+            tooltip: 'Ir al inicio',
+          ),
+        ],
         title: Text(
           'Transfer Outbox',
           style: GoogleFonts.manrope(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: palette.textPrimary,
           ),
         ),
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: palette.textPrimary),
         elevation: 0,
       ),
       body: outboxAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: kPrimaryColor),
-        ),
+        loading: () =>
+            Center(child: CircularProgressIndicator(color: palette.primary)),
         error: (error, _) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.redAccent,
-                size: 48,
-              ),
+              Icon(Icons.error_outline, color: palette.danger, size: 48),
               const SizedBox(height: 16),
               Text(
                 'Failed to load your requests',
-                style: GoogleFonts.manrope(color: Colors.white54),
+                style: GoogleFonts.manrope(color: palette.textSecondary),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () => ref.invalidate(outboxTransfersProvider),
-                style: ElevatedButton.styleFrom(backgroundColor: kPrimaryColor),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: palette.primary,
+                  foregroundColor: palette.textPrimary,
+                ),
                 child: const Text('Retry'),
               ),
             ],
@@ -67,13 +86,13 @@ class TransferOutboxPage extends ConsumerWidget {
                   Icon(
                     Icons.outbox_rounded,
                     size: 64,
-                    color: Colors.white.withValues(alpha: 0.15),
+                    color: palette.textMuted.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No outgoing transfer activity',
                     style: GoogleFonts.manrope(
-                      color: Colors.white54,
+                      color: palette.textSecondary,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
@@ -82,10 +101,20 @@ class TransferOutboxPage extends ConsumerWidget {
                   Text(
                     'Requests you send and tickets you offer will appear here.',
                     style: GoogleFonts.manrope(
-                      color: Colors.white24,
+                      color: palette.textMuted,
                       fontSize: 13,
                     ),
                     textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  OutlinedButton.icon(
+                    onPressed: () => context.go(landingRoute),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: palette.textPrimary,
+                      side: BorderSide(color: palette.border),
+                    ),
+                    icon: const Icon(Icons.home_rounded),
+                    label: const Text('Ir al inicio'),
                   ),
                 ],
               ),
@@ -94,7 +123,8 @@ class TransferOutboxPage extends ConsumerWidget {
 
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(outboxTransfersProvider),
-            color: kPrimaryColor,
+            color: palette.primary,
+            backgroundColor: palette.surface,
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: transfers.length,
@@ -121,12 +151,10 @@ class _TransferOutboxCard extends ConsumerStatefulWidget {
 }
 
 class _TransferOutboxCardState extends ConsumerState<_TransferOutboxCard> {
-  static const Color kPrimaryColor = Color(0xFF8655F6);
-  static const Color kCardColor = Color(0xFF151022);
-
   bool _isProcessing = false;
 
   Future<void> _handleCancel() async {
+    final palette = context.dutyTheme;
     setState(() => _isProcessing = true);
 
     await ref
@@ -139,24 +167,25 @@ class _TransferOutboxCardState extends ConsumerState<_TransferOutboxCard> {
     if (state.hasError) {
       setState(() => _isProcessing = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to cancel transfer request'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('Failed to cancel transfer request'),
+          backgroundColor: palette.danger,
         ),
       );
       return;
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Transfer request cancelled.'),
-        backgroundColor: Colors.blueGrey,
+      SnackBar(
+        content: const Text('Transfer request cancelled.'),
+        backgroundColor: palette.info,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final transfer = widget.transfer as Map<String, dynamic>;
     final event = transfer['event'] as Map<String, dynamic>? ?? {};
     final receiver = transfer['receiver'] as Map<String, dynamic>? ?? {};
@@ -180,10 +209,10 @@ class _TransferOutboxCardState extends ConsumerState<_TransferOutboxCard> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: kCardColor,
+          color: palette.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: _statusColor(status).withValues(alpha: 0.3),
+            color: _statusColor(status, palette).withValues(alpha: 0.3),
           ),
         ),
         child: Column(
@@ -195,7 +224,7 @@ class _TransferOutboxCardState extends ConsumerState<_TransferOutboxCard> {
                   child: Text(
                     title,
                     style: GoogleFonts.manrope(
-                      color: Colors.white,
+                      color: palette.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -208,7 +237,7 @@ class _TransferOutboxCardState extends ConsumerState<_TransferOutboxCard> {
             Text(
               body,
               style: GoogleFonts.manrope(
-                color: Colors.white60,
+                color: palette.textSecondary,
                 fontSize: 13,
                 height: 1.45,
               ),
@@ -237,7 +266,7 @@ class _TransferOutboxCardState extends ConsumerState<_TransferOutboxCard> {
             ],
             if (_isProcessing) ...[
               const SizedBox(height: 16),
-              const LinearProgressIndicator(color: kPrimaryColor),
+              LinearProgressIndicator(color: palette.primary),
             ] else if (transfer['can_cancel'] == true) ...[
               const SizedBox(height: 16),
               Align(
@@ -245,8 +274,8 @@ class _TransferOutboxCardState extends ConsumerState<_TransferOutboxCard> {
                 child: OutlinedButton.icon(
                   onPressed: _handleCancel,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.white24),
+                    foregroundColor: palette.textPrimary,
+                    side: BorderSide(color: palette.border),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -262,16 +291,16 @@ class _TransferOutboxCardState extends ConsumerState<_TransferOutboxCard> {
     );
   }
 
-  Color _statusColor(String status) {
+  Color _statusColor(String status, DutyThemeTokens palette) {
     switch (status) {
       case 'accepted':
-        return Colors.greenAccent;
+        return palette.success;
       case 'rejected':
-        return Colors.orangeAccent;
+        return palette.warning;
       case 'cancelled':
-        return Colors.blueGrey;
+        return palette.info;
       default:
-        return kPrimaryColor;
+        return palette.primary;
     }
   }
 }
@@ -289,14 +318,15 @@ class _MiniMetaLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.white38),
+        Icon(icon, size: 16, color: palette.textMuted),
         const SizedBox(width: 8),
         Text(
           '$label: ',
           style: GoogleFonts.manrope(
-            color: Colors.white38,
+            color: palette.textMuted,
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
@@ -305,7 +335,7 @@ class _MiniMetaLine extends StatelessWidget {
           child: Text(
             value,
             style: GoogleFonts.manrope(
-              color: Colors.white70,
+              color: palette.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -323,11 +353,12 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final color = switch (status) {
-      'accepted' => Colors.greenAccent,
-      'rejected' => Colors.orangeAccent,
-      'cancelled' => Colors.blueGrey,
-      _ => const Color(0xFF8655F6),
+      'accepted' => palette.success,
+      'rejected' => palette.warning,
+      'cancelled' => palette.info,
+      _ => palette.primary,
     };
     final label = switch (status) {
       'accepted' => 'Accepted',

@@ -2,24 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/theme/colors.dart';
 import '../../data/models/booking_model.dart';
 
 class TicketCard extends StatelessWidget {
   final BookingModel booking;
   final VoidCallback onTap;
   final bool isPast;
-  final bool showReviewPrompt;
 
   const TicketCard({
     super.key,
     required this.booking,
     required this.onTap,
     this.isPast = false,
-    this.showReviewPrompt = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     // Parse date if needed or use from model
     final DateTime? eventDate = booking.eventDate != null
         ? DateTime.tryParse(booking.eventDate!)
@@ -38,10 +38,10 @@ class TicketCard extends StatelessWidget {
         height: 480, // Aspect ratio approx 4/5 logic or fixed height
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          border: Border.all(color: palette.border),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF8655F6).withValues(alpha: 0.15),
+              color: palette.primaryGlow.withValues(alpha: 0.16),
               blurRadius: 25,
               offset: const Offset(0, 0),
             ),
@@ -58,21 +58,21 @@ class TicketCard extends StatelessWidget {
                     imageUrl: booking.eventImage!,
                     fit: BoxFit.cover,
                     placeholder: (context, url) =>
-                        Container(color: const Color(0xFF2A2A2A)),
+                        Container(color: palette.surfaceAlt),
                     errorWidget: (context, url, error) => Container(
-                      color: const Color(0xFF2A2A2A),
-                      child: const Center(
+                      color: palette.surfaceAlt,
+                      child: Center(
                         child: Icon(
                           Icons.event,
                           size: 50,
-                          color: Colors.white24,
+                          color: palette.textMuted,
                         ),
                       ),
                     ),
                   ),
                 )
               else
-                Container(color: const Color(0xFF2A2A2A)),
+                Container(color: palette.surfaceAlt),
 
               // Gradient Overlay
               Positioned.fill(
@@ -82,10 +82,10 @@ class TicketCard extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withValues(alpha: 0.1),
+                        palette.shadow.withValues(alpha: 0.1),
                         Colors.transparent,
-                        const Color(0xFF050505).withValues(alpha: 0.8),
-                        const Color(0xFF050505),
+                        palette.shadow.withValues(alpha: 0.8),
+                        palette.shadow,
                       ],
                       stops: const [0.0, 0.4, 0.8, 1.0],
                     ),
@@ -104,11 +104,11 @@ class TicketCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF8655F6),
+                      color: palette.primary,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF8655F6).withValues(alpha: 0.5),
+                          color: palette.primaryGlow.withValues(alpha: 0.5),
                           blurRadius: 15,
                         ),
                       ],
@@ -138,71 +138,6 @@ class TicketCard extends StatelessWidget {
                   ),
                 ),
 
-              // LISTED Badge
-              if (booking.isListed && !isPast)
-                Positioned(
-                  top: 16,
-                  right: 16,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF9500),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFFF9500).withValues(alpha: 0.5),
-                          blurRadius: 15,
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      'LISTED',
-                      style: GoogleFonts.outfit(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ),
-                ),
-
-              if (showReviewPrompt && isPast)
-                Positioned(
-                  top: 16,
-                  left: 16,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF5A5F),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(
-                            0xFFFF5A5F,
-                          ).withValues(alpha: 0.35),
-                          blurRadius: 16,
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      'REVIEW PENDING',
-                      style: GoogleFonts.outfit(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 1.1,
-                      ),
-                    ),
-                  ),
-                ),
-
               // Content
               Positioned(
                 bottom: 0,
@@ -221,9 +156,7 @@ class TicketCard extends StatelessWidget {
                         style: GoogleFonts.outfit(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: isPast
-                              ? Colors.white54
-                              : const Color(0xFF8655F6),
+                          color: isPast ? palette.textMuted : palette.primary,
                           letterSpacing: 1.5,
                         ),
                       ),
@@ -234,7 +167,7 @@ class TicketCard extends StatelessWidget {
                         style: GoogleFonts.outfit(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: palette.textPrimary,
                           height: 1.1,
                         ),
                         maxLines: 2,
@@ -246,6 +179,7 @@ class TicketCard extends StatelessWidget {
                       Row(
                         children: [
                           _buildInfoChip(
+                            context,
                             Icons.calendar_today_outlined,
                             eventDate != null
                                 ? (booking.bookingId.length > 4
@@ -256,6 +190,7 @@ class TicketCard extends StatelessWidget {
                           const SizedBox(width: 16),
                           if (eventDate != null)
                             _buildInfoChip(
+                              context,
                               Icons.access_time,
                               DateFormat('h:mm a').format(eventDate),
                             ),
@@ -264,7 +199,7 @@ class TicketCard extends StatelessWidget {
 
                       if (!isPast) ...[
                         const SizedBox(height: 20),
-                        const Divider(color: Colors.white10),
+                        Divider(color: palette.border),
                         const SizedBox(height: 16),
 
                         // Footer / Button
@@ -273,17 +208,19 @@ class TicketCard extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.location_on_outlined,
-                                  color: Colors.white54,
+                                  color: palette.textMuted,
                                   size: 18,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  booking.venueName?.isNotEmpty == true ? booking.venueName! : 'Location TBA',
+                                  booking.venueName?.isNotEmpty == true
+                                      ? booking.venueName!
+                                      : 'Location TBA',
                                   style: GoogleFonts.outfit(
                                     fontSize: 12,
-                                    color: Colors.white54,
+                                    color: palette.textSecondary,
                                   ),
                                 ),
                               ],
@@ -294,22 +231,16 @@ class TicketCard extends StatelessWidget {
                                 vertical: 10,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFF8655F6,
-                                ).withValues(alpha: 0.1),
+                                color: palette.primarySurface,
                                 borderRadius: BorderRadius.circular(30),
-                                border: Border.all(
-                                  color: const Color(
-                                    0xFF8655F6,
-                                  ).withValues(alpha: 0.3),
-                                ),
+                                border: Border.all(color: palette.borderStrong),
                               ),
                               child: Text(
                                 'VIEW QR',
                                 style: GoogleFonts.outfit(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  color: palette.textPrimary,
                                   letterSpacing: 1.0,
                                 ),
                               ),
@@ -328,16 +259,17 @@ class TicketCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoChip(IconData icon, String label) {
+  Widget _buildInfoChip(BuildContext context, IconData icon, String label) {
+    final palette = context.dutyTheme;
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.white70),
+        Icon(icon, size: 16, color: palette.textSecondary),
         const SizedBox(width: 6),
         Text(
           label,
           style: GoogleFonts.outfit(
             fontSize: 14,
-            color: Colors.white70,
+            color: palette.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),

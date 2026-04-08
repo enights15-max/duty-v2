@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,10 +11,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/offline', 'FrontEnd\HomeController@offline');
 Route::post('/push-notification/store-endpoint', 'FrontEnd\PushNotificationController@store');
 // Route::get('/test-pdf', 'FrontEnd\HomeController@testPDF');
-
-Route::get('/migrate', function () {
-  Artisan::call('migrate');
-});
 
 Route::get('login', function () {
   return view('frontend.organizer.login');
@@ -181,15 +176,7 @@ Route::post('/store-subscriber', 'Controller@storeSubscriber')->name('store_subs
 
 Route::middleware('change.lang')->group(function () {
   Route::get('/', 'FrontEnd\HomeController@index')->name('index');
-<<<<<<< Updated upstream
-=======
-  Route::get('/download-app', 'FrontEnd\ProductController@downloadApp')->name('frontend.download_app');
-  Route::get('/open/event/{id}/{slug?}', 'FrontEnd\ProductController@openEvent')->name('frontend.open_event');
-  Route::get('/for-organizers', 'FrontEnd\ProductController@forOrganizers')->name('frontend.for_organizers');
-  Route::get('/for-artists', 'FrontEnd\ProductController@forArtists')->name('frontend.for_artists');
-  Route::get('/for-venues', 'FrontEnd\ProductController@forVenues')->name('frontend.for_venues');
   Route::get('events-filter', 'FrontEnd\EventController@filter')->name('events.filter');
->>>>>>> Stashed changes
   Route::get('events', 'FrontEnd\EventController@index')->name('events');
   Route::get('event/{slug}/{id}', 'FrontEnd\EventController@details')->name('event.details');
   Route::get('event/slot-mapping-seat', 'FrontEnd\EventController@slotMapping')->name('event.slot-mapping-seat');
@@ -222,10 +209,12 @@ Route::middleware('change.lang')->group(function () {
 
   Route::get('/product-order/{id}/cancel', 'FrontEnd\Shop\OrderController@cancel')->name('product_order.cancel');
   Route::get('/product-order-complete/complete/{via?}', 'FrontEnd\Shop\OrderController@complete')->name('product_order.complete');
-  Route::get('organizer/details/{id}/{name}', 'FrontEnd\OrganizerController@details')->name('frontend.organizer.details');
-  Route::get('organizers/', 'FrontEnd\OrganizerController@index')->name('frontend.all.organizer');
-
   Route::post('organizers/contact/send-mail', 'FrontEnd\OrganizerController@sendMail')->name('organizer.contact.send_mail');
+
+  Route::get('organizer/details/{id}/{name}', 'FrontEnd\OrganizerController@details')->name('frontend.organizer.details');
+  Route::get('artist/details/{id}/{name}', 'FrontEnd\ArtistController@details')->name('frontend.artist.details');
+  Route::get('venue/details/{id}/{name}', 'FrontEnd\VenueController@details')->name('frontend.venue.details');
+  Route::get('profile/{username}', 'FrontEnd\CustomerController@publicProfile')->name('frontend.customer.public_profile');
 });
 /*
 |---------------------------------------------------------------------------------

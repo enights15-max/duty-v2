@@ -1,120 +1,84 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:duty_client/core/constants/app_urls.dart';
+import 'package:duty_client/core/providers/profile_state_provider.dart';
+import 'package:duty_client/core/theme/colors.dart';
+import 'package:duty_client/features/auth/presentation/providers/auth_provider.dart';
+import 'package:duty_client/features/profile/domain/models/profile_model.dart';
+import 'package:duty_client/features/profile/presentation/widgets/profile_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../providers/profile_provider.dart';
-import '../../../../features/auth/presentation/providers/auth_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-<<<<<<< Updated upstream
-    // We can use authProvider to get basic user info if stored,
-    // or fetch detailed profile from API using profileProvider
-    final profileAsync = ref.watch(profileProvider);
-=======
+    final palette = context.dutyTheme;
     final activeProfile = ref.watch(activeProfileProvider);
     final user = ref.watch(currentUserProvider);
-    final isLoggingOut = ref.watch(authControllerProvider).isLoading;
 
     if (user == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final fullAvatarUrl =
-        activeProfile?.avatarUrl ??
-        AppUrls.getAvatarUrl(user['photo']?.toString());
->>>>>>> Stashed changes
+    final avatarUrl = activeProfile?.avatarUrl ?? user['photo'];
+    String? fullAvatarUrl;
+    if (avatarUrl != null) {
+      if (avatarUrl.startsWith('http')) {
+        fullAvatarUrl = avatarUrl;
+      } else {
+        fullAvatarUrl = '${AppConstants.profileImageBaseUrl}$avatarUrl';
+      }
+    }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mi Perfil')),
-      body: profileAsync.when(
-        data: (profile) {
-          final user = profile['customer'] ?? {}; // Adjust key based on API
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                const CircleAvatar(
-                  radius: 50,
-                  backgroundImage: AssetImage(
-                    'assets/images/user-placeholder.png',
-                  ), // Placeholder
-                  // backgroundImage: NetworkImage(user['photo'] ?? ''), // If photo available
+      backgroundColor: palette.background,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [palette.heroGradientStart, palette.background],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  '${user['fname'] ?? 'Usuario'} ${user['lname'] ?? ''}',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                Text(
-                  user['email'] ?? '',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                ),
-
-                const SizedBox(height: 32),
-
-                ListTile(
-                  leading: const Icon(Icons.confirmation_number_outlined),
-                  title: const Text('Mis Entradas'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/my-tickets'),
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.person_outline),
-                  title: const Text('Editar Perfil'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    // Navigate to Edit Profile Page (Not implemented in this phase)
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Próximamente')),
-                    );
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.lock_outline),
-                  title: const Text('Cambiar Contraseña'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.red),
-                  title: const Text(
-                    'Cerrar Sesión',
-                    style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  pinned: true,
+                  title: Text(
+                    'Mi Perfil',
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      color: palette.textPrimary,
+                    ),
                   ),
-<<<<<<< Updated upstream
-                  onTap: () async {
-                    await ref.read(authControllerProvider.notifier).logout();
-                    if (context.mounted) {
-                      context.go('/login');
-                    }
-                  },
-=======
                   actions: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.settings_outlined,
-                        color: Colors.white,
+                        color: palette.textPrimary,
                       ),
-                      onPressed: () {},
+                      onPressed: () => context.push('/settings'),
                     ),
                   ],
                 ),
-
-                // Profile Header
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Column(
                       children: [
-                        _buildProfileAvatar(fullAvatarUrl),
+                        _buildProfileAvatar(context, fullAvatarUrl),
                         const SizedBox(height: 16),
                         Text(
                           activeProfile?.name ??
@@ -122,7 +86,7 @@ class ProfilePage extends ConsumerWidget {
                           style: GoogleFonts.outfit(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: palette.textPrimary,
                           ),
                         ),
                         if (activeProfile != null)
@@ -133,22 +97,16 @@ class ProfilePage extends ConsumerWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(
-                                0xFF6200EE,
-                              ).withValues(alpha: 0.2),
+                              color: palette.primarySurface,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: const Color(
-                                  0xFF6200EE,
-                                ).withValues(alpha: 0.5),
-                              ),
+                              border: Border.all(color: palette.borderStrong),
                             ),
                             child: Text(
                               activeProfile.type.name.toUpperCase(),
                               style: GoogleFonts.outfit(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFFBB86FC),
+                                color: palette.primary,
                               ),
                             ),
                           ),
@@ -156,16 +114,12 @@ class ProfilePage extends ConsumerWidget {
                     ),
                   ),
                 ),
-
-                // Profile Switcher (The core selection component)
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(bottom: 24.0),
                     child: ProfileSwitcher(),
                   ),
                 ),
-
-                // Menu Items
                 SliverList(
                   delegate: SliverChildListDelegate([
                     _buildMenuItem(
@@ -178,13 +132,21 @@ class ProfilePage extends ConsumerWidget {
                       context,
                       icon: Icons.person_outline,
                       title: 'Datos Personales',
-                      onTap: () {},
+                      onTap: () => context.push('/settings/edit-profile'),
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.tune_rounded,
+                      title: 'Configuración',
+                      subtitle: 'Tema, privacidad, idioma y seguridad',
+                      onTap: () => context.push('/settings'),
+                      highlight: true,
                     ),
                     _buildMenuItem(
                       context,
                       icon: Icons.lock_outline,
                       title: 'Seguridad',
-                      onTap: () {},
+                      onTap: () => context.push('/settings'),
                     ),
                     if (activeProfile?.type == ProfileType.organizer ||
                         activeProfile?.type == ProfileType.venue)
@@ -193,7 +155,7 @@ class ProfilePage extends ConsumerWidget {
                         icon: Icons.dashboard_customize_outlined,
                         title: 'Panel Administrativo',
                         subtitle: 'Gestiona tus eventos y ventas',
-                        onTap: () {},
+                        onTap: () => context.push('/dashboard'),
                         highlight: true,
                       ),
                     const SizedBox(height: 24),
@@ -213,18 +175,89 @@ class ProfilePage extends ConsumerWidget {
                                 context.go('/login');
                               }
                             },
-                      textColor: Colors.redAccent,
+                      textColor: palette.danger,
                     ),
                     const SizedBox(height: 100),
                   ]),
->>>>>>> Stashed changes
                 ),
               ],
             ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileAvatar(BuildContext context, String? url) {
+    final palette = context.dutyTheme;
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [palette.primary, palette.primaryDeep],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: palette.primaryGlow.withValues(alpha: 0.28),
+            blurRadius: 20,
+            spreadRadius: 3,
+          ),
+        ],
+      ),
+      child: CircleAvatar(
+        radius: 50,
+        backgroundColor: palette.surface,
+        backgroundImage: url != null ? CachedNetworkImageProvider(url) : null,
+        child: url == null
+            ? Icon(Icons.person, size: 50, color: palette.textMuted)
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    required VoidCallback onTap,
+    Color? textColor,
+    bool highlight = false,
+  }) {
+    final palette = context.dutyTheme;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: highlight ? palette.primarySurface : palette.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: highlight ? palette.borderStrong : palette.border,
+        ),
+      ),
+      child: ListTile(
+        onTap: onTap,
+        leading: Icon(icon, color: textColor ?? palette.textSecondary),
+        title: Text(
+          title,
+          style: GoogleFonts.inter(
+            color: textColor ?? palette.textPrimary,
+            fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        subtitle: subtitle != null
+            ? Text(
+                subtitle,
+                style: GoogleFonts.inter(
+                  color: palette.textMuted,
+                  fontSize: 12,
+                ),
+              )
+            : null,
+        trailing: Icon(Icons.chevron_right, color: palette.textMuted, size: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }

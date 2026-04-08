@@ -25,6 +25,7 @@ class Customer extends Model implements AuthenticatableContract
     'username',
     'email',
     'photo',
+    'date_of_birth',
     'phone',
     'address',
     'country',
@@ -33,9 +34,13 @@ class Customer extends Model implements AuthenticatableContract
     'zip_code',
     'password',
     'gender',
+    'firebase_uid',
+    'is_private',
     'status',
     'email_verified_at',
-    'verification_token'
+    'phone_verified_at',
+    'verification_token',
+    'stripe_customer_id'
   ];
 
   protected $hidden = [
@@ -47,7 +52,18 @@ class Customer extends Model implements AuthenticatableContract
 
   protected $casts = [
     'email_verified_at' => 'datetime',
+    'phone_verified_at' => 'datetime',
   ];
+
+  protected $appends = ['age'];
+
+  public function getAgeAttribute()
+  {
+    if ($this->date_of_birth) {
+      return \Carbon\Carbon::parse($this->date_of_birth)->age;
+    }
+    return null;
+  }
 
   //bookings
   public function bookings()
@@ -78,5 +94,19 @@ class Customer extends Model implements AuthenticatableContract
   public function wishlists()
   {
     return $this->hasMany(Wishlist::class, 'customer_id', 'id');
+  }
+
+  //following
+  public function following()
+  {
+    return $this->hasMany(Follower::class, 'customer_id', 'id');
+  }
+
+  /**
+   * Get the payment methods for the customer.
+   */
+  public function paymentMethods()
+  {
+    return $this->hasMany(PaymentMethod::class, 'user_id', 'id');
   }
 }

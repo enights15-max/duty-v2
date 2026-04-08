@@ -5,11 +5,11 @@ class AppUrls {
   // static const String _apiBase = 'https://duty.do';
   // Local Server (localhost for iOS Simulator, use 10.0.2.2 for Android Emulator)
   // Local Server (localhost for iOS Simulator, use 10.0.2.2 for Android Emulator)
-  static const String _fallbackApiBase = 'http://10.0.1.27/v2';
+  static const String _fallbackApiBase = 'http://localhost/v2';
 
   static const String _baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: '$_fallbackApiBase/api',
+    defaultValue: '$_apiBase/api',
   );
   static const String _publicBaseOverride = String.fromEnvironment(
     'PUBLIC_BASE_URL',
@@ -22,6 +22,12 @@ class AppUrls {
       'https://maps.googleapis.com/maps/api/place/autocomplete/json';
   static const String googlePlaceDetails =
       'https://maps.googleapis.com/maps/api/place/details/json';
+  static const String googleGeocode =
+      'https://maps.googleapis.com/maps/api/geocode/json';
+  static const String nominatimSearch =
+      'https://nominatim.openstreetmap.org/search';
+  static const String nominatimReverse =
+      'https://nominatim.openstreetmap.org/reverse';
 
   static String get _apiBase {
     if (_baseUrl.startsWith('http')) {
@@ -80,19 +86,6 @@ class AppUrls {
   static const String events = '$_baseUrl/events';
   static String eventDetails(int id) =>
       '$_baseUrl/events/details/?event_id=$id';
-  static String eventShareBridge(int id, {String? slug}) {
-    final normalizedSlug = (slug ?? '').trim();
-    if (normalizedSlug.isEmpty) {
-      return '$publicBaseUrl/open/event/$id?source=app-share';
-    }
-    return '$publicBaseUrl/open/event/$id/$normalizedSlug?source=app-share';
-  }
-
-  static String transferRecipientCode({required int customerId}) =>
-      'duty://transfer-recipient/$customerId';
-  static String transferTicketRequestCode({required String transferToken}) =>
-      'duty://transfer-ticket?token=${Uri.encodeQueryComponent(transferToken)}';
-
   static String seatDetails({
     required int eventId,
     required int ticketId,
@@ -110,7 +103,7 @@ class AppUrls {
       '$_baseUrl/customers/booking/details/?booking_id=$id';
   static const String eventBooking = '$_baseUrl/event-booking';
   static const String eventCheckoutVerify = '$_baseUrl/event/checkout-verify';
-  // Verify payable amount with the backend before booking
+  // Verify payable amount with the backend before hitting PGW
   static const String eventVerifyPayment = '$_baseUrl/event/verify-payment';
   // Finalize/submit payment + booking (alias to eventBooking for this app)
   static const String paymentProcessUrl = eventBooking;
@@ -123,6 +116,8 @@ class AppUrls {
   static const String walletWithdrawals =
       '$_baseUrl/customers/wallet/withdrawals';
   static const String walletWithdraw = '$_baseUrl/customers/wallet/withdraw';
+  static const String walletTransfer = '$_baseUrl/customers/wallet/transfer';
+  static String walletQr(String walletId) => 'duty-wallet://$walletId';
   static const String bonusWallet = '$_baseUrl/customers/bonus-wallet';
   static const String bonusWalletHistory =
       '$_baseUrl/customers/bonus-wallet/history';
@@ -138,8 +133,12 @@ class AppUrls {
   static String tipArtist(int artistId) =>
       '$_baseUrl/customers/artists/$artistId/tip';
   static const String reservations = '$_baseUrl/customers/reservations';
+  static const String reservationPreview =
+      '$_baseUrl/customers/reservations/preview';
   static String reservationDetails(int id) =>
       '$_baseUrl/customers/reservations/$id';
+  static String reservationPayPreview(int id) =>
+      '$_baseUrl/customers/reservations/$id/pay-preview';
   static String reservationPay(int id) =>
       '$_baseUrl/customers/reservations/$id/pay';
 
@@ -148,52 +147,28 @@ class AppUrls {
       '$_baseUrl/customers/subscriptions/plans';
   static const String subscribe = '$_baseUrl/customers/subscriptions/subscribe';
 
+  // Scanner (Organizer/Staff)
+  static const String claimReward = '$_baseUrl/scanner/organizer/claim-reward';
+
   // Marketplace (Phase 6 & 7)
   static String transferTicket(int bookingId) =>
       '$_baseUrl/customers/bookings/$bookingId/transfer';
-  static String transferTicketQr(int bookingId) =>
-      '$_baseUrl/customers/bookings/$bookingId/transfer-qr';
   static String listTicket(int bookingId) =>
       '$_baseUrl/customers/bookings/$bookingId/list';
   static const String marketplaceTickets =
       '$_baseUrl/customers/marketplace/tickets';
+  static String marketplacePurchasePreview(int bookingId) =>
+      '$_baseUrl/customers/marketplace/purchase-preview/$bookingId';
   static String purchaseMarketplaceTicket(int bookingId) =>
       '$_baseUrl/customers/marketplace/purchase/$bookingId';
 
-  // Transfer Approval Flow
-  static const String verifyRecipient =
-      '$_baseUrl/customers/transfers/verify-recipient';
-  static const String requestTransferFromScan =
-      '$_baseUrl/customers/transfers/request-from-scan';
-  static const String pendingTransfers =
-      '$_baseUrl/customers/transfers/pending';
-  static const String outboxTransfers = '$_baseUrl/customers/transfers/outbox';
-  static String transferDetails(int transferId) =>
-      '$_baseUrl/customers/transfers/$transferId';
-  static String acceptTransfer(int transferId) =>
-      '$_baseUrl/customers/transfers/$transferId/accept';
-  static String rejectTransfer(int transferId) =>
-      '$_baseUrl/customers/transfers/$transferId/reject';
-  static String cancelTransfer(int transferId) =>
-      '$_baseUrl/customers/transfers/$transferId/cancel';
-
-  // Public Profiles (Social Network)
-  static String userProfile(int id) => '$_baseUrl/user/$id/profile';
-  static String userUpcomingAttendance(int id) =>
-      '$_baseUrl/user/$id/upcoming-attendance';
-  static String userAttendedEvents(int id) =>
-      '$_baseUrl/user/$id/attended-events';
-  static String userInterestedEvents(int id) =>
-      '$_baseUrl/user/$id/interested-events';
-  static String userFavorites(int id) => '$_baseUrl/user/$id/favorites';
-  static String userFollowers(int id) => '$_baseUrl/user/$id/followers';
-  static String artistProfile(int id) => '$_baseUrl/artist/$id/profile';
-  static String venueProfile(int id) => '$_baseUrl/venue/$id/profile';
-  static String organizerProfile(int id) => '$_baseUrl/organizer/$id/profile';
-  static const String discoverArtists = '$_baseUrl/discover/artists';
-  static const String discoverOrganizers = '$_baseUrl/discover/organizers';
-  static const String discoverVenues = '$_baseUrl/discover/venues';
-
+  // Payment gateway helpers (non-API helpers hosted on same host)
+  static const String stripeCreatePaymentIntent =
+      '$_apiBase/pgw/create-payment-intent.php';
+  static const String flutterwaveCreatePayment =
+      '$_apiBase/pgw/flutterwave-create-payment.php';
+  static const String flutterwaveVerifyPayment =
+      '$_apiBase/pgw/flutterwave-verify-payment.php';
   static const String wishlists = '$_baseUrl/customers/wishlists';
   static const String wishlistsStore = '$_baseUrl/customers/wishlists/store';
   static const String wishlistsDelete = '$_baseUrl/customers/wishlists/delete';
@@ -217,6 +192,8 @@ class AppUrls {
   static const String updatePassword = '$_baseUrl/customers/update/password';
   static const String privacySettings = '$_baseUrl/customers/privacy-settings';
   static const String socialFeed = '$_baseUrl/social/feed';
+  static const String walletTopupPreview =
+      '$_baseUrl/customers/payments/intent/preview';
   static const String forgetPassword = '$_baseUrl/customer/forget-password';
   static const String resetPasswordUpdate =
       '$_baseUrl/customer/reset-password-update';
@@ -257,27 +234,112 @@ class AppUrls {
   static const String requestIdentity = '$_baseUrl/customers/identities';
   static String updateIdentity(String id) =>
       '$_baseUrl/customers/identities/$id';
+  // Locations
+  static const String locationCountries = '$_baseUrl/locations/countries';
+  static String locationCities({int? countryId}) => countryId != null
+      ? '$_baseUrl/locations/cities?country_id=$countryId'
+      : '$_baseUrl/locations/cities';
+  static String eventWaitlist(int id) =>
+      '$_baseUrl/customers/events/$id/waitlist';
   static const String professionalEvents =
       '$_baseUrl/customers/professional/events';
+  static const String professionalDashboard =
+      '$_baseUrl/customers/professional/dashboard';
+  static String professionalDashboardRange(String range) =>
+      '$professionalDashboard?range=$range';
   static String professionalEvent(int id) => '$professionalEvents/$id';
+  static String professionalEventInventory(int id) =>
+      '$professionalEvents/$id/inventory';
+  static String professionalEventClaim(int id) =>
+      '$professionalEvents/$id/claim';
+  static String professionalEventCollaborators(int id) =>
+      '$professionalEvents/$id/collaborators';
+  static String professionalEventTickets(int id) =>
+      '$professionalEvents/$id/tickets';
+  static String professionalEventTicket(int eventId, int ticketId) =>
+      '${professionalEventTickets(eventId)}/$ticketId';
+  static String professionalEventTicketDuplicate(int eventId, int ticketId) =>
+      '${professionalEventTicket(eventId, ticketId)}/duplicate';
+  static String professionalEventTicketStatus(int eventId, int ticketId) =>
+      '${professionalEventTicket(eventId, ticketId)}/status';
   static const String professionalVenueSearch =
       '$_baseUrl/customers/professional/venues/search';
   static const String professionalArtistSearch =
       '$_baseUrl/customers/professional/artists/search';
+  static const String professionalCollaborations =
+      '$_baseUrl/customers/professional/collaborations';
+  static String professionalCollaborationClaim(int earningId) =>
+      '$professionalCollaborations/$earningId/claim';
+  static String professionalCollaborationMode(int earningId) =>
+      '$professionalCollaborations/$earningId/mode';
 
   // Images
-  static String get imageBaseUrl =>
+  static const String imageBaseUrl =
       '$_apiBase/assets/admin/img/event/thumbnail/';
-  static String get eventCoverBaseUrl =>
+  static const String eventCoverBaseUrl =
       '$_apiBase/assets/admin/img/event-gallery/';
-  static String get profileImageBaseUrl =>
+  static const String profileImageBaseUrl =
       '$_apiBase/assets/admin/img/customer-profile/';
-  static String get organizerImageBaseUrl =>
+  static const String organizerImageBaseUrl =
       '$_apiBase/assets/admin/img/organizer-photo/';
   static String get organizerCoverImageBaseUrl =>
       '$_apiBase/assets/admin/img/organizer-cover/';
   static String get venueImageBaseUrl => '$_apiBase/assets/admin/img/venue/';
   static String get artistImageBaseUrl => '$_apiBase/assets/admin/img/artist/';
+
+  static String? getIdentityAvatarUrl(String type, String? photo) {
+    if (photo == null || photo.trim().isEmpty) return null;
+    final normalized = photo.trim();
+    if (normalized.startsWith('http')) {
+      return normalized;
+    }
+
+    final cleanPhoto = normalized.startsWith('/')
+        ? normalized.substring(1)
+        : normalized;
+
+    if (cleanPhoto.contains('assets/admin/img/')) {
+      return '$_apiBase/$cleanPhoto';
+    }
+
+    switch (type) {
+      case 'artist':
+        return '$artistImageBaseUrl$cleanPhoto';
+      case 'venue':
+        return '$venueImageBaseUrl$cleanPhoto';
+      case 'organizer':
+        return '$organizerImageBaseUrl$cleanPhoto';
+      default:
+        return getAvatarUrl(cleanPhoto);
+    }
+  }
+
+  static String? getIdentityCoverUrl(String type, String? photo) {
+    if (photo == null || photo.trim().isEmpty) return null;
+    final normalized = photo.trim();
+    if (normalized.startsWith('http')) {
+      return normalized;
+    }
+
+    final cleanPhoto = normalized.startsWith('/')
+        ? normalized.substring(1)
+        : normalized;
+
+    if (cleanPhoto.contains('assets/admin/img/')) {
+      return '$_apiBase/$cleanPhoto';
+    }
+
+    switch (type) {
+      case 'artist':
+        return '$artistImageBaseUrl$cleanPhoto';
+      case 'venue':
+        return '$venueImageBaseUrl$cleanPhoto';
+      case 'organizer':
+        return '$organizerCoverImageBaseUrl$cleanPhoto';
+      default:
+        return null;
+    }
+  }
 
   /// Helper to get the full avatar URL for a customer or organizer.
   /// Handles both full URLs (http) and relative file paths.
@@ -300,8 +362,69 @@ class AppUrls {
     final cleanPhoto = normalized.startsWith('/')
         ? normalized.substring(1)
         : normalized;
+    if (cleanPhoto.contains('assets/admin/img/')) {
+      return '$_apiBase/$cleanPhoto';
+    }
     final baseUrl = isOrganizer ? organizerImageBaseUrl : profileImageBaseUrl;
     return '$baseUrl$cleanPhoto';
+  }
+
+  static String? getCustomerAvatarUrl(Map<String, dynamic>? user) {
+    if (user == null) return null;
+
+    String? resolveCandidate(dynamic value) {
+      final normalized = value?.toString().trim();
+      if (normalized == null || normalized.isEmpty) {
+        return null;
+      }
+      return getAvatarUrl(normalized);
+    }
+
+    final directCandidates = [
+      user['photo_url'],
+      user['avatar_url'],
+      user['avatar'],
+      user['photoUrl'],
+      user['photo'],
+      user['image'],
+    ];
+
+    for (final candidate in directCandidates) {
+      final resolved = resolveCandidate(candidate);
+      if (resolved != null) {
+        return resolved;
+      }
+    }
+
+    final customerInfo = user['customer_info'];
+    if (customerInfo is Map<String, dynamic>) {
+      final nested = getCustomerAvatarUrl(customerInfo);
+      if (nested != null) {
+        return nested;
+      }
+    } else if (customerInfo is Map) {
+      final nested = getCustomerAvatarUrl(
+        Map<String, dynamic>.from(customerInfo),
+      );
+      if (nested != null) {
+        return nested;
+      }
+    }
+
+    final data = user['data'];
+    if (data is Map<String, dynamic>) {
+      final nested = getCustomerAvatarUrl(data);
+      if (nested != null) {
+        return nested;
+      }
+    } else if (data is Map) {
+      final nested = getCustomerAvatarUrl(Map<String, dynamic>.from(data));
+      if (nested != null) {
+        return nested;
+      }
+    }
+
+    return null;
   }
 
   /// Helper to get the full event thumbnail URL.
@@ -327,6 +450,9 @@ class AppUrls {
     if (photo.startsWith('http')) return photo;
 
     final cleanPhoto = photo.startsWith('/') ? photo.substring(1) : photo;
+    if (cleanPhoto.contains('assets/admin/img/')) {
+      return '$_apiBase/$cleanPhoto';
+    }
     return '$artistImageBaseUrl$cleanPhoto';
   }
 
@@ -336,6 +462,9 @@ class AppUrls {
     if (photo.startsWith('http')) return photo;
 
     final cleanPhoto = photo.startsWith('/') ? photo.substring(1) : photo;
+    if (cleanPhoto.contains('assets/admin/img/')) {
+      return '$_apiBase/$cleanPhoto';
+    }
     return '$venueImageBaseUrl$cleanPhoto';
   }
 

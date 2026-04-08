@@ -14,6 +14,7 @@ class Kernel extends HttpKernel
    * @var array
    */
   protected $middleware = [
+    \App\Http\Middleware\ApacheAuthorizationHeader::class,
     \App\Http\Middleware\TrustProxies::class,
     \Fruitcake\Cors\HandleCors::class,
     \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
@@ -69,6 +70,7 @@ class Kernel extends HttpKernel
     'certificate.status' => \App\Http\Middleware\EnsureCertificateIsEnable::class,
     'Deactive' => \App\Http\Middleware\Deactive::class,
     'EmailStatus' => \App\Http\Middleware\EmailStatus::class,
-    "adminLang" => \App\Http\Middleware\SetLangMiddleware::class
+    "adminLang" => \App\Http\Middleware\SetLangMiddleware::class,
+    'identity.context' => \App\Http\Middleware\IdentityContext::class,
   ];
 }

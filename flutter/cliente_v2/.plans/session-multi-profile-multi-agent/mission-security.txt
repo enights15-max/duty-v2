@@ -1,0 +1,14 @@
+ROLE: code-reviewer
+PHASE: Draft
+MISSION: Create initial plan for permissions and authorization.
+
+CONTEXT: .plans/session-multi-profile-multi-agent/context.md
+OUTPUT: .plans/session-multi-profile-multi-agent/draft-security-specialist.md
+
+Include:
+- Permission matrix for different profile types.
+- Verification logic for event creation and ticket sales.
+- Secure handling of profile switching.
+- Backend/Frontend synchronization of roles and permissions.
+
+Update status.yaml when complete.

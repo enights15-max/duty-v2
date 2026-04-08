@@ -16,4 +16,12 @@ class Withdraw extends Model
   {
     return $this->belongsTo(Organizer::class);
   }
+  public function venue()
+  {
+    return $this->belongsTo(Venue::class);
+  }
+  public function artist()
+  {
+    return $this->belongsTo(Artist::class);
+  }
 }

@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/home_provider.dart';
-<<<<<<< Updated upstream
-=======
 import '../../data/models/event_model.dart';
 import '../../data/models/advertisement_model.dart';
-import '../../data/models/discovery_models.dart';
-import '../providers/discovery_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../profile/data/models/social_feed_model.dart';
 import '../../../profile/data/repositories/social_repository.dart';
 import '../../../../core/constants/app_urls.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/cached_image.dart';
 import '../../../wallet/presentation/providers/wallet_provider.dart';
 import '../../../chat/presentation/providers/chat_provider.dart';
@@ -20,42 +17,44 @@ import '../../../profile/presentation/providers/marketplace_provider.dart';
 import '../../../profile/presentation/providers/review_prompt_provider.dart';
 
 final isForYouGridViewProvider = StateProvider<bool>((ref) => true);
->>>>>>> Stashed changes
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch events
+    final palette = context.dutyTheme;
+    // Watch home content (Ads, Events, etc)
+    final homeContentAsyncValue = ref.watch(homeContentProvider);
     final eventsAsyncValue = ref.watch(homeEventsProvider);
-
-<<<<<<< Updated upstream
-=======
-    final socialFeedAsyncValue = ref.watch(socialFeedProvider);
     final currentUser = ref.watch(currentUserProvider);
-    final socialProofByEventId = {
-      for (final item
-          in socialFeedAsyncValue.valueOrNull?.items ??
-              const <SocialFeedItemModel>[])
-        item.eventId: item,
-    };
->>>>>>> Stashed changes
+    String? avatarUrl;
+    final photo = currentUser?['photo']?.toString();
+    if (photo != null) {
+      if (photo.startsWith('http')) {
+        avatarUrl = photo;
+      } else {
+        avatarUrl = '${AppConstants.profileImageBaseUrl}$photo';
+      }
+    }
+
+    final isVerified =
+        currentUser != null &&
+        currentUser['email_verified_at'] != null &&
+        currentUser['phone_verified_at'] != null;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A), // Dark Background
+      backgroundColor: palette.background,
       body: Stack(
         children: [
           // Background Gradient (Optional, similar to Login to give depth)
           Positioned.fill(
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: RadialGradient(
                   center: Alignment.topLeft,
                   radius: 1.2,
-                  colors: [
-                    Color(0xFF2A1B3D), // Purple glow top-left
-                    Color(0xFF0F0F1A), // Dark base
-                  ],
+                  colors: [palette.heroGradientStart, palette.background],
                 ),
               ),
             ),
@@ -64,20 +63,9 @@ class HomePage extends ConsumerWidget {
           // Main Content
           SafeArea(
             bottom: false,
-<<<<<<< Updated upstream
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                // Header
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0,
-                      vertical: 20.0,
-=======
             child: RefreshIndicator(
-              color: const Color(0xFF6200EE),
-              backgroundColor: const Color(0xFF1E1E2C),
+              color: palette.primary,
+              backgroundColor: palette.surfaceAlt,
               onRefresh: () async {
                 ref.invalidate(homeContentProvider);
                 ref.invalidate(socialFeedProvider);
@@ -112,7 +100,7 @@ class HomePage extends ConsumerWidget {
                                   Text(
                                     'DISCOVERY',
                                     style: GoogleFonts.outfit(
-                                      color: const Color(0xFF6200EE),
+                                      color: palette.primary,
                                       fontSize: 12,
                                       letterSpacing: 2,
                                       fontWeight: FontWeight.bold,
@@ -121,7 +109,7 @@ class HomePage extends ConsumerWidget {
                                   Text(
                                     'DUTY.',
                                     style: GoogleFonts.outfit(
-                                      color: Colors.white,
+                                      color: palette.textPrimary,
                                       fontSize: 32,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -146,23 +134,19 @@ class HomePage extends ConsumerWidget {
                                         vertical: 8,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: const Color(
-                                          0xFF6200EE,
-                                        ).withValues(alpha: 0.15),
+                                        color: palette.primarySurface,
                                         borderRadius: BorderRadius.circular(20),
                                         border: Border.all(
-                                          color: const Color(
-                                            0xFF6200EE,
-                                          ).withValues(alpha: 0.3),
+                                          color: palette.borderStrong,
                                         ),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const Icon(
+                                          Icon(
                                             Icons
                                                 .account_balance_wallet_rounded,
-                                            color: Color(0xFF6200EE),
+                                            color: palette.primary,
                                             size: 16,
                                           ),
                                           const SizedBox(width: 6),
@@ -178,7 +162,7 @@ class HomePage extends ConsumerWidget {
                                               return Text(
                                                 '\$${balance.toStringAsFixed(0)}',
                                                 style: GoogleFonts.splineSans(
-                                                  color: Colors.white,
+                                                  color: palette.textPrimary,
                                                   fontSize: 13,
                                                   fontWeight: FontWeight.w600,
                                                 ),
@@ -189,13 +173,13 @@ class HomePage extends ConsumerWidget {
                                               height: 12,
                                               child: CircularProgressIndicator(
                                                 strokeWidth: 1.5,
-                                                color: Colors.white38,
+                                                color: kTextMuted,
                                               ),
                                             ),
                                             error: (_, _) => Text(
                                               '--',
                                               style: GoogleFonts.splineSans(
-                                                color: Colors.white38,
+                                                color: palette.textMuted,
                                                 fontSize: 13,
                                               ),
                                             ),
@@ -213,16 +197,16 @@ class HomePage extends ConsumerWidget {
                                 children: [
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF6200EE).withValues(alpha: 0.15),
+                                      color: palette.primarySurface,
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: const Color(0xFF6200EE).withValues(alpha: 0.3),
+                                        color: palette.borderStrong,
                                       ),
                                     ),
                                     child: IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.chat_bubble_outline,
-                                        color: Colors.white,
+                                        color: palette.textPrimary,
                                         size: 20,
                                       ),
                                       onPressed: () => context.go('/messages'),
@@ -233,78 +217,88 @@ class HomePage extends ConsumerWidget {
                                       padding: EdgeInsets.zero,
                                     ),
                                   ),
-                                  Consumer(builder: (context, ref, _) {
-                                    final unreadCountAsync = ref.watch(unreadCountProvider);
-                                    return unreadCountAsync.when(
-                                      data: (count) {
-                                        if (count > 0) {
-                                          return Positioned(
-                                            top: -2,
-                                            right: -2,
-                                            child: Container(
-                                              padding: const EdgeInsets.all(4),
-                                              decoration: BoxDecoration(
-                                                color: Colors.red,
-                                                shape: BoxShape.circle,
-                                                border: Border.all(
-                                                    color: const Color(0xFF0F0F1A),
-                                                    width: 1.5),
-                                              ),
-                                              constraints: const BoxConstraints(
-                                                minWidth: 16,
-                                                minHeight: 16,
-                                              ),
-                                              child: Text(
-                                                count > 99 ? '99+' : count.toString(),
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 8,
-                                                  fontWeight: FontWeight.bold,
+                                  Consumer(
+                                    builder: (context, ref, _) {
+                                      final unreadCountAsync = ref.watch(
+                                        unreadCountProvider,
+                                      );
+                                      return unreadCountAsync.when(
+                                        data: (count) {
+                                          if (count > 0) {
+                                            return Positioned(
+                                              top: -2,
+                                              right: -2,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(
+                                                  4,
                                                 ),
-                                                textAlign: TextAlign.center,
+                                                decoration: BoxDecoration(
+                                                  color: palette.danger,
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(
+                                                    color: palette.background,
+                                                    width: 1.5,
+                                                  ),
+                                                ),
+                                                constraints:
+                                                    const BoxConstraints(
+                                                      minWidth: 16,
+                                                      minHeight: 16,
+                                                    ),
+                                                child: Text(
+                                                  count > 99
+                                                      ? '99+'
+                                                      : count.toString(),
+                                                  style: const TextStyle(
+                                                    color: kTextPrimary,
+                                                    fontSize: 8,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
                                               ),
-                                            ),
-                                          );
-                                        }
-                                        return const SizedBox.shrink();
-                                      },
-                                      loading: () => const SizedBox.shrink(),
-                                      error: (_, _) => const SizedBox.shrink(),
-                                    );
-                                  }),
+                                            );
+                                          }
+                                          return const SizedBox.shrink();
+                                        },
+                                        loading: () => const SizedBox.shrink(),
+                                        error: (_, _) =>
+                                            const SizedBox.shrink(),
+                                      );
+                                    },
+                                  ),
                                 ],
                               ),
                             ],
                           ),
                         ],
                       ),
->>>>>>> Stashed changes
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Image.asset(
-                          'assets/images/logo-w.png',
-                          height: 30,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
+                  ),
+
+                  // Dynamic Greeting
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                _getGreetingMessage(),
+                                style: GoogleFonts.outfit(
+                                  color: palette.textSecondary,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              if (currentUser != null) ...[
+                                const SizedBox(width: 4),
                                 Text(
                                   'DISCOVERY',
                                   style: GoogleFonts.outfit(
-                                    color: const Color(0xFF6200EE),
-                                    fontSize: 12,
-                                    letterSpacing: 2,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'DUTY.',
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white,
-                                    fontSize: 32,
+                                    color: palette.primary,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -312,21 +306,103 @@ class HomePage extends ConsumerWidget {
                             );
                           },
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color(0xFF6200EE),
-                              width: 2,
-                            ),
+                        GestureDetector(
+                          onTap: () => context.go('/profile'),
+                          child: Stack(
+                            alignment: Alignment.bottomRight,
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                color: palette.primary,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Santo Domingo, RD',
+                                style: GoogleFonts.inter(
+                                  color: palette.textMuted,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
                           ),
-                          child: CircleAvatar(
-                            radius: 20,
-                            backgroundImage: NetworkImage(
-                              'https://i.pravatar.cc/150?img=12',
-                            ), // Mock Profile
-                            onBackgroundImageError: (_, __) {},
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
+                  // Search Bar
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: GestureDetector(
+                        onTap: () => context.push('/search'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: palette.surface,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: palette.border),
+                            boxShadow: [
+                              BoxShadow(
+                                color: palette.shadow.withValues(alpha: 0.12),
+                                blurRadius: 20,
+                                offset: const Offset(0, 12),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: palette.primarySurface,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Icon(
+                                  Icons.search_rounded,
+                                  color: palette.primary,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Search events, artists, venues...',
+                                  style: GoogleFonts.outfit(
+                                    color: palette.textMuted,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 9,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: palette.surfaceAlt,
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(color: palette.border),
+                                ),
+                                child: Text(
+                                  'Explore',
+                                  style: GoogleFonts.outfit(
+                                    color: palette.primary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -343,59 +419,11 @@ class HomePage extends ConsumerWidget {
                         horizontal: 16,
                         vertical: 12,
                       ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E1E2C),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.05),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.search, color: Colors.purpleAccent),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Search festivals, artists, or wallets',
-                              style: GoogleFonts.inter(
-                                color: Colors.white.withOpacity(0.3),
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                          const Icon(Icons.tune, color: Colors.grey, size: 20),
-                        ],
-                      ),
                     ),
                   ),
-                ),
 
-                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                  const SliverToBoxAdapter(child: SizedBox(height: 32)),
 
-<<<<<<< Updated upstream
-                // Categories
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 80,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      children: [
-                        _buildCategoryItem(
-                          Icons.account_balance_wallet,
-                          'WALLET',
-                          true,
-                        ),
-                        _buildCategoryItem(
-                          Icons.confirmation_number,
-                          'PASS',
-                          false,
-                        ),
-                        _buildCategoryItem(Icons.bolt, 'DROPS', false),
-                        _buildCategoryItem(Icons.more_horiz, 'MORE', false),
-                      ],
-=======
                   // Unified Services Grid (5x2)
                   SliverToBoxAdapter(
                     child: Padding(
@@ -410,7 +438,7 @@ class HomePage extends ConsumerWidget {
                                 child: _QuickActionTile(
                                   icon: Icons.account_balance_wallet_rounded,
                                   title: 'Wallet',
-                                  color: const Color(0xFF8655F6),
+                                  color: palette.primary,
                                   onTap: () => context.push('/wallet'),
                                 ),
                               ),
@@ -458,8 +486,11 @@ class HomePage extends ConsumerWidget {
                                   icon: Icons.move_to_inbox_rounded,
                                   title: 'Inbox',
                                   color: const Color(0xFFFF2E93),
-                                  badgeCount: ref.watch(pendingTransfersCountProvider),
-                                  onTap: () => context.push('/pending-transfers'),
+                                  badgeCount: ref.watch(
+                                    pendingTransfersCountProvider,
+                                  ),
+                                  onTap: () =>
+                                      context.push('/pending-transfers'),
                                 ),
                               ),
                               Expanded(
@@ -491,7 +522,12 @@ class HomePage extends ConsumerWidget {
                                   icon: Icons.rate_review_rounded,
                                   title: 'Reviews',
                                   color: const Color(0xFFA4C639),
-                                  badgeCount: ref.watch(pendingReviewPromptsProvider).valueOrNull?.length ?? 0,
+                                  badgeCount:
+                                      ref
+                                          .watch(pendingReviewPromptsProvider)
+                                          .valueOrNull
+                                          ?.length ??
+                                      0,
                                   onTap: () => context.push('/reviews/pending'),
                                 ),
                               ),
@@ -520,13 +556,13 @@ class HomePage extends ConsumerWidget {
                                 child: _buildHeroSection(context, events[0]),
                               );
                             },
-                            loading: () => _buildHeroShimmer(),
+                            loading: () => _buildHeroShimmer(context),
                             error: (_, _) => const SizedBox(),
                           );
                         }
                         return _buildAdSlider(context, content.advertisements);
                       },
-                      loading: () => _buildHeroShimmer(),
+                      loading: () => _buildHeroShimmer(context),
                       error: (_, _) => const SizedBox(),
                     ),
                   ),
@@ -536,30 +572,11 @@ class HomePage extends ConsumerWidget {
                   SliverToBoxAdapter(
                     child: socialFeedAsyncValue.when(
                       data: (feed) => _buildSocialFeedSection(context, feed),
-                      loading: () => _buildSocialFeedLoading(),
+                      loading: () => _buildSocialFeedLoading(context),
                       error: (_, _) => const SizedBox.shrink(),
->>>>>>> Stashed changes
                     ),
                   ),
-                ),
 
-<<<<<<< Updated upstream
-                const SliverToBoxAdapter(child: SizedBox(height: 32)),
-
-                // Trending Title
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Trending Now',
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-=======
                   // const SliverToBoxAdapter(child: SizedBox(height: 32)),
 
                   // _buildDiscoveryPreviewSection(
@@ -589,68 +606,122 @@ class HomePage extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 24.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            'Trending Now',
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 7,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: palette.primarySurface,
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(
+                                    color: palette.borderStrong,
+                                  ),
+                                ),
+                                child: Text(
+                                  'DISCOVER',
+                                  style: GoogleFonts.outfit(
+                                    color: palette.primary,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.4,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                'Trending Now',
+                                style: GoogleFonts.outfit(
+                                  color: palette.textPrimary,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: () => context.push('/explore'),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: palette.surfaceAlt,
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(color: palette.border),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'See All',
+                                    style: GoogleFonts.outfit(
+                                      color: palette.textSecondary,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Icon(
+                                    Icons.arrow_forward_rounded,
+                                    size: 15,
+                                    color: palette.primary,
+                                  ),
+                                ],
+                              ),
                             ),
->>>>>>> Stashed changes
                           ),
-                        ),
-                        Text(
-                          'See All',
-                          style: GoogleFonts.outfit(
-                            color: const Color(0xFF6200EE),
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                          const Icon(Icons.tune, color: Colors.grey, size: 20),
+                        ],
+                      ),
                     ),
                   ),
                 ),
 
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
-                // Trending List (Horizontal)
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 180, // Height for trending cards
-                    child: eventsAsyncValue.when(
-                      data: (events) {
-                        if (events.isEmpty) return const SizedBox();
-                        return ListView.builder(
+                  // Trending List (Horizontal)
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 228,
+                      child: eventsAsyncValue.when(
+                        data: (events) {
+                          if (events.isEmpty) return const SizedBox();
+                          return ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            itemCount: events
+                                .take(3)
+                                .length, // Take first 3 as trending
+                            itemBuilder: (context, index) {
+                              return _buildTrendingCard(
+                                context,
+                                events[index],
+                                socialProofByEventId[events[index].id],
+                              );
+                            },
+                          );
+                        },
+                        loading: () => ListView.builder(
                           scrollDirection: Axis.horizontal,
                           physics: const BouncingScrollPhysics(),
                           padding: const EdgeInsets.symmetric(horizontal: 24),
-<<<<<<< Updated upstream
-                          itemCount: events
-                              .take(3)
-                              .length, // Take first 3 as trending
-                          itemBuilder: (context, index) {
-                            return _buildTrendingCard(context, events[index]);
-                          },
-                        );
-                      },
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (err, _) => const SizedBox(),
-                    ),
-                  ),
-                ),
-=======
                           itemCount: 3,
                           itemBuilder: (context, index) => Shimmer.fromColors(
-                            baseColor: const Color(0xFF1E1E2C),
-                            highlightColor: const Color(0xFF2A2A3D),
+                            baseColor: palette.surfaceAlt,
+                            highlightColor: palette.surfaceMuted,
                             child: Container(
                               width: 240,
                               margin: const EdgeInsets.only(right: 16),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: palette.surface,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                             ),
@@ -660,10 +731,10 @@ class HomePage extends ConsumerWidget {
                       ),
                     ),
                   ),
+                ),
 
                   // Bottom padding to clear the TabBar
                   const SliverToBoxAdapter(child: SizedBox(height: 120)),
-
                 ],
               ),
             ),
@@ -672,106 +743,9 @@ class HomePage extends ConsumerWidget {
       ),
     );
   }
->>>>>>> Stashed changes
-
-                const SliverToBoxAdapter(child: SizedBox(height: 32)),
-
-                // For You Title
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Text(
-                      'For You',
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-                // For You List (Vertical)
-                eventsAsyncValue.when(
-                  data: (events) {
-                    // Skip the first 3 used in trending, or just show all
-                    final forYouEvents = events.length > 3
-                        ? events.sublist(3)
-                        : events;
-
-                    return SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(
-                        24,
-                        0,
-                        24,
-                        100,
-                      ), // Bottom padding for NavBar
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return _buildForYouCard(context, forYouEvents[index]);
-                        }, childCount: forYouEvents.length),
-                      ),
-                    );
-                  },
-                  loading: () => const SliverToBoxAdapter(
-                    child: Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-<<<<<<< Updated upstream
-=======
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 198,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final item = items[index];
-                    return _buildDiscoveryPreviewCard(context, kind, item);
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      loading: () => SliverToBoxAdapter(
-        child: SizedBox(
-          height: 198,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            itemCount: 3,
-            itemBuilder: (context, index) => Shimmer.fromColors(
-              baseColor: const Color(0xFF1E1E2C),
-              highlightColor: const Color(0xFF2A2A3D),
-              child: Container(
-                width: 250,
-                margin: const EdgeInsets.only(right: 14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-      error: (_, _) => const SliverToBoxAdapter(child: SizedBox.shrink()),
-    );
-  }
 
   Widget _buildSocialFeedSection(BuildContext context, SocialFeedModel feed) {
+    final palette = context.dutyTheme;
     final items = feed.items.take(6).toList();
 
     return Padding(
@@ -779,12 +753,12 @@ class HomePage extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
         decoration: BoxDecoration(
-          color: const Color(0xFF151122),
+          color: palette.surface,
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+          border: Border.all(color: palette.border),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF8655F6).withValues(alpha: 0.12),
+              color: palette.primaryGlow.withValues(alpha: 0.12),
               blurRadius: 30,
               offset: const Offset(0, 18),
             ),
@@ -799,51 +773,120 @@ class HomePage extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 8,
->>>>>>> Stashed changes
                   ),
-                  error: (err, _) => SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Text(
-                        'Error: $err',
-                        style: const TextStyle(color: Colors.white),
+                  decoration: BoxDecoration(
+                    color: palette.primarySurface,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.auto_awesome_rounded,
+                        size: 14,
+                        color: palette.primary,
                       ),
-                    ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'YOUR SCENE',
+                        style: GoogleFonts.outfit(
+                          color: palette.primary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.3,
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: () => context.push('/social/connections'),
+                  icon: const Icon(Icons.people_alt_rounded, size: 16),
+                  label: const Text('My Network'),
+                  style: TextButton.styleFrom(foregroundColor: palette.primary),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 12),
+            Text(
+              'What your people are planning tonight',
+              style: GoogleFonts.outfit(
+                color: palette.textPrimary,
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                height: 1.05,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              items.isEmpty
+                  ? 'Start following people, organizers and venues to turn Duty into your own event graph.'
+                  : 'Built from who you follow, what they save and where they are actually showing up.',
+              style: GoogleFonts.inter(
+                color: palette.textSecondary,
+                fontSize: 13,
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _buildSceneMetric(
+                  context,
+                  '${feed.summary.followingPeopleCount}',
+                  'People',
+                ),
+                _buildSceneMetric(
+                  context,
+                  '${feed.summary.followingProfilesCount}',
+                  'Profiles',
+                ),
+                _buildSceneMetric(
+                  context,
+                  '${feed.summary.pendingRequestsCount}',
+                  'Requests',
+                  highlight: feed.summary.pendingRequestsCount > 0,
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            if (items.isEmpty)
+              _buildSocialFeedEmptyState(context)
+            else
+              SizedBox(
+                height: 228,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: items.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 14),
+                  itemBuilder: (context, index) {
+                    return _buildSocialFeedCard(context, items[index]);
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
-<<<<<<< Updated upstream
-          // Bottom Navigation Bar (Custom Floating)
-          Positioned(
-            bottom: 24,
-            left: 24,
-            right: 24,
-            child: Container(
-              height: 64,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E2C),
-                borderRadius: BorderRadius.circular(32),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-=======
   Widget _buildSocialFeedCard(BuildContext context, SocialFeedItemModel item) {
+    final palette = context.dutyTheme;
     final accent = _sceneReasonColor(item.reasonType);
     final thumbnail = item.thumbnailUrl != null && item.thumbnailUrl!.isNotEmpty
         ? item.thumbnailUrl!
         : '';
 
     return GestureDetector(
-      onTap: () => context.push('/event-details/${item.eventId}'),
+      onTap: () => context.push('/event-details/${event.id}'),
       child: Container(
         width: 286,
         decoration: BoxDecoration(
-          color: const Color(0xFF100D1A),
+          color: palette.surfaceAlt,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: accent.withValues(alpha: 0.22)),
         ),
@@ -863,9 +906,12 @@ class HomePage extends ConsumerWidget {
                             width: double.infinity,
                             height: double.infinity,
                             fit: BoxFit.cover,
-                            errorWidget: _buildSocialFeedImageFallback(accent),
+                            errorWidget: _buildSocialFeedImageFallback(
+                              context,
+                              accent,
+                            ),
                           )
-                        : _buildSocialFeedImageFallback(accent),
+                        : _buildSocialFeedImageFallback(context, accent),
                   ),
                   Positioned.fill(
                     child: DecoratedBox(
@@ -938,59 +984,54 @@ class HomePage extends ConsumerWidget {
                         ),
                       ],
                     ),
->>>>>>> Stashed changes
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.home, color: Color(0xFF6200EE)),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.explore, color: Colors.grey),
-                    onPressed: () {},
-                  ),
-
-                  // FAB in middle
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF6200EE),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0xFF6200EE),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.qr_code_scanner,
-                      color: Colors.white,
-                    ),
-                  ),
-
-                  IconButton(
-                    icon: const Icon(
-                      Icons.confirmation_number,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () => context.push('/my-tickets'),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.person, color: Colors.grey),
-                    onPressed: () => context.push('/profile'),
                   ),
                 ],
               ),
             ),
-<<<<<<< Updated upstream
-=======
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildScenePeopleRow(
+                      context,
+                      item.people,
+                      item.peopleCount,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 9,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.arrow_outward_rounded,
+                          color: accent,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Open',
+                          style: GoogleFonts.outfit(
+                            color: accent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -998,13 +1039,14 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildSocialFeedEmptyState(BuildContext context) {
+    final palette = context.dutyTheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
+        color: palette.surfaceAlt,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1015,17 +1057,17 @@ class HomePage extends ConsumerWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF8655F6).withValues(alpha: 0.16),
+                  color: palette.primarySurface,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(Icons.hub_rounded, color: Color(0xFFB494FF)),
+                child: Icon(Icons.hub_rounded, color: palette.primary),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Your social feed wakes up as soon as you build a network.',
                   style: GoogleFonts.outfit(
-                    color: Colors.white,
+                    color: palette.textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
@@ -1037,7 +1079,7 @@ class HomePage extends ConsumerWidget {
           Text(
             'Follow people, organizers and venues you care about. Then we can show you what your scene is saving, attending and hosting.',
             style: GoogleFonts.inter(
-              color: Colors.white70,
+              color: palette.textSecondary,
               fontSize: 13,
               height: 1.5,
             ),
@@ -1048,64 +1090,26 @@ class HomePage extends ConsumerWidget {
             icon: const Icon(Icons.people_alt_rounded),
             label: const Text('Open My Network'),
             style: FilledButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: const Color(0xFF8655F6).withValues(alpha: 0.22),
+              foregroundColor: palette.onPrimary,
+              backgroundColor: palette.primary,
             ),
->>>>>>> Stashed changes
           ),
         ],
       ),
     );
   }
 
-<<<<<<< Updated upstream
-  Widget _buildCategoryItem(IconData icon, String label, bool isSelected) {
-    return Container(
-      margin: const EdgeInsets.only(right: 16),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? const Color(0xFF2A1B3D)
-                  : const Color(0xFF1E1E2C),
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(16),
-              border: isSelected
-                  ? Border.all(color: const Color(0xFF6200EE).withOpacity(0.5))
-                  : null,
-            ),
-            child: Icon(
-              icon,
-              color: isSelected ? const Color(0xFF6200EE) : Colors.grey,
-              size: 24,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: GoogleFonts.outfit(
-              color: isSelected ? Colors.white : Colors.grey,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-=======
-  Widget _buildSocialFeedLoading() {
+  Widget _buildSocialFeedLoading(BuildContext context) {
+    final palette = context.dutyTheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Shimmer.fromColors(
-        baseColor: const Color(0xFF1E1E2C),
-        highlightColor: const Color(0xFF2A2A3D),
+        baseColor: palette.surfaceAlt,
+        highlightColor: palette.surfaceMuted,
         child: Container(
           height: 298,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: palette.surface,
             borderRadius: BorderRadius.circular(28),
           ),
         ),
@@ -1114,21 +1118,24 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildSceneMetric(
+    BuildContext context,
     String value,
     String label, {
     bool highlight = false,
   }) {
+    final palette = context.dutyTheme;
+    final highlightColor = palette.warning;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: highlight
-            ? const Color(0xFFFFC14A).withValues(alpha: 0.14)
-            : Colors.white.withValues(alpha: 0.04),
+            ? highlightColor.withValues(alpha: 0.14)
+            : palette.surfaceAlt,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
           color: highlight
-              ? const Color(0xFFFFC14A).withValues(alpha: 0.28)
-              : Colors.white.withValues(alpha: 0.08),
+              ? highlightColor.withValues(alpha: 0.28)
+              : palette.border,
         ),
       ),
       child: RichText(
@@ -1137,7 +1144,7 @@ class HomePage extends ConsumerWidget {
             TextSpan(
               text: '$value ',
               style: GoogleFonts.outfit(
-                color: Colors.white,
+                color: palette.textPrimary,
                 fontSize: 13,
                 fontWeight: FontWeight.w800,
               ),
@@ -1145,7 +1152,7 @@ class HomePage extends ConsumerWidget {
             TextSpan(
               text: label,
               style: GoogleFonts.outfit(
-                color: highlight ? const Color(0xFFFFD986) : Colors.white70,
+                color: highlight ? highlightColor : palette.textSecondary,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -1157,14 +1164,16 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildScenePeopleRow(
+    BuildContext context,
     List<SocialFeedPersonModel> people,
     int peopleCount,
   ) {
+    final palette = context.dutyTheme;
     if (people.isEmpty || peopleCount <= 0) {
       return Text(
         'From your network',
         style: GoogleFonts.inter(
-          color: Colors.white60,
+          color: palette.textMuted,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -1188,10 +1197,7 @@ class HomePage extends ConsumerWidget {
                     height: 24,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFF151122),
-                        width: 2,
-                      ),
+                      border: Border.all(color: palette.background, width: 2),
                     ),
                     child: ClipOval(
                       child:
@@ -1202,9 +1208,9 @@ class HomePage extends ConsumerWidget {
                               width: 24,
                               height: 24,
                               fit: BoxFit.cover,
-                              errorWidget: _buildScenePersonFallback(),
+                              errorWidget: _buildScenePersonFallback(context),
                             )
-                          : _buildScenePersonFallback(),
+                          : _buildScenePersonFallback(context),
                     ),
                   ),
                 ),
@@ -1220,7 +1226,7 @@ class HomePage extends ConsumerWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
-              color: Colors.white70,
+              color: palette.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -1230,20 +1236,22 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildScenePersonFallback() {
+  Widget _buildScenePersonFallback(BuildContext context) {
+    final palette = context.dutyTheme;
     return Container(
-      color: const Color(0xFF2A243A),
-      child: const Icon(Icons.person, color: Colors.white38, size: 12),
+      color: palette.surfaceMuted,
+      child: Icon(Icons.person, color: palette.textMuted, size: 12),
     );
   }
 
-  Widget _buildSocialFeedImageFallback(Color accent) {
+  Widget _buildSocialFeedImageFallback(BuildContext context, Color accent) {
+    final palette = context.dutyTheme;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [accent.withValues(alpha: 0.24), const Color(0xFF130F1E)],
+          colors: [accent.withValues(alpha: 0.24), palette.background],
         ),
       ),
       child: Center(
@@ -1263,7 +1271,7 @@ class HomePage extends ConsumerWidget {
       case 'followed_people_interested':
         return const Color(0xFFFFB020);
       case 'followed_profile_event':
-        return const Color(0xFF8655F6);
+        return kPrimaryColor;
       default:
         return const Color(0xFF7C8BFF);
     }
@@ -1285,7 +1293,20 @@ class HomePage extends ConsumerWidget {
     return parts.join(' • ');
   }
 
-  String _sceneDateLabel(DateTime date) {
+  String _sceneDateLabel(dynamic rawDate) {
+    DateTime? date;
+    if (rawDate is DateTime) {
+      date = rawDate;
+    } else if (rawDate is String && rawDate.trim().isNotEmpty) {
+      date = DateTime.tryParse(rawDate.trim());
+    }
+
+    if (date == null) {
+      return rawDate?.toString().trim().isNotEmpty == true
+          ? rawDate.toString().trim()
+          : 'Fecha por confirmar';
+    }
+
     final local = date.toLocal();
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const months = [
@@ -1308,186 +1329,181 @@ class HomePage extends ConsumerWidget {
     return '$weekday ${local.day} $month';
   }
 
-  Widget _buildDiscoveryPreviewCard(
+  Widget _buildTrendingCard(
     BuildContext context,
-    DiscoveryKind kind,
-    DiscoveryProfileModel item,
+    dynamic event,
+    SocialFeedItemModel? socialProof,
   ) {
-    return GestureDetector(
-      onTap: () => context.push(kind.profileRoute(item.id)),
-      child: Container(
-        width: 250,
-        margin: const EdgeInsets.only(right: 14),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E1E2C),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: kind.accentColor.withValues(alpha: 0.18)),
+    final palette = context.dutyTheme;
+    final isSoldOutTotal =
+        event.showWaitlistCta ||
+        (event.availabilityState == 'sold_out' &&
+            event.showMarketplaceFallback != true);
+    final topBadges = <Widget>[
+      if (event.id % 2 == 0) _buildStatusBadge('TRENDING', kWarmGold),
+      if (isSoldOutTotal)
+        _buildStatusBadge(
+          event.viewerWaitlistSubscribed == true ? 'EN WAITLIST' : 'SOLD OUT',
+          event.viewerWaitlistSubscribed == true
+              ? palette.success
+              : palette.danger,
         ),
-        child: Row(
-          children: [
-            _buildDiscoveryAvatar(kind, item.photo),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    item.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    item.subtitle ??
-                        item.location ??
-                        _previewFallbackLabel(kind),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      color: Colors.white60,
-                      fontSize: 12,
-                      height: 1.35,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: [
-                      _buildMiniCount(
-                        '${item.followersCount}',
-                        'Followers',
-                        kind.accentColor,
-                      ),
-                      _buildMiniCount(
-                        '${item.upcomingEventsCount}',
-                        'Upcoming',
-                        kind.accentColor,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+      if (event.showMarketplaceFallback == true &&
+          event.marketplaceAvailableCount > 0)
+        _buildStatusBadge(
+          '${event.marketplaceAvailableCount} EN BLACKMARKET',
+          palette.warning,
         ),
-      ),
-    );
-  }
+    ];
 
-  Widget _buildDiscoveryAvatar(DiscoveryKind kind, String? photoUrl) {
-    return Container(
-      width: 74,
-      height: 74,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: kind.accentColor.withValues(alpha: 0.12),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: photoUrl != null && photoUrl.isNotEmpty
-            ? CachedImage(
-                imageUrl: photoUrl,
-                width: 74,
-                height: 74,
-                fit: BoxFit.cover,
-                errorWidget: Center(
-                  child: Icon(kind.icon, color: Colors.white38, size: 28),
-                ),
-              )
-            : Icon(kind.icon, color: Colors.white38, size: 28),
-      ),
-    );
-  }
-
-  Widget _buildMiniCount(String value, String label, Color accent) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        '$value $label',
-        style: GoogleFonts.inter(
-          color: Colors.white70,
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  String _previewFallbackLabel(DiscoveryKind kind) {
-    switch (kind) {
-      case DiscoveryKind.artists:
-        return 'Artist profile';
-      case DiscoveryKind.organizers:
-        return 'Organizer profile';
-      case DiscoveryKind.venues:
-        return 'Venue profile';
-    }
-  }
-
-
->>>>>>> Stashed changes
-
-  Widget _buildTrendingCard(BuildContext context, dynamic event) {
     return GestureDetector(
       onTap: () => context.push('/event-details/${event.id}'),
       child: Container(
         width: 240,
         margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          image: DecorationImage(
-            image: NetworkImage(event.thumbnail),
-            onError: (_, __) {},
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.3),
-              BlendMode.darken,
+          color: palette.surface,
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: palette.border),
+          boxShadow: [
+            BoxShadow(
+              color: palette.shadow.withValues(alpha: 0.22),
+              blurRadius: 26,
+              offset: const Offset(0, 18),
             ),
-          ),
+          ],
         ),
         child: Stack(
           children: [
-<<<<<<< Updated upstream
-            Positioned(
-              top: 12,
-              left: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF6200EE).withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(8),
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl:
+                          AppUrls.getEventThumbnailUrl(event.thumbnail) ?? '',
+                      fit: BoxFit.cover,
+                    ),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.04),
+                            Colors.black.withValues(alpha: 0.16),
+                            palette.background.withValues(alpha: 0.86),
+                            palette.background,
+                          ],
+                          stops: const [0.0, 0.28, 0.68, 1.0],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                child: Text(
-                  'LIVE DROP',
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-=======
-            if (event.id % 2 == 0)
+              ),
+            ),
+            if (topBadges.isNotEmpty)
               Positioned(
-                top: 12,
-                left: 12,
-                child: _buildStatusBadge('TRENDING', Colors.orangeAccent),
+                top: 14,
+                left: 14,
+                right: 14,
+                child: Wrap(spacing: 8, runSpacing: 8, children: topBadges),
+              ),
+            Positioned(
+              left: 14,
+              right: 14,
+              bottom: socialProof != null ? 62 : 18,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    event.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      color: palette.textPrimary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      height: 1.04,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today_rounded,
+                              size: 13,
+                              color: palette.primary,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                _sceneDateLabel(event.date),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(
+                                  color: palette.textSecondary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.38),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: palette.borderStrong),
+                        ),
+                        child: Text(
+                          event.formattedPriceLabel,
+                          style: GoogleFonts.outfit(
+                            color: palette.success,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            if (isSoldOutTotal && event.waitlistCount > 0)
+              Positioned(
+                left: 14,
+                right: 14,
+                bottom: socialProof != null ? 110 : 66,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: _buildStatusBadge(
+                    event.waitlistCount == 1
+                        ? '1 PERSONA ESPERANDO'
+                        : '${event.waitlistCount} ESPERANDO',
+                    palette.primary,
+                  ),
+                ),
               ),
             if (socialProof != null)
               Positioned(
-                left: 12,
-                right: 12,
-                bottom: 12,
-                child: _buildCardSocialCue(socialProof),
+                left: 14,
+                right: 14,
+                bottom: 14,
+                child: _buildCardSocialCue(context, socialProof),
               ),
           ],
         ),
@@ -1495,16 +1511,11 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-
-
-
-
-
-
   Widget _buildAdSlider(
     BuildContext context,
     List<AdvertisementModel> advertisements,
   ) {
+    final palette = context.dutyTheme;
     return Column(
       children: [
         CarouselSlider(
@@ -1532,238 +1543,185 @@ class HomePage extends ConsumerWidget {
                         offset: const Offset(0, 8),
                       ),
                     ],
->>>>>>> Stashed changes
                   ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 12,
-              left: 12,
-              right: 12,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Stack(
                       children: [
-                        Text(
-                          event.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                        // Ad Image
+                        Positioned.fill(
+                          child: CachedNetworkImage(
+                            imageUrl: ad.image ?? '',
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) =>
+                                _buildHeroShimmer(context),
+                            errorWidget: (context, url, error) => Container(
+                              color: palette.surfaceAlt,
+                              child: Icon(
+                                Icons.broken_image_rounded,
+                                color: palette.textMuted,
+                                size: 40,
+                              ),
+                            ),
                           ),
                         ),
-                        Text(
-                          event.address ?? 'Unknown Location',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 10,
+
+                        // Gradient Overlay for readability
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withValues(alpha: 0.4),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      'JOIN',
-                      style: GoogleFonts.outfit(
-                        color: Colors.black,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+                );
+              },
+            );
+          }).toList(),
         ),
-      ),
+      ],
     );
   }
 
-<<<<<<< Updated upstream
-  Widget _buildForYouCard(BuildContext context, dynamic event) {
+  Widget _buildHeroSection(BuildContext context, EventModel event) {
+    final palette = context.dutyTheme;
+    final isSoldOutTotal =
+        event.availabilityState == 'sold_out' &&
+        event.showMarketplaceFallback != true;
+    final heroBadges = <Widget>[
+      _buildStatusBadge('FEATURED', palette.primary),
+      if (isSoldOutTotal)
+        _buildStatusBadge(
+          event.viewerWaitlistSubscribed ? 'EN WAITLIST' : 'SOLD OUT',
+          event.viewerWaitlistSubscribed ? palette.success : palette.danger,
+        ),
+      if (event.showMarketplaceFallback && event.marketplaceAvailableCount > 0)
+        _buildStatusBadge(
+          '${event.marketplaceAvailableCount} EN BLACKMARKET',
+          palette.warning,
+        ),
+    ];
+
     return GestureDetector(
       onTap: () => context.push('/event-details/${event.id}'),
       child: Container(
-        height: 380,
-        margin: const EdgeInsets.only(bottom: 24),
+        height: 400,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          image: DecorationImage(
-            image: NetworkImage(event.thumbnail),
-            onError: (_, __) {},
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.2),
-              BlendMode.darken,
+          borderRadius: BorderRadius.circular(32),
+          boxShadow: [
+            BoxShadow(
+              color: palette.primaryGlow,
+              blurRadius: 30,
+              offset: const Offset(0, 20),
             ),
+          ],
+          image: DecorationImage(
+            image: CachedNetworkImageProvider(
+              AppUrls.getEventThumbnailUrl(event.thumbnail) ?? '',
+            ),
+            fit: BoxFit.cover,
           ),
         ),
         child: Stack(
           children: [
-            // Gradient overlay for text readability
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
-                    stops: const [0.6, 1.0],
-                  ),
-                ),
-              ),
-            ),
-
             Positioned(
-              bottom: 20,
+              top: 20,
               left: 20,
               right: 20,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 8,
+                runSpacing: 8,
+                children: heroBadges,
+              ),
+            ),
+            if (isSoldOutTotal && event.waitlistCount > 0)
+              Positioned(
+                left: 20,
+                bottom: 20,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.42),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: palette.borderStrong),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircleAvatar(
-                        radius: 12,
-                        backgroundImage: NetworkImage(
-                          'https://i.pravatar.cc/150?img=5',
-                        ), // Mock organizer
-                        onBackgroundImageError: (_, __) {},
+                      Icon(
+                        Icons.people_alt_rounded,
+                        color: palette.textPrimary,
+                        size: 15,
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        event.organizer ?? 'Duty Events',
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                        event.waitlistCount == 1
+                            ? '1 persona esperando'
+                            : '${event.waitlistCount} personas esperando',
+                        style: GoogleFonts.inter(
+                          color: palette.textPrimary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    event.title,
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'The biggest event of the year is selling out fast. Get your tickets now!', // Mock description
-                    style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 14,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.favorite, color: Colors.pinkAccent),
-                          const SizedBox(width: 4),
-                          Text(
-                            '14.2k',
-                            style: GoogleFonts.outfit(color: Colors.white),
-                          ),
-                          const SizedBox(width: 16),
-                          const Icon(Icons.comment, color: Colors.white70),
-                          const SizedBox(width: 4),
-                          Text(
-                            '842',
-                            style: GoogleFonts.outfit(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF6200EE), Colors.purpleAccent],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'QUICK BUY',
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
-            ),
           ],
-=======
-
-
-  Widget _buildHeroShimmer() {
-    return Shimmer.fromColors(
-      baseColor: const Color(0xFF1E1E2C),
-      highlightColor: const Color(0xFF2A2A3D),
-      child: Container(
-        height: 400,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(32),
->>>>>>> Stashed changes
         ),
       ),
     );
   }
-<<<<<<< Updated upstream
-=======
+
+  Widget _buildHeroShimmer(BuildContext context) {
+    final palette = context.dutyTheme;
+    return Shimmer.fromColors(
+      baseColor: palette.surfaceAlt,
+      highlightColor: palette.surfaceMuted,
+      child: Container(
+        height: 400,
+        decoration: BoxDecoration(
+          color: palette.surface,
+          borderRadius: BorderRadius.circular(32),
+        ),
+      ),
+    );
+  }
 
   Widget _buildStatusBadge(String text, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(8),
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.28)),
       ),
       child: Text(
         text,
         style: GoogleFonts.outfit(
-          color: Colors.white,
-          fontSize: 8,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.9,
         ),
       ),
     );
   }
-
-
 
   String _getGreetingMessage() {
     final hour = DateTime.now().hour;
@@ -1773,10 +1731,12 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildCardSocialCue(
+    BuildContext context,
     SocialFeedItemModel item, {
     bool compact = false,
     bool elevated = false,
   }) {
+    final palette = context.dutyTheme;
     final accent = _sceneReasonColor(item.reasonType);
 
     return Container(
@@ -1820,7 +1780,7 @@ class HomePage extends ConsumerWidget {
               maxLines: compact ? 1 : 2,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.outfit(
-                color: Colors.white,
+                color: palette.textPrimary,
                 fontSize: compact ? 10 : 12,
                 fontWeight: FontWeight.w700,
                 height: 1.2,
@@ -1844,7 +1804,6 @@ class HomePage extends ConsumerWidget {
         return Icons.auto_awesome_rounded;
     }
   }
->>>>>>> Stashed changes
 }
 
 class _QuickActionTile extends StatelessWidget {
@@ -1864,6 +1823,7 @@ class _QuickActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
@@ -1893,21 +1853,27 @@ class _QuickActionTile extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF3B30),
+                        color: palette.danger,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFF0D0812), // Match dark background
-                          width: 2,
-                        ),
+                        border: Border.all(color: palette.background, width: 2),
                       ),
                       child: Text(
                         badgeCount > 99 ? '99+' : '$badgeCount',
                         style: GoogleFonts.outfit(
-                          color: Colors.white,
+                          color: palette.textPrimary,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    event.title,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
               ],
@@ -1918,7 +1884,7 @@ class _QuickActionTile extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 2,
               style: GoogleFonts.outfit(
-                color: Colors.white,
+                color: palette.textPrimary,
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.5,

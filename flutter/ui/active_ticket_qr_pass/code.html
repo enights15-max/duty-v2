@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Active Ticket QR Pass</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8c06f9",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#050505",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .light-leak {
+            background: radial-gradient(circle at 0% 0%, rgba(140, 6, 249, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 100% 100%, rgba(140, 6, 249, 0.1) 0%, transparent 50%);
+        }
+        .ticket-perforation {
+            background-image: radial-gradient(circle, transparent 10px, rgba(255, 255, 255, 0.1) 11px);
+            background-size: 30px 30px;
+            background-position: -15px center;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen selection:bg-primary/30">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden light-leak">
+<!-- Header -->
+<header class="flex items-center justify-between px-6 pt-12 pb-6 sticky top-0 z-50 bg-background-dark/50 backdrop-blur-md">
+<button class="flex size-10 items-center justify-center rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-white">chevron_left</span>
+</button>
+<h1 class="text-lg font-semibold tracking-tight">Active Pass</h1>
+<button class="flex size-10 items-center justify-center rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-white">ios_share</span>
+</button>
+</header>
+<main class="flex-1 flex flex-col items-center px-6 pb-24">
+<!-- Ticket Container -->
+<div class="w-full max-w-md relative group">
+<!-- Physical Ticket Look -->
+<div class="glass rounded-xl overflow-hidden shadow-2xl shadow-primary/20 border border-white/20">
+<!-- Event Poster Section -->
+<div class="relative h-64 overflow-hidden">
+<img alt="Event Image" class="w-full h-full object-cover" data-alt="Abstract vibrant purple light show event poster" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-Z9gQhMxla0AQPn_6drWonJa-0uwo2w4qXZ0j_iUzF-Env1ax82nNZujlqQoM_usiS0fQD4ja1jkJiaSNySVnC18vswi1qcEDEGoEok4F4L4G177yF57VU5saKd2CA-GvpSaRx0R6Qsqfy5VahFTf0-WnPmbKEb9OTaJuJJ0fEeznkydsuAvcKUdB_XHtzvQZTd5--TupFQ5fA0YNL7sv70BgrsARw0W84G2bhAoREQaSXQAnr15r6ScfsllxcFMTD67J_oistwvi"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+<div class="absolute bottom-4 left-6">
+<h2 class="text-2xl font-bold leading-tight">Afterlife: Ibiza Series</h2>
+<p class="text-primary font-medium text-sm mt-1 uppercase tracking-widest">VIP EXPERIENCE</p>
+</div>
+</div>
+<!-- Perforation Divider -->
+<div class="relative h-6 flex items-center justify-between px-[-10px]">
+<div class="absolute left-0 -translate-x-1/2 w-6 h-6 bg-background-dark rounded-full border-r border-white/10"></div>
+<div class="w-full border-t border-dashed border-white/20 mx-4"></div>
+<div class="absolute right-0 translate-x-1/2 w-6 h-6 bg-background-dark rounded-full border-l border-white/10"></div>
+</div>
+<!-- QR Section -->
+<div class="px-6 py-8 flex flex-col items-center">
+<p class="text-white/50 text-xs font-bold uppercase tracking-[0.2em] mb-6">SAT, OCT 21 • 10:00 PM</p>
+<!-- QR Code Wrapper -->
+<div class="relative p-3 bg-white rounded-2xl shadow-[0_0_50px_rgba(140,6,249,0.3)]">
+<img alt="QR Code" class="w-48 h-48" data-alt="High contrast large black and white QR code" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSQh8egFsY5zj2ztGERqt-quKIfX0B_6v59LNIxoq6z64iIfgEelkxc6yCHPLXIPzIAWQsL6qt249HJOWuoD48hkuWv2x5AW9gamNqaeFkXq623nTtRrdDWeZzKfUcb1wSNzv5Dt7pISRwxL8wgmpTauTNjrO2yNhSWs2JSWRhFAumi8LZyqHguH_ZXUMwnJxEUWiAVorD97sHQpYyfL648WBw40Dvqbp8-t72sqyQ7DkvOdfIcMsdhoeIjlDceSyBZd7PZvl4hPtp"/>
+<!-- Scanning line indicator -->
+<div class="absolute top-0 left-0 w-full h-1 bg-primary/40 shadow-[0_0_15px_rgba(140,6,249,0.8)] rounded-full"></div>
+</div>
+<div class="mt-6 flex items-center gap-2 text-primary font-medium text-sm">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+                            Dynamic Security Key Active
+                        </div>
+</div>
+<!-- Info Grid Section -->
+<div class="grid grid-cols-3 border-t border-white/10 bg-white/5 py-6">
+<div class="text-center border-r border-white/10 px-2">
+<p class="text-[10px] text-white/40 uppercase font-bold tracking-wider mb-1">Seat/Zone</p>
+<p class="text-sm font-semibold">VIP Floor</p>
+</div>
+<div class="text-center border-r border-white/10 px-2">
+<p class="text-[10px] text-white/40 uppercase font-bold tracking-wider mb-1">Order #</p>
+<p class="text-sm font-semibold">BK-99210</p>
+</div>
+<div class="text-center px-2">
+<p class="text-[10px] text-white/40 uppercase font-bold tracking-wider mb-1">Gate</p>
+<p class="text-sm font-semibold">B4</p>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="mt-10 space-y-4 w-full">
+<!-- Apple Wallet Style -->
+<button class="w-full h-14 bg-black border border-white/20 rounded-xl flex items-center justify-center gap-3 hover:bg-zinc-900 transition-all">
+<span class="material-symbols-outlined text-white">wallet</span>
+<span class="text-white font-medium">Add to Apple Wallet</span>
+</button>
+<!-- Transfer Action -->
+<button class="w-full h-14 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center gap-3 hover:bg-white/10 transition-all">
+<span class="material-symbols-outlined text-white/70">send</span>
+<span class="text-white/90 font-medium">Transfer to Friend</span>
+</button>
+<!-- Primary Blackmarket Action -->
+<button class="w-full h-14 bg-primary rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-primary/30 hover:brightness-110 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-white">shopping_cart</span>
+<span class="text-white font-bold">Sell in Blackmarket</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50">
+<div class="flex gap-2 border-t border-white/10 bg-background-dark/80 backdrop-blur-xl px-6 pb-8 pt-4">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-white/40 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-1">confirmation_number</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Events</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-white/40 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Wallet</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-white/40 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">storefront</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Market</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-white/40 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Profile</p>
+</a>
+</div>
+</nav>
+<!-- Subtle Light Leak Overlays -->
+<div class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full pointer-events-none"></div>
+<div class="fixed bottom-[-5%] right-[-5%] w-[40%] h-[40%] bg-primary/5 blur-[100px] rounded-full pointer-events-none"></div>
+</div>
+</body></html>

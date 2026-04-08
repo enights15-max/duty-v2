@@ -1,3 +1,7 @@
+@php
+  $persistedAdminLayout = optional(Auth::guard('admin')->user())->navigation_layout;
+  $adminNavigationLayout = session('admin_navigation_layout', $persistedAdminLayout ?: 'sidebar');
+@endphp
 <div class="main-header">
   <!-- Logo Header Start -->
   <div class="logo-header" data-background-color="{{ $settings->admin_theme_version == 'light' ? 'white' : 'dark2' }}">
@@ -7,19 +11,21 @@
       </a>
     @endif
 
-    <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse" data-target="collapse"
-      aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon">
-        <i class="icon-menu"></i>
-      </span>
-    </button>
-    <button class="topbar-toggler more"><i class="icon-options-vertical"></i></button>
-
-    <div class="nav-toggle">
-      <button class="btn btn-toggle toggle-sidebar">
-        <i class="icon-menu"></i>
+    @if ($adminNavigationLayout === 'sidebar')
+      <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse" data-target="collapse"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon">
+          <i class="icon-menu"></i>
+        </span>
       </button>
-    </div>
+      <button class="topbar-toggler more"><i class="icon-options-vertical"></i></button>
+
+      <div class="nav-toggle">
+        <button class="btn btn-toggle toggle-sidebar">
+          <i class="icon-menu"></i>
+        </button>
+      </div>
+    @endif
   </div>
   <!-- Logo Header End -->
 
@@ -27,6 +33,10 @@
   <nav class="navbar navbar-header navbar-expand-lg"
     data-background-color="{{ $settings->admin_theme_version == 'light' ? 'white2' : 'dark' }}">
     <div class="container-fluid">
+      @if ($adminNavigationLayout === 'topbar')
+        @includeIf('backend.partials.top-navigation')
+      @endif
+
       <ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
         <form action="{{ route('admin.change_theme') }}" class="form-inline mr-3" method="POST">
 
@@ -47,6 +57,28 @@
             </div>
           </div>
         </form>
+
+        <li class="nav-item dropdown hidden-caret mr-3">
+          <a class="nav-link dropdown-toggle admin-layout-toggle" data-toggle="dropdown" href="#" aria-expanded="false">
+            <i class="fas fa-window-maximize mr-2"></i>{{ __('Layout') }}
+          </a>
+          <div class="dropdown-menu dropdown-menu-right animated fadeIn">
+            <a class="dropdown-item d-flex justify-content-between align-items-center"
+              href="{{ route('admin.change_navigation_layout', ['layout' => 'sidebar']) }}">
+              <span>{{ __('Sidebar') }}</span>
+              @if ($adminNavigationLayout === 'sidebar')
+                <i class="fas fa-check text-success"></i>
+              @endif
+            </a>
+            <a class="dropdown-item d-flex justify-content-between align-items-center"
+              href="{{ route('admin.change_navigation_layout', ['layout' => 'topbar']) }}">
+              <span>{{ __('Topbar') }}</span>
+              @if ($adminNavigationLayout === 'topbar')
+                <i class="fas fa-check text-success"></i>
+              @endif
+            </a>
+          </div>
+        </li>
 
         <li class="nav-item dropdown hidden-caret">
           <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">

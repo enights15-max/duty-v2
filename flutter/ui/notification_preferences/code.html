@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Notification Preferences - DUTY</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8c25f4",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior: none;
+        }
+        .ios-toggle:checked ~ .dot {
+            transform: translateX(100%);
+            background-color: white;
+        }
+        .ios-toggle:checked ~ .block {
+            background-color: #8c25f4;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex justify-center items-start">
+<!-- Phone Container Simulator -->
+<div class="w-full max-w-[430px] min-h-screen bg-white dark:bg-[#0a050f] shadow-2xl relative overflow-hidden flex flex-col">
+<!-- Status Bar Spacer (iOS) -->
+<div class="h-12 w-full"></div>
+<!-- Header -->
+<header class="px-6 py-4 flex items-center justify-between sticky top-0 bg-white/80 dark:bg-[#0a050f]/80 backdrop-blur-xl z-20">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 dark:bg-primary/20 text-primary">
+<span class="material-icons-round">chevron_left</span>
+</button>
+<h1 class="text-lg font-semibold tracking-tight">Notifications</h1>
+<div class="w-10 h-10 flex items-center justify-center">
+<!-- Spacer for layout symmetry -->
+</div>
+</header>
+<!-- Content -->
+<main class="flex-1 overflow-y-auto px-6 pb-12">
+<!-- Do Not Disturb Section (Hero Style) -->
+<section class="mt-4 mb-8">
+<div class="bg-primary/10 dark:bg-primary/10 border border-primary/20 rounded-xl p-5">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+<span class="material-icons-round">bedtime</span>
+</div>
+<div>
+<h2 class="font-medium text-base">Quiet Hours</h2>
+<p class="text-xs text-slate-500 dark:text-slate-400">Silence after-event alerts</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-toggle" type="checkbox"/>
+<div class="block w-12 h-7 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors"></div>
+<div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform duration-200"></div>
+</label>
+</div>
+<div class="mt-4 flex gap-2">
+<div class="flex-1 bg-white/5 dark:bg-black/20 rounded-lg p-2 border border-white/10 dark:border-white/5 text-center">
+<span class="text-[10px] uppercase tracking-widest text-slate-500 block">From</span>
+<span class="text-sm font-semibold">23:00</span>
+</div>
+<div class="flex-1 bg-white/5 dark:bg-black/20 rounded-lg p-2 border border-white/10 dark:border-white/5 text-center">
+<span class="text-[10px] uppercase tracking-widest text-slate-500 block">To</span>
+<span class="text-sm font-semibold">08:00</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Event Alerts Group -->
+<div class="mb-8">
+<h3 class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-4 px-1">Event Updates</h3>
+<div class="space-y-1 bg-slate-50 dark:bg-white/5 rounded-xl overflow-hidden border border-slate-200 dark:border-white/5">
+<!-- Toggle Row -->
+<div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/5">
+<div class="flex items-center gap-4">
+<span class="material-icons-round text-primary/60">auto_awesome</span>
+<div>
+<p class="text-[15px] font-medium leading-none">New Event Drops</p>
+<p class="text-xs text-slate-500 mt-1">Be first to know about new listings</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-toggle" type="checkbox"/>
+<div class="block w-11 h-6 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors"></div>
+<div class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-200"></div>
+</label>
+</div>
+<!-- Toggle Row -->
+<div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/5">
+<div class="flex items-center gap-4">
+<span class="material-icons-round text-primary/60">timer</span>
+<div>
+<p class="text-[15px] font-medium leading-none">Ticket Sales Ending</p>
+<p class="text-xs text-slate-500 mt-1">Last chance warnings for shows</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-toggle" type="checkbox"/>
+<div class="block w-11 h-6 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors"></div>
+<div class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-200"></div>
+</label>
+</div>
+<!-- Toggle Row -->
+<div class="flex items-center justify-between p-4">
+<div class="flex items-center gap-4">
+<span class="material-icons-round text-primary/60">confirmation_number</span>
+<div>
+<p class="text-[15px] font-medium leading-none">Show Reminders</p>
+<p class="text-xs text-slate-500 mt-1">Updates on your booked events</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only ios-toggle" type="checkbox"/>
+<div class="block w-11 h-6 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors"></div>
+<div class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-200"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- Fintech & Social Group -->
+<div class="mb-8">
+<h3 class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-4 px-1">Fintech &amp; Social</h3>
+<div class="space-y-1 bg-slate-50 dark:bg-white/5 rounded-xl overflow-hidden border border-slate-200 dark:border-white/5">
+<!-- Toggle Row -->
+<div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/5">
+<div class="flex items-center gap-4">
+<span class="material-icons-round text-primary/60">account_balance_wallet</span>
+<div>
+<p class="text-[15px] font-medium leading-none">Wallet Transactions</p>
+<p class="text-xs text-slate-500 mt-1">Deposit and purchase confirmations</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-toggle" type="checkbox"/>
+<div class="block w-11 h-6 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors"></div>
+<div class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-200"></div>
+</label>
+</div>
+<!-- Toggle Row -->
+<div class="flex items-center justify-between p-4">
+<div class="flex items-center gap-4">
+<span class="material-icons-round text-primary/60">group</span>
+<div>
+<p class="text-[15px] font-medium leading-none">Friend Activity</p>
+<p class="text-xs text-slate-500 mt-1">See which events your friends join</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-toggle" type="checkbox"/>
+<div class="block w-11 h-6 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors"></div>
+<div class="dot absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-200"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- Notification Style -->
+<div class="mb-8">
+<h3 class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-4 px-1">Delivery Method</h3>
+<div class="grid grid-cols-3 gap-3">
+<button class="flex flex-col items-center justify-center p-4 bg-primary rounded-xl text-white border border-primary">
+<span class="material-icons-round text-xl mb-2">notifications_active</span>
+<span class="text-[10px] font-medium uppercase tracking-tight">Push</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5">
+<span class="material-icons-round text-xl mb-2 text-slate-400">mail</span>
+<span class="text-[10px] font-medium uppercase tracking-tight text-slate-400">Email</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5">
+<span class="material-icons-round text-xl mb-2 text-slate-400">sms</span>
+<span class="text-[10px] font-medium uppercase tracking-tight text-slate-400">SMS</span>
+</button>
+</div>
+</div>
+<!-- Security Notice -->
+<div class="p-6 rounded-xl bg-slate-100 dark:bg-[#251b31] flex gap-4">
+<span class="material-icons-round text-primary mt-0.5">security</span>
+<p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                    High-priority security alerts and critical wallet notifications will bypass Do Not Disturb settings for your safety.
+                </p>
+</div>
+</main>
+<!-- Home Indicator (iOS) -->
+<div class="h-8 flex justify-center items-center w-full">
+<div class="w-32 h-1 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+</div>
+</div>
+</body></html>

@@ -1,6 +1,13 @@
 @extends('backend.layout')
 
+@section('style')
+  @includeIf('backend.partials.scarlet-operations-workspace')
+@endsection
+
 @section('content')
+  @php
+    $activeMethods = collect($collection)->where('status', 1)->count();
+  @endphp
   <div class="page-header">
     <h4 class="page-title">{{ __('Withdraw Payment Methods') }}</h4>
     <ul class="breadcrumbs">
@@ -24,9 +31,32 @@
     </ul>
   </div>
 
-  <div class="row">
-    <div class="col-md-12">
-      <div class="card">
+  <div class="ops-shell">
+    <div class="ops-hero">
+      <div class="ops-hero__grid">
+        <div>
+          <span class="ops-hero__eyebrow">{{ __('Payout methods') }}</span>
+          <h1 class="ops-hero__title">{{ __('Configure how money exits the platform') }}</h1>
+          <p class="ops-hero__copy">
+            {{ __('Keep payout rails clean, auditable and ready for professional settlements. Methods defined here shape every downstream withdrawal request.') }}
+          </p>
+        </div>
+        <div class="ops-hero__meta">
+          <div class="ops-hero__stat">
+            <span class="ops-hero__stat-label">{{ __('Configured methods') }}</span>
+            <span class="ops-hero__stat-value">{{ number_format(count($collection)) }}</span>
+            <span class="ops-hero__stat-note">{{ __('Total withdrawal methods in this environment') }}</span>
+          </div>
+          <div class="ops-hero__stat">
+            <span class="ops-hero__stat-label">{{ __('Active right now') }}</span>
+            <span class="ops-hero__stat-value">{{ number_format($activeMethods) }}</span>
+            <span class="ops-hero__stat-note">{{ __('Methods available to professionals for cash out') }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card ops-panel">
         <div class="card-header">
           <div class="row">
             <div class="col-lg-8">
@@ -45,10 +75,13 @@
           <div class="row">
             <div class="col-lg-12">
               @if (count($collection) == 0)
-                <h3 class="text-center">{{ __('NO WITHDRAW PAYMENT METHODS FOUND') . '!' }}</h3>
+                <div class="ops-empty">
+                  <h3>{{ __('No withdrawal methods configured') }}</h3>
+                  <p>{{ __('Add the first payout method to start routing organizer, venue and artist withdrawals.') }}</p>
+                </div>
               @else
                 <div class="table-responsive">
-                  <table class="table table-striped mt-3" id="basic-datatables">
+                  <table class="table table-striped mt-3 ops-table" id="basic-datatables">
                     <thead>
                       <tr>
                         <th scope="col">#</th>

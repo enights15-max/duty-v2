@@ -1,0 +1,328 @@
+<svg width="1800" height="1520" viewBox="0 0 1800 1520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1800" y2="1520" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F0D13"/>
+      <stop offset="1" stop-color="#17131B"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#1E1820"/>
+      <stop offset="1" stop-color="#15131A"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#C1121F"/>
+      <stop offset="1" stop-color="#8A0F18"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.32"/>
+    </filter>
+    <style>
+      .title { font: 700 40px Georgia, serif; fill: #F7F1EB; }
+      .subtitle { font: 400 18px Arial, sans-serif; fill: #CDBFC5; }
+      .section { font: 700 24px Arial, sans-serif; fill: #FFF7F4; }
+      .section-copy { font: 400 14px Arial, sans-serif; fill: #BFAFB7; }
+      .legend { font: 700 14px Arial, sans-serif; fill: #F3E8E9; }
+      .card-title { font: 700 16px Arial, sans-serif; fill: #FFF8F5; }
+      .card-copy { font: 400 12px Arial, sans-serif; fill: #E5D8DB; }
+      .mini { font: 700 12px Arial, sans-serif; fill: #FFF8F5; letter-spacing: 1px; }
+      .count { font: 700 28px Arial, sans-serif; fill: #FFF8F5; }
+      .count-label { font: 400 13px Arial, sans-serif; fill: #D0C1C7; }
+    </style>
+  </defs>
+
+  <rect width="1800" height="1520" fill="url(#bg)"/>
+  <rect x="36" y="30" width="1728" height="1460" rx="30" fill="rgba(255,255,255,0.02)" stroke="#2B2530"/>
+
+  <text x="74" y="94" class="title">Panorama Completo del Proyecto</text>
+  <text x="74" y="126" class="subtitle">Mapa visual de modulos implementados, muy avanzados, en transicion y nuevas ideas por construir</text>
+
+  <g filter="url(#shadow)">
+    <rect x="74" y="154" width="1652" height="96" rx="24" fill="#15121A" stroke="#342C34"/>
+    <rect x="104" y="183" width="18" height="18" rx="6" fill="#238A57"/>
+    <text x="134" y="197" class="legend">Implementado / estable</text>
+    <rect x="344" y="183" width="18" height="18" rx="6" fill="#C68500"/>
+    <text x="374" y="197" class="legend">Muy avanzado / falta cierre</text>
+    <rect x="646" y="183" width="18" height="18" rx="6" fill="#4459E6"/>
+    <text x="676" y="197" class="legend">En transicion / siguiente corte</text>
+    <rect x="966" y="183" width="18" height="18" rx="6" fill="#C1121F"/>
+    <text x="996" y="197" class="legend">Pendiente / nueva idea</text>
+
+    <text x="1284" y="194" class="count">14</text>
+    <text x="1326" y="194" class="count-label">implementados</text>
+    <text x="1460" y="194" class="count">9</text>
+    <text x="1495" y="194" class="count-label">por cerrar o abrir</text>
+  </g>
+
+  <!-- SECTION 1 -->
+  <g filter="url(#shadow)">
+    <rect x="74" y="286" width="812" height="372" rx="28" fill="url(#glass)" stroke="#342C34"/>
+    <rect x="74" y="286" width="812" height="10" rx="5" fill="url(#accent)"/>
+    <text x="104" y="328" class="section">Core Platform & Identity</text>
+    <text x="104" y="352" class="section-copy">Cuenta, identidades, ownership y superficies base del producto</text>
+
+    <g>
+      <rect x="104" y="386" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="122" y="417" class="mini">IMPLEMENTADO</text>
+      <text x="122" y="442" class="card-title">Account Center + Identity Core</text>
+      <text x="122" y="462" class="card-copy">perfil activo, switching, base canónica</text>
+    </g>
+    <g>
+      <rect x="358" y="386" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="376" y="417" class="mini">IMPLEMENTADO</text>
+      <text x="376" y="442" class="card-title">Scarlet Editorial System</text>
+      <text x="376" y="462" class="card-copy">consumer app, pro mobile y admin web</text>
+    </g>
+    <g>
+      <rect x="612" y="386" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="630" y="417" class="mini">IMPLEMENTADO</text>
+      <text x="630" y="442" class="card-title">Event Ownership Identity-First</text>
+      <text x="630" y="462" class="card-copy">owner_identity_id y authoring profesional</text>
+    </g>
+
+    <g>
+      <rect x="104" y="496" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="122" y="527" class="mini">IMPLEMENTADO</text>
+      <text x="122" y="552" class="card-title">Discovery / Search / Public Organizer</text>
+      <text x="122" y="572" class="card-copy">profiles y discovery bastante alineados</text>
+    </g>
+    <g>
+      <rect x="358" y="496" width="236" height="92" rx="18" fill="#C68500"/>
+      <text x="376" y="527" class="mini">MUY AVANZADO</text>
+      <text x="376" y="552" class="card-title">Customer Booking Identity-First</text>
+      <text x="376" y="572" class="card-copy">falta rematar invoices y algunos gateways legacy</text>
+    </g>
+    <g>
+      <rect x="612" y="496" width="236" height="92" rx="18" fill="#C68500"/>
+      <text x="630" y="527" class="mini">MUY AVANZADO</text>
+      <text x="630" y="552" class="card-title">Reviews / Reputation Identity-First</text>
+      <text x="630" y="572" class="card-copy">queda deuda organizer legacy en algunos caminos</text>
+    </g>
+
+    <g>
+      <rect x="104" y="606" width="236" height="92" rx="18" fill="#C68500"/>
+      <text x="122" y="637" class="mini">MUY AVANZADO</text>
+      <text x="122" y="662" class="card-title">Venue / Artist Public Maturity</text>
+      <text x="122" y="682" class="card-copy">bastante bien, pero no tan maduro como organizer</text>
+    </g>
+    <g>
+      <rect x="358" y="606" width="236" height="92" rx="18" fill="#4459E6"/>
+      <text x="376" y="637" class="mini">EN TRANSICION</text>
+      <text x="376" y="662" class="card-title">Chat / Polymorphic Messaging</text>
+      <text x="376" y="682" class="card-copy">funciona, pero todavia no está 100% identity-first</text>
+    </g>
+    <g>
+      <rect x="612" y="606" width="236" height="92" rx="18" fill="#4459E6"/>
+      <text x="630" y="637" class="mini">EN TRANSICION</text>
+      <text x="630" y="662" class="card-title">POS / Terminales</text>
+      <text x="630" y="682" class="card-copy">todavia arrastra naming y ownership legacy</text>
+    </g>
+  </g>
+
+  <!-- SECTION 2 -->
+  <g filter="url(#shadow)">
+    <rect x="914" y="286" width="812" height="372" rx="28" fill="url(#glass)" stroke="#342C34"/>
+    <rect x="914" y="286" width="812" height="10" rx="5" fill="url(#accent)"/>
+    <text x="944" y="328" class="section">Consumer, Events & Experience</text>
+    <text x="944" y="352" class="section-copy">Home, search, checkout, tickets, scanner, marketplace y experiencia pública</text>
+
+    <g>
+      <rect x="944" y="386" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="962" y="417" class="mini">IMPLEMENTADO</text>
+      <text x="962" y="442" class="card-title">Home / Search / Explore / Event Details</text>
+      <text x="962" y="462" class="card-copy">migrados a Scarlet y bastante consistentes</text>
+    </g>
+    <g>
+      <rect x="1198" y="386" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="1216" y="417" class="mini">IMPLEMENTADO</text>
+      <text x="1216" y="442" class="card-title">Checkout / Wallet / My Tickets</text>
+      <text x="1216" y="462" class="card-copy">surface principal de compra y post-compra lista</text>
+    </g>
+    <g>
+      <rect x="1452" y="386" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="1470" y="417" class="mini">IMPLEMENTADO</text>
+      <text x="1470" y="442" class="card-title">Scanner / Transfer / Blackmarket</text>
+      <text x="1470" y="462" class="card-copy">flujo público funcional y visualmente alineado</text>
+    </g>
+
+    <g>
+      <rect x="944" y="496" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="962" y="527" class="mini">IMPLEMENTADO</text>
+      <text x="962" y="552" class="card-title">Reservations Core</text>
+      <text x="962" y="572" class="card-copy">reservas, pagos, expiración y conversión a booking</text>
+    </g>
+    <g>
+      <rect x="1198" y="496" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="1216" y="527" class="mini">IMPLEMENTADO</text>
+      <text x="1216" y="442" class="card-title"></text>
+      <text x="1216" y="552" class="card-title">Loyalty + Tips + Rewards Base</text>
+      <text x="1216" y="572" class="card-copy">base funcional existente, aún expandible</text>
+    </g>
+    <g>
+      <rect x="1452" y="496" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="1470" y="527" class="mini">IMPLEMENTADO</text>
+      <text x="1470" y="552" class="card-title">Marketplace Fallback & Purchase Rules</text>
+      <text x="1470" y="572" class="card-copy">inventario, visibilidad y compra alineados</text>
+    </g>
+
+    <g>
+      <rect x="944" y="606" width="236" height="92" rx="18" fill="#C1121F"/>
+      <text x="962" y="637" class="mini">PENDIENTE / NUEVA IDEA</text>
+      <text x="962" y="662" class="card-title">Ticket Rewards / Welcome Drink QR</text>
+      <text x="962" y="682" class="card-copy">perks operativos ligados al ticket y claim por bar</text>
+    </g>
+    <g>
+      <rect x="1198" y="606" width="236" height="92" rx="18" fill="#C1121F"/>
+      <text x="1216" y="637" class="mini">PENDIENTE / NUEVA IDEA</text>
+      <text x="1216" y="662" class="card-title">Structured Event Details</text>
+      <text x="1216" y="682" class="card-copy">menos texto manual, más módulos de datos</text>
+    </g>
+    <g>
+      <rect x="1452" y="606" width="236" height="92" rx="18" fill="#C1121F"/>
+      <text x="1470" y="637" class="mini">PENDIENTE / NUEVA IDEA</text>
+      <text x="1470" y="662" class="card-title">Community / Memberships</text>
+      <text x="1470" y="682" class="card-copy">revenue recurrente, perks y relación organizer-audiencia</text>
+    </g>
+  </g>
+
+  <!-- SECTION 3 -->
+  <g filter="url(#shadow)">
+    <rect x="74" y="694" width="812" height="410" rx="28" fill="url(#glass)" stroke="#342C34"/>
+    <rect x="74" y="694" width="812" height="10" rx="5" fill="url(#accent)"/>
+    <text x="104" y="736" class="section">Professional, Treasury & Admin Operations</text>
+    <text x="104" y="760" class="section-copy">Operación financiera, collaborator economy, dashboards y tooling admin</text>
+
+    <g>
+      <rect x="104" y="794" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="122" y="825" class="mini">IMPLEMENTADO</text>
+      <text x="122" y="850" class="card-title">Professional Event Authoring</text>
+      <text x="122" y="870" class="card-copy">create/edit, tickets, inventory, dashboard, stats</text>
+    </g>
+    <g>
+      <rect x="358" y="794" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="376" y="825" class="mini">IMPLEMENTADO</text>
+      <text x="376" y="850" class="card-title">Settlement Review + Reconciliation</text>
+      <text x="376" y="870" class="card-copy">queue, detail, export y actions log en admin</text>
+    </g>
+    <g>
+      <rect x="612" y="794" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="630" y="825" class="mini">IMPLEMENTADO</text>
+      <text x="630" y="850" class="card-title">Refund Governance & Insights</text>
+      <text x="630" y="870" class="card-copy">reason codes, flags, analytics, reporting</text>
+    </g>
+
+    <g>
+      <rect x="104" y="904" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="122" y="935" class="mini">IMPLEMENTADO</text>
+      <text x="122" y="960" class="card-title">Collaborator Economy v2</text>
+      <text x="122" y="980" class="card-copy">fixed splits, gross basis, release modes, reconciliation</text>
+    </g>
+    <g>
+      <rect x="358" y="904" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="376" y="935" class="mini">IMPLEMENTADO</text>
+      <text x="376" y="960" class="card-title">Gateway Contract + Registry</text>
+      <text x="376" y="980" class="card-copy">payments/refunds desacoplados y telemetry persistida</text>
+    </g>
+    <g>
+      <rect x="612" y="904" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="630" y="935" class="mini">IMPLEMENTADO</text>
+      <text x="630" y="960" class="card-title">Admin Web Scarlet + Ops Workspaces</text>
+      <text x="630" y="980" class="card-copy">dashboard, economy, reservations, bookings, withdrawals</text>
+    </g>
+
+    <g>
+      <rect x="104" y="1014" width="236" height="92" rx="18" fill="#C1121F"/>
+      <text x="122" y="1045" class="mini">PENDIENTE / NUEVA IDEA</text>
+      <text x="122" y="1070" class="card-title">Sponsors Catalog + Event Sponsors</text>
+      <text x="122" y="1090" class="card-copy">admin-curated sponsor list y selección por organizer</text>
+    </g>
+    <g>
+      <rect x="358" y="1014" width="236" height="92" rx="18" fill="#C1121F"/>
+      <text x="376" y="1045" class="mini">PENDIENTE / NUEVA IDEA</text>
+      <text x="376" y="1070" class="card-title">Promoter / Co-organizer Actor</text>
+      <text x="376" y="1090" class="card-copy">nueva capa profesional para collaboration y revenue split</text>
+    </g>
+    <g>
+      <rect x="612" y="1014" width="236" height="92" rx="18" fill="#C1121F"/>
+      <text x="630" y="1045" class="mini">PENDIENTE / NUEVA IDEA</text>
+      <text x="630" y="1070" class="card-title">Organizer CRM / Audience Ops</text>
+      <text x="630" y="1090" class="card-copy">members, segments, VIP lists, repeat buyers</text>
+    </g>
+  </g>
+
+  <!-- SECTION 4 -->
+  <g filter="url(#shadow)">
+    <rect x="914" y="694" width="812" height="410" rx="28" fill="url(#glass)" stroke="#342C34"/>
+    <rect x="914" y="694" width="812" height="10" rx="5" fill="url(#accent)"/>
+    <text x="944" y="736" class="section">Algorithms, Readiness & Remaining Closures</text>
+    <text x="944" y="760" class="section-copy">Algoritmos core, runbooks, QA live y cierres técnicos de salida</text>
+
+    <g>
+      <rect x="944" y="794" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="962" y="825" class="mini">IMPLEMENTADO</text>
+      <text x="962" y="850" class="card-title">Purchase Limits Hardened</text>
+      <text x="962" y="870" class="card-copy">mixed variations, gift slots y guardrails reales</text>
+    </g>
+    <g>
+      <rect x="1198" y="794" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="1216" y="825" class="mini">IMPLEMENTADO</text>
+      <text x="1216" y="850" class="card-title">Pricing Schedule Hardened</text>
+      <text x="1216" y="870" class="card-copy">fallbacks, sort order y start price corregidos</text>
+    </g>
+    <g>
+      <rect x="1452" y="794" width="236" height="92" rx="18" fill="#238A57"/>
+      <text x="1470" y="825" class="mini">IMPLEMENTADO</text>
+      <text x="1470" y="850" class="card-title">Inventory / Waitlist / Marketplace Rules</text>
+      <text x="1470" y="870" class="card-copy">visibilidad y fallback alineados de punta a punta</text>
+    </g>
+
+    <g>
+      <rect x="944" y="904" width="236" height="92" rx="18" fill="#C68500"/>
+      <text x="962" y="935" class="mini">MUY AVANZADO</text>
+      <text x="962" y="960" class="card-title">Live Readiness Tooling</text>
+      <text x="962" y="980" class="card-copy">bundle, board, wrappers, runbook y check-only listos</text>
+    </g>
+    <g>
+      <rect x="1198" y="904" width="236" height="92" rx="18" fill="#4459E6"/>
+      <text x="1216" y="935" class="mini">EN TRANSICION</text>
+      <text x="1216" y="960" class="card-title">Staging Dry Run Real</text>
+      <text x="1216" y="980" class="card-copy">falta ejecutar con credenciales y evidencia real</text>
+    </g>
+    <g>
+      <rect x="1452" y="904" width="236" height="92" rx="18" fill="#4459E6"/>
+      <text x="1470" y="935" class="mini">EN TRANSICION</text>
+      <text x="1470" y="960" class="card-title">Identity Residual in Legacy Invoices</text>
+      <text x="1470" y="980" class="card-copy">booking/payment/invoice paths aún con deuda puntual</text>
+    </g>
+
+    <g>
+      <rect x="944" y="1014" width="236" height="92" rx="18" fill="#C68500"/>
+      <text x="962" y="1045" class="mini">MUY AVANZADO</text>
+      <text x="962" y="1070" class="card-title">Financial Reporting Executive Layer</text>
+      <text x="962" y="1090" class="card-copy">base operativa existe; puede crecer a reporting ejecutivo</text>
+    </g>
+    <g>
+      <rect x="1198" y="1014" width="236" height="92" rx="18" fill="#4459E6"/>
+      <text x="1216" y="1045" class="mini">EN TRANSICION</text>
+      <text x="1216" y="1070" class="card-title">Feed Relevance / Social Ranking</text>
+      <text x="1216" y="1090" class="card-copy">queda pendiente endurecer señales y cobertura</text>
+    </g>
+    <g>
+      <rect x="1452" y="1014" width="236" height="92" rx="18" fill="#C1121F"/>
+      <text x="1470" y="1045" class="mini">PENDIENTE / NUEVA IDEA</text>
+      <text x="1470" y="1070" class="card-title">Marketplace Premium / Member Layer</text>
+      <text x="1470" y="1090" class="card-copy">perks, acceso anticipado y ventajas para comunidad</text>
+    </g>
+  </g>
+
+  <!-- BOTTOM SUMMARY -->
+  <g filter="url(#shadow)">
+    <rect x="74" y="1142" width="1652" height="304" rx="28" fill="#141119" stroke="#342C34"/>
+    <text x="104" y="1186" class="section">Lectura Ejecutiva</text>
+    <text x="104" y="1218" class="card-title">Lo que ya está fuerte</text>
+    <text x="104" y="1242" class="card-copy">Identity core, event authoring profesional, consumer purchase/post-purchase, treasury, refunds, collaborator economy, gateway contract, admin ops y gran parte del sistema visual.</text>
+    <text x="104" y="1282" class="card-title">Lo que conviene cerrar antes de abrir demasiado</text>
+    <text x="104" y="1306" class="card-copy">Staging dry run real, deuda residual identity-first en invoices/payment paths, reporting ejecutivo y algunos algoritmos sociales.</text>
+    <text x="104" y="1346" class="card-title">Lo que mejor expande el negocio después</text>
+    <text x="104" y="1370" class="card-copy">1. Ticket Rewards  2. Sponsors  3. Promoter / Co-organizer  4. Structured Event Details  5. Community / Memberships.</text>
+    <text x="104" y="1410" class="card-copy">Si quieres foco: primero cerramos los dos o tres residuos críticos, y luego entramos al bloque comercial nuevo con una narrativa limpia de producto.</text>
+  </g>
+</svg>

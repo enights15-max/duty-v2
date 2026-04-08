@@ -37,4 +37,16 @@ class EventRemoteDataSource {
       rethrow;
     }
   }
+
+  Future<List<dynamic>> getCategories() async {
+    try {
+      final response = await _apiClient.dio.get('/events/categories');
+      if (response.data['success'] == true && response.data['data'] != null) {
+        return response.data['data']['categories'] as List;
+      }
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

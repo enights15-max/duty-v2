@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DUTY - User Profile &amp; Collectibles</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8c25f4",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                    backgroundImage: {
+                        'glass-gradient': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
+                        'glass-border': 'linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05))',
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .glass-card {
+                @apply bg-glass-gradient backdrop-blur-xl border border-white/10 shadow-lg;
+            }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white antialiased min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-white">
+<!-- Ambient Background Glow -->
+<div class="fixed top-0 left-0 right-0 h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 z-0"></div>
+<div class="fixed bottom-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full pointer-events-none translate-y-1/3 z-0"></div>
+<div class="relative z-10 max-w-md mx-auto min-h-screen flex flex-col pb-24">
+<!-- Header / Nav -->
+<header class="flex justify-between items-center px-6 pt-12 pb-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 backdrop-blur-md border border-white/10 active:scale-95 transition-transform text-white/70 hover:text-white hover:bg-white/10">
+<span class="material-icons-round text-xl">arrow_back</span>
+</button>
+<div class="text-sm font-medium tracking-widest uppercase text-white/50">Profile</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 backdrop-blur-md border border-white/10 active:scale-95 transition-transform text-white/70 hover:text-white hover:bg-white/10">
+<span class="material-icons-round text-xl">settings</span>
+</button>
+</header>
+<!-- Profile Section -->
+<section class="flex flex-col items-center px-6 pt-4 text-center">
+<div class="relative group cursor-pointer">
+<!-- Avatar Ring Glow -->
+<div class="absolute -inset-1 bg-gradient-to-r from-primary to-purple-400 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+<!-- Avatar Image -->
+<div class="relative w-28 h-28 rounded-full p-[2px] bg-background-dark">
+<img alt="Profile picture of a man in a modern suit" class="w-full h-full object-cover rounded-full border-2 border-background-dark" data-alt="Profile picture of a man in a modern suit" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkqsmuCtVkjkv9NRn994J-BIt5mECZncHN-CUWRM9XgOglP7PRtwfmI8J_xWIdw2vdc6d9GFzCNYPR9hrlnIg_ft8Q53F1EsR6feBWFmXMV6V40dvRYZLDZY4glYHfitHkbWUWccp-kmG24VYWNeYYHgUno7ZUd4iJCat4IPHQ1DfwWksy0brDldqBJQHC-XSYHMlGzqgj1rNalV2WZMjGr-TrWi6QfBZ1d8eE9-EKr1bOGtj5j__op5U2l0VZV6JXhMMS5fRvqz9g"/>
+</div>
+<!-- VIP Badge -->
+<div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md border border-primary/50 text-primary px-3 py-1 rounded-full flex items-center gap-1 shadow-lg shadow-primary/20">
+<span class="material-icons-round text-[10px] text-yellow-400">verified</span>
+<span class="text-[10px] font-bold tracking-wider uppercase text-white">VIP Member</span>
+</div>
+</div>
+<h1 class="mt-6 text-2xl font-bold text-white">Alex Sterling</h1>
+<p class="text-white/40 text-sm mt-1 font-light">Member since 2021</p>
+</section>
+<!-- Balance Section -->
+<section class="mt-8 px-6 text-center">
+<div class="inline-flex flex-col items-center">
+<span class="text-white/40 text-xs font-medium tracking-widest uppercase mb-1">Total Balance</span>
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">45,200</span>
+<span class="text-primary font-bold text-lg">DUTY</span>
+</div>
+</div>
+</section>
+<!-- Stats Row -->
+<section class="mt-8 px-4">
+<div class="glass-card rounded-2xl p-4 flex justify-between divide-x divide-white/10">
+<div class="flex-1 flex flex-col items-center px-2">
+<span class="text-xl font-bold text-white">12</span>
+<span class="text-[10px] text-white/40 uppercase tracking-wide mt-1">Events</span>
+</div>
+<div class="flex-1 flex flex-col items-center px-2">
+<span class="text-xl font-bold text-white">5</span>
+<span class="text-[10px] text-white/40 uppercase tracking-wide mt-1">Artists</span>
+</div>
+<div class="flex-1 flex flex-col items-center px-2">
+<span class="text-xl font-bold text-white">3</span>
+<span class="text-[10px] text-white/40 uppercase tracking-wide mt-1">Communities</span>
+</div>
+</div>
+</section>
+<!-- Collectibles Gallery -->
+<section class="mt-10">
+<div class="px-6 flex justify-between items-end mb-4">
+<h2 class="text-sm font-bold text-white uppercase tracking-widest">Collectibles</h2>
+<button class="text-primary text-xs font-medium hover:text-white transition-colors">View All</button>
+</div>
+<div class="flex overflow-x-auto space-x-4 px-6 pb-8 pt-2 no-scrollbar snap-x snap-mandatory">
+<!-- Card 1 -->
+<div class="snap-center shrink-0 w-40 h-56 glass-card rounded-2xl relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.8)]"></div>
+<div class="h-32 w-full flex items-center justify-center p-4">
+<img alt="Abstract 3D golden geometric shape floating" class="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(140,37,244,0.3)]" data-alt="Abstract 3D golden geometric shape floating" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCE8saTxUc9oJu2sQcJ-Syruout1t7sD2zH6hkAdmTSvaaRkZD9MjVQPAWJ3glXxz8Eolkq5jtoVId8UNxpqCuAKaNhSzF24bVaBIlBb2qQnZY9pwPejyhbqz-LseZmodusLXAcddcnouRcK6nTRI8zIANR0IFepXFNFcFCVB59J_7HHDZIimcYXkpNKvcXIYwonA4w_ZIVR-iePiBQWMvBs1Q3o9nOlf45-8GUsnE-wa5n8ul0IXHOg3WoA0eqQwKEK8irZsjND_wf"/>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/80 to-transparent">
+<p class="text-xs text-primary font-bold uppercase tracking-wide mb-0.5">Rare</p>
+<h3 class="text-white text-sm font-semibold leading-tight">Genesis Pass</h3>
+<p class="text-[10px] text-white/50 mt-1">#0422 Minted</p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="snap-center shrink-0 w-40 h-56 glass-card rounded-2xl relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="h-32 w-full flex items-center justify-center p-4">
+<img alt="3D rendered neon blue cube structure" class="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]" data-alt="3D rendered neon blue cube structure" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBi8a-WkMXRnv1FhRvPLhJe6DclGCljGzktqsJvQF76arSaXoyxe_rmtzXjtvQ4tWBbKRxVtR0hbaCPaPTDIn2E1Q0RRotjYHNi4j0HJrNqYTCV0SiXU3pwG659cYCRyC1FLx6hJpFZUw2l3LhJHBfJXHfEc-tIlrjFuvfsWEVFDTAFTcr-3sB5LpYcJCyztymg72VOgMtuNGtz1fXdKKEAOqnnVmJV48D4nHWSWBWW-gpuHFW2L2XqmKEehNYEPo_5T_TkXp-UgH3l"/>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/80 to-transparent">
+<p class="text-xs text-blue-400 font-bold uppercase tracking-wide mb-0.5">Epic</p>
+<h3 class="text-white text-sm font-semibold leading-tight">Tokyo Fashion</h3>
+<p class="text-[10px] text-white/50 mt-1">Event Token</p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="snap-center shrink-0 w-40 h-56 glass-card rounded-2xl relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="h-32 w-full flex items-center justify-center p-4">
+<img alt="3D metallic key floating in dark space" class="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(168,85,247,0.3)]" data-alt="3D metallic key floating in dark space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhqBBHKvegUw5pX1lvT6r8m8BZ8H1YBe8e4lAsaZvsPqtYtezypZFredhpRK3c3WPZzidfr5t1E8nruelNfXuWB5qf0mXkcwmHhTWO-hKCLDHznPFZ7qJpuJVLVs_LDZTtKpiTMj_jgC7f38m1hS25N-EKEipaVJ7me8O23RFIr4e-UB2ISX2NJzJUmEmuqDyaM31aU5rUGcdbQEYHB_6rfvjn6kpyrE6vMVYdteCjYfTJmld1AWjIa135wUv2gKfKtrkFe4EmOQpX"/>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/80 to-transparent">
+<p class="text-xs text-purple-400 font-bold uppercase tracking-wide mb-0.5">Legendary</p>
+<h3 class="text-white text-sm font-semibold leading-tight">VIP Lounge</h3>
+<p class="text-[10px] text-white/50 mt-1">Access Key</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Activity List -->
+<section class="px-6 pb-8">
+<h2 class="text-sm font-bold text-white uppercase tracking-widest mb-4">History</h2>
+<div class="space-y-4">
+<!-- Item 1 -->
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-colors border border-white/5">
+<span class="material-icons-round text-white/70 group-hover:text-primary transition-colors">local_activity</span>
+</div>
+<div>
+<h4 class="text-white font-medium text-sm">Met Gala Afterparty</h4>
+<p class="text-white/40 text-xs mt-0.5">Payment Processed</p>
+</div>
+</div>
+<div class="text-right">
+<span class="block text-white font-medium text-sm">- 5,000 DUTY</span>
+<span class="block text-white/30 text-[10px] uppercase mt-0.5">Yesterday</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-colors border border-white/5">
+<span class="material-icons-round text-white/70 group-hover:text-primary transition-colors">diamond</span>
+</div>
+<div>
+<h4 class="text-white font-medium text-sm">Exclusive Drop #4</h4>
+<p class="text-white/40 text-xs mt-0.5">Collectible Received</p>
+</div>
+</div>
+<div class="text-right">
+<span class="block text-green-400 font-medium text-sm">+ 1 NFT</span>
+<span class="block text-white/30 text-[10px] uppercase mt-0.5">2 Days Ago</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-colors border border-white/5">
+<span class="material-icons-round text-white/70 group-hover:text-primary transition-colors">group</span>
+</div>
+<div>
+<h4 class="text-white font-medium text-sm">Community Meetup</h4>
+<p class="text-white/40 text-xs mt-0.5">Checked In</p>
+</div>
+</div>
+<div class="text-right">
+<span class="block text-primary font-medium text-sm">+ 200 DUTY</span>
+<span class="block text-white/30 text-[10px] uppercase mt-0.5">Oct 24</span>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-colors border border-white/5">
+<span class="material-icons-round text-white/70 group-hover:text-primary transition-colors">qr_code_scanner</span>
+</div>
+<div>
+<h4 class="text-white font-medium text-sm">Main Stage Access</h4>
+<p class="text-white/40 text-xs mt-0.5">Ticket Scanned</p>
+</div>
+</div>
+<div class="text-right">
+<span class="block text-white/50 font-medium text-sm">Verified</span>
+<span class="block text-white/30 text-[10px] uppercase mt-0.5">Oct 22</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Floating Navigation Bar -->
+<nav class="fixed bottom-6 left-6 right-6 h-16 glass-card rounded-full flex items-center justify-between px-2 z-50 max-w-md mx-auto">
+<a class="flex-1 h-full flex items-center justify-center text-white/50 hover:text-white transition-colors relative group" href="#">
+<span class="material-icons-round text-2xl group-hover:-translate-y-1 transition-transform duration-300">home</span>
+<span class="absolute bottom-2 w-1 h-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+</a>
+<a class="flex-1 h-full flex items-center justify-center text-white/50 hover:text-white transition-colors relative group" href="#">
+<span class="material-icons-round text-2xl group-hover:-translate-y-1 transition-transform duration-300">account_balance_wallet</span>
+<span class="absolute bottom-2 w-1 h-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+</a>
+<!-- Active Tab -->
+<a class="flex-1 h-full flex items-center justify-center relative group" href="#">
+<div class="absolute inset-2 bg-primary/20 rounded-full blur-sm"></div>
+<div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(140,37,244,0.5)] z-10 relative -translate-y-4 border-4 border-background-dark">
+<span class="material-icons-round text-white text-2xl">person</span>
+</div>
+</a>
+<a class="flex-1 h-full flex items-center justify-center text-white/50 hover:text-white transition-colors relative group" href="#">
+<span class="material-icons-round text-2xl group-hover:-translate-y-1 transition-transform duration-300">confirmation_number</span>
+<span class="absolute bottom-2 w-1 h-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+</a>
+<a class="flex-1 h-full flex items-center justify-center text-white/50 hover:text-white transition-colors relative group" href="#">
+<span class="material-icons-round text-2xl group-hover:-translate-y-1 transition-transform duration-300">grid_view</span>
+<span class="absolute bottom-2 w-1 h-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+</a>
+</nav>
+</body></html>

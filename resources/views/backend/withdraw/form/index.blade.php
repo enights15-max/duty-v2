@@ -1,5 +1,9 @@
 @extends('backend.layout')
 
+@section('style')
+  @includeIf('backend.partials.scarlet-operations-workspace')
+@endsection
+
 @section('content')
   <div class="page-header">
     <h4 class="page-title">{{ __('Form Builder') }}</h4>
@@ -32,9 +36,34 @@
     </ul>
   </div>
 
-  <div class="row" id="app">
+  <div class="ops-shell" id="app">
+    <div class="ops-hero">
+      <div class="ops-hero__grid">
+        <div>
+          <span class="ops-hero__eyebrow">{{ __('Payout form builder') }}</span>
+          <h1 class="ops-hero__title">{{ __('Shape the withdrawal intake experience') }}</h1>
+          <p class="ops-hero__copy">
+            {{ __('Define the extra information professionals must provide before a withdrawal is reviewed and paid out. Keep the form minimal and operationally useful.') }}
+          </p>
+        </div>
+        <div class="ops-hero__meta">
+          <div class="ops-hero__stat">
+            <span class="ops-hero__stat-label">{{ __('Method') }}</span>
+            <span class="ops-hero__stat-value">{{ $payment_method->name }}</span>
+            <span class="ops-hero__stat-note">{{ __('Current payout rail being configured') }}</span>
+          </div>
+          <div class="ops-hero__stat">
+            <span class="ops-hero__stat-label">{{ __('Custom fields') }}</span>
+            <span class="ops-hero__stat-value">{{ number_format(count($inputs)) }}</span>
+            <span class="ops-hero__stat-note">{{ __('Fields added on top of amount and reference') }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
     <div class="col-lg-7">
-      <div class="card">
+      <div class="card ops-panel">
         <div class="card-header">
           <div class="row">
             <div class="col-lg-8">
@@ -52,9 +81,9 @@
           </div>
         </div>
         <div class="card-body">
-          <p class="text-warning mb-0">** {{ __('Do not create') }} <strong
+          <div class="ops-note mb-4">** {{ __('Do not create') }} <strong
               class="text-danger">{{ __('Withdraw Amount & Additional Reference') }}</strong>
-            {{ __('input field, it will be in the Table Reservation form by default') }}.</p>
+            {{ __('input field, it will be in the Table Reservation form by default') }}.</div>
           <p class="text-warning">** {{ __('Drag & Drop the input fields to change the order number') }}</p>
 
           <form class="ui-state-default ui-state-disabled">
@@ -91,6 +120,7 @@
     <div class="col-lg-5">
       @includeIf('backend.withdraw.form.create-input')
     </div>
+  </div>
   </div>
 @endsection
 

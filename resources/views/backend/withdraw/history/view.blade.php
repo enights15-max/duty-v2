@@ -14,7 +14,21 @@
           @php
             $d_feilds = json_decode($item->feilds, true);
           @endphp
-          <div class="">
+          <span class="scarlet-modal__eyebrow">{{ __('Withdraw request') }}</span>
+          <h6 class="scarlet-modal__title">{{ __('Review payout information') }}</h6>
+          <p class="scarlet-modal__intro">
+            {{ __('Use this snapshot to confirm actor identity, selected payout rail and the custom data submitted with the request.') }}
+          </p>
+
+          <div class="scarlet-modal__section">
+            <p><strong>{{ __('Actor') }} :</strong> {{ $item->actor_name ?? __('Organizer') }}</p>
+            @if (!empty($item->actor_type))
+              <p><strong>{{ __('Actor Type') }} :</strong> {{ ucfirst($item->actor_type) }}</p>
+            @endif
+            @if (!empty($item->actor_email))
+              <p><strong>{{ __('Email') }} :</strong> {{ $item->actor_email }}</p>
+            @endif
+            <p><strong>{{ __('Method') }} :</strong> {{ optional($item->method)->name ?? __('N/A') }}</p>
             <p>{{ __('Total Payable Amount') }} :
               {{ $currencyInfo->base_currency_symbol_position == 'left' ? $currencyInfo->base_currency_symbol : '' }}
               {{ $item->payable_amount }}

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\BackEnd\BasicSettings;
 
+use App\Models\FeePolicy;
 use App\Models\Timezone;
+use App\Services\FeeEngine;
 use Illuminate\Http\Request;
 use App\Http\Helpers\UploadFile;
 use App\Rules\ImageMimeTypeRule;
@@ -13,12 +15,18 @@ use Illuminate\Support\Facades\File;
 use App\Http\Requests\CurrencyRequest;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\MailFromAdminRequest;
+use App\Services\RegionalSettingsService;
 
 class BasicController extends Controller
 {
+  public function __construct(
+    private RegionalSettingsService $regionalSettingsService
+  ) {
+  }
 
   public function information()
   {
@@ -953,9 +961,45 @@ class BasicController extends Controller
       ['uniqid' => 12345],
       [
         'tax' => $request->tax,
-        'commission' => $request->commission
+        'commission' => $request->commission,
+        'marketplace_commission' => $request->marketplace_commission ?? 5,
       ]
     );
+
+    if (Schema::hasTable('fee_policies')) {
+      FeePolicy::query()->updateOrCreate(
+        ['operation_key' => FeeEngine::OP_PRIMARY_TICKET_SALE],
+        [
+          'label' => 'Primary ticket sale',
+          'description' => 'Platform commission on official ticket sales.',
+          'fee_type' => FeePolicy::TYPE_PERCENTAGE,
+          'percentage_value' => $request->filled('commission') ? $request->commission : 0,
+          'fixed_value' => 0,
+          'minimum_fee' => null,
+          'maximum_fee' => null,
+          'charged_to' => FeePolicy::CHARGED_TO_SELLER,
+          'currency' => 'DOP',
+          'is_active' => true,
+        ]
+      );
+
+      FeePolicy::query()->updateOrCreate(
+        ['operation_key' => FeeEngine::OP_MARKETPLACE_RESALE],
+        [
+          'label' => 'Marketplace resale',
+          'description' => 'Platform fee on blackmarket resale operations.',
+          'fee_type' => FeePolicy::TYPE_PERCENTAGE,
+          'percentage_value' => $request->filled('marketplace_commission') ? $request->marketplace_commission : 5,
+          'fixed_value' => 0,
+          'minimum_fee' => null,
+          'maximum_fee' => null,
+          'charged_to' => FeePolicy::CHARGED_TO_SELLER,
+          'currency' => 'DOP',
+          'is_active' => true,
+        ]
+      );
+    }
+
     $request->session()->flash('success', 'Updated Successfully');
 
     return redirect()->back();
@@ -967,6 +1011,7 @@ class BasicController extends Controller
     $data = [];
     $data['data'] = DB::table('basic_settings')->first();
     $data['time_zones'] = Timezone::orderBy('country_code', 'asc')->get();
+    $data['regionalSettings'] = $this->regionalSettingsService->getSettings();
     return view('backend.basic-settings.general-settings', $data);
   }
   //update general settings
@@ -983,6 +1028,8 @@ class BasicController extends Controller
       'base_currency_text' => 'required',
       'base_currency_text_position' => 'required',
       'base_currency_rate' => 'required|numeric',
+      'app_default_country_iso2' => 'required|string|size:2',
+      'app_supported_country_iso2s' => 'required|string',
       'primary_color' => 'required',
       'breadcrumb_overlay_color' => 'required',
       'breadcrumb_overlay_opacity' => 'required|numeric|min:0|max:1'
@@ -1024,6 +1071,12 @@ class BasicController extends Controller
     }
 
 
+    $defaultCountryIso2 = strtoupper(trim((string) $request->app_default_country_iso2));
+    $supportedCountryIso2s = $this->regionalSettingsService->normalizeSupportedCountryIso2s(
+      $request->app_supported_country_iso2s,
+      $defaultCountryIso2
+    );
+
     //update or insert data to basic settigs table
     DB::table('basic_settings')->updateOrInsert(
       ['uniqid' => 12345],
@@ -1040,7 +1093,9 @@ class BasicController extends Controller
         'base_currency_symbol_position' => $request->base_currency_symbol_position,
         'base_currency_text' => $request->base_currency_text,
         'base_currency_text_position' => $request->base_currency_text_position,
-        'base_currency_rate' => $request->base_currency_rate
+        'base_currency_rate' => $request->base_currency_rate,
+        'app_default_country_iso2' => $defaultCountryIso2,
+        'app_supported_country_iso2s' => json_encode($supportedCountryIso2s),
       ]
     );
 

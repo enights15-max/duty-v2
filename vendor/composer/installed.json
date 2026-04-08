@@ -3580,25 +3580,24 @@
             "install-path": "../kreait/firebase-tokens"
         },
         {
-<<<<<<< Updated upstream
             "name": "kreativdev/installer",
-            "version": "1.1.0",
-            "version_normalized": "1.1.0.0",
+            "version": "1.0.9",
+            "version_normalized": "1.0.9.0",
             "source": {
                 "type": "git",
-                "url": "https://gitlab.com/packages9950522/installer.git",
-                "reference": "d43d50386f91bea3c09b19695235331a19bf6f2c"
+                "url": "git@gitlab.com:packages9950522/installer.git",
+                "reference": "9b90c5f28e3a84b699a254460f090b6e9200d0f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/packages9950522%2Finstaller/repository/archive.zip?sha=d43d50386f91bea3c09b19695235331a19bf6f2c",
-                "reference": "d43d50386f91bea3c09b19695235331a19bf6f2c",
+                "url": "https://gitlab.com/api/v4/projects/packages9950522%2Finstaller/repository/archive.zip?sha=9b90c5f28e3a84b699a254460f090b6e9200d0f3",
+                "reference": "9b90c5f28e3a84b699a254460f090b6e9200d0f3",
                 "shasum": ""
             },
             "require": {
                 "rachidlaasri/laravel-installer": "^4.1"
             },
-            "time": "2024-07-05T18:30:11+00:00",
+            "time": "2023-08-31T17:51:23+00:00",
             "type": "library",
             "extra": {
                 "laravel": {
@@ -3624,15 +3623,9 @@
                 }
             ],
             "description": "This package will add installer in Laravel Items of KreativDev (Non-SAAS)",
-            "support": {
-                "issues": "https://gitlab.com/packages9950522/installer/-/issues",
-                "source": "https://gitlab.com/packages9950522/installer/-/tree/1.1.0"
-            },
             "install-path": "../kreativdev/installer"
         },
         {
-=======
->>>>>>> Stashed changes
             "name": "laravel-notification-channels/webpush",
             "version": "6.0.0",
             "version_normalized": "6.0.0.0",
@@ -7857,6 +7850,74 @@
             "install-path": "../psy/psysh"
         },
         {
+            "name": "rachidlaasri/laravel-installer",
+            "version": "4.1.0",
+            "version_normalized": "4.1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rashidlaasri/LaravelInstaller.git",
+                "reference": "b751b4c23dba893e9a4a12f881a6fd8fa921d228"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rashidlaasri/LaravelInstaller/zipball/b751b4c23dba893e9a4a12f881a6fd8fa921d228",
+                "reference": "b751b4c23dba893e9a4a12f881a6fd8fa921d228",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0"
+            },
+            "time": "2020-05-19T13:19:45+00:00",
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "RachidLaasri\\LaravelInstaller\\Providers\\LaravelInstallerServiceProvider"
+                    ]
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "files": [
+                    "src/Helpers/functions.php"
+                ],
+                "psr-4": {
+                    "RachidLaasri\\LaravelInstaller\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rachid Laasri",
+                    "email": "rashidlaasri@gmail.com"
+                },
+                {
+                    "name": "Jeremy Kenedy",
+                    "email": "jeremykenedy@gmail.com"
+                }
+            ],
+            "description": "Laravel web installer",
+            "support": {
+                "issues": "https://github.com/rashidlaasri/LaravelInstaller/issues",
+                "source": "https://github.com/rashidlaasri/LaravelInstaller/tree/4.1.0"
+            },
+            "funding": [
+                {
+                    "url": "https://rachidlaasri.com",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://twitter.com/rashidlaasri",
+                    "type": "custom"
+                }
+            ],
+            "abandoned": true,
+            "install-path": "../rachidlaasri/laravel-installer"
+        },
+        {
             "name": "ralouphie/getallheaders",
             "version": "3.0.3",
             "version_normalized": "3.0.3.0",
@@ -9993,6 +10054,68 @@
                 }
             ],
             "install-path": "../spomky-labs/base64url"
+        },
+        {
+            "name": "stripe/stripe-php",
+            "version": "v19.3.0",
+            "version_normalized": "19.3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/stripe/stripe-php.git",
+                "reference": "462272ae7560ee29bb891763fd0967d5a77784e5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/462272ae7560ee29bb891763fd0967d5a77784e5",
+                "reference": "462272ae7560ee29bb891763fd0967d5a77784e5",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "3.72.0",
+                "phpstan/phpstan": "^1.2",
+                "phpunit/phpunit": "^5.7 || ^9.0"
+            },
+            "time": "2026-01-28T21:15:45+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Stripe\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Stripe and contributors",
+                    "homepage": "https://github.com/stripe/stripe-php/contributors"
+                }
+            ],
+            "description": "Stripe PHP Library",
+            "homepage": "https://stripe.com/",
+            "keywords": [
+                "api",
+                "payment processing",
+                "stripe"
+            ],
+            "support": {
+                "issues": "https://github.com/stripe/stripe-php/issues",
+                "source": "https://github.com/stripe/stripe-php/tree/v19.3.0"
+            },
+            "install-path": "../stripe/stripe-php"
         },
         {
             "name": "symfony/console",

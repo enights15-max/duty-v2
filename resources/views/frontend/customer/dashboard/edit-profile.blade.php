@@ -94,9 +94,8 @@
                         <div class="col-lg-6">
                           <div class="form-group">
                             <label for="">{{ __('First Name') }} <span>*</span> </label>
-                            <input type="text" class="form_control"
-                              value="{{ Auth::guard('customer')->user()->fname }}" placeholder="{{ __('First Name') }}"
-                              name="fname" required>
+                            <input type="text" class="form_control" value="{{ Auth::guard('customer')->user()->fname }}"
+                              placeholder="{{ __('First Name') }}" name="fname" required>
                             @error('fname')
                               <p class="text-danger">{{ $message }}</p>
                             @enderror
@@ -156,22 +155,37 @@
                         <div class="col-lg-6">
                           <div class="form-group">
                             <label for="">{{ __('State') }}</label>
-                            <input type="text" class="form_control" placeholder="{{ __('State') }}"
-                              name="state" value="{{ Auth::guard('customer')->user()->state }}">
+                            <input type="text" class="form_control" placeholder="{{ __('State') }}" name="state"
+                              value="{{ Auth::guard('customer')->user()->state }}">
                           </div>
                         </div>
                         <div class="col-lg-6">
                           <div class="form-group">
                             <label for="">{{ __('Zip-code') }}</label>
-                            <input type="text" class="form_control" placeholder="{{ __('Zip-code') }}"
-                              name="zip_code" value="{{ Auth::guard('customer')->user()->zip_code }}">
+                            <input type="text" class="form_control" placeholder="{{ __('Zip-code') }}" name="zip_code"
+                              value="{{ Auth::guard('customer')->user()->zip_code }}">
                           </div>
                         </div>
 
                         <div class="col-lg-12">
                           <div class="form-group">
                             <label for="">{{ __('Address') }}</label>
-                            <textarea name="address" class="form_control" placeholder="{{ __('Address') }}">{{ Auth::guard('customer')->user()->address }}</textarea>
+                            <textarea name="address" class="form_control"
+                              placeholder="{{ __('Address') }}">{{ Auth::guard('customer')->user()->address }}</textarea>
+                          </div>
+                        </div>
+                        <div class="col-lg-12">
+                          <div class="form-group">
+                            <label for="">{{ __('Profile Visibility') }}</label>
+                            <div class="form-check form-switch mt-2">
+                              <input class="form-check-input" type="checkbox" name="is_private" id="is_private" value="1"
+                                {{ Auth::guard('customer')->user()->is_private == 1 ? 'checked' : '' }}>
+                              <label class="form-check-label" for="is_private">
+                                {{ __('Make my profile private') }}
+                              </label>
+                            </div>
+                            <small
+                              class="text-muted">{{ __('If private, only your name and photo will be visible to others. Your following list and other details will be hidden.') }}</small>
                           </div>
                         </div>
                         <div class="col-lg-12">

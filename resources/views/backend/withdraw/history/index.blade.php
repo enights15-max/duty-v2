@@ -1,6 +1,14 @@
 @extends('backend.layout')
 
+@section('style')
+  @includeIf('backend.partials.scarlet-operations-workspace')
+@endsection
+
 @section('content')
+    @php
+        $pendingCount = collect($collection)->where('status', 0)->count();
+        $visiblePayable = collect($collection)->sum(fn ($item) => (float) $item->payable_amount);
+    @endphp
     <div class="page-header">
         <h4 class="page-title">{{ __('Withdraw Requests') }}</h4>
         <ul class="breadcrumbs">
@@ -24,9 +32,34 @@
         </ul>
     </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
+    <div class="ops-shell">
+        <div class="ops-hero">
+            <div class="ops-hero__grid">
+                <div>
+                    <span class="ops-hero__eyebrow">{{ __('Withdraw requests') }}</span>
+                    <h1 class="ops-hero__title">{{ __('Review payouts before money leaves the system') }}</h1>
+                    <p class="ops-hero__copy">
+                        {{ __('Approve, decline or inspect payout requests with actor context, method details and payable totals in a single review queue.') }}
+                    </p>
+                </div>
+                <div class="ops-hero__meta">
+                    <div class="ops-hero__stat">
+                        <span class="ops-hero__stat-label">{{ __('Pending in view') }}</span>
+                        <span class="ops-hero__stat-value">{{ number_format($pendingCount) }}</span>
+                        <span class="ops-hero__stat-note">{{ __('Requests still waiting for approval on this page') }}</span>
+                    </div>
+                    <div class="ops-hero__stat">
+                        <span class="ops-hero__stat-label">{{ __('Visible payable') }}</span>
+                        <span class="ops-hero__stat-value">
+                            {{ $currencyInfo->base_currency_symbol_position == 'left' ? $currencyInfo->base_currency_symbol : '' }}{{ number_format((float) $visiblePayable, 2) }}{{ $currencyInfo->base_currency_symbol_position == 'right' ? $currencyInfo->base_currency_symbol : '' }}
+                        </span>
+                        <span class="ops-hero__stat-note">{{ __('Combined payable amount across visible requests') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card ops-panel">
                 <div class="card-header">
                     <div class="row">
                         <div class="col-lg-4">
@@ -46,10 +79,13 @@
                     <div class="row">
                         <div class="col-lg-12">
                             @if (count($collection) == 0)
-                                <h3 class="text-center">{{ __('NO WITHDRAW REQUESTS FOUND') . '!' }}</h3>
+                                <div class="ops-empty">
+                                    <h3>{{ __('No withdraw requests found') }}</h3>
+                                    <p>{{ __('Search by request ID or method name to narrow down the payout queue.') }}</p>
+                                </div>
                             @else
                                 <div class="table-responsive">
-                                    <table class="table table-striped mt-3">
+                                    <table class="table table-striped mt-3 ops-table">
                                         <thead>
                                             <tr>
                                                 <th>#</th>

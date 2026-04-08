@@ -16,6 +16,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
@@ -27,8 +28,28 @@ class Controller extends BaseController
 
   public function getCurrencyInfo()
   {
+    if (!Schema::hasTable('basic_settings')) {
+      return (object) [
+        'base_currency_symbol' => 'RD$',
+        'base_currency_symbol_position' => 'left',
+        'base_currency_text' => 'DOP',
+        'base_currency_text_position' => 'right',
+        'base_currency_rate' => 1,
+      ];
+    }
+
     $baseCurrencyInfo = Basic::select('base_currency_symbol', 'base_currency_symbol_position', 'base_currency_text', 'base_currency_text_position', 'base_currency_rate')
       ->first();
+
+    if (!$baseCurrencyInfo) {
+      return (object) [
+        'base_currency_symbol' => 'RD$',
+        'base_currency_symbol_position' => 'left',
+        'base_currency_text' => 'DOP',
+        'base_currency_text_position' => 'right',
+        'base_currency_rate' => 1,
+      ];
+    }
 
     return $baseCurrencyInfo;
   }

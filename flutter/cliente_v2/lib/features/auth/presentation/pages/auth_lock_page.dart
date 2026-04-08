@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
+import '../../../../core/providers/profile_state_provider.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../providers/auth_provider.dart';
 
@@ -34,11 +36,10 @@ class _AuthLockPageState extends ConsumerState<AuthLockPage> {
     try {
       final bool canCheck =
           await _auth.canCheckBiometrics || await _auth.isDeviceSupported();
+      final landingRoute = ref.read(activeProfileLandingRouteProvider);
       if (!canCheck) {
         if (mounted) {
-          context.go(
-            '/home',
-          ); // Fallback to home if biometrics are suddenly not available
+          context.go(landingRoute);
         }
         return;
       }
@@ -49,10 +50,10 @@ class _AuthLockPageState extends ConsumerState<AuthLockPage> {
       );
 
       if (didAuthenticate && mounted) {
-        context.go('/home');
+        context.go(landingRoute);
       }
     } catch (e) {
-      appLog('Biometrics error: $e');
+      debugPrint('Biometrics error: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -64,24 +65,21 @@ class _AuthLockPageState extends ConsumerState<AuthLockPage> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final isLoggingOut = ref.watch(authControllerProvider).isLoading;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0712),
+      backgroundColor: palette.background,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.lock_outline_rounded,
-              size: 80,
-              color: Color(0xFF8655F6),
-            ),
+            Icon(Icons.lock_outline_rounded, size: 80, color: palette.primary),
             const SizedBox(height: 24),
             Text(
               'App Locked',
               style: GoogleFonts.splineSans(
-                color: Colors.white,
+                color: palette.textPrimary,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -90,21 +88,21 @@ class _AuthLockPageState extends ConsumerState<AuthLockPage> {
             Text(
               'Use Face ID to unlock',
               style: GoogleFonts.splineSans(
-                color: Colors.white70,
+                color: palette.textSecondary,
                 fontSize: 16,
               ),
             ),
             const SizedBox(height: 48),
             if (_isAuthenticating)
-              const CircularProgressIndicator(color: Color(0xFF8655F6))
+              CircularProgressIndicator(color: palette.primary)
             else
               ElevatedButton.icon(
                 onPressed: _promptBiometrics,
                 icon: const Icon(Icons.face_retouching_natural_rounded),
                 label: const Text('Unlock'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8655F6),
-                  foregroundColor: Colors.white,
+                  backgroundColor: palette.primary,
+                  foregroundColor: palette.onPrimary,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 16,
@@ -116,17 +114,13 @@ class _AuthLockPageState extends ConsumerState<AuthLockPage> {
               ),
             const SizedBox(height: 24),
             TextButton(
-              onPressed: isLoggingOut
-                  ? null
-                  : () async {
-                      await ref.read(authControllerProvider.notifier).logout();
-                      if (!context.mounted) return;
-                      context.go('/login');
-                    },
+              onPressed: () async {
+                await ref.read(authControllerProvider.notifier).logout();
+              },
               child: Text(
-                isLoggingOut ? 'Logging Out...' : 'Log Out',
+                'Log Out',
                 style: GoogleFonts.splineSans(
-                  color: Colors.redAccent,
+                  color: palette.danger,
                   fontWeight: FontWeight.w600,
                 ),
               ),

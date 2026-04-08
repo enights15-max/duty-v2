@@ -195,7 +195,14 @@
 </head>
 
 <body class="p-3">
+    @php
+        if (isset($bookingInfo) && !isset($bookings)) {
+            $bookings = collect([$bookingInfo]);
+        }
+    @endphp
 
+    @foreach ($bookings as $bookingInfo)
+        
     @php
         $position = $bookingInfo->currencyTextPosition;
         $currency = $bookingInfo->currencyText;
@@ -706,6 +713,11 @@
             @endif
         @endfor
     @endif
+    
+    @if (!$loop->last)
+        <div class="page-break"></div>
+    @endif
+    @endforeach
 
 </body>
 

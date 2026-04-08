@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_urls.dart';
+import '../../../../core/theme/colors.dart';
 import '../providers/marketplace_provider.dart';
 
 class TransferRequestDetailsPage extends ConsumerStatefulWidget {
@@ -18,10 +19,6 @@ class TransferRequestDetailsPage extends ConsumerStatefulWidget {
 
 class _TransferRequestDetailsPageState
     extends ConsumerState<TransferRequestDetailsPage> {
-  static const Color kPrimaryColor = Color(0xFF8655F6);
-  static const Color kDarkBackground = Color(0xFF0D0812);
-  static const Color kCardColor = Color(0xFF151022);
-
   bool _isProcessing = false;
 
   Future<void> _runAction(
@@ -29,6 +26,7 @@ class _TransferRequestDetailsPageState
     required String successMessage,
     required Color successColor,
   }) async {
+    final palette = context.dutyTheme;
     setState(() => _isProcessing = true);
     await action();
     final state = ref.read(marketplaceProvider);
@@ -39,7 +37,7 @@ class _TransferRequestDetailsPageState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(state.error.toString()),
-          backgroundColor: Colors.red,
+          backgroundColor: palette.danger,
         ),
       );
       return;
@@ -54,42 +52,38 @@ class _TransferRequestDetailsPageState
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final transferAsync = ref.watch(transferDetailsProvider(widget.transferId));
 
     return Scaffold(
-      backgroundColor: kDarkBackground,
+      backgroundColor: palette.background,
       appBar: AppBar(
-        backgroundColor: kDarkBackground,
+        backgroundColor: palette.background,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: palette.textPrimary),
         title: Text(
           'Transfer Request',
           style: GoogleFonts.manrope(
-            color: Colors.white,
+            color: palette.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),
       ),
       body: transferAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: kPrimaryColor),
-        ),
+        loading: () =>
+            Center(child: CircularProgressIndicator(color: palette.primary)),
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.error_outline,
-                  color: Colors.redAccent,
-                  size: 48,
-                ),
+                Icon(Icons.error_outline, color: palette.danger, size: 48),
                 const SizedBox(height: 16),
                 Text(
                   'We could not load this transfer request.',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.manrope(color: Colors.white70),
+                  style: GoogleFonts.manrope(color: palette.textSecondary),
                 ),
               ],
             ),
@@ -100,7 +94,7 @@ class _TransferRequestDetailsPageState
             return Center(
               child: Text(
                 'Transfer not found.',
-                style: GoogleFonts.manrope(color: Colors.white54),
+                style: GoogleFonts.manrope(color: palette.textSecondary),
               ),
             );
           }
@@ -141,13 +135,13 @@ class _TransferRequestDetailsPageState
                   Container(
                     height: 200,
                     decoration: BoxDecoration(
-                      color: kCardColor,
+                      color: palette.surface,
                       borderRadius: BorderRadius.circular(24),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Icon(
                         Icons.local_activity_rounded,
-                        color: Colors.white30,
+                        color: palette.textMuted,
                         size: 48,
                       ),
                     ),
@@ -156,7 +150,7 @@ class _TransferRequestDetailsPageState
                 Text(
                   headline,
                   style: GoogleFonts.outfit(
-                    color: Colors.white,
+                    color: palette.textPrimary,
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
                     height: 1.0,
@@ -166,7 +160,7 @@ class _TransferRequestDetailsPageState
                 Text(
                   summary,
                   style: GoogleFonts.inter(
-                    color: Colors.white70,
+                    color: palette.textSecondary,
                     fontSize: 14,
                     height: 1.5,
                   ),
@@ -175,9 +169,9 @@ class _TransferRequestDetailsPageState
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: kCardColor,
+                    color: palette.surface,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(color: palette.border),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,7 +179,7 @@ class _TransferRequestDetailsPageState
                       Text(
                         event['title']?.toString() ?? 'Unknown Event',
                         style: GoogleFonts.manrope(
-                          color: Colors.white,
+                          color: palette.textPrimary,
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                         ),
@@ -194,7 +188,7 @@ class _TransferRequestDetailsPageState
                       Text(
                         event['date']?.toString() ?? 'Date pending',
                         style: GoogleFonts.manrope(
-                          color: Colors.white54,
+                          color: palette.textSecondary,
                           fontSize: 13,
                         ),
                       ),
@@ -215,16 +209,16 @@ class _TransferRequestDetailsPageState
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
+                    color: palette.surfaceAlt,
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(color: palette.border),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.info_outline,
-                        color: Color(0xFFE9B4FF),
+                        color: palette.primary,
                         size: 18,
                       ),
                       const SizedBox(width: 10),
@@ -234,7 +228,7 @@ class _TransferRequestDetailsPageState
                               ? 'Approving this request moves the ticket to the requester immediately.'
                               : 'Approving this transfer moves the ticket into your account immediately.',
                           style: GoogleFonts.inter(
-                            color: Colors.white70,
+                            color: palette.textSecondary,
                             fontSize: 13,
                             height: 1.45,
                           ),
@@ -245,8 +239,8 @@ class _TransferRequestDetailsPageState
                 ),
                 const SizedBox(height: 24),
                 if (_isProcessing)
-                  const Center(
-                    child: CircularProgressIndicator(color: kPrimaryColor),
+                  Center(
+                    child: CircularProgressIndicator(color: palette.primary),
                   )
                 else ...[
                   if (canAccept || canReject)
@@ -256,11 +250,9 @@ class _TransferRequestDetailsPageState
                           Expanded(
                             child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.redAccent,
+                                foregroundColor: palette.danger,
                                 side: BorderSide(
-                                  color: Colors.redAccent.withValues(
-                                    alpha: 0.5,
-                                  ),
+                                  color: palette.danger.withValues(alpha: 0.5),
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 15,
@@ -276,7 +268,7 @@ class _TransferRequestDetailsPageState
                                       transferId: widget.transferId,
                                     ),
                                 successMessage: 'Transfer request rejected.',
-                                successColor: Colors.orange,
+                                successColor: palette.warning,
                               ),
                               child: Text(
                                 'Reject',
@@ -292,8 +284,8 @@ class _TransferRequestDetailsPageState
                             flex: 2,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: kPrimaryColor,
-                                foregroundColor: Colors.white,
+                                backgroundColor: palette.primary,
+                                foregroundColor: palette.textPrimary,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 15,
                                 ),
@@ -310,7 +302,7 @@ class _TransferRequestDetailsPageState
                                 successMessage: isReceiverRequest
                                     ? 'Transfer approved. The ticket has been sent.'
                                     : 'Transfer accepted! The ticket is now yours.',
-                                successColor: Colors.green,
+                                successColor: palette.success,
                               ),
                               child: Text(
                                 isReceiverRequest
@@ -330,8 +322,8 @@ class _TransferRequestDetailsPageState
                       width: double.infinity,
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white24),
+                          foregroundColor: palette.textPrimary,
+                          side: BorderSide(color: palette.border),
                           padding: const EdgeInsets.symmetric(vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -342,7 +334,7 @@ class _TransferRequestDetailsPageState
                               .read(marketplaceProvider.notifier)
                               .cancelTransfer(transferId: widget.transferId),
                           successMessage: 'Transfer request cancelled.',
-                          successColor: Colors.blueGrey,
+                          successColor: palette.info,
                         ),
                         child: Text(
                           'Cancel Request',
@@ -371,6 +363,7 @@ class _ActorSummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final name = actor['name']?.toString().trim();
     final username = actor['username']?.toString().trim();
     final source = name?.isNotEmpty == true ? name! : 'U';
@@ -380,11 +373,11 @@ class _ActorSummaryRow extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 22,
-          backgroundColor: const Color(0xFF8655F6).withValues(alpha: 0.22),
+          backgroundColor: palette.primarySurface,
           child: Text(
             initial,
             style: GoogleFonts.manrope(
-              color: const Color(0xFFE9B4FF),
+              color: palette.primary,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -397,7 +390,7 @@ class _ActorSummaryRow extends StatelessWidget {
               Text(
                 label,
                 style: GoogleFonts.manrope(
-                  color: Colors.white38,
+                  color: palette.textMuted,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -406,7 +399,7 @@ class _ActorSummaryRow extends StatelessWidget {
               Text(
                 name?.isNotEmpty == true ? name! : 'Duty user',
                 style: GoogleFonts.manrope(
-                  color: Colors.white,
+                  color: palette.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -414,7 +407,7 @@ class _ActorSummaryRow extends StatelessWidget {
                 Text(
                   '@$username',
                   style: GoogleFonts.manrope(
-                    color: Colors.white54,
+                    color: palette.textSecondary,
                     fontSize: 12,
                   ),
                 ),

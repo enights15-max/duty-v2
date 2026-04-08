@@ -11,14 +11,11 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
-<<<<<<< Updated upstream
-=======
 .env
 <<<<<<< Updated upstream
 =======
 .staging-live-readiness.env
 .mobile-release.env
->>>>>>> Stashed changes
 AuthKey_*.p8
 *firebase-adminsdk-*.json
 *_v2tickets.sql
@@ -26,8 +23,8 @@ AuthKey_*.p8
 *.cer
 *.csr
 *.key
+>>>>>>> Stashed changes
 test-results/
 junit*.xml
 error_log
 /public/assets/admin/file/invoices/*.pdf
->>>>>>> Stashed changes

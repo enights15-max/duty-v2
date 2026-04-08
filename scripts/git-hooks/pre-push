@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo "[pre-push] Running actor smoke gate..."
+php artisan test \
+  --filter='(ActorScopeAndWalletServiceTest|NfcActorScopeTest|WebhookActorResolutionTest|PaymentMethodsActorApiTest|WalletControllerActorApiTest|MarketplacePurchaseActorTest|MarketplaceTransferActorTest|FollowControllerApiTest|SubscriptionControllerApiTest|ScannerContractSmokeTest|EventBookingContractSmokeTest)' \
+  --stop-on-failure
+
+echo "[pre-push] Gate passed."

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../../core/constants/app_urls.dart';
 
 class AuthRemoteDataSource {
   final ApiClient _apiClient;
@@ -66,8 +67,6 @@ class AuthRemoteDataSource {
       rethrow;
     }
   }
-<<<<<<< Updated upstream
-=======
 
   Future<Map<String, dynamic>> loginFirebase(String idToken) async {
     try {
@@ -78,6 +77,9 @@ class AuthRemoteDataSource {
       );
       return response.data;
     } catch (e) {
+      if (e is DioException) {
+        // print('Firebase Login Error: ${e.response?.statusCode} - ${e.response?.data}');
+      }
       rethrow;
     }
   }
@@ -96,7 +98,7 @@ class AuthRemoteDataSource {
         'fname': fname,
         'lname': lname,
         'email': email,
-        'date_of_birth': ?dateOfBirth,
+        if (dateOfBirth != null) 'date_of_birth': dateOfBirth,
       },
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
@@ -110,7 +112,11 @@ class AuthRemoteDataSource {
   }) async {
     final response = await _apiClient.dio.post(
       '/customer/check-availability',
-      data: {'email': ?email, 'phone': ?phone, 'username': ?username},
+      data: {
+        if (email != null) 'email': email,
+        if (phone != null) 'phone': phone,
+        if (username != null) 'username': username,
+      },
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     return response.data;
@@ -164,33 +170,4 @@ class AuthRemoteDataSource {
     );
     return response.data;
   }
-
-  Future<Map<String, dynamic>> requestPasswordResetCode(String email) async {
-    final response = await _apiClient.dio.post(
-      AppUrls.forgetPassword,
-      data: {'email': email},
-      options: Options(contentType: Headers.formUrlEncodedContentType),
-    );
-    return response.data;
-  }
-
-  Future<Map<String, dynamic>> resetPassword({
-    required String email,
-    required String code,
-    required String newPassword,
-    required String newPasswordConfirmation,
-  }) async {
-    final response = await _apiClient.dio.post(
-      AppUrls.resetPasswordUpdate,
-      data: {
-        'email': email,
-        'code': code,
-        'new_password': newPassword,
-        'new_password_confirmation': newPasswordConfirmation,
-      },
-      options: Options(contentType: Headers.formUrlEncodedContentType),
-    );
-    return response.data;
-  }
->>>>>>> Stashed changes
 }

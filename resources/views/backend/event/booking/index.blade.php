@@ -1,6 +1,19 @@
 @extends('backend.layout')
 
+@section('style')
+  @includeIf('backend.partials.scarlet-operations-workspace')
+@endsection
+
 @section('content')
+  @php
+    $bookingFilterLabel = match (request()->input('status')) {
+        'completed' => __('Completed'),
+        'pending' => __('Pending'),
+        'rejected' => __('Rejected'),
+        default => __('All statuses'),
+    };
+  @endphp
+
   <div class="page-header">
     <h4 class="page-title">{{ __('Event Booking') }}</h4>
     <ul class="breadcrumbs">
@@ -51,17 +64,40 @@
     </ul>
   </div>
 
-  <div class="row">
-    <div class="col-md-12">
-      <div class="card">
-        <div class="card-header">
+  <div class="ops-shell">
+    <div class="ops-hero">
+      <div class="ops-hero__grid">
+        <div>
+          <span class="ops-hero__eyebrow">{{ __('Bookings') }}</span>
+          <h1 class="ops-hero__title">{{ __('Payment flow and attendance operations') }}</h1>
+          <p class="ops-hero__copy">
+            {{ __('Track booking status, ticket scans and professional revenue context in a single queue. This view is built for fast support decisions during live operations.') }}
+          </p>
+        </div>
+        <div class="ops-hero__meta">
+          <div class="ops-hero__stat">
+            <span class="ops-hero__stat-label">{{ __('Current results') }}</span>
+            <span class="ops-hero__stat-value">{{ number_format($bookings->total()) }}</span>
+            <span class="ops-hero__stat-note">{{ __('Total bookings matching current filters') }}</span>
+          </div>
+          <div class="ops-hero__stat">
+            <span class="ops-hero__stat-label">{{ __('Status scope') }}</span>
+            <span class="ops-hero__stat-value">{{ $bookingFilterLabel }}</span>
+            <span class="ops-hero__stat-note">{{ __('Use filters below to pivot between payment states quickly') }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card ops-panel">
+      <div class="card-header">
           <div class="row">
             <div class="col-lg-3">
               <div class="card-title">{{ __('Event Booking') }}</div>
             </div>
 
             <div class="col-lg-9">
-              <div class="row justify-content-lg-end justify-content-start">
+              <div class="row justify-content-lg-end justify-content-start ops-toolbar">
                 <div class="col-lg-2">
                   <button class="btn btn-danger btn-sm float-right d-none bulk-delete ml-3 mt-1"
                     data-href="{{ route('admin.event_booking.bulk_delete') }}">
@@ -112,10 +148,13 @@
           <div class="row">
             <div class="col-lg-12">
               @if (count($bookings) == 0)
-                <h3 class="text-center mt-2">{{ __('NO EVENT BOOKING FOUND') . '!' }}</h3>
+                <div class="ops-empty">
+                  <h3>{{ __('No event bookings found') }}</h3>
+                  <p>{{ __('Try another booking ID, title or payment status to surface the right order flow.') }}</p>
+                </div>
               @else
                 <div class="table-responsive">
-                  <table class="table table-striped mt-3">
+                  <table class="table table-striped mt-3 ops-table">
                     <thead>
                       <tr>
                         <th scope="col">

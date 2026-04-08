@@ -38,4 +38,10 @@ class Organizer extends Model implements AuthenticatableContract
   {
     return $this->hasOne(OrganizerInfo::class);
   }
+
+  //followers
+  public function followers()
+  {
+    return $this->morphMany(Follower::class, 'following');
+  }
 }

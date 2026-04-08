@@ -8,8 +8,7 @@
                         <img src="{{ asset('assets/admin/img/admins/' . Auth::guard('admin')->user()->image) }}"
                             alt="Admin Image" class="avatar-img rounded-circle">
                     @else
-                        <img src="{{ asset('assets/admin/img/blank_user.jpg') }}" alt=""
-                            class="avatar-img rounded-circle">
+                        <img src="{{ asset('assets/admin/img/blank_user.jpg') }}" alt="" class="avatar-img rounded-circle">
                     @endif
                 </div>
 
@@ -73,6 +72,11 @@
                     </div>
                 </div>
 
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">OV</span>
+                    <h4 class="text-section">{{ __('Overview') }}</h4>
+                </li>
+
                 {{-- dashboard --}}
                 <li class="nav-item @if (request()->routeIs('admin.dashboard')) active @endif">
                     <a href="{{ route('admin.dashboard') }}">
@@ -81,318 +85,367 @@
                     </a>
                 </li>
 
-                {{-- menu builder --}}
-                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Menu Builder', $rolePermissions)))
-                    <li class="nav-item @if (request()->routeIs('admin.menu_builder')) active @endif">
-                        <a href="{{ route('admin.menu_builder', ['language' => $defaultLang->code]) }}">
-                            <i class="fal fa-bars"></i>
-                            <p>{{ __('Menu Builder') }}</p>
-                        </a>
-                    </li>
-                @endif
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">OP</span>
+                    <h4 class="text-section">{{ __('Operations') }}</h4>
+                </li>
                 {{-- event --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Event Management', $rolePermissions)))
-                    @php
-                        $isParentEventMangementActive =
-                            request()->routeIs('admin.event_management.categories') ||
-                            request()->routeIs('add.event.event') ||
-                            request()->routeIs('admin.choose-event-type') ||
-                            request()->routeIs('admin.event_management.event') ||
-                            request()->routeIs('admin.event_management.edit_event') ||
-                            request()->routeIs('admin.event.ticket') ||
-                            request()->routeIs('admin.event_management.ticket_setting') ||
-                            request()->routeIs('admin.event.add.ticket') ||
-                            request()->routeIs('admin.event.edit.ticket') ||
-                            request()->routeIs('admin.event_management.countries') ||
-                            request()->routeIs('admin.event_management.state') ||
-                            request()->routeIs('admin.event_management.edit_state') ||
-                            request()->routeIs('admin.event_management.city') ||
-                            request()->routeIs('admin.event_management.edit_city') ||
-                            request()->routeIs('admin.event_management.settings') ||
-                            request()->routeIs('admin.event_management.seat_mapping')
-                                ? true
-                                : false;
-                        $isActiveEventSp =
-                            request()->routeIs('admin.event_management.categories') ||
-                            request()->routeIs('admin.event_management.countries') ||
-                            request()->routeIs('admin.event_management.state') ||
-                            request()->routeIs('admin.event_management.edit_state') ||
-                            request()->routeIs('admin.event_management.city') ||
-                            request()->routeIs('admin.event_management.edit_city') ||
-                            request()->routeIs('admin.event_management.settings')
-                                ? true
-                                : false;
-                    @endphp
-                    <li class="nav-item {{ $isParentEventMangementActive == true ? 'active' : '' }}">
-                        <a data-toggle="collapse" href="#event">
-                            <i class="fal fa-book"></i>
-                            <p>{{ __('Event Management') }}</p>
-                            <span class="caret"></span>
-                        </a>
+                            @php
+                                $isParentEventMangementActive =
+                                    request()->routeIs('admin.event_management.categories') ||
+                                    request()->routeIs('add.event.event') ||
+                                    request()->routeIs('admin.choose-event-type') ||
+                                    request()->routeIs('admin.event_management.event') ||
+                                    request()->routeIs('admin.event_management.edit_event') ||
+                                    request()->routeIs('admin.event.ticket') ||
+                                    request()->routeIs('admin.event_management.ticket_setting') ||
+                                    request()->routeIs('admin.event.add.ticket') ||
+                                    request()->routeIs('admin.event.edit.ticket') ||
+                                    request()->routeIs('admin.event_management.countries') ||
+                                    request()->routeIs('admin.event_management.state') ||
+                                    request()->routeIs('admin.event_management.edit_state') ||
+                                    request()->routeIs('admin.event_management.city') ||
+                                    request()->routeIs('admin.event_management.edit_city') ||
+                                    request()->routeIs('admin.event_management.settings') ||
+                                    request()->routeIs('admin.event_management.seat_mapping')
+                                    ? true
+                                    : false;
+                                $isActiveEventSp =
+                                    request()->routeIs('admin.event_management.categories') ||
+                                    request()->routeIs('admin.event_management.countries') ||
+                                    request()->routeIs('admin.event_management.state') ||
+                                    request()->routeIs('admin.event_management.edit_state') ||
+                                    request()->routeIs('admin.event_management.city') ||
+                                    request()->routeIs('admin.event_management.edit_city') ||
+                                    request()->routeIs('admin.event_management.settings')
+                                    ? true
+                                    : false;
+                            @endphp
+                            <li class="nav-item {{ $isParentEventMangementActive == true ? 'active' : '' }}">
+                                <a data-toggle="collapse" href="#event">
+                                    <i class="fal fa-book"></i>
+                                    <p>{{ __('Events') }}</p>
+                                    <span class="caret"></span>
+                                </a>
 
-                        <div id="event" class="collapse {{ $isParentEventMangementActive == true ? 'show' : '' }}">
-                            <ul class="nav nav-collapse">
-                                <li class="submenu">
-                                    <a data-toggle="collapse" href="#eventSpecifications"
-                                        aria-expanded="{{ $isActiveEventSp ? 'true' : 'false' }}">
-                                        <span class="sub-item">{{ __('Event Specifications') }}</span>
-                                        <span class="caret"></span>
-                                    </a>
-                                    <div class="collapse {{ $isActiveEventSp ? 'show' : '' }}"
-                                        id="eventSpecifications">
-                                        <ul class="nav nav-collapse subnav">
-                                            <li class=" @if (request()->routeIs('admin.event_management.settings')) active @endif ">
-                                                <a href="{{ route('admin.event_management.settings') }}">
-                                                    <span class="sub-item">{{ __('Settings') }}</span>
-                                                </a>
-                                            </li>
-                                            <li class=" @if (request()->routeIs('admin.event_management.categories')) active @endif ">
-                                                <a
-                                                    href="{{ route('admin.event_management.categories', ['language' => $defaultLang->code]) }}">
-                                                    <span class="sub-item">{{ __('Categories') }}</span>
-                                                </a>
-                                            </li>
-                                            @if ($settings->event_country_status == 1)
-                                                <li class=" @if (request()->routeIs('admin.event_management.countries')) active @endif ">
-                                                    <a
-                                                        href="{{ route('admin.event_management.countries', ['language' => $defaultLang->code]) }}">
-                                                        <span class="sub-item">{{ __('Countries') }}</span>
-                                                    </a>
-                                                </li>
-                                            @endif
-                                            @if ($settings->event_state_status == 1)
-                                                <li
-                                                    class="
-                                             @if (request()->routeIs('admin.event_management.state')) active @endif
-                                             @if (request()->routeIs('admin.event_management.edit_state')) active @endif
-                                              ">
-                                                    <a
-                                                        href="{{ route('admin.event_management.state', ['language' => $defaultLang->code]) }}">
-                                                        <span class="sub-item">{{ __('States') }}</span>
-                                                    </a>
-                                                </li>
-                                            @endif
-                                            <li
-                                                class="
-                                             @if (request()->routeIs('admin.event_management.city')) active @endif
-                                             @if (request()->routeIs('admin.event_management.edit_city')) active @endif
-                                              ">
-                                                <a
-                                                    href="{{ route('admin.event_management.city', ['language' => $defaultLang->code]) }}">
-                                                    <span class="sub-item">{{ __('Cities') }}</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </li>
+                                <div id="event" class="collapse {{ $isParentEventMangementActive == true ? 'show' : '' }}">
+                                    <ul class="nav nav-collapse">
+                                        <li class="submenu">
+                                            <a data-toggle="collapse" href="#eventSpecifications"
+                                                aria-expanded="{{ $isActiveEventSp ? 'true' : 'false' }}">
+                                                <span class="sub-item">{{ __('Event Specifications') }}</span>
+                                                <span class="caret"></span>
+                                            </a>
+                                            <div class="collapse {{ $isActiveEventSp ? 'show' : '' }}" id="eventSpecifications">
+                                                <ul class="nav nav-collapse subnav">
+                                                    <li
+                                                        class=" @if (request()->routeIs('admin.event_management.settings')) active @endif ">
+                                                        <a href="{{ route('admin.event_management.settings') }}">
+                                                            <span class="sub-item">{{ __('Settings') }}</span>
+                                                        </a>
+                                                    </li>
+                                                    <li
+                                                        class=" @if (request()->routeIs('admin.event_management.categories')) active @endif ">
+                                                        <a
+                                                            href="{{ route('admin.event_management.categories', ['language' => $defaultLang->code]) }}">
+                                                            <span class="sub-item">{{ __('Categories') }}</span>
+                                                        </a>
+                                                    </li>
+                                                    @if ($settings->event_country_status == 1)
+                                                        <li
+                                                            class=" @if (request()->routeIs('admin.event_management.countries')) active @endif ">
+                                                            <a
+                                                                href="{{ route('admin.event_management.countries', ['language' => $defaultLang->code]) }}">
+                                                                <span class="sub-item">{{ __('Countries') }}</span>
+                                                            </a>
+                                                        </li>
+                                                    @endif
+                                                    @if ($settings->event_state_status == 1)
+                                                        <li class="
+                                                                             @if (request()->routeIs('admin.event_management.state')) active @endif
+                                                                             @if (request()->routeIs('admin.event_management.edit_state')) active @endif
+                                                                              ">
+                                                            <a
+                                                                href="{{ route('admin.event_management.state', ['language' => $defaultLang->code]) }}">
+                                                                <span class="sub-item">{{ __('States') }}</span>
+                                                            </a>
+                                                        </li>
+                                                    @endif
+                                                    <li class="
+                                                                     @if (request()->routeIs('admin.event_management.city')) active @endif
+                                                                     @if (request()->routeIs('admin.event_management.edit_city')) active @endif
+                                                                      ">
+                                                        <a
+                                                            href="{{ route('admin.event_management.city', ['language' => $defaultLang->code]) }}">
+                                                            <span class="sub-item">{{ __('Cities') }}</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </li>
 
-                                <li class="submenu">
-                                    <a data-toggle="collapse" href="#EventsManagement"
-                                        aria-expanded="{{ request()->routeIs('admin.choose-event-type') ||
-                                        request()->routeIs('add.event.event') ||
-                                        request()->routeIs('admin.event_management.event') ||
-                                        request()->routeIs('admin.event_management.edit_event') ||
-                                        request()->routeIs('admin.event.ticket') ||
-                                        request()->routeIs('admin.event_management.ticket_setting') ||
-                                        request()->routeIs('admin.event.add.ticket') ||
-                                        request()->routeIs('admin.event.edit.ticket') ||
-                                        request()->routeIs('admin.event_management.seat_mapping')
-                                            ? 'true'
-                                            : 'false' }}">
-                                        <span class="sub-item">{{ __('Event Management') }}</span>
-                                        <span class="caret"></span>
-                                    </a>
-                                    <div class="collapse
-                    @if (request()->routeIs('admin.choose-event-type')) show
-                    @elseif(request()->routeIs('add.event.event')) show
-                    @elseif(request()->routeIs('admin.event_management.event')) show
-                    @elseif(request()->routeIs('admin.event_management.edit_event')) show
-                    @elseif(request()->routeIs('admin.event_management.ticket_setting')) show
-                    @elseif(request()->routeIs('admin.event.ticket')) show
-                    @elseif(request()->routeIs('admin.event.add.ticket')) show
-                    @elseif(request()->routeIs('admin.event.edit.ticket')) show
-                    @elseif(request()->routeIs('admin.event_management.seat_mapping')) show @endif"
-                                        id="EventsManagement">
-                                        <ul class="nav nav-collapse subnav">
-                                            <li
-                                                class=" @if (request()->routeIs('admin.choose-event-type')) active
-                        @elseif (request()->routeIs('add.event.event')) active @endif ">
-                                                <a
-                                                    href="{{ route('admin.choose-event-type', ['language' => $defaultLang->code]) }}">
-                                                    <span class="sub-item">{{ __('Add Event') }}</span>
-                                                </a>
-                                            </li>
+                                        <li class="submenu">
+                                            <a data-toggle="collapse" href="#EventsManagement" aria-expanded="{{ request()->routeIs('admin.choose-event-type') ||
+                    request()->routeIs('add.event.event') ||
+                    request()->routeIs('admin.event_management.event') ||
+                    request()->routeIs('admin.event_management.edit_event') ||
+                    request()->routeIs('admin.event.ticket') ||
+                    request()->routeIs('admin.event_management.ticket_setting') ||
+                    request()->routeIs('admin.event.add.ticket') ||
+                    request()->routeIs('admin.event.edit.ticket') ||
+                    request()->routeIs('admin.event_management.seat_mapping')
+                    ? 'true'
+                    : 'false' }}">
+                                                <span class="sub-item">{{ __('Event Management') }}</span>
+                                                <span class="caret"></span>
+                                            </a>
+                                            <div class="collapse
+                                            @if (request()->routeIs('admin.choose-event-type')) show
+                                            @elseif(request()->routeIs('add.event.event')) show
+                                            @elseif(request()->routeIs('admin.event_management.event')) show
+                                            @elseif(request()->routeIs('admin.event_management.edit_event')) show
+                                            @elseif(request()->routeIs('admin.event_management.ticket_setting')) show
+                                            @elseif(request()->routeIs('admin.event.ticket')) show
+                                            @elseif(request()->routeIs('admin.event.add.ticket')) show
+                                            @elseif(request()->routeIs('admin.event.edit.ticket')) show
+                                            @elseif(request()->routeIs('admin.event_management.seat_mapping')) show @endif"
+                                                id="EventsManagement">
+                                                <ul class="nav nav-collapse subnav">
+                                                    <li class=" @if (request()->routeIs('admin.choose-event-type')) active
+                                                    @elseif (request()->routeIs('add.event.event')) active @endif ">
+                                                        <a
+                                                            href="{{ route('admin.choose-event-type', ['language' => $defaultLang->code]) }}">
+                                                            <span class="sub-item">{{ __('Add Event') }}</span>
+                                                        </a>
+                                                    </li>
 
-                                            <li
-                                                class="@if (request()->routeIs('admin.event_management.event') && request()->input('event_type') == '') active
-                        @elseif (request()->routeIs('admin.event_management.edit_event') && request()->input('event_type') == '') active
-                        @elseif (request()->routeIs('admin.event.ticket') && request()->input('event_type') == '') active
-                        @elseif (request()->routeIs('admin.event_management.ticket_setting')) active
-                        @elseif (request()->routeIs('admin.event.add.ticket') && request()->input('event_type') == '') active
-                        @elseif (request()->routeIs('admin.event.edit.ticket') && request()->input('event_type') == '') active
-                        @elseif (request()->routeIs('admin.event_management.seat_mapping') && request()->input('event_type') == '') active @endif">
-                                                <a
-                                                    href="{{ route('admin.event_management.event', ['language' => $defaultLang->code]) }}">
-                                                    <span class="sub-item">{{ __('All Events') }}</span>
-                                                </a>
-                                            </li>
+                                                    <li
+                                                        class="@if (request()->routeIs('admin.event_management.event') && request()->input('event_type') == '') active
+                                                        @elseif (request()->routeIs('admin.event_management.edit_event') && request()->input('event_type') == '') active
+                                                                    @elseif (request()->routeIs('admin.event.ticket') && request()->input('event_type') == '') active
+                                                @elseif (request()->routeIs('admin.event_management.ticket_setting')) active
+                                                @elseif (request()->routeIs('admin.event.add.ticket') && request()->input('event_type') == '') active
+                                                @elseif (request()->routeIs('admin.event.edit.ticket') && request()->input('event_type') == '') active
+                                                @elseif (request()->routeIs('admin.event_management.seat_mapping') && request()->input('event_type') == '') active @endif">
+                                                        <a
+                                                            href="{{ route('admin.event_management.event', ['language' => $defaultLang->code]) }}">
+                                                            <span class="sub-item">{{ __('All Events') }}</span>
+                                                        </a>
+                                                    </li>
 
-                                            <li
-                                                class="@if (request()->routeIs('admin.event_management.event') && request()->input('event_type') == 'venue') active
-                        @elseif (request()->routeIs('admin.add.event.event') && request()->input('type') == 'venue') active
-                        @elseif (request()->routeIs('admin.event.ticket') && request()->input('event_type') == 'venue') active
-                        @elseif (request()->routeIs('admin.event.add.ticket') && request()->input('event_type') == 'venue') active
-                        @elseif (request()->routeIs('admin.event.edit.ticket') && request()->input('event_type') == 'venue') active @endif">
-                                                <a
-                                                    href="{{ route('admin.event_management.event', ['language' => $defaultLang->code, 'event_type' => 'venue']) }}">
-                                                    <span class="sub-item">{{ __('Venue Events') }}</span>
-                                                </a>
-                                            </li>
+                                                    <li
+                                                        class="@if (request()->routeIs('admin.event_management.event') && request()->input('event_type') == 'venue') active
+                                                        @elseif (request()->routeIs('admin.add.event.event') && request()->input('type') == 'venue') active
+                                                                    @elseif (request()->routeIs('admin.event.ticket') && request()->input('event_type') == 'venue') active
+                                                @elseif (request()->routeIs('admin.event.add.ticket') && request()->input('event_type') == 'venue') active
+                                                @elseif (request()->routeIs('admin.event.edit.ticket') && request()->input('event_type') == 'venue') active @endif">
+                                                        <a
+                                                            href="{{ route('admin.event_management.event', ['language' => $defaultLang->code, 'event_type' => 'venue']) }}">
+                                                            <span class="sub-item">{{ __('Venue Events') }}</span>
+                                                        </a>
+                                                    </li>
 
-                                            <li
-                                                class="@if (request()->routeIs('admin.event_management.event') && request()->input('event_type') == 'online') active
-                        @elseif (request()->routeIs('admin.add.event.event') && request()->input('type') == 'online') active @endif ">
-                                                <a
-                                                    href="{{ route('admin.event_management.event', ['language' => $defaultLang->code, 'event_type' => 'online']) }}">
-                                                    <span class="sub-item">{{ __('Online Events') }}</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
+                                                    <li
+                                                        class="@if (request()->routeIs('admin.event_management.event') && request()->input('event_type') == 'online') active
+                                                        @elseif (request()->routeIs('admin.add.event.event') && request()->input('type') == 'online') active @endif ">
+                                                        <a
+                                                            href="{{ route('admin.event_management.event', ['language' => $defaultLang->code, 'event_type' => 'online']) }}">
+                                                            <span class="sub-item">{{ __('Online Events') }}</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
                 @endif
 
                 {{-- event booking --}}
-                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Event Bookings', $rolePermissions)))
-                    <li
-                        class="nav-item
-          @if (request()->routeIs('admin.event.booking')) active
-          @elseif (request()->routeIs('admin.event_booking.details')) active
-          @elseif (request()->routeIs('admin.event_management.coupons')) active
-          @elseif (request()->routeIs('admin.event_booking.settings.preference')) active
-          @elseif (request()->routeIs('admin.event_booking.settings.tax_commission')) active
-          @elseif (request()->routeIs('admin.event_booking.report')) active @endif">
+                @php
+                    $canEventBookingsMenu = is_null($roleInfo) || (!empty($rolePermissions) && in_array('Event Bookings', $rolePermissions));
+                    $canEconomyMenu = is_null($roleInfo) || (!empty($rolePermissions) && (in_array('Event Bookings', $rolePermissions) || in_array('Event Booking Economy', $rolePermissions)));
+                    $canFeePoliciesMenu = is_null($roleInfo) || (!empty($rolePermissions) && (in_array('Event Bookings', $rolePermissions) || in_array('Event Booking Fee Policies', $rolePermissions)));
+                @endphp
+                @if ($canEventBookingsMenu || $canEconomyMenu || $canFeePoliciesMenu)
+                    <li class="nav-item
+                              @if (request()->routeIs('admin.event.booking')) active
+                              @elseif (request()->routeIs('admin.event_booking.details')) active
+                              @elseif (request()->routeIs('admin.event_management.coupons')) active
+                              @elseif (request()->routeIs('admin.event_booking.settings.preference')) active
+                              @elseif (request()->routeIs('admin.event_booking.settings.tax_commission')) active
+                              @elseif (request()->routeIs('admin.event_booking.settings.fee_policies')) active
+                              @elseif (request()->routeIs('admin.event_booking.economy')) active
+                              @elseif (request()->routeIs('admin.event_booking.report')) active @endif">
                         <a data-toggle="collapse" href="#event_bookings">
                             <i class="fal fa-users-class"></i>
-                            <p>{{ __('Event Bookings') }}</p>
+                            <p>{{ __('Bookings') }}</p>
                             <span class="caret"></span>
                         </a>
 
-                        <div id="event_bookings"
-                            class="collapse
-            @if (request()->routeIs('admin.event_management.coupons')) show
-            @elseif (request()->routeIs('admin.event_booking.settings.preference')) show
-            @elseif (request()->routeIs('admin.event.booking')) show
-            @elseif (request()->routeIs('admin.event_booking.details')) show
-            @elseif (request()->routeIs('admin.event_booking.report')) show
-            @elseif (request()->routeIs('admin.event_booking.settings.tax_commission')) show @endif">
+                        <div id="event_bookings" class="collapse
+                                @if (request()->routeIs('admin.event_management.coupons')) show
+                                @elseif (request()->routeIs('admin.event_booking.settings.preference')) show
+                                @elseif (request()->routeIs('admin.event.booking')) show
+                                @elseif (request()->routeIs('admin.event_booking.details')) show
+                                @elseif (request()->routeIs('admin.event_booking.report')) show
+                                @elseif (request()->routeIs('admin.event_booking.settings.tax_commission')) show
+                                @elseif (request()->routeIs('admin.event_booking.settings.fee_policies')) show
+                                @elseif (request()->routeIs('admin.event_booking.economy')) show @endif">
                             <ul class="nav nav-collapse">
 
                                 <li class="submenu">
                                     <a data-toggle="collapse" href="#EventsSettings"
-                                        aria-expanded="{{ request()->routeIs('admin.event_management.coupons') || request()->routeIs('admin.event_booking.settings.tax_commission') || request()->routeIs('admin.event_booking.settings.preference') ? 'true' : 'false' }}">
+                                        aria-expanded="{{ request()->routeIs('admin.event_management.coupons') || request()->routeIs('admin.event_booking.settings.tax_commission') || request()->routeIs('admin.event_booking.settings.preference') || request()->routeIs('admin.event_booking.settings.fee_policies') ? 'true' : 'false' }}">
                                         <span class="sub-item">{{ __('Settings') }}</span>
                                         <span class="caret"></span>
                                     </a>
                                     <div class="collapse
-                    @if (request()->routeIs('admin.event_management.coupons')) show
-                    @elseif (request()->routeIs('admin.event_booking.settings.preference')) show
-                    @elseif (request()->routeIs('admin.event_booking.settings.tax_commission')) show @endif"
+                                        @if (request()->routeIs('admin.event_management.coupons')) show
+                                        @elseif (request()->routeIs('admin.event_booking.settings.preference')) show
+                                        @elseif (request()->routeIs('admin.event_booking.settings.tax_commission')) show
+                                        @elseif (request()->routeIs('admin.event_booking.settings.fee_policies')) show @endif"
                                         id="EventsSettings">
                                         <ul class="nav nav-collapse subnav">
-                                            <li
-                                                class="{{ request()->routeIs('admin.event_booking.settings.preference') ? 'active' : '' }}">
-                                                <a href="{{ route('admin.event_booking.settings.preference') }}">
-                                                    <span class="sub-item">{{ __('Preference') }}</span>
-                                                </a>
-                                            </li>
-                                            <li
-                                                class="{{ request()->routeIs('admin.event_management.coupons') ? 'active' : '' }}">
-                                                <a href="{{ route('admin.event_management.coupons') }}">
-                                                    <span class="sub-item">{{ __('Coupons') }}</span>
-                                                </a>
-                                            </li>
-                                            <li
-                                                class="{{ request()->routeIs('admin.event_booking.settings.tax_commission') ? 'active' : '' }}">
-                                                <a href="{{ route('admin.event_booking.settings.tax_commission') }}">
-                                                    <span class="sub-item">{{ __('Tax & Commission') }}</span>
-                                                </a>
-                                            </li>
+                                            @if ($canEventBookingsMenu)
+                                                <li
+                                                    class="{{ request()->routeIs('admin.event_booking.settings.preference') ? 'active' : '' }}">
+                                                    <a href="{{ route('admin.event_booking.settings.preference') }}">
+                                                        <span class="sub-item">{{ __('Preference') }}</span>
+                                                    </a>
+                                                </li>
+                                                <li
+                                                    class="{{ request()->routeIs('admin.event_management.coupons') ? 'active' : '' }}">
+                                                    <a href="{{ route('admin.event_management.coupons') }}">
+                                                        <span class="sub-item">{{ __('Coupons') }}</span>
+                                                    </a>
+                                                </li>
+                                                <li
+                                                    class="{{ request()->routeIs('admin.event_booking.settings.tax_commission') ? 'active' : '' }}">
+                                                    <a href="{{ route('admin.event_booking.settings.tax_commission') }}">
+                                                        <span class="sub-item">{{ __('Tax & Commission') }}</span>
+                                                    </a>
+                                                </li>
+                                            @endif
+                                            @if ($canFeePoliciesMenu)
+                                                <li
+                                                    class="{{ request()->routeIs('admin.event_booking.settings.fee_policies') ? 'active' : '' }}">
+                                                    <a href="{{ route('admin.event_booking.settings.fee_policies') }}">
+                                                        <span class="sub-item">{{ __('Fee Policies') }}</span>
+                                                    </a>
+                                                </li>
+                                            @endif
 
                                         </ul>
                                     </div>
                                 </li>
 
-                                <li
-                                    class="
-                  @if (request()->routeIs('admin.event.booking') && empty(request()->input('status'))) active
-                  @elseif (request()->routeIs('admin.event_booking.details')) active @endif">
-                                    <a href="{{ route('admin.event.booking') }}">
-                                        <span class="sub-item">{{ __('All Bookings') }}</span>
-                                    </a>
-                                </li>
+                                @if ($canEventBookingsMenu)
+                                    <li class="
+                                          @if (request()->routeIs('admin.event.booking') && empty(request()->input('status'))) active
+                                          @elseif (request()->routeIs('admin.event_booking.details')) active @endif">
+                                        <a href="{{ route('admin.event.booking') }}">
+                                            <span class="sub-item">{{ __('All Bookings') }}</span>
+                                        </a>
+                                    </li>
 
-                                <li
-                                    class="{{ request()->routeIs('admin.event.booking') && request()->input('status') == 'completed' ? 'active' : '' }}">
-                                    <a href="{{ route('admin.event.booking', ['status' => 'completed']) }}">
-                                        <span class="sub-item">{{ __('Completed Bookings') }}</span>
-                                    </a>
-                                </li>
+                                    <li
+                                        class="{{ request()->routeIs('admin.event.booking') && request()->input('status') == 'completed' ? 'active' : '' }}">
+                                        <a href="{{ route('admin.event.booking', ['status' => 'completed']) }}">
+                                            <span class="sub-item">{{ __('Completed Bookings') }}</span>
+                                        </a>
+                                    </li>
 
-                                <li
-                                    class="{{ request()->routeIs('admin.event.booking') && request()->input('status') == 'pending' ? 'active' : '' }}">
-                                    <a href="{{ route('admin.event.booking', ['status' => 'pending']) }}">
-                                        <span class="sub-item">{{ __('Pending Bookings') }}</span>
-                                    </a>
-                                </li>
+                                    <li
+                                        class="{{ request()->routeIs('admin.event.booking') && request()->input('status') == 'pending' ? 'active' : '' }}">
+                                        <a href="{{ route('admin.event.booking', ['status' => 'pending']) }}">
+                                            <span class="sub-item">{{ __('Pending Bookings') }}</span>
+                                        </a>
+                                    </li>
 
-                                <li
-                                    class="{{ request()->routeIs('admin.event.booking') && request()->input('status') == 'rejected' ? 'active' : '' }}">
-                                    <a href="{{ route('admin.event.booking', ['status' => 'rejected']) }}">
-                                        <span class="sub-item">{{ __('Rejected Bookings') }}</span>
-                                    </a>
-                                </li>
+                                    <li
+                                        class="{{ request()->routeIs('admin.event.booking') && request()->input('status') == 'rejected' ? 'active' : '' }}">
+                                        <a href="{{ route('admin.event.booking', ['status' => 'rejected']) }}">
+                                            <span class="sub-item">{{ __('Rejected Bookings') }}</span>
+                                        </a>
+                                    </li>
 
-                                <li class="{{ request()->routeIs('admin.event_booking.report') ? 'active' : '' }}">
-                                    <a href="{{ route('admin.event_booking.report') }}">
-                                        <span class="sub-item">{{ __('Report') }}</span>
-                                    </a>
-                                </li>
+                                    <li
+                                        class="{{ request()->routeIs('admin.event_reservation.index') && (request()->input('status') === null || request()->input('status') === 'all') ? 'active' : '' }}">
+                                        <a href="{{ route('admin.event_reservation.index', ['status' => 'all']) }}">
+                                            <span class="sub-item">{{ __('All Reservations') }}</span>
+                                        </a>
+                                    </li>
+
+                                    <li
+                                        class="{{ request()->routeIs('admin.event_reservation.index') && request()->input('status') == 'active' ? 'active' : '' }} {{ request()->routeIs('admin.event_reservation.details') ? 'active' : '' }}">
+                                        <a href="{{ route('admin.event_reservation.index', ['status' => 'active']) }}">
+                                            <span class="sub-item">{{ __('Active Reservations') }}</span>
+                                        </a>
+                                    </li>
+
+                                    <li
+                                        class="{{ request()->routeIs('admin.event_reservation.index') && request()->input('status') == 'completed' ? 'active' : '' }}">
+                                        <a href="{{ route('admin.event_reservation.index', ['status' => 'completed']) }}">
+                                            <span class="sub-item">{{ __('Completed Reservations') }}</span>
+                                        </a>
+                                    </li>
+
+                                    <li
+                                        class="{{ request()->routeIs('admin.event_reservation.index') && request()->input('status') == 'expired' ? 'active' : '' }}">
+                                        <a href="{{ route('admin.event_reservation.index', ['status' => 'expired']) }}">
+                                            <span class="sub-item">{{ __('Expired Reservations') }}</span>
+                                        </a>
+                                    </li>
+
+                                    <li class="{{ request()->routeIs('admin.event_booking.report') ? 'active' : '' }}">
+                                        <a href="{{ route('admin.event_booking.report') }}">
+                                            <span class="sub-item">{{ __('Report') }}</span>
+                                        </a>
+                                    </li>
+                                @endif
+                                @if ($canEconomyMenu)
+                                    <li class="{{ request()->routeIs('admin.event_booking.economy') ? 'active' : '' }}">
+                                        <a href="{{ route('admin.event_booking.economy') }}">
+                                            <span class="sub-item">{{ __('Economy') }}</span>
+                                        </a>
+                                    </li>
+                                @endif
                             </ul>
                         </div>
                     </li>
                 @endif
 
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">FI</span>
+                    <h4 class="text-section">{{ __('Finance') }}</h4>
+                </li>
+
                 {{-- Withdraw Method --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Withdraw Method', $rolePermissions)))
-                    <li
-                        class="nav-item
-          @if (request()->routeIs('admin.withdraw.payment_method')) active
-          @elseif (request()->routeIs('admin.withdraw.payment_method')) active
-          @elseif (request()->routeIs('admin.withdraw_payment_method.mange_input')) active
-          @elseif (request()->routeIs('admin.withdraw_payment_method.edit_input')) active
-          @elseif (request()->routeIs('admin.withdraw.withdraw_request')) active @endif">
+                    <li class="nav-item
+                          @if (request()->routeIs('admin.withdraw.payment_method')) active
+                          @elseif (request()->routeIs('admin.withdraw.payment_method')) active
+                          @elseif (request()->routeIs('admin.withdraw_payment_method.mange_input')) active
+                          @elseif (request()->routeIs('admin.withdraw_payment_method.edit_input')) active
+                          @elseif (request()->routeIs('admin.withdraw.withdraw_request')) active @endif">
                         <a data-toggle="collapse" href="#withdraw_method">
                             <i class="fas fa-credit-card"></i>
-                            <p>{{ __('Withdraw Method') }}</p>
+                            <p>{{ __('Payouts') }}</p>
                             <span class="caret"></span>
                         </a>
 
-                        <div id="withdraw_method"
-                            class="collapse
-            @if (request()->routeIs('admin.withdraw.payment_method')) show
-            @elseif (request()->routeIs('admin.withdraw.payment_method')) show
-            @elseif (request()->routeIs('admin.withdraw_payment_method.mange_input')) show
-            @elseif (request()->routeIs('admin.withdraw_payment_method.edit_input')) show
-            @elseif (request()->routeIs('admin.withdraw.withdraw_request')) show @endif">
+                        <div id="withdraw_method" class="collapse
+                            @if (request()->routeIs('admin.withdraw.payment_method')) show
+                            @elseif (request()->routeIs('admin.withdraw.payment_method')) show
+                            @elseif (request()->routeIs('admin.withdraw_payment_method.mange_input')) show
+                            @elseif (request()->routeIs('admin.withdraw_payment_method.edit_input')) show
+                            @elseif (request()->routeIs('admin.withdraw.withdraw_request')) show @endif">
                             <ul class="nav nav-collapse">
-                                <li
-                                    class="@if (request()->routeIs('admin.withdraw.payment_method')) active
-                  @elseif (request()->routeIs('admin.withdraw_payment_method.mange_input')) active
-                  @elseif (request()->routeIs('admin.withdraw_payment_method.edit_input')) active @endif">
+                                <li class="@if (request()->routeIs('admin.withdraw.payment_method')) active
+                                  @elseif (request()->routeIs('admin.withdraw_payment_method.mange_input')) active
+                                              @elseif (request()->routeIs('admin.withdraw_payment_method.edit_input')) active @endif">
                                     <a
                                         href="{{ route('admin.withdraw.payment_method', ['language' => $defaultLang->code]) }}">
                                         <span class="sub-item">{{ __('Payment Methods') }}</span>
@@ -421,29 +474,54 @@
                     </li>
                 @endif
 
-                {{-- organizer --}}
-                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Organizer Mangement', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.organizer_management.registered_organizer')) active
-            @elseif (request()->routeIs('admin.organizer_management.add_organizer')) active
-            @elseif (request()->routeIs('admin.organizer_management.organizer_details')) active
-            @elseif (request()->routeIs('admin.edit_management.organizer_edit')) active
-            @elseif (request()->routeIs('admin.organizer_management.organizer.change_password')) active
-            @elseif (request()->routeIs('admin.organizer_management.settings')) active @endif">
-                        <a data-toggle="collapse" href="#organizer">
-                            <i class="la flaticon-users"></i>
-                            <p>{{ __('Organizers Management') }}</p>
+                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Payment Gateways', $rolePermissions)))
+                    <li class="nav-item {{ request()->routeIs('admin.payment_gateways.online_gateways') ? 'active' : '' }}">
+                        <a data-toggle="collapse" href="#payment_gateways">
+                            <i class="la la-credit-card"></i>
+                            <p>{{ __('Payments') }}</p>
                             <span class="caret"></span>
                         </a>
 
-                        <div id="organizer"
-                            class="collapse
-              @if (request()->routeIs('admin.organizer_management.registered_organizer')) show
-              @elseif (request()->routeIs('admin.organizer_management.organizer_details')) show
-              @elseif (request()->routeIs('admin.edit_management.organizer_edit')) show
-              @elseif (request()->routeIs('admin.organizer_management.add_organizer')) show
-              @elseif (request()->routeIs('admin.organizer_management.organizer.change_password')) show
-              @elseif (request()->routeIs('admin.organizer_management.settings')) show @endif">
+                        <div id="payment_gateways"
+                            class="collapse {{ request()->routeIs('admin.payment_gateways.online_gateways') ? 'show' : '' }}">
+                            <ul class="nav nav-collapse">
+                                <li
+                                    class="{{ request()->routeIs('admin.payment_gateways.online_gateways') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.payment_gateways.online_gateways') }}">
+                                        <span class="sub-item">{{ __('Stripe') }}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                @endif
+
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">PP</span>
+                    <h4 class="text-section">{{ __('People & Profiles') }}</h4>
+                </li>
+
+                {{-- organizer --}}
+                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Organizer Mangement', $rolePermissions)))
+                    <li class="nav-item @if (request()->routeIs('admin.organizer_management.registered_organizer')) active
+                    @elseif (request()->routeIs('admin.organizer_management.add_organizer')) active
+                            @elseif (request()->routeIs('admin.organizer_management.organizer_details')) active
+                        @elseif (request()->routeIs('admin.edit_management.organizer_edit')) active
+                        @elseif (request()->routeIs('admin.organizer_management.organizer.change_password')) active
+                        @elseif (request()->routeIs('admin.organizer_management.settings')) active @endif">
+                        <a data-toggle="collapse" href="#organizer">
+                            <i class="la flaticon-users"></i>
+                            <p>{{ __('Organizers') }}</p>
+                            <span class="caret"></span>
+                        </a>
+
+                        <div id="organizer" class="collapse
+                          @if (request()->routeIs('admin.organizer_management.registered_organizer')) show
+                          @elseif (request()->routeIs('admin.organizer_management.organizer_details')) show
+                          @elseif (request()->routeIs('admin.edit_management.organizer_edit')) show
+                          @elseif (request()->routeIs('admin.organizer_management.add_organizer')) show
+                          @elseif (request()->routeIs('admin.organizer_management.organizer.change_password')) show
+                          @elseif (request()->routeIs('admin.organizer_management.settings')) show @endif">
                             <ul class="nav nav-collapse">
                                 <li class="@if (request()->routeIs('admin.organizer_management.settings')) active @endif">
                                     <a href="{{ route('admin.organizer_management.settings') }}">
@@ -452,14 +530,15 @@
                                 </li>
                                 <li
                                     class="@if (request()->routeIs('admin.organizer_management.registered_organizer')) active
-                  @elseif (request()->routeIs('admin.organizer_management.organizer_details')) active
-                  @elseif (request()->routeIs('admin.edit_management.organizer_edit')) active
-                  @elseif (request()->routeIs('admin.organizer_management.organizer.change_password')) active @endif">
+                                      @elseif (request()->routeIs('admin.organizer_management.organizer_details')) active
+                                          @elseif (request()->routeIs('admin.edit_management.organizer_edit')) active
+                              @elseif (request()->routeIs('admin.organizer_management.organizer.change_password')) active @endif">
                                     <a href="{{ route('admin.organizer_management.registered_organizer') }}">
                                         <span class="sub-item">{{ __('Registered Organizers') }}</span>
                                     </a>
                                 </li>
-                                <li class="@if (request()->routeIs('admin.organizer_management.add_organizer')) active @endif">
+                                <li
+                                    class="@if (request()->routeIs('admin.organizer_management.add_organizer')) active @endif">
                                     <a href="{{ route('admin.organizer_management.add_organizer') }}">
                                         <span class="sub-item">{{ __('Add Organizer') }}</span>
                                     </a>
@@ -471,35 +550,34 @@
 
                 {{-- customer --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Customer Management', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.organizer_management.registered_customer')) active
-            @elseif (request()->routeIs('admin.customer_management.customer_edit')) active
-            @elseif (request()->routeIs('admin.customer_management.customer_details')) active
-            @elseif (request()->routeIs('admin.customer_management.customer.change_password')) active
-            @elseif (request()->routeIs('admin.organizer_management.add_customer')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.organizer_management.registered_customer')) active
+                    @elseif (request()->routeIs('admin.customer_management.customer_edit')) active
+                            @elseif (request()->routeIs('admin.customer_management.customer_details')) active
+                        @elseif (request()->routeIs('admin.customer_management.customer.change_password')) active
+                        @elseif (request()->routeIs('admin.organizer_management.add_customer')) active @endif">
                         <a data-toggle="collapse" href="#customer">
                             <i class="fas fa-users"></i>
-                            <p>{{ __('Customers Management') }}</p>
+                            <p>{{ __('Customers') }}</p>
                             <span class="caret"></span>
                         </a>
-                        <div id="customer"
-                            class="collapse
-              @if (request()->routeIs('admin.organizer_management.registered_customer')) show
-              @elseif (request()->routeIs('admin.customer_management.customer_details')) show
-              @elseif (request()->routeIs('admin.customer_management.customer_edit')) show
-              @elseif (request()->routeIs('admin.customer_management.customer.change_password')) show
-              @elseif (request()->routeIs('admin.organizer_management.add_customer')) show @endif">
+                        <div id="customer" class="collapse
+                          @if (request()->routeIs('admin.organizer_management.registered_customer')) show
+                          @elseif (request()->routeIs('admin.customer_management.customer_details')) show
+                          @elseif (request()->routeIs('admin.customer_management.customer_edit')) show
+                          @elseif (request()->routeIs('admin.customer_management.customer.change_password')) show
+                          @elseif (request()->routeIs('admin.organizer_management.add_customer')) show @endif">
                             <ul class="nav nav-collapse">
                                 <li
                                     class="@if (request()->routeIs('admin.organizer_management.registered_customer')) active
-                  @elseif (request()->routeIs('admin.customer_management.customer_details')) active
-                  @elseif (request()->routeIs('admin.customer_management.customer_edit')) active
-                  @elseif (request()->routeIs('admin.customer_management.customer.change_password')) active @endif">
+                                      @elseif (request()->routeIs('admin.customer_management.customer_details')) active
+                                          @elseif (request()->routeIs('admin.customer_management.customer_edit')) active
+                              @elseif (request()->routeIs('admin.customer_management.customer.change_password')) active @endif">
                                     <a href="{{ route('admin.organizer_management.registered_customer') }}">
                                         <span class="sub-item">{{ __('Registered Customers') }}</span>
                                     </a>
                                 </li>
-                                <li class="@if (request()->routeIs('admin.organizer_management.add_customer')) active @endif">
+                                <li
+                                    class="@if (request()->routeIs('admin.organizer_management.add_customer')) active @endif">
                                     <a href="{{ route('admin.organizer_management.add_customer') }}">
                                         <span class="sub-item">{{ __('Add Customer') }}</span>
                                     </a>
@@ -509,33 +587,152 @@
                     </li>
                 @endif
 
+                {{-- venue --}}
+                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Venue Management', $rolePermissions)))
+                    <li class="nav-item @if (request()->routeIs('admin.venue_management.registered_venue')) active
+                    @elseif (request()->routeIs('admin.venue_management.venue_details')) active
+                            @elseif (request()->routeIs('admin.venue_management.venue_edit')) active
+                        @elseif (request()->routeIs('admin.venue_management.add_venue')) active @endif">
+                        <a data-toggle="collapse" href="#venue">
+                            <i class="fas fa-building"></i>
+                            <p>{{ __('Venues') }}</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div id="venue" class="collapse
+                          @if (request()->routeIs('admin.venue_management.registered_venue')) show
+                          @elseif (request()->routeIs('admin.venue_management.venue_details')) show
+                          @elseif (request()->routeIs('admin.venue_management.venue_edit')) show
+                          @elseif (request()->routeIs('admin.venue_management.add_venue')) show @endif">
+                            <ul class="nav nav-collapse">
+                                <li class="@if (request()->routeIs('admin.venue_management.registered_venue')) active
+                                  @elseif (request()->routeIs('admin.venue_management.venue_details')) active
+                                          @elseif (request()->routeIs('admin.venue_management.venue_edit')) active @endif">
+                                    <a href="{{ route('admin.venue_management.registered_venue') }}">
+                                        <span class="sub-item">{{ __('Registered Venues') }}</span>
+                                    </a>
+                                </li>
+                                <li class="@if (request()->routeIs('admin.venue_management.add_venue')) active @endif">
+                                    <a href="{{ route('admin.venue_management.add_venue') }}">
+                                        <span class="sub-item">{{ __('Add Venue') }}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                @endif
+
+                {{-- artist --}}
+                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Artist Management', $rolePermissions)))
+                    <li class="nav-item @if (request()->routeIs('admin.artist_management.registered_artist')) active
+                    @elseif (request()->routeIs('admin.artist_management.artist_edit')) active
+                        @elseif (request()->routeIs('admin.artist_management.add_artist')) active @endif">
+                        <a data-toggle="collapse" href="#artist">
+                            <i class="fas fa-microphone"></i>
+                            <p>{{ __('Artists') }}</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div id="artist" class="collapse
+                          @if (request()->routeIs('admin.artist_management.registered_artist')) show
+                          @elseif (request()->routeIs('admin.artist_management.artist_edit')) show
+                          @elseif (request()->routeIs('admin.artist_management.add_artist')) show @endif">
+                            <ul class="nav nav-collapse">
+                                <li class="@if (request()->routeIs('admin.artist_management.registered_artist')) active
+                                  @elseif (request()->routeIs('admin.artist_management.artist_edit')) active @endif">
+                                    <a href="{{ route('admin.artist_management.registered_artist') }}">
+                                        <span class="sub-item">{{ __('Registered Artists') }}</span>
+                                    </a>
+                                </li>
+                                <li class="@if (request()->routeIs('admin.artist_management.add_artist')) active @endif">
+                                    <a href="{{ route('admin.artist_management.add_artist') }}">
+                                        <span class="sub-item">{{ __('Add Artist') }}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                @endif
+
+                {{-- wallet --}}
+                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Customer Management', $rolePermissions)))
+                    <li class="nav-item @if (request()->routeIs('admin.wallet_management.wallets')) active
+                    @elseif (request()->routeIs('admin.wallet_management.wallet_history')) active @endif">
+                        <a data-toggle="collapse" href="#wallet">
+                            <i class="fas fa-wallet"></i>
+                            <p>{{ __('Wallets') }}</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div id="wallet" class="collapse
+                          @if (request()->routeIs('admin.wallet_management.wallets')) show
+                          @elseif (request()->routeIs('admin.wallet_management.wallet_history')) show @endif">
+                            <ul class="nav nav-collapse">
+                                <li
+                                    class="@if (request()->routeIs('admin.wallet_management.wallets')) active
+                                      @elseif (request()->routeIs('admin.wallet_management.wallet_history')) active @endif">
+                                    <a href="{{ route('admin.wallet_management.wallets') }}">
+                                        <span class="sub-item">{{ __('Customer Wallets') }}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                @endif
+
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">MS</span>
+                    <h4 class="text-section">{{ __('Marketplace & Support') }}</h4>
+                </li>
+
+
+                {{-- Blackmarket --}}
+                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Blackmarket', $rolePermissions)))
+                    <li class="nav-item @if (request()->routeIs('admin.blackmarket.tickets')) active
+                    @elseif (request()->routeIs('admin.blackmarket.settings')) active @endif">
+                        <a data-toggle="collapse" href="#blackmarket">
+                            <i class="fas fa-shopping-basket"></i>
+                            <p>{{ __('Blackmarket') }}</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div id="blackmarket" class="collapse @if (request()->routeIs('admin.blackmarket.tickets')) show
+                          @elseif (request()->routeIs('admin.blackmarket.settings')) show @endif">
+                            <ul class="nav nav-collapse">
+                                <li class="@if (request()->routeIs('admin.blackmarket.tickets')) active @endif">
+                                    <a href="{{ route('admin.blackmarket.tickets') }}">
+                                        <span class="sub-item">{{ __('Listed Tickets') }}</span>
+                                    </a>
+                                </li>
+                                <li class="@if (request()->routeIs('admin.blackmarket.settings')) active @endif">
+                                    <a href="{{ route('admin.blackmarket.settings') }}">
+                                        <span class="sub-item">{{ __('Settings') }}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                @endif
                 {{-- customer --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Support Ticket', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.support_ticket.setting')) active
-            @elseif (request()->routeIs('admin.support_tickets')) active
-            @elseif (request()->routeIs('admin.support_tickets.message')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.support_ticket.setting')) active
+                    @elseif (request()->routeIs('admin.support_tickets')) active
+                            @elseif (request()->routeIs('admin.support_tickets.message')) active @endif">
                         <a data-toggle="collapse" href="#support_ticket">
                             <i class="la flaticon-web-1"></i>
                             <p>{{ __('Support Tickets') }}</p>
                             <span class="caret"></span>
                         </a>
 
-                        <div id="support_ticket"
-                            class="collapse
-              @if (request()->routeIs('admin.support_ticket.setting')) show
-              @elseif (request()->routeIs('admin.support_tickets')) show
-              @elseif (request()->routeIs('admin.support_tickets.message')) show @endif">
+                        <div id="support_ticket" class="collapse
+                          @if (request()->routeIs('admin.support_ticket.setting')) show
+                          @elseif (request()->routeIs('admin.support_tickets')) show
+                          @elseif (request()->routeIs('admin.support_tickets.message')) show @endif">
                             <ul class="nav nav-collapse">
                                 <li class="@if (request()->routeIs('admin.support_ticket.setting')) active @endif">
                                     <a href="{{ route('admin.support_ticket.setting') }}">
                                         <span class="sub-item">{{ __('Settings') }}</span>
                                     </a>
                                 </li>
-                                <li
-                                    class="
-                  @if (request()->routeIs('admin.support_tickets') && empty(request()->input('status'))) active
-                  @elseif(request()->routeIs('admin.support_tickets.message')) active @endif ">
+                                <li class="
+                              @if (request()->routeIs('admin.support_tickets') && empty(request()->input('status'))) active
+                              @elseif(request()->routeIs('admin.support_tickets.message')) active @endif ">
                                     <a href="{{ route('admin.support_tickets') }}">
                                         <span class="sub-item">{{ __('All Tickets') }}</span>
                                     </a>
@@ -565,37 +762,35 @@
 
                 {{-- customer --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Shop Management', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.product.setting')) active
-            @elseif (request()->routeIs('admin.shop_management.shipping_charge')) active
-            @elseif (request()->routeIs('admin.shop_management.category')) active
-            @elseif (request()->routeIs('admin.shop_management.coupon')) active
-            @elseif (request()->routeIs('admin.shop_management.product_type')) active
-            @elseif (request()->routeIs('admin.shop_management.product.create')) active
-            @elseif (request()->routeIs('admin.shop_management.products')) active
-            @elseif (request()->routeIs('admin.shop_management.product.edit')) active
-            @elseif (request()->routeIs('admin.product.order')) active
-            @elseif (request()->routeIs('admin.product_order.details')) active
-            @elseif (request()->routeIs('admin.product_order.report')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.product.setting')) active
+                    @elseif (request()->routeIs('admin.shop_management.shipping_charge')) active
+                            @elseif (request()->routeIs('admin.shop_management.category')) active
+                        @elseif (request()->routeIs('admin.shop_management.coupon')) active
+                        @elseif (request()->routeIs('admin.shop_management.product_type')) active
+                        @elseif (request()->routeIs('admin.shop_management.product.create')) active
+                        @elseif (request()->routeIs('admin.shop_management.products')) active
+                        @elseif (request()->routeIs('admin.shop_management.product.edit')) active
+                        @elseif (request()->routeIs('admin.product.order')) active
+                        @elseif (request()->routeIs('admin.product_order.details')) active
+                        @elseif (request()->routeIs('admin.product_order.report')) active @endif">
                         <a data-toggle="collapse" href="#shop_management">
                             <i class="fas fa-store-alt"></i>
                             <p>{{ __('Shop Management') }}</p>
                             <span class="caret"></span>
                         </a>
 
-                        <div id="shop_management"
-                            class="collapse
-              @if (request()->routeIs('admin.product.setting')) show
-              @elseif (request()->routeIs('admin.shop_management.shipping_charge')) show
-              @elseif (request()->routeIs('admin.shop_management.category')) show
-              @elseif (request()->routeIs('admin.shop_management.coupon')) show
-              @elseif (request()->routeIs('admin.shop_management.product_type')) show
-              @elseif (request()->routeIs('admin.shop_management.product.create')) show
-              @elseif (request()->routeIs('admin.shop_management.product.edit')) show
-              @elseif (request()->routeIs('admin.shop_management.products')) show
-              @elseif (request()->routeIs('admin.product.order')) show
-              @elseif (request()->routeIs('admin.product_order.details')) show
-              @elseif (request()->routeIs('admin.product_order.report')) show @endif">
+                        <div id="shop_management" class="collapse
+                          @if (request()->routeIs('admin.product.setting')) show
+                          @elseif (request()->routeIs('admin.shop_management.shipping_charge')) show
+                          @elseif (request()->routeIs('admin.shop_management.category')) show
+                          @elseif (request()->routeIs('admin.shop_management.coupon')) show
+                          @elseif (request()->routeIs('admin.shop_management.product_type')) show
+                          @elseif (request()->routeIs('admin.shop_management.product.create')) show
+                          @elseif (request()->routeIs('admin.shop_management.product.edit')) show
+                          @elseif (request()->routeIs('admin.shop_management.products')) show
+                          @elseif (request()->routeIs('admin.product.order')) show
+                          @elseif (request()->routeIs('admin.product_order.details')) show
+                          @elseif (request()->routeIs('admin.product_order.report')) show @endif">
                             <ul class="nav nav-collapse">
                                 <li class="@if (request()->routeIs('admin.product.setting')) active @endif">
                                     <a href="{{ route('admin.product.setting') }}">
@@ -622,34 +817,31 @@
                                         <span class="caret"></span>
                                     </a>
                                     <div class="collapse
-                    @if (request()->routeIs('admin.shop_management.category')) show
-                    @elseif(request()->routeIs('admin.shop_management.product_type')) show
-                    @elseif(request()->routeIs('admin.shop_management.product.create')) show
-                    @elseif(request()->routeIs('admin.shop_management.product.edit')) show
-                    @elseif(request()->routeIs('admin.shop_management.products')) show
-                    @elseif(request()->routeIs('admin.product_order.report')) show @endif"
+                                @if (request()->routeIs('admin.shop_management.category')) show
+                                @elseif(request()->routeIs('admin.shop_management.product_type')) show
+                                @elseif(request()->routeIs('admin.shop_management.product.create')) show
+                                @elseif(request()->routeIs('admin.shop_management.product.edit')) show
+                                @elseif(request()->routeIs('admin.shop_management.products')) show
+                                @elseif(request()->routeIs('admin.product_order.report')) show @endif"
                                         id="productManagement">
                                         <ul class="nav nav-collapse subnav">
-                                            <li
-                                                class="
-                        @if (request()->routeIs('admin.shop_management.category')) active @endif">
+                                            <li class="
+                                    @if (request()->routeIs('admin.shop_management.category')) active @endif">
                                                 <a
                                                     href="{{ route('admin.shop_management.category', ['language' => $defaultLang->code]) }}">
                                                     <span class="sub-item">{{ __('Category') }}</span>
                                                 </a>
                                             </li>
-                                            <li
-                                                class="
-                        @if (request()->routeIs('admin.shop_management.product_type')) active
-                        @elseif(request()->routeIs('admin.shop_management.product.create')) active @endif">
+                                            <li class="
+                                    @if (request()->routeIs('admin.shop_management.product_type')) active
+                                    @elseif(request()->routeIs('admin.shop_management.product.create')) active @endif">
                                                 <a href="{{ route('admin.shop_management.product_type') }}">
                                                     <span class="sub-item">{{ __('Add Product') }}</span>
                                                 </a>
                                             </li>
-                                            <li
-                                                class="
-                        @if (request()->routeIs('admin.shop_management.products')) active
-                        @elseif(request()->routeIs('admin.shop_management.product.edit')) active @endif">
+                                            <li class="
+                                    @if (request()->routeIs('admin.shop_management.products')) active
+                                    @elseif(request()->routeIs('admin.shop_management.product.edit')) active @endif">
                                                 <a
                                                     href="{{ route('admin.shop_management.products', ['language' => $defaultLang->code]) }}">
                                                     <span class="sub-item">{{ __('Products') }}</span>
@@ -665,53 +857,49 @@
                                         <span class="caret"></span>
                                     </a>
                                     <div class="collapse
-                    @if (request()->routeIs('admin.product.order')) show
-                    @elseif(request()->routeIs('admin.product_order.details')) show
-                    @elseif(request()->routeIs('admin.product_order.report')) show @endif"
+                                @if (request()->routeIs('admin.product.order')) show
+                                @elseif(request()->routeIs('admin.product_order.details')) show
+                                @elseif(request()->routeIs('admin.product_order.report')) show @endif"
                                         id="orderManagement">
                                         <ul class="nav nav-collapse subnav">
 
-                                            <li
-                                                class="
-                        @if (request()->routeIs('admin.product.order') && empty(request()->input('type'))) active
-                        @elseif (request()->routeIs('admin.product_order.details')) active @endif">
+                                            <li class="
+                                    @if (request()->routeIs('admin.product.order') && empty(request()->input('type'))) active
+                                    @elseif (request()->routeIs('admin.product_order.details')) active @endif">
                                                 <a href="{{ route('admin.product.order') }}">
                                                     <span class="sub-item">{{ __('All Orders') }}</span>
                                                 </a>
                                             </li>
                                             <li
                                                 class="
-                        @if (request()->routeIs('admin.product.order') && request()->input('type') == 'pending') active @endif">
+                                    @if (request()->routeIs('admin.product.order') && request()->input('type') == 'pending') active @endif">
                                                 <a href="{{ route('admin.product.order', ['type' => 'pending']) }}">
                                                     <span class="sub-item">{{ __('Pending Orders') }}</span>
                                                 </a>
                                             </li>
                                             <li
                                                 class="
-                        @if (request()->routeIs('admin.product.order') && request()->input('type') == 'processing') active @endif">
-                                                <a
-                                                    href="{{ route('admin.product.order', ['type' => 'processing']) }}">
+                                    @if (request()->routeIs('admin.product.order') && request()->input('type') == 'processing') active @endif">
+                                                <a href="{{ route('admin.product.order', ['type' => 'processing']) }}">
                                                     <span class="sub-item">{{ __('Processing Orders') }}</span>
                                                 </a>
                                             </li>
                                             <li
                                                 class="
-                        @if (request()->routeIs('admin.product.order') && request()->input('type') == 'completed') active @endif">
-                                                <a
-                                                    href="{{ route('admin.product.order', ['type' => 'completed']) }}">
+                                    @if (request()->routeIs('admin.product.order') && request()->input('type') == 'completed') active @endif">
+                                                <a href="{{ route('admin.product.order', ['type' => 'completed']) }}">
                                                     <span class="sub-item">{{ __('Completed Orders') }}</span>
                                                 </a>
                                             </li>
                                             <li
                                                 class="
-                        @if (request()->routeIs('admin.product.order') && request()->input('type') == 'rejected') active @endif">
+                                    @if (request()->routeIs('admin.product.order') && request()->input('type') == 'rejected') active @endif">
                                                 <a href="{{ route('admin.product.order', ['type' => 'rejected']) }}">
                                                     <span class="sub-item">{{ __('Rejected Orders') }}</span>
                                                 </a>
                                             </li>
-                                            <li
-                                                class="
-                        @if (request()->routeIs('admin.product_order.report')) active @endif">
+                                            <li class="
+                                    @if (request()->routeIs('admin.product_order.report')) active @endif">
                                                 <a
                                                     href="{{ route('admin.product_order.report', ['language' => $defaultLang->code]) }}">
                                                     <span class="sub-item">{{ __('Report') }}</span>
@@ -725,35 +913,48 @@
                     </li>
                 @endif
 
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">CT</span>
+                    <h4 class="text-section">{{ __('Content') }}</h4>
+                </li>
+
+                {{-- menu builder --}}
+                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Menu Builder', $rolePermissions)))
+                    <li class="nav-item @if (request()->routeIs('admin.menu_builder')) active @endif">
+                        <a href="{{ route('admin.menu_builder', ['language' => $defaultLang->code]) }}">
+                            <i class="fal fa-bars"></i>
+                            <p>{{ __('Menu Builder') }}</p>
+                        </a>
+                    </li>
+                @endif
+
                 {{-- home page --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Home Page', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.home_page.hero_section')) active
-            @elseif (request()->routeIs('admin.home_page.section_titles')) active
-            @elseif (request()->routeIs('admin.home_page.features_section')) active
-            @elseif (request()->routeIs('admin.home_page.event_features_section')) active
-            @elseif (request()->routeIs('admin.home_page.how.work')) active
-            @elseif (request()->routeIs('admin.home_page.partner')) active
-            @elseif (request()->routeIs('admin.home_page.testimonials_section')) active
-            @elseif (request()->routeIs('admin.home_page.about_us_section')) active
-            @elseif (request()->routeIs('admin.home_page.section_customization')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.home_page.hero_section')) active
+                    @elseif (request()->routeIs('admin.home_page.section_titles')) active
+                            @elseif (request()->routeIs('admin.home_page.features_section')) active
+                        @elseif (request()->routeIs('admin.home_page.event_features_section')) active
+                        @elseif (request()->routeIs('admin.home_page.how.work')) active
+                        @elseif (request()->routeIs('admin.home_page.partner')) active
+                        @elseif (request()->routeIs('admin.home_page.testimonials_section')) active
+                        @elseif (request()->routeIs('admin.home_page.about_us_section')) active
+                        @elseif (request()->routeIs('admin.home_page.section_customization')) active @endif">
                         <a data-toggle="collapse" href="#home_page">
                             <i class="fal fa-layer-group"></i>
-                            <p>{{ __('Home Page') }}</p>
+                            <p>{{ __('Website Content') }}</p>
                             <span class="caret"></span>
                         </a>
 
-                        <div id="home_page"
-                            class="collapse
-              @if (request()->routeIs('admin.home_page.hero_section')) show
-              @elseif (request()->routeIs('admin.home_page.section_titles')) show
-              @elseif (request()->routeIs('admin.home_page.features_section')) show
-              @elseif (request()->routeIs('admin.home_page.event_features_section')) show
-              @elseif (request()->routeIs('admin.home_page.how.work')) show
-              @elseif (request()->routeIs('admin.home_page.partner')) show
-              @elseif (request()->routeIs('admin.home_page.testimonials_section')) show
-              @elseif (request()->routeIs('admin.home_page.about_us_section')) show
-              @elseif (request()->routeIs('admin.home_page.section_customization')) show @endif">
+                        <div id="home_page" class="collapse
+                          @if (request()->routeIs('admin.home_page.hero_section')) show
+                          @elseif (request()->routeIs('admin.home_page.section_titles')) show
+                          @elseif (request()->routeIs('admin.home_page.features_section')) show
+                          @elseif (request()->routeIs('admin.home_page.event_features_section')) show
+                          @elseif (request()->routeIs('admin.home_page.how.work')) show
+                          @elseif (request()->routeIs('admin.home_page.partner')) show
+                          @elseif (request()->routeIs('admin.home_page.testimonials_section')) show
+                          @elseif (request()->routeIs('admin.home_page.about_us_section')) show
+                          @elseif (request()->routeIs('admin.home_page.section_customization')) show @endif">
                             <ul class="nav nav-collapse">
                                 <li class="{{ request()->routeIs('admin.home_page.hero_section') ? 'active' : '' }}">
                                     <a
@@ -762,8 +963,7 @@
                                     </a>
                                 </li>
 
-                                <li
-                                    class="{{ request()->routeIs('admin.home_page.section_titles') ? 'active' : '' }}">
+                                <li class="{{ request()->routeIs('admin.home_page.section_titles') ? 'active' : '' }}">
                                     <a
                                         href="{{ route('admin.home_page.section_titles', ['language' => $defaultLang->code]) }}">
                                         <span class="sub-item">{{ __('Section Titles') }}</span>
@@ -778,14 +978,12 @@
                                     </a>
                                 </li>
                                 <li class="{{ request()->routeIs('admin.home_page.how.work') ? 'active' : '' }}">
-                                    <a
-                                        href="{{ route('admin.home_page.how.work', ['language' => $defaultLang->code]) }}">
+                                    <a href="{{ route('admin.home_page.how.work', ['language' => $defaultLang->code]) }}">
                                         <span class="sub-item">{{ __('How it Work Section') }}</span>
                                     </a>
                                 </li>
                                 <li class="{{ request()->routeIs('admin.home_page.partner') ? 'active' : '' }}">
-                                    <a
-                                        href="{{ route('admin.home_page.partner', ['language' => $defaultLang->code]) }}">
+                                    <a href="{{ route('admin.home_page.partner', ['language' => $defaultLang->code]) }}">
                                         <span class="sub-item">{{ __('Partner Section') }}</span>
                                     </a>
                                 </li>
@@ -800,8 +998,7 @@
                                 </li>
 
 
-                                <li
-                                    class="{{ request()->routeIs('admin.home_page.about_us_section') ? 'active' : '' }}">
+                                <li class="{{ request()->routeIs('admin.home_page.about_us_section') ? 'active' : '' }}">
                                     <a
                                         href="{{ route('admin.home_page.about_us_section', ['language' => $defaultLang->code]) }}">
                                         <span class="sub-item">{{ __('About Us Section') }}</span>
@@ -821,31 +1018,27 @@
 
                 {{-- footer --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Footer', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.footer.content')) active
-            @elseif (request()->routeIs('admin.footer.quick_links')) active
-            @elseif (request()->routeIs('admin.contact.page')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.footer.content')) active
+                    @elseif (request()->routeIs('admin.footer.quick_links')) active
+                            @elseif (request()->routeIs('admin.contact.page')) active @endif">
                         <a data-toggle="collapse" href="#footer">
                             <i class="fal fa-shoe-prints"></i>
                             <p>{{ __('Footer') }}</p>
                             <span class="caret"></span>
                         </a>
 
-                        <div id="footer"
-                            class="collapse @if (request()->routeIs('admin.footer.content')) show
-              @elseif (request()->routeIs('admin.footer.quick_links')) show
-              @elseif (request()->routeIs('admin.contact.page')) show @endif">
+                        <div id="footer" class="collapse @if (request()->routeIs('admin.footer.content')) show
+                          @elseif (request()->routeIs('admin.footer.quick_links')) show
+                                  @elseif (request()->routeIs('admin.contact.page')) show @endif">
                             <ul class="nav nav-collapse">
                                 <li class="{{ request()->routeIs('admin.footer.content') ? 'active' : '' }}">
-                                    <a
-                                        href="{{ route('admin.footer.content', ['language' => $defaultLang->code]) }}">
+                                    <a href="{{ route('admin.footer.content', ['language' => $defaultLang->code]) }}">
                                         <span class="sub-item">{{ __('Content & Color') }}</span>
                                     </a>
                                 </li>
 
                                 <li class="{{ request()->routeIs('admin.footer.quick_links') ? 'active' : '' }}">
-                                    <a
-                                        href="{{ route('admin.footer.quick_links', ['language' => $defaultLang->code]) }}">
+                                    <a href="{{ route('admin.footer.quick_links', ['language' => $defaultLang->code]) }}">
                                         <span class="sub-item">{{ __('Quick Links') }}</span>
                                     </a>
                                 </li>
@@ -861,10 +1054,9 @@
 
                 {{-- custom page --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Custom Pages', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.custom_pages')) active
-            @elseif (request()->routeIs('admin.custom_pages.create_page')) active
-            @elseif (request()->routeIs('admin.custom_pages.edit_page')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.custom_pages')) active
+                    @elseif (request()->routeIs('admin.custom_pages.create_page')) active
+                            @elseif (request()->routeIs('admin.custom_pages.edit_page')) active @endif">
                         <a href="{{ route('admin.custom_pages', ['language' => $defaultLang->code]) }}">
                             <i class="la flaticon-file"></i>
                             <p>{{ __('Custom Pages') }}</p>
@@ -874,35 +1066,31 @@
 
                 {{-- blog --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Blog Management', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.blog_management.categories')) active
-            @elseif (request()->routeIs('admin.blog_management.blogs')) active
-            @elseif (request()->routeIs('admin.blog_management.create_blog')) active
-            @elseif (request()->routeIs('admin.blog_management.edit_blog')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.blog_management.categories')) active
+                    @elseif (request()->routeIs('admin.blog_management.blogs')) active
+                            @elseif (request()->routeIs('admin.blog_management.create_blog')) active
+                        @elseif (request()->routeIs('admin.blog_management.edit_blog')) active @endif">
                         <a data-toggle="collapse" href="#blog">
                             <i class="fal fa-blog"></i>
                             <p>{{ __('Blog Management') }}</p>
                             <span class="caret"></span>
                         </a>
-                        <div id="blog"
-                            class="collapse
-              @if (request()->routeIs('admin.blog_management.categories')) show
-              @elseif (request()->routeIs('admin.blog_management.blogs')) show
-              @elseif (request()->routeIs('admin.blog_management.create_blog')) show
-              @elseif (request()->routeIs('admin.blog_management.edit_blog')) show @endif">
+                        <div id="blog" class="collapse
+                          @if (request()->routeIs('admin.blog_management.categories')) show
+                          @elseif (request()->routeIs('admin.blog_management.blogs')) show
+                          @elseif (request()->routeIs('admin.blog_management.create_blog')) show
+                          @elseif (request()->routeIs('admin.blog_management.edit_blog')) show @endif">
                             <ul class="nav nav-collapse">
-                                <li
-                                    class="{{ request()->routeIs('admin.blog_management.categories') ? 'active' : '' }}">
+                                <li class="{{ request()->routeIs('admin.blog_management.categories') ? 'active' : '' }}">
                                     <a
                                         href="{{ route('admin.blog_management.categories', ['language' => $defaultLang->code]) }}">
                                         <span class="sub-item">{{ __('Categories') }}</span>
                                     </a>
                                 </li>
 
-                                <li
-                                    class="@if (request()->routeIs('admin.blog_management.blogs')) active
-                  @elseif (request()->routeIs('admin.blog_management.create_blog')) active
-                  @elseif (request()->routeIs('admin.blog_management.edit_blog')) active @endif">
+                                <li class="@if (request()->routeIs('admin.blog_management.blogs')) active
+                                  @elseif (request()->routeIs('admin.blog_management.create_blog')) active
+                                          @elseif (request()->routeIs('admin.blog_management.edit_blog')) active @endif">
                                     <a
                                         href="{{ route('admin.blog_management.blogs', ['language' => $defaultLang->code]) }}">
                                         <span class="sub-item">{{ __('Blog') }}</span>
@@ -925,8 +1113,7 @@
 
                 {{-- faq --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Contact Page', $rolePermissions)))
-                    <li
-                        class="nav-item {{ request()->routeIs('admin.basic_settings.contact_page') ? 'active' : '' }}">
+                    <li class="nav-item {{ request()->routeIs('admin.basic_settings.contact_page') ? 'active' : '' }}">
                         <a href="{{ route('admin.basic_settings.contact_page') }}">
                             <i class="fas fa-address-book"></i>
                             <p>{{ __('Contact Page') }}</p>
@@ -934,20 +1121,23 @@
                     </li>
                 @endif
 
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">GR</span>
+                    <h4 class="text-section">{{ __('Growth & Comms') }}</h4>
+                </li>
+
                 {{-- advertise --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Advertise', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.advertise.settings')) active
-            @elseif (request()->routeIs('admin.advertise.advertisements')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.advertise.settings')) active
+                    @elseif (request()->routeIs('admin.advertise.advertisements')) active @endif">
                         <a data-toggle="collapse" href="#workingId">
                             <i class="fab fa-buysellads"></i>
                             <p>{{ __('Ads') }}</p>
                             <span class="caret"></span>
                         </a>
 
-                        <div id="workingId"
-                            class="collapse @if (request()->routeIs('admin.advertise.settings')) show
-              @elseif (request()->routeIs('admin.advertise.advertisements')) show @endif">
+                        <div id="workingId" class="collapse @if (request()->routeIs('admin.advertise.settings')) show
+                          @elseif (request()->routeIs('admin.advertise.advertisements')) show @endif">
                             <ul class="nav nav-collapse">
                                 <li class="{{ request()->routeIs('admin.advertise.settings') ? 'active' : '' }}">
                                     <a href="{{ route('admin.advertise.settings') }}">
@@ -955,8 +1145,7 @@
                                     </a>
                                 </li>
 
-                                <li
-                                    class="{{ request()->routeIs('admin.advertise.advertisements') ? 'active' : '' }}">
+                                <li class="{{ request()->routeIs('admin.advertise.advertisements') ? 'active' : '' }}">
                                     <a href="{{ route('admin.advertise.advertisements') }}">
                                         <span class="sub-item">{{ __('Advertisements') }}</span>
                                     </a>
@@ -968,11 +1157,10 @@
 
                 {{-- announcement popup --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Announcement Popups', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.announcement_popups')) active
-            @elseif (request()->routeIs('admin.announcement_popups.select_popup_type')) active
-            @elseif (request()->routeIs('admin.announcement_popups.create_popup')) active
-            @elseif (request()->routeIs('admin.announcement_popups.edit_popup')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.announcement_popups')) active
+                    @elseif (request()->routeIs('admin.announcement_popups.select_popup_type')) active
+                            @elseif (request()->routeIs('admin.announcement_popups.create_popup')) active
+                        @elseif (request()->routeIs('admin.announcement_popups.edit_popup')) active @endif">
                         <a href="{{ route('admin.announcement_popups', ['language' => $defaultLang->code]) }}">
                             <i class="fal fa-bullhorn"></i>
                             <p>{{ __('Announcement Popups') }}</p>
@@ -980,18 +1168,17 @@
                     </li>
                 @endif
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Subscribers', $rolePermissions)))
-                    <li
-                        class="nav-item
-          @if (request()->routeIs('admin.user_management.subscribers')) active
-          @elseif(request()->routeIs('admin.user_management.mail_for_subscribers')) active @endif">
+                    <li class="nav-item
+                          @if (request()->routeIs('admin.user_management.subscribers')) active
+                          @elseif(request()->routeIs('admin.user_management.mail_for_subscribers')) active @endif">
                         <a data-toggle="collapse" href="#subscribers">
                             <i class="la flaticon-envelope"></i>
                             <p>{{ __('Subscribers') }}</p>
                             <span class="caret"></span>
                         </a>
                         <div class="collapse
-            @if (request()->routeIs('admin.user_management.subscribers')) show
-            @elseif(request()->routeIs('admin.user_management.mail_for_subscribers')) show @endif"
+                            @if (request()->routeIs('admin.user_management.subscribers')) show
+                            @elseif(request()->routeIs('admin.user_management.mail_for_subscribers')) show @endif"
                             id="subscribers">
                             <ul class="nav nav-collapse">
                                 <li class="@if (request()->routeIs('admin.user_management.subscribers')) active @endif">
@@ -999,7 +1186,8 @@
                                         <span class="sub-item">{{ __('Subscribers') }}</span>
                                     </a>
                                 </li>
-                                <li class="@if (request()->routeIs('admin.user_management.mail_for_subscribers')) active @endif">
+                                <li
+                                    class="@if (request()->routeIs('admin.user_management.mail_for_subscribers')) active @endif">
                                     <a href="{{ route('admin.user_management.mail_for_subscribers') }}">
                                         <span class="sub-item">{{ __('Mail to Subscribers') }}</span>
                                     </a>
@@ -1012,7 +1200,7 @@
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Push Notification', $rolePermissions)))
                     <li
                         class="nav-item @if (request()->routeIs('admin.user_management.push_notification.settings')) active
-                    @elseif (request()->routeIs('admin.user_management.push_notification.notification_for_visitors')) active @endif">
+                        @elseif (request()->routeIs('admin.user_management.push_notification.notification_for_visitors')) active @endif">
                         <a data-toggle="collapse" href="#push_notification">
                             <i class="fal fa-bell"></i>
                             <p>{{ __('Push Notification') }}</p>
@@ -1021,8 +1209,8 @@
 
                         <div id="push_notification"
                             class="collapse
-              @if (request()->routeIs('admin.user_management.push_notification.settings')) show
-                    @elseif (request()->routeIs('admin.user_management.push_notification.notification_for_visitors')) show @endif">
+                          @if (request()->routeIs('admin.user_management.push_notification.settings')) show
+                        @elseif (request()->routeIs('admin.user_management.push_notification.notification_for_visitors')) show @endif">
                             <ul class="nav nav-collapse">
                                 <li
                                     class="{{ request()->routeIs('admin.user_management.push_notification.settings') ? 'active' : '' }}">
@@ -1043,77 +1231,46 @@
                     </li>
                 @endif
 
-                {{-- payment gateway --}}
-                @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Payment Gateways', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.payment_gateways.online_gateways')) active
-            @elseif (request()->routeIs('admin.payment_gateways.offline_gateways')) active @endif">
-                        <a data-toggle="collapse" href="#payment_gateways">
-                            <i class="la flaticon-paypal"></i>
-                            <p>{{ __('Payment Gateways') }}</p>
-                            <span class="caret"></span>
-                        </a>
-
-                        <div id="payment_gateways"
-                            class="collapse
-              @if (request()->routeIs('admin.payment_gateways.online_gateways')) show
-              @elseif (request()->routeIs('admin.payment_gateways.offline_gateways')) show @endif">
-                            <ul class="nav nav-collapse">
-                                <li
-                                    class="{{ request()->routeIs('admin.payment_gateways.online_gateways') ? 'active' : '' }}">
-                                    <a href="{{ route('admin.payment_gateways.online_gateways') }}">
-                                        <span class="sub-item">{{ __('Online Gateways') }}</span>
-                                    </a>
-                                </li>
-
-                                <li
-                                    class="{{ request()->routeIs('admin.payment_gateways.offline_gateways') ? 'active' : '' }}">
-                                    <a href="{{ route('admin.payment_gateways.offline_gateways') }}">
-                                        <span class="sub-item">{{ __('Offline Gateways') }}</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                @endif
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">SY</span>
+                    <h4 class="text-section">{{ __('System') }}</h4>
+                </li>
 
                 {{-- basic settings --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Basic Settings', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.basic_settings.general_settings')) active
-            @elseif (request()->routeIs('admin.basic_settings.mail_from_admin')) active
-            @elseif (request()->routeIs('admin.basic_settings.mail_to_admin')) active
-            @elseif (request()->routeIs('admin.basic_settings.mail_templates')) active
-            @elseif (request()->routeIs('admin.basic_settings.edit_mail_template')) active
-            @elseif (request()->routeIs('admin.basic_settings.breadcrumb')) active
-            @elseif (request()->routeIs('admin.basic_settings.page_headings')) active
-            @elseif (request()->routeIs('admin.basic_settings.plugins')) active
-            @elseif (request()->routeIs('admin.basic_settings.seo')) active
-            @elseif (request()->routeIs('admin.basic_settings.maintenance_mode')) active
-            @elseif (request()->routeIs('admin.basic_settings.cookie_alert')) active
-            @elseif (request()->routeIs('admin.basic_settings.footer_logo')) active
-            @elseif (request()->routeIs('admin.basic_settings.social_medias')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.basic_settings.general_settings')) active
+                    @elseif (request()->routeIs('admin.basic_settings.mail_from_admin')) active
+                            @elseif (request()->routeIs('admin.basic_settings.mail_to_admin')) active
+                        @elseif (request()->routeIs('admin.basic_settings.mail_templates')) active
+                        @elseif (request()->routeIs('admin.basic_settings.edit_mail_template')) active
+                        @elseif (request()->routeIs('admin.basic_settings.breadcrumb')) active
+                        @elseif (request()->routeIs('admin.basic_settings.page_headings')) active
+                        @elseif (request()->routeIs('admin.basic_settings.plugins')) active
+                        @elseif (request()->routeIs('admin.basic_settings.seo')) active
+                        @elseif (request()->routeIs('admin.basic_settings.maintenance_mode')) active
+                        @elseif (request()->routeIs('admin.basic_settings.cookie_alert')) active
+                        @elseif (request()->routeIs('admin.basic_settings.footer_logo')) active
+                        @elseif (request()->routeIs('admin.basic_settings.social_medias')) active @endif">
                         <a data-toggle="collapse" href="#basic_settings">
                             <i class="la flaticon-settings"></i>
-                            <p>{{ __('Basic Settings') }}</p>
+                            <p>{{ __('System Settings') }}</p>
                             <span class="caret"></span>
                         </a>
 
-                        <div id="basic_settings"
-                            class="collapse
-              @if (request()->routeIs('admin.basic_settings.general_settings')) show
-              @elseif (request()->routeIs('admin.basic_settings.mail_from_admin')) show
-              @elseif (request()->routeIs('admin.basic_settings.mail_to_admin')) show
-              @elseif (request()->routeIs('admin.basic_settings.mail_templates')) show
-              @elseif (request()->routeIs('admin.basic_settings.edit_mail_template')) show
-              @elseif (request()->routeIs('admin.basic_settings.breadcrumb')) show
-              @elseif (request()->routeIs('admin.basic_settings.page_headings')) show
-              @elseif (request()->routeIs('admin.basic_settings.plugins')) show
-              @elseif (request()->routeIs('admin.basic_settings.seo')) show
-              @elseif (request()->routeIs('admin.basic_settings.maintenance_mode')) show
-              @elseif (request()->routeIs('admin.basic_settings.cookie_alert')) show
-              @elseif (request()->routeIs('admin.basic_settings.footer_logo')) show
-              @elseif (request()->routeIs('admin.basic_settings.social_medias')) show @endif">
+                        <div id="basic_settings" class="collapse
+                          @if (request()->routeIs('admin.basic_settings.general_settings')) show
+                          @elseif (request()->routeIs('admin.basic_settings.mail_from_admin')) show
+                          @elseif (request()->routeIs('admin.basic_settings.mail_to_admin')) show
+                          @elseif (request()->routeIs('admin.basic_settings.mail_templates')) show
+                          @elseif (request()->routeIs('admin.basic_settings.edit_mail_template')) show
+                          @elseif (request()->routeIs('admin.basic_settings.breadcrumb')) show
+                          @elseif (request()->routeIs('admin.basic_settings.page_headings')) show
+                          @elseif (request()->routeIs('admin.basic_settings.plugins')) show
+                          @elseif (request()->routeIs('admin.basic_settings.seo')) show
+                          @elseif (request()->routeIs('admin.basic_settings.maintenance_mode')) show
+                          @elseif (request()->routeIs('admin.basic_settings.cookie_alert')) show
+                          @elseif (request()->routeIs('admin.basic_settings.footer_logo')) show
+                          @elseif (request()->routeIs('admin.basic_settings.social_medias')) show @endif">
                             <ul class="nav nav-collapse">
                                 <li
                                     class="{{ request()->routeIs('admin.basic_settings.general_settings') ? 'active' : '' }}">
@@ -1129,12 +1286,11 @@
                                         <span class="caret"></span>
                                     </a>
 
-                                    <div id="mail_settings"
-                                        class="collapse
-                    @if (request()->routeIs('admin.basic_settings.mail_from_admin')) show
-                    @elseif (request()->routeIs('admin.basic_settings.mail_to_admin')) show
-                    @elseif (request()->routeIs('admin.basic_settings.mail_templates')) show
-                    @elseif (request()->routeIs('admin.basic_settings.edit_mail_template')) show @endif">
+                                    <div id="mail_settings" class="collapse
+                                @if (request()->routeIs('admin.basic_settings.mail_from_admin')) show
+                                @elseif (request()->routeIs('admin.basic_settings.mail_to_admin')) show
+                                @elseif (request()->routeIs('admin.basic_settings.mail_templates')) show
+                                @elseif (request()->routeIs('admin.basic_settings.edit_mail_template')) show @endif">
                                         <ul class="nav nav-collapse subnav">
                                             <li
                                                 class="{{ request()->routeIs('admin.basic_settings.mail_from_admin') ? 'active' : '' }}">
@@ -1152,7 +1308,7 @@
 
                                             <li
                                                 class="@if (request()->routeIs('admin.basic_settings.mail_templates')) active
-                        @elseif (request()->routeIs('admin.basic_settings.edit_mail_template')) active @endif">
+                                                @elseif (request()->routeIs('admin.basic_settings.edit_mail_template')) active @endif">
                                                 <a href="{{ route('admin.basic_settings.mail_templates') }}">
                                                     <span class="sub-item">{{ __('Mail Templates') }}</span>
                                                 </a>
@@ -1161,15 +1317,13 @@
                                     </div>
                                 </li>
 
-                                <li
-                                    class="{{ request()->routeIs('admin.basic_settings.breadcrumb') ? 'active' : '' }}">
+                                <li class="{{ request()->routeIs('admin.basic_settings.breadcrumb') ? 'active' : '' }}">
                                     <a href="{{ route('admin.basic_settings.breadcrumb') }}">
                                         <span class="sub-item">{{ __('Breadcrumb') }}</span>
                                     </a>
                                 </li>
 
-                                <li
-                                    class="{{ request()->routeIs('admin.basic_settings.page_headings') ? 'active' : '' }}">
+                                <li class="{{ request()->routeIs('admin.basic_settings.page_headings') ? 'active' : '' }}">
                                     <a
                                         href="{{ route('admin.basic_settings.page_headings', ['language' => $defaultLang->code]) }}">
                                         <span class="sub-item">{{ __('Page Headings') }}</span>
@@ -1183,8 +1337,7 @@
                                 </li>
 
                                 <li class="{{ request()->routeIs('admin.basic_settings.seo') ? 'active' : '' }}">
-                                    <a
-                                        href="{{ route('admin.basic_settings.seo', ['language' => $defaultLang->code]) }}">
+                                    <a href="{{ route('admin.basic_settings.seo', ['language' => $defaultLang->code]) }}">
                                         <span class="sub-item">{{ __('SEO Informations') }}</span>
                                     </a>
                                 </li>
@@ -1196,23 +1349,20 @@
                                     </a>
                                 </li>
 
-                                <li
-                                    class="{{ request()->routeIs('admin.basic_settings.cookie_alert') ? 'active' : '' }}">
+                                <li class="{{ request()->routeIs('admin.basic_settings.cookie_alert') ? 'active' : '' }}">
                                     <a
                                         href="{{ route('admin.basic_settings.cookie_alert', ['language' => $defaultLang->code]) }}">
                                         <span class="sub-item">{{ __('Cookie Alert') }}</span>
                                     </a>
                                 </li>
 
-                                <li
-                                    class="{{ request()->routeIs('admin.basic_settings.footer_logo') ? 'active' : '' }}">
+                                <li class="{{ request()->routeIs('admin.basic_settings.footer_logo') ? 'active' : '' }}">
                                     <a href="{{ route('admin.basic_settings.footer_logo') }}">
                                         <span class="sub-item">{{ __('Footer Logo') }}</span>
                                     </a>
                                 </li>
 
-                                <li
-                                    class="{{ request()->routeIs('admin.basic_settings.social_medias') ? 'active' : '' }}">
+                                <li class="{{ request()->routeIs('admin.basic_settings.social_medias') ? 'active' : '' }}">
                                     <a href="{{ route('admin.basic_settings.social_medias') }}">
                                         <span class="sub-item">{{ __('Social Medias') }}</span>
                                     </a>
@@ -1224,21 +1374,19 @@
 
                 {{-- pwa setting --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('PWA Settings', $rolePermissions)))
-                    <li
-                        class="nav-item
-          @if (request()->routeIs('admin.pwa')) active
-          @elseif (request()->routeIs('admin.pwa.scanner')) active @endif">
+                    <li class="nav-item
+                          @if (request()->routeIs('admin.pwa')) active
+                          @elseif (request()->routeIs('admin.pwa.scanner')) active @endif">
                         <a data-toggle="collapse" href="#pwa_setting">
                             <i class="fab fa-app-store-ios"></i>
                             <p>{{ __('PWA Settings') }}</p>
                             <span class="caret"></span>
                         </a>
 
-                        <div id="pwa_setting"
-                            class="collapse
-            @if (request()->routeIs('admin.pwa')) show
-            @elseif (request()->routeIs('admin.pwa.scanner')) show @endif
-            ">
+                        <div id="pwa_setting" class="collapse
+                            @if (request()->routeIs('admin.pwa')) show
+                            @elseif (request()->routeIs('admin.pwa.scanner')) show @endif
+                            ">
                             <ul class="nav nav-collapse">
                                 <li class="{{ request()->routeIs('admin.pwa.scanner') ? 'active' : '' }}">
                                     <a href="{{ route('admin.pwa.scanner') }}">
@@ -1258,14 +1406,16 @@
                 </li>
 
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Mobile Interface', $rolePermissions)))
-                    <li class="nav-item @if (request()->routeIs('admin.mobile_interface') ||
-                            request()->routeIs('admin.mobile_interface_content') ||
-                            request()->routeIs('admin.mobile_interface.payment_gateways') ||
-                            request()->routeIs('admin.mobile_interface.plugins') ||
-                            request()->routeIs('admin.mobile_interface_gsetting')) active @endif">
-                        <a href="{{ route('admin.mobile_interface',['language' => $defaultLang->code]) }}">
+                    <li class="nav-item @if (
+                        request()->routeIs('admin.mobile_interface') ||
+                        request()->routeIs('admin.mobile_interface_content') ||
+                        request()->routeIs('admin.mobile_interface.payment_gateways') ||
+                        request()->routeIs('admin.mobile_interface.plugins') ||
+                        request()->routeIs('admin.mobile_interface_gsetting')
+                    ) active @endif">
+                        <a href="{{ route('admin.mobile_interface', ['language' => $defaultLang->code]) }}">
                             <i class="fas fa-mobile-alt"></i>
-                            <p>{{ __('Mobile App Settings') }}</p>
+                            <p>{{ __('App Settings') }}</p>
                         </a>
                     </li>
                 @endif
@@ -1273,25 +1423,23 @@
 
                 {{-- admin --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Admin Management', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.admin_management.role_permissions')) active
-            @elseif (request()->routeIs('admin.admin_management.role.permissions')) active
-            @elseif (request()->routeIs('admin.admin_management.registered_admins')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.admin_management.role_permissions')) active
+                    @elseif (request()->routeIs('admin.admin_management.role.permissions')) active
+                            @elseif (request()->routeIs('admin.admin_management.registered_admins')) active @endif">
                         <a data-toggle="collapse" href="#admin">
                             <i class="fal fa-users-cog"></i>
-                            <p>{{ __('Admin Management') }}</p>
+                            <p>{{ __('Admins') }}</p>
                             <span class="caret"></span>
                         </a>
 
-                        <div id="admin"
-                            class="collapse
-              @if (request()->routeIs('admin.admin_management.role_permissions')) show
-              @elseif (request()->routeIs('admin.admin_management.role.permissions')) show
-              @elseif (request()->routeIs('admin.admin_management.registered_admins')) show @endif">
+                        <div id="admin" class="collapse
+                          @if (request()->routeIs('admin.admin_management.role_permissions')) show
+                          @elseif (request()->routeIs('admin.admin_management.role.permissions')) show
+                          @elseif (request()->routeIs('admin.admin_management.registered_admins')) show @endif">
                             <ul class="nav nav-collapse">
                                 <li
                                     class="@if (request()->routeIs('admin.admin_management.role_permissions')) active
-                  @elseif (request()->routeIs('admin.admin_management.role.permissions')) active @endif">
+                                      @elseif (request()->routeIs('admin.admin_management.role.permissions')) active @endif">
                                     <a href="{{ route('admin.admin_management.role_permissions') }}">
                                         <span class="sub-item">{{ __('Role & Permissions') }}</span>
                                     </a>
@@ -1310,22 +1458,20 @@
 
                 {{-- language --}}
                 @if (is_null($roleInfo) || (!empty($rolePermissions) && in_array('Language Management', $rolePermissions)))
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.language_management')) active
-            @elseif (request()->routeIs('admin.language_management.edit_keyword')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.language_management')) active
+                    @elseif (request()->routeIs('admin.language_management.edit_keyword')) active @endif">
                         <a href="{{ route('admin.language_management') }}">
                             <i class="fal fa-language"></i>
-                            <p>{{ __('Language Management') }}</p>
+                            <p>{{ __('Languages') }}</p>
                         </a>
                     </li>
 
 
-                    <li
-                        class="nav-item @if (request()->routeIs('admin.edit_admin_keywords')) active
-            @elseif (request()->routeIs('admin.edit_admin_keywords')) active @endif">
+                    <li class="nav-item @if (request()->routeIs('admin.edit_admin_keywords')) active
+                    @elseif (request()->routeIs('admin.edit_admin_keywords')) active @endif">
                         <a href="{{ route('admin.edit_admin_keywords') }}">
                             <i class="fal fa-language"></i>
-                            <p>{{ __('Admin Language Keywords') }}</p>
+                            <p>{{ __('Admin Keywords') }}</p>
                         </a>
                     </li>
                 @endif

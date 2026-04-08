@@ -42,12 +42,7 @@ return [
   'stripe' => [
     'key' => env('STRIPE_KEY'),
     'secret' => env('STRIPE_SECRET'),
-  ],
-
-  'duty_app' => [
-    'ios_url' => env('DUTY_IOS_APP_URL'),
-    'android_url' => env('DUTY_ANDROID_APP_URL'),
-    'deep_link_base' => env('DUTY_APP_DEEP_LINK_BASE', 'duty://'),
+    'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
   ],
 
   'facebook' => [
@@ -59,6 +54,10 @@ return [
     'client_id' => env('GOOGLE_CLIENT_ID'),
     'client_secret' => env('GOOGLE_CLIENT_SECRET'),
     'redirect' => env('GOOGLE_CALLBACK_URL'),
+  ],
+
+  'nfc' => [
+    'secret' => env('NFC_SECRET', 'duty_nfc_default_secret'),
   ],
 
 ];

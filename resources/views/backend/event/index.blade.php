@@ -1,6 +1,263 @@
 @extends('backend.layout')
 
 @section('content')
+  @php
+    $activeLanguage = request()->input('language', $defaultLang->code);
+    $activeType = request()->input('event_type');
+    $activeLifecycle = request()->input('lifecycle', 'all');
+    $titleFilter = request()->input('title');
+    $statusFilter = $statusFilter ?? request()->input('status_filter', 'all');
+    $statusFilter = in_array($statusFilter, ['all', 'active', 'inactive'], true) ? $statusFilter : 'all';
+    $submissionFilter = $submissionFilter ?? request()->input('submission_filter', 'all');
+    $submissionFilter = in_array($submissionFilter, ['all', 'app_submitted', 'admin_authored'], true) ? $submissionFilter : 'all';
+    $sortBy = $sortBy ?? request()->input('sort_by', 'timeline');
+    $sortBy = in_array($sortBy, ['timeline', 'newest', 'oldest', 'title_asc', 'title_desc'], true) ? $sortBy : 'timeline';
+    $featuredOnly = isset($featuredOnly) ? (bool) $featuredOnly : request()->boolean('featured_only');
+    $viewMode = $viewMode ?? request()->input('view_mode', 'list');
+    $viewMode = in_array($viewMode, ['list', 'grid'], true) ? $viewMode : 'list';
+    $gridColumns = isset($gridColumns) ? (int) $gridColumns : (int) request()->input('grid_columns', 3);
+    $gridColumns = in_array($gridColumns, [2, 3, 4], true) ? $gridColumns : 3;
+    $gridDensity = $gridDensity ?? request()->input('grid_density', 'comfortable');
+    $gridDensity = in_array($gridDensity, ['comfortable', 'compact'], true) ? $gridDensity : 'comfortable';
+
+    $pageEvents = $events->getCollection();
+    $visibleCount = $pageEvents->count();
+    $currentPageCount = $pageEvents->where('is_expired', 0)->count();
+    $expiredPageCount = $pageEvents->where('is_expired', 1)->count();
+    $featuredCount = $pageEvents->where('is_featured', 'yes')->count();
+    $activeStatusCount = $pageEvents->where('status', 1)->count();
+    $inactiveStatusCount = $pageEvents->where('status', 0)->count();
+    $pendingReviewCount = $pageEvents->filter(function ($event) {
+      return (int) $event->status === 0 && (!empty($event->owner_identity_id) || !empty($event->venue_identity_id));
+    })->count();
+    $submissionCounts = $submissionCounts ?? [
+      'all' => $events->total(),
+      'app_submitted' => $pageEvents->filter(function ($event) {
+        return !empty($event->owner_identity_id) || !empty($event->venue_identity_id);
+      })->count(),
+      'admin_authored' => $pageEvents->filter(function ($event) {
+        return empty($event->owner_identity_id) && empty($event->venue_identity_id);
+      })->count(),
+    ];
+    $venueCount = $pageEvents->where('event_type', 'venue')->count();
+    $onlineCount = $pageEvents->where('event_type', 'online')->count();
+
+    $sortLabels = [
+      'timeline' => __('Timeline priority'),
+      'newest' => __('Newest first'),
+      'oldest' => __('Oldest first'),
+      'title_asc' => __('Title A-Z'),
+      'title_desc' => __('Title Z-A'),
+    ];
+    $currentSortLabel = $sortLabels[$sortBy] ?? $sortLabels['timeline'];
+    $advancedSettingsCount = 0;
+    if ($activeLanguage !== $defaultLang->code) {
+      $advancedSettingsCount++;
+    }
+    if ($statusFilter !== 'all') {
+      $advancedSettingsCount++;
+    }
+    if ($submissionFilter !== 'all') {
+      $advancedSettingsCount++;
+    }
+    if ($featuredOnly) {
+      $advancedSettingsCount++;
+    }
+    if ($viewMode === 'grid' && ($gridColumns !== 3 || $gridDensity !== 'comfortable')) {
+      $advancedSettingsCount++;
+    }
+
+    $summaryTokens = collect([
+      ['label' => __('Sort'), 'value' => $currentSortLabel],
+    ]);
+    if ($activeType) {
+      $summaryTokens->push(['label' => __('Type'), 'value' => ucfirst($activeType)]);
+    }
+    if ($activeLifecycle !== 'all') {
+      $summaryTokens->push(['label' => __('Timeline'), 'value' => ucfirst($activeLifecycle)]);
+    }
+    if ($statusFilter !== 'all') {
+      $summaryTokens->push(['label' => __('Status'), 'value' => ucfirst($statusFilter)]);
+    }
+    if ($submissionFilter !== 'all') {
+      $summaryTokens->push([
+        'label' => __('Source'),
+        'value' => $submissionFilter === 'app_submitted' ? __('App submitted') : __('Admin authored'),
+      ]);
+    }
+    if ($featuredOnly) {
+      $summaryTokens->push(['label' => __('Focus'), 'value' => __('Featured only')]);
+    }
+    if ($pendingReviewCount > 0) {
+      $summaryTokens->push(['label' => __('Review'), 'value' => $pendingReviewCount . ' ' . __('pending')]);
+    }
+    if ($activeLanguage !== $defaultLang->code) {
+      $summaryTokens->push(['label' => __('Language'), 'value' => $language->name]);
+    }
+    if ($viewMode === 'grid') {
+      $summaryTokens->push(['label' => __('View'), 'value' => __('Grid') . ' · ' . $gridColumns . ' ' . __('cols')]);
+      if ($gridDensity !== 'comfortable') {
+        $summaryTokens->push(['label' => __('Density'), 'value' => ucfirst($gridDensity)]);
+      }
+    }
+
+    $surfaceParams = [
+      'view_mode' => $viewMode,
+      'grid_columns' => $gridColumns,
+      'grid_density' => $gridDensity,
+      'sort_by' => $sortBy,
+    ];
+
+    $baseRouteParams = array_merge(['language' => $activeLanguage], $surfaceParams);
+    $filterRouteParams = array_merge(['language' => $activeLanguage], $surfaceParams);
+    $lifecycleRouteParams = array_merge(['language' => $activeLanguage], $surfaceParams);
+
+    if (filled($titleFilter)) {
+      $baseRouteParams['title'] = $titleFilter;
+      $filterRouteParams['title'] = $titleFilter;
+      $lifecycleRouteParams['title'] = $titleFilter;
+    }
+
+    if (filled($activeType)) {
+      $baseRouteParams['event_type'] = $activeType;
+      $filterRouteParams['event_type'] = $activeType;
+      $lifecycleRouteParams['event_type'] = $activeType;
+    }
+
+    if ($activeLifecycle !== 'all') {
+      $baseRouteParams['lifecycle'] = $activeLifecycle;
+      $filterRouteParams['lifecycle'] = $activeLifecycle;
+    }
+
+    if ($statusFilter !== 'all') {
+      $baseRouteParams['status_filter'] = $statusFilter;
+      $filterRouteParams['status_filter'] = $statusFilter;
+      $lifecycleRouteParams['status_filter'] = $statusFilter;
+    }
+    if ($submissionFilter !== 'all') {
+      $baseRouteParams['submission_filter'] = $submissionFilter;
+      $filterRouteParams['submission_filter'] = $submissionFilter;
+      $lifecycleRouteParams['submission_filter'] = $submissionFilter;
+    }
+
+    if ($featuredOnly) {
+      $baseRouteParams['featured_only'] = 1;
+      $filterRouteParams['featured_only'] = 1;
+      $lifecycleRouteParams['featured_only'] = 1;
+    }
+
+    $statusRouteParams = array_merge(['language' => $activeLanguage], $surfaceParams);
+    $featuredRouteParams = array_merge(['language' => $activeLanguage], $surfaceParams);
+    if (filled($titleFilter)) {
+      $statusRouteParams['title'] = $titleFilter;
+      $featuredRouteParams['title'] = $titleFilter;
+    }
+    if (filled($activeType)) {
+      $statusRouteParams['event_type'] = $activeType;
+      $featuredRouteParams['event_type'] = $activeType;
+    }
+    if ($activeLifecycle !== 'all') {
+      $statusRouteParams['lifecycle'] = $activeLifecycle;
+      $featuredRouteParams['lifecycle'] = $activeLifecycle;
+    }
+    if ($featuredOnly) {
+      $statusRouteParams['featured_only'] = 1;
+    }
+    if ($statusFilter !== 'all') {
+      $featuredRouteParams['status_filter'] = $statusFilter;
+    }
+    if ($submissionFilter !== 'all') {
+      $statusRouteParams['submission_filter'] = $submissionFilter;
+      $featuredRouteParams['submission_filter'] = $submissionFilter;
+    }
+
+    $submissionRouteParams = array_merge(['language' => $activeLanguage], $surfaceParams);
+    if (filled($titleFilter)) {
+      $submissionRouteParams['title'] = $titleFilter;
+    }
+    if (filled($activeType)) {
+      $submissionRouteParams['event_type'] = $activeType;
+    }
+    if ($activeLifecycle !== 'all') {
+      $submissionRouteParams['lifecycle'] = $activeLifecycle;
+    }
+    if ($statusFilter !== 'all') {
+      $submissionRouteParams['status_filter'] = $statusFilter;
+    }
+    if ($featuredOnly) {
+      $submissionRouteParams['featured_only'] = 1;
+    }
+
+    $allEventsUrl = route('admin.event_management.event', $baseRouteParams);
+    $venueEventsUrl = route('admin.event_management.event', array_merge($baseRouteParams, ['event_type' => 'venue']));
+    $onlineEventsUrl = route('admin.event_management.event', array_merge($baseRouteParams, ['event_type' => 'online']));
+    $allLifecycleUrl = route('admin.event_management.event', $lifecycleRouteParams);
+    $currentLifecycleUrl = route('admin.event_management.event', array_merge($lifecycleRouteParams, ['lifecycle' => 'current']));
+    $expiredLifecycleUrl = route('admin.event_management.event', array_merge($lifecycleRouteParams, ['lifecycle' => 'expired']));
+    $allStatusUrl = route('admin.event_management.event', $statusRouteParams);
+    $activeStatusUrl = route('admin.event_management.event', array_merge($statusRouteParams, ['status_filter' => 'active']));
+    $inactiveStatusUrl = route('admin.event_management.event', array_merge($statusRouteParams, ['status_filter' => 'inactive']));
+    $allFeaturedUrl = route('admin.event_management.event', $featuredRouteParams);
+    $featuredOnlyUrl = route('admin.event_management.event', array_merge($featuredRouteParams, ['featured_only' => 1]));
+    $allSubmissionUrl = route('admin.event_management.event', $submissionRouteParams);
+    $appSubmittedUrl = route('admin.event_management.event', array_merge($submissionRouteParams, ['submission_filter' => 'app_submitted']));
+    $adminAuthoredUrl = route('admin.event_management.event', array_merge($submissionRouteParams, ['submission_filter' => 'admin_authored']));
+    $clearFiltersUrl = route('admin.event_management.event', array_merge(['language' => $activeLanguage], $surfaceParams));
+    $listViewUrl = route('admin.event_management.event', array_merge($filterRouteParams, ['view_mode' => 'list']));
+    $gridViewUrl = route('admin.event_management.event', array_merge($filterRouteParams, ['view_mode' => 'grid']));
+
+    $boardLabel = !request()->filled('event_type')
+      ? __('All Events')
+      : (request()->input('event_type') === 'venue' ? __('Venue Events') : __('Online Events'));
+
+    $boardSubtitle = __('Search, edit, clone and publish events from one cleaner operating surface.');
+    if ($activeType === 'venue') {
+      $boardSubtitle = __('Venue events with onsite ticketing, seating logic and floor operations.');
+    } elseif ($activeType === 'online') {
+      $boardSubtitle = __('Online events with remote access flow, digital delivery and checkout control.');
+    }
+
+    $scopeBadges = collect();
+    if ($activeType) {
+      $scopeBadges->push([
+        'label' => __('Scope'),
+        'value' => ucfirst($activeType),
+      ]);
+    }
+    if ($activeLifecycle !== 'all') {
+      $scopeBadges->push([
+        'label' => __('Timeline'),
+        'value' => ucfirst($activeLifecycle),
+      ]);
+    }
+    if (filled($titleFilter)) {
+      $scopeBadges->push([
+        'label' => __('Search'),
+        'value' => $titleFilter,
+      ]);
+    }
+
+    $currentEvents = $pageEvents->where('is_expired', 0)->values();
+    $expiredEvents = $pageEvents->where('is_expired', 1)->values();
+    $eventGroups = collect();
+    if ($currentEvents->isNotEmpty()) {
+      $eventGroups->push([
+        'key' => 'current',
+        'label' => __('Current events'),
+        'hint' => __('Events whose end time has not passed yet.'),
+        'items' => $currentEvents,
+      ]);
+    }
+    if ($expiredEvents->isNotEmpty()) {
+      $eventGroups->push([
+        'key' => 'expired',
+        'label' => __('Expired events'),
+        'hint' => __('Events that already passed their final end date and time.'),
+        'items' => $expiredEvents,
+      ]);
+    }
+  @endphp
+
   <div class="page-header">
     <h4 class="page-title">{{ __('Events') }}</h4>
     <ul class="breadcrumbs">
@@ -69,7 +326,17 @@
               @endif
             </div>
 
-            <div class="col-lg-4 offset-lg-1 mt-2 mt-lg-0">
+      <div class="event-index-workbench">
+        <form action="{{ route('admin.event_management.event') }}" method="get" class="event-index-primary-form">
+          <input type="hidden" name="language" value="{{ $activeLanguage }}">
+          <input type="hidden" name="event_type" value="{{ $activeType }}">
+          <input type="hidden" name="lifecycle" value="{{ $activeLifecycle === 'all' ? '' : $activeLifecycle }}">
+          <input type="hidden" name="status_filter" value="{{ $statusFilter === 'all' ? '' : $statusFilter }}">
+          <input type="hidden" name="submission_filter" value="{{ $submissionFilter === 'all' ? '' : $submissionFilter }}">
+          <input type="hidden" name="featured_only" value="{{ $featuredOnly ? 1 : '' }}">
+          <input type="hidden" name="view_mode" value="{{ $viewMode }}">
+          <input type="hidden" name="grid_columns" value="{{ $gridColumns }}">
+          <input type="hidden" name="grid_density" value="{{ $gridDensity }}">
 
               <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle btn-sm float-right" type="button"
@@ -82,11 +349,6 @@
                     {{ __('Online Event') }}
                   </a>
 
-<<<<<<< Updated upstream
-                  <a href="{{ route('add.event.event', ['type' => 'venue']) }}" class="dropdown-item">
-                    {{ __('Venue Event') }}
-                  </a>
-=======
           <div class="event-index-primary-form__actions">
             <button type="submit" class="btn btn-primary event-index-search-submit">
               <i class="fas fa-search mr-1"></i>
@@ -143,13 +405,31 @@
               </a>
             </div>
           </div>
+
+          <div class="event-index-chip-group">
+            <span class="event-index-chip-group__label">{{ __('Source') }}</span>
+            <div class="event-index-chip-tabs">
+              <a href="{{ $allSubmissionUrl }}" class="event-index-chip-tab {{ $submissionFilter === 'all' ? 'is-active' : '' }}">
+                <span>{{ __('All') }}</span>
+                <strong>{{ $submissionCounts['all'] ?? $events->total() }}</strong>
+              </a>
+              <a href="{{ $appSubmittedUrl }}" class="event-index-chip-tab {{ $submissionFilter === 'app_submitted' ? 'is-active' : '' }}">
+                <span>{{ __('App submitted') }}</span>
+                <strong>{{ $submissionCounts['app_submitted'] ?? 0 }}</strong>
+              </a>
+              <a href="{{ $adminAuthoredUrl }}" class="event-index-chip-tab {{ $submissionFilter === 'admin_authored' ? 'is-active' : '' }}">
+                <span>{{ __('Admin authored') }}</span>
+                <strong>{{ $submissionCounts['admin_authored'] ?? 0 }}</strong>
+              </a>
+            </div>
+          </div>
         </div>
 
-        <details class="event-index-advanced" {{ $statusFilter !== 'all' || $featuredOnly || $activeLanguage !== $defaultLang->code || $viewMode === 'grid' ? 'open' : '' }}>
+        <details class="event-index-advanced" {{ $statusFilter !== 'all' || $submissionFilter !== 'all' || $featuredOnly || $activeLanguage !== $defaultLang->code || $viewMode === 'grid' ? 'open' : '' }}>
           <summary>
             <span class="event-index-advanced__summary-copy">
               <strong>{{ __('Advanced filters & display') }}</strong>
-              <small>{{ __('Language, status, featured and grid controls') }}</small>
+              <small>{{ __('Language, source, status, featured and grid controls') }}</small>
             </span>
             <span class="event-index-advanced__summary-badge">
               {{ $advancedSettingsCount > 0 ? trans_choice('{1} :count active|[2,*] :count active', $advancedSettingsCount, ['count' => $advancedSettingsCount]) : __('Defaults') }}
@@ -182,6 +462,15 @@
                 <option value="all" {{ $statusFilter === 'all' ? 'selected' : '' }}>{{ __('All statuses') }}</option>
                 <option value="active" {{ $statusFilter === 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
                 <option value="inactive" {{ $statusFilter === 'inactive' ? 'selected' : '' }}>{{ __('Deactive') }}</option>
+              </select>
+            </label>
+
+            <label class="event-index-select-field">
+              <span class="event-index-select-field__label">{{ __('Source') }}</span>
+              <select name="submission_filter" class="form-control">
+                <option value="all" {{ $submissionFilter === 'all' ? 'selected' : '' }}>{{ __('All sources') }}</option>
+                <option value="app_submitted" {{ $submissionFilter === 'app_submitted' ? 'selected' : '' }}>{{ __('App submitted') }}</option>
+                <option value="admin_authored" {{ $submissionFilter === 'admin_authored' ? 'selected' : '' }}>{{ __('Admin authored') }}</option>
               </select>
             </label>
 
@@ -275,9 +564,48 @@
                       : __('Date pending');
                     $timeLabel = $event->start_time ? date('g:i A', strtotime($event->start_time)) : __('Time pending');
                     $organizerName = optional($event->organizer)->username;
+                    $managedByType = !empty($event->owner_identity_id) || !empty($event->organizer_id)
+                      ? 'organizer'
+                      : ((!empty($event->venue_identity_id) || !empty($event->venue_id)) ? 'venue' : 'admin');
+                    $managementLabel = match ($managedByType) {
+                      'organizer' => __('Managed by organizer'),
+                      'venue' => __('Managed by venue'),
+                      default => __('Managed by admin'),
+                    };
+                    $hostingVenueName = $managedByType === 'organizer'
+                      ? ($event->venue_name_snapshot ?: optional($event->venue)->name ?: optional($event->venue)->username)
+                      : null;
+                    $isPendingReview = (int) $event->status === 0 && (!empty($event->owner_identity_id) || !empty($event->venue_identity_id));
+                    $reviewStatus = $event->review_status ?: null;
+                    $inactiveLabel = match ($reviewStatus) {
+                      'pending' => __('Pending review'),
+                      'changes_requested' => __('Changes requested'),
+                      'rejected' => __('Rejected'),
+                      default => ($isPendingReview ? __('Pending review') : __('Inactive')),
+                    };
                     $effectiveEndLabel = $event->effective_end_date_time
                       ? \Carbon\Carbon::parse($event->effective_end_date_time)->format('M d, Y · g:i A')
                       : null;
+                    $collaborationPreview = $event->collaboration_summary_preview ?? null;
+                    $latestCollaborationActivity = data_get($collaborationPreview, 'latest_activity');
+                    $latestActivityTypeLabel = match (data_get($latestCollaborationActivity, 'type')) {
+                      'split_configured' => __('Configuration'),
+                      'mode_changed' => __('Mode change'),
+                      'manual_claim_completed' => __('Manual payout'),
+                      'auto_release_completed' => __('Auto release'),
+                      default => __('Activity'),
+                    };
+                    $latestActivityBadgeClass = match (data_get($latestCollaborationActivity, 'type')) {
+                      'split_configured' => 'secondary',
+                      'mode_changed' => 'warning',
+                      'manual_claim_completed' => 'success',
+                      'auto_release_completed' => 'primary',
+                      default => 'dark',
+                    };
+                    $latestActivityAmount = (float) data_get($latestCollaborationActivity, 'amount', 0);
+                    $formattedLatestActivityAmount = $getCurrencyInfo->base_currency_symbol_position == 'left'
+                      ? $getCurrencyInfo->base_currency_symbol . number_format($latestActivityAmount, 2)
+                      : number_format($latestActivityAmount, 2) . $getCurrencyInfo->base_currency_symbol;
                   @endphp
                   <tr class="{{ $event->is_expired ? 'is-expired' : 'is-current' }}">
                     <td class="event-index-check">
@@ -308,6 +636,9 @@
                           <div class="event-index-badges">
                             <span class="event-index-pill event-index-pill--type">{{ ucfirst($event->event_type) }}</span>
                             <span class="event-index-pill event-index-pill--category">{{ $event->category ?: __('Uncategorized') }}</span>
+                            @if ($isPendingReview)
+                              <span class="event-index-pill event-index-pill--status">{{ __('Pending review') }}</span>
+                            @endif
                           </div>
                         </div>
                       </div>
@@ -321,6 +652,10 @@
                         @else
                           <span class="event-index-organizer__name">{{ __('Admin') }}</span>
                           <span class="event-index-organizer__badge">{{ __('Internal') }}</span>
+                        @endif
+                        <span class="event-index-organizer__badge mt-2">{{ $managementLabel }}</span>
+                        @if (!empty($hostingVenueName))
+                          <span class="event-index-ticket-muted mt-2">{{ __('Host venue') }}: {{ $hostingVenueName }}</span>
                         @endif
                       </div>
                     </td>
@@ -339,9 +674,47 @@
                           @csrf
                           <select class="form-control form-control-sm {{ $event->status == 0 ? 'bg-warning text-dark' : 'bg-primary' }}" name="status" onchange="document.getElementById('statusForm-{{ $event->id }}').submit()">
                             <option value="1" {{ $event->status == 1 ? 'selected' : '' }}>{{ __('Active') }}</option>
-                            <option value="0" {{ $event->status == 0 ? 'selected' : '' }}>{{ __('Deactive') }}</option>
+                            <option value="0" {{ $event->status == 0 ? 'selected' : '' }}>{{ $inactiveLabel }}</option>
                           </select>
                         </form>
+                        @if ($isPendingReview)
+                          <span class="event-index-ticket-muted">{{ __('Submitted from app and waiting for admin approval.') }}</span>
+                        @elseif ($reviewStatus === 'changes_requested' && !empty($event->review_notes))
+                          <span class="event-index-ticket-muted">{{ __('Notes') }}: {{ $event->review_notes }}</span>
+                        @elseif ($reviewStatus === 'rejected' && !empty($event->review_notes))
+                          <span class="event-index-ticket-muted">{{ __('Reason') }}: {{ $event->review_notes }}</span>
+                        @endif
+
+                        @if (!empty($collaborationPreview) && (data_get($collaborationPreview, 'has_activity') || data_get($collaborationPreview, 'claimable_count', 0) > 0))
+                          <div class="border rounded p-2 mt-2 bg-light">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 8px;">
+                              <strong>{{ __('Collaboration activity') }}</strong>
+                              <a href="{{ route('admin.event_management.edit_event', ['id' => $event->id]) }}" class="small">
+                                {{ __('Review') }}
+                              </a>
+                            </div>
+                            <div class="small text-muted mt-1">
+                              <span class="badge {{ (int) data_get($collaborationPreview, 'claimable_count', 0) > 0 ? 'badge-success' : 'badge-light' }}">
+                                {{ __('Claimable now') }}: {{ (int) data_get($collaborationPreview, 'claimable_count', 0) }}
+                              </span>
+                              · {{ __('Reserved') }}:
+                              <strong>
+                                {{ $getCurrencyInfo->base_currency_symbol_position == 'left'
+                                  ? $getCurrencyInfo->base_currency_symbol . number_format((float) data_get($collaborationPreview, 'reserved_for_collaborators', 0), 2)
+                                  : number_format((float) data_get($collaborationPreview, 'reserved_for_collaborators', 0), 2) . $getCurrencyInfo->base_currency_symbol }}
+                              </strong>
+                            </div>
+                            @if (!empty($latestCollaborationActivity))
+                              <div class="small mt-2">
+                                <span class="badge badge-{{ $latestActivityBadgeClass }}">{{ $latestActivityTypeLabel }}</span>
+                                <span class="text-muted ml-1">{{ data_get($latestCollaborationActivity, 'title') }}</span>
+                                @if ($latestActivityAmount > 0)
+                                  <span class="badge badge-success ml-1">{{ $formattedLatestActivityAmount }}</span>
+                                @endif
+                              </div>
+                            @endif
+                          </div>
+                        @endif
 
                         @unless ($event->is_expired)
                           <form id="featuredForm-{{ $event->id }}" action="{{ route('admin.event_management.event.update_featured', ['id' => $event->id]) }}" method="post">
@@ -405,18 +778,9 @@
                 <div>
                   <h4 class="event-index-group__title">{{ $group['label'] }}</h4>
                   <p class="event-index-group__hint">{{ $group['hint'] }}</p>
->>>>>>> Stashed changes
                 </div>
               </div>
 
-<<<<<<< Updated upstream
-              <button class="btn btn-danger btn-sm float-right mr-2 d-none bulk-delete"
-                data-href="{{ route('admin.event_management.bulk_delete_event') }}">
-                <i class="flaticon-interface-5"></i> {{ __('Delete') }}
-              </button>
-            </div>
-          </div>
-=======
               <div class="event-index-grid">
                 @foreach ($group['items'] as $event)
                   @php
@@ -428,9 +792,48 @@
                       : __('Date pending');
                     $timeLabel = $event->start_time ? date('g:i A', strtotime($event->start_time)) : __('Time pending');
                     $organizerName = optional($event->organizer)->username;
+                    $managedByType = !empty($event->owner_identity_id) || !empty($event->organizer_id)
+                      ? 'organizer'
+                      : ((!empty($event->venue_identity_id) || !empty($event->venue_id)) ? 'venue' : 'admin');
+                    $managementLabel = match ($managedByType) {
+                      'organizer' => __('Managed by organizer'),
+                      'venue' => __('Managed by venue'),
+                      default => __('Managed by admin'),
+                    };
+                    $hostingVenueName = $managedByType === 'organizer'
+                      ? ($event->venue_name_snapshot ?: optional($event->venue)->name ?: optional($event->venue)->username)
+                      : null;
+                    $isPendingReview = (int) $event->status === 0 && (!empty($event->owner_identity_id) || !empty($event->venue_identity_id));
+                    $reviewStatus = $event->review_status ?: null;
+                    $inactiveLabel = match ($reviewStatus) {
+                      'pending' => __('Pending review'),
+                      'changes_requested' => __('Changes requested'),
+                      'rejected' => __('Rejected'),
+                      default => ($isPendingReview ? __('Pending review') : __('Inactive')),
+                    };
                     $effectiveEndLabel = $event->effective_end_date_time
                       ? \Carbon\Carbon::parse($event->effective_end_date_time)->format('M d, Y · g:i A')
                       : null;
+                    $collaborationPreview = $event->collaboration_summary_preview ?? null;
+                    $latestCollaborationActivity = data_get($collaborationPreview, 'latest_activity');
+                    $latestActivityTypeLabel = match (data_get($latestCollaborationActivity, 'type')) {
+                      'split_configured' => __('Configuration'),
+                      'mode_changed' => __('Mode change'),
+                      'manual_claim_completed' => __('Manual payout'),
+                      'auto_release_completed' => __('Auto release'),
+                      default => __('Activity'),
+                    };
+                    $latestActivityBadgeClass = match (data_get($latestCollaborationActivity, 'type')) {
+                      'split_configured' => 'secondary',
+                      'mode_changed' => 'warning',
+                      'manual_claim_completed' => 'success',
+                      'auto_release_completed' => 'primary',
+                      default => 'dark',
+                    };
+                    $latestActivityAmount = (float) data_get($latestCollaborationActivity, 'amount', 0);
+                    $formattedLatestActivityAmount = $getCurrencyInfo->base_currency_symbol_position == 'left'
+                      ? $getCurrencyInfo->base_currency_symbol . number_format($latestActivityAmount, 2)
+                      : number_format($latestActivityAmount, 2) . $getCurrencyInfo->base_currency_symbol;
                   @endphp
                   <article class="event-index-card {{ $event->is_expired ? 'is-expired' : 'is-current' }}">
                     <label class="event-index-card__check">
@@ -465,6 +868,39 @@
                       <div class="event-index-badges">
                         <span class="event-index-pill event-index-pill--type">{{ ucfirst($event->event_type) }}</span>
                         <span class="event-index-pill event-index-pill--category">{{ $event->category ?: __('Uncategorized') }}</span>
+                        @if ($isPendingReview)
+                          <span class="event-index-pill event-index-pill--status">{{ __('Pending review') }}</span>
+                        @elseif ($reviewStatus === 'changes_requested')
+                          <span class="event-index-pill event-index-pill--status">{{ __('Changes requested') }}</span>
+                        @elseif ($reviewStatus === 'rejected')
+                          <span class="event-index-pill event-index-pill--status">{{ __('Rejected') }}</span>
+                        @endif
+                      </div>
+
+                      <div class="event-index-state-stack mt-2">
+                        <span class="event-index-ticket-muted">{{ $managementLabel }}</span>
+                        @if (!empty($hostingVenueName))
+                          <span class="event-index-ticket-muted">{{ __('Host venue') }}: {{ $hostingVenueName }}</span>
+                        @endif
+                        @if (!empty($collaborationPreview) && (data_get($collaborationPreview, 'has_activity') || data_get($collaborationPreview, 'claimable_count', 0) > 0))
+                          <div class="border rounded p-2 mt-2 bg-light">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 8px;">
+                              <strong class="small">{{ __('Collaboration activity') }}</strong>
+                              <span class="badge {{ (int) data_get($collaborationPreview, 'claimable_count', 0) > 0 ? 'badge-success' : 'badge-light' }}">
+                                {{ __('Claimable') }}: {{ (int) data_get($collaborationPreview, 'claimable_count', 0) }}
+                              </span>
+                            </div>
+                            @if (!empty($latestCollaborationActivity))
+                              <div class="small text-muted mt-1">{{ data_get($latestCollaborationActivity, 'title') }}</div>
+                              <div class="d-flex justify-content-between align-items-center mt-1 flex-wrap" style="gap: 8px;">
+                                <span class="badge badge-{{ $latestActivityBadgeClass }}">{{ $latestActivityTypeLabel }}</span>
+                                @if ($latestActivityAmount > 0)
+                                  <span class="badge badge-success">{{ $formattedLatestActivityAmount }}</span>
+                                @endif
+                              </div>
+                            @endif
+                          </div>
+                        @endif
                       </div>
 
                       <div class="event-index-card__ops">
@@ -481,9 +917,16 @@
                           @csrf
                           <select class="form-control form-control-sm {{ $event->status == 0 ? 'bg-warning text-dark' : 'bg-primary' }}" name="status" onchange="document.getElementById('grid-statusForm-{{ $event->id }}').submit()">
                             <option value="1" {{ $event->status == 1 ? 'selected' : '' }}>{{ __('Active') }}</option>
-                            <option value="0" {{ $event->status == 0 ? 'selected' : '' }}>{{ __('Deactive') }}</option>
+                            <option value="0" {{ $event->status == 0 ? 'selected' : '' }}>{{ $inactiveLabel }}</option>
                           </select>
                         </form>
+                        @if ($isPendingReview)
+                          <span class="event-index-ticket-muted">{{ __('Submitted from app and waiting for admin approval.') }}</span>
+                        @elseif ($reviewStatus === 'changes_requested' && !empty($event->review_notes))
+                          <span class="event-index-ticket-muted">{{ __('Notes') }}: {{ $event->review_notes }}</span>
+                        @elseif ($reviewStatus === 'rejected' && !empty($event->review_notes))
+                          <span class="event-index-ticket-muted">{{ __('Reason') }}: {{ $event->review_notes }}</span>
+                        @endif
 
                         @unless ($event->is_expired)
                           <form id="grid-featuredForm-{{ $event->id }}" action="{{ route('admin.event_management.event.update_featured', ['id' => $event->id]) }}" method="post">
@@ -537,161 +980,23 @@
               </div>
             </section>
           @endforeach
->>>>>>> Stashed changes
         </div>
 
-        <div class="card-body">
-          <div class="row">
-            <div class="col-lg-12">
-
-              <div class="float-right">
-                <div class="form-group">
-                  <form action="" method="get">
-                    <input type="hidden" name="language" value="{{ request()->input('language') }}" class="hidden">
-                    <input type="text" name="title" value="{{ request()->input('title') }}" name="name"
-                      placeholder="Enter Event Name" class="form-control">
-                  </form>
-                </div>
-              </div>
-
-              @if (count($events) == 0)
-                <h3 class="text-center mt-2">{{ __('NO EVENT CONTENT FOUND FOR ') . $language->name . '!' }}</h3>
-              @else
-                <div class="table-responsive">
-                  <table class="table table-striped mt-3">
-                    <thead>
-                      <tr>
-                        <th scope="col">
-                          <input type="checkbox" class="bulk-check" data-val="all">
-                        </th>
-                        <th scope="col" width="30%">{{ __('Title') }}</th>
-                        <th scope="col">{{ __('Organizer') }}</th>
-                        <th scope="col">{{ __('Type') }}</th>
-                        <th scope="col">{{ __('Category') }}</th>
-                        <th scope="col">{{ __('Ticket') }}</th>
-                        <th scope="col">{{ __('Status') }}</th>
-                        <th scope="col">{{ __('Featured') }}</th>
-                        <th scope="col">{{ __('Actions') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @foreach ($events as $event)
-                        <tr>
-                          <td>
-                            <input type="checkbox" class="bulk-check" data-val="{{ $event->id }}">
-                          </td>
-                          <td width="20%">
-                            <a target="_blank"
-                              href="{{ route('event.details', ['slug' => $event->slug, 'id' => $event->id]) }}">{{ strlen($event->title) > 30 ? mb_substr($event->title, 0, 30, 'UTF-8') . '....' : $event->title }}</a>
-                          </td>
-                          <td>
-                            @if ($event->organizer)
-                              <a target="_blank"
-                                href="{{ route('admin.organizer_management.organizer_details', ['id' => $event->organizer_id, 'language' => $defaultLang->code]) }}">
-                                {{ strlen($event->organizer->username) > 20 ? mb_substr($event->organizer->username, 0, 20, 'UTF-8') . '....' : $event->organizer->username }}</a>
-                            @else
-                              <span class="badge badge-success">{{ __('Admin') }}</span>
-                            @endif
-                          </td>
-                          <td>
-                            {{ ucfirst($event->event_type) }}
-                          </td>
-                          <td>
-                            {{ $event->category }}
-                          </td>
-                          <td>
-                            @if ($event->event_type == 'venue')
-                              <a href="{{ route('admin.event.ticket', ['language' => request()->input('language'), 'event_id' => $event->id, 'event_type' => $event->event_type]) }}"
-                                class="btn btn-success btn-sm">{{ __('Manage') }}</a>
-                            @endif
-                          </td>
-                          <td>
-                            <form id="statusForm-{{ $event->id }}" class="d-inline-block"
-                              action="{{ route('admin.event_management.event.event_status', ['id' => $event->id, 'language' => request()->input('language')]) }}"
-                              method="post">
-
-                              @csrf
-                              <select
-                                class="form-control form-control-sm {{ $event->status == 0 ? 'bg-warning text-dark' : 'bg-primary' }}"
-                                name="status"
-                                onchange="document.getElementById('statusForm-{{ $event->id }}').submit()">
-                                <option value="1" {{ $event->status == 1 ? 'selected' : '' }}>
-                                  {{ __('Active') }}
-                                </option>
-                                <option value="0" {{ $event->status == 0 ? 'selected' : '' }}>
-                                  {{ __('Deactive') }}
-                                </option>
-                              </select>
-                            </form>
-                          </td>
-                          <td>
-
-                            <form id="featuredForm-{{ $event->id }}" class="d-inline-block"
-                              action="{{ route('admin.event_management.event.update_featured', ['id' => $event->id]) }}"
-                              method="post">
-
-                              @csrf
-                              <select
-                                class="form-control form-control-sm {{ $event->is_featured == 'yes' ? 'bg-success' : 'bg-danger' }}"
-                                name="is_featured"
-                                onchange="document.getElementById('featuredForm-{{ $event->id }}').submit()">
-                                <option value="yes" {{ $event->is_featured == 'yes' ? 'selected' : '' }}>
-                                  {{ __('Yes') }}
-                                </option>
-                                <option value="no" {{ $event->is_featured == 'no' ? 'selected' : '' }}>
-                                  {{ __('No') }}
-                                </option>
-                              </select>
-                            </form>
-                          </td>
-                          <td>
-                            <div class="dropdown">
-                              <button class="btn btn-secondary dropdown-toggle btn-sm" type="button"
-                                id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false">
-                                {{ __('Select') }}
-                              </button>
-
-                              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a href="{{ route('admin.event_management.edit_event', ['id' => $event->id]) }}"
-                                  class="dropdown-item">
-                                  {{ __('Edit') }}
-                                </a>
-
-                                <a href="{{ route('admin.event_management.ticket_setting', ['id' => $event->id]) }}"
-                                  class="dropdown-item">
-                                  {{ __('Ticket Settings') }}
-                                </a>
-
-                                <form class="deleteForm d-block"
-                                  action="{{ route('admin.event_management.delete_event', ['id' => $event->id]) }}"
-                                  method="post">
-
-                                  @csrf
-                                  <button type="submit" class="btn btn-sm deleteBtn">
-                                    {{ __('Delete') }}
-                                  </button>
-                                </form>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                </div>
-              @endif
-            </div>
-          </div>
-        </div>
-
-        <div class="card-footer text-center">
-          <div class="d-inline-block mt-3">
-            {{ $events->appends([
-                    'language' => request()->input('language'),
-                    'title' => request()->input('title'),
-                ])->links() }}
-          </div>
+      <div class="event-index-pagination">
+        <div class="d-inline-block mt-3">
+          {{ $events->appends([
+                  'language' => request()->input('language'),
+                  'title' => request()->input('title'),
+                  'event_type' => request()->input('event_type'),
+                  'lifecycle' => request()->input('lifecycle'),
+                  'status_filter' => $statusFilter,
+                  'submission_filter' => $submissionFilter,
+                  'featured_only' => $featuredOnly ? 1 : null,
+                  'sort_by' => $sortBy,
+                  'view_mode' => $viewMode,
+                  'grid_columns' => $gridColumns,
+                  'grid_density' => $gridDensity,
+              ])->links() }}
         </div>
       </div>
     </div>

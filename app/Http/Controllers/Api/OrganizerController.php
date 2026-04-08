@@ -9,8 +9,10 @@ use App\Models\Event\EventCategory;
 use App\Models\Event\EventDates;
 use App\Models\Event\Ticket;
 use App\Models\Event\Wishlist;
+use App\Models\Follower;
 use App\Models\Language;
 use App\Models\Organizer;
+use App\Models\Venue;
 use App\Traits\ApiFormatTrait;
 use Illuminate\Http\Request;
 use DB;
@@ -22,9 +24,14 @@ use stdClass;
 class OrganizerController extends Controller
 {
   use ApiFormatTrait;
+
+  public function __construct(
+    private OrganizerPublicProfileService $organizerPublicProfileService
+  ) {
+  }
   /* ****************************
-     * Show Organizers
-     * ****************************/
+   * Show Organizers
+   * ****************************/
   public function index(Request $request)
   {
     $locale = $request->header('Accept-Language');
@@ -121,25 +128,67 @@ class OrganizerController extends Controller
           'organizer_infos.details',
         )
         ->first();
-      $information['organizer'] = $this->format_organizer_data($organizer, 'organizer');
-      //end organizer info
 
-      foreach ($categories as $category) {
-        $events = DB::table('event_contents')
-          ->join('events', 'events.id', '=', 'event_contents.event_id')
-          ->where([
-            ['event_contents.language_id', $language->id],
-            ['event_contents.event_category_id', $category->id],
-            ['events.status', 1],
-            ['events.organizer_id', $id],
-          ])
-          ->orderBy('events.created_at', 'desc')
-          ->get()
-          ->map(function ($event) use ($language) {
-            return $this->formatEventForApi($event, $language);
-          });
+      if (!$organizer && $id == 0) {
+        $admin = Admin::first();
+        $information['admin'] = true;
+        $information['organizer'] = $this->format_organizer_data($admin, 'admin');
 
-        $information['events']['categories'][$category->id] = $events;
+        // Social stats for admin
+        $information['organizer']->followers_count = Follower::where('organizer_id', 0)->count();
+        $information['organizer']->events_count = OrganizerEventCount(0, true);
+        $information['organizer']->is_followed = Auth::guard('sanctum')->check()
+          ? Follower::where('organizer_id', 0)->where('customer_id', Auth::guard('sanctum')->id())->exists()
+          : false;
+
+        // Load admin events
+        foreach ($categories as $category) {
+          $events = DB::table('event_contents')
+            ->join('events', 'events.id', '=', 'event_contents.event_id')
+            ->where([
+              ['event_contents.language_id', $language->id],
+              ['event_contents.event_category_id', $category->id],
+              ['events.status', 1],
+              ['events.organizer_id', null],
+            ])
+            ->orderBy('events.created_at', 'desc')
+            ->get()
+            ->map(function ($event) use ($language) {
+              return $this->formatEventForApi($event, $language);
+            });
+          $information['events']['categories'][$category->id] = $events;
+        }
+      } else {
+        $information['organizer'] = $this->format_organizer_data($organizer, 'organizer');
+
+        // Social stats for organizer
+        if ($organizer) {
+          $information['organizer']->followers_count = Follower::where('organizer_id', $organizer->id)->count();
+          $information['organizer']->events_count = OrganizerEventCount($organizer->id);
+          $information['organizer']->is_followed = Auth::guard('sanctum')->check()
+            ? Follower::where('organizer_id', $organizer->id)->where('customer_id', Auth::guard('sanctum')->id())->exists()
+            : false;
+        }
+
+        //end organizer info
+
+        foreach ($categories as $category) {
+          $events = DB::table('event_contents')
+            ->join('events', 'events.id', '=', 'event_contents.event_id')
+            ->where([
+              ['event_contents.language_id', $language->id],
+              ['event_contents.event_category_id', $category->id],
+              ['events.status', 1],
+              ['events.organizer_id', $id],
+            ])
+            ->orderBy('events.created_at', 'desc')
+            ->get()
+            ->map(function ($event) use ($language) {
+              return $this->formatEventForApi($event, $language);
+            });
+
+          $information['events']['categories'][$category->id] = $events;
+        }
       }
     }
 
@@ -251,16 +300,16 @@ class OrganizerController extends Controller
     if ($info->smtp_status == 1) {
 
       $mail->isSMTP();
-      $mail->Host       = $info->smtp_host;
-      $mail->SMTPAuth   = true;
-      $mail->Username   = $info->smtp_username;
-      $mail->Password   = $info->smtp_password;
+      $mail->Host = $info->smtp_host;
+      $mail->SMTPAuth = true;
+      $mail->Username = $info->smtp_username;
+      $mail->Password = $info->smtp_password;
 
       if ($info->encryption == 'TLS') {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
       }
 
-      $mail->Port       = $info->smtp_port;
+      $mail->Port = $info->smtp_port;
     }
 
     try {
@@ -286,5 +335,52 @@ class OrganizerController extends Controller
       'message' => $message ?? "something went wrong!"
     ]);
 
+  }
+
+  public function followedEvents(Request $request)
+  {
+    $customer = Auth::guard('sanctum')->user();
+    if (!$customer) {
+      return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+    }
+
+    $locale = $request->header('Accept-Language');
+    $language = $locale ? Language::where('code', $locale)->first()
+      : Language::where('is_default', 1)->first();
+
+    $followed = $customer->following()->get();
+
+    $organizer_ids = $followed->where('following_type', Organizer::class)->pluck('following_id')->toArray();
+    $venue_ids = $followed->where('following_type', Venue::class)->pluck('following_id')->toArray();
+
+    $include_admin = in_array(0, $organizer_ids);
+
+    $events_query = DB::table('event_contents')
+      ->join('events', 'events.id', '=', 'event_contents.event_id')
+      ->where('event_contents.language_id', $language->id)
+      ->where('events.status', 1);
+
+    $events_query->where(function ($query) use ($organizer_ids, $venue_ids, $include_admin) {
+      $query->whereIn('events.organizer_id', $organizer_ids)
+        ->orWhereIn('events.venue_id', $venue_ids);
+
+      if ($include_admin) {
+        $query->orWhere(function ($q) {
+          $q->whereNull('events.organizer_id')->whereNull('events.venue_id');
+        });
+      }
+    });
+
+    $events = $events_query->orderBy('events.created_at', 'desc')
+      ->limit(10)
+      ->get()
+      ->map(function ($event) use ($language) {
+        return $this->formatEventForApi($event, $language);
+      });
+
+    return response()->json([
+      'success' => true,
+      'data' => $events
+    ]);
   }
 }

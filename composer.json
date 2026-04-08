@@ -20,6 +20,7 @@
     "iyzico/iyzipay-php": "^2.0",
     "james-heinrich/getid3": "^1.9",
     "kreait/firebase-php": "^7.6",
+    "kreativdev/installer": "^1.0",
     "laravel-notification-channels/webpush": "6.0.0",
     "laravel/framework": "^9.0",
     "laravel/sanctum": "^3.3",
@@ -33,7 +34,8 @@
     "phpmailer/phpmailer": "^6.4",
     "razorpay/razorpay": "2.*",
     "simplesoftwareio/simple-qrcode": "~4",
-    "spatie/laravel-cookie-consent": "^3.2.0"
+    "spatie/laravel-cookie-consent": "^3.2.0",
+    "stripe/stripe-php": "^19.3"
   },
   "require-dev": {
     "spatie/laravel-ignition": "^1.0",

@@ -1,0 +1,100 @@
+<svg width="1800" height="1400" viewBox="0 0 1800 1400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1800" y2="1400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A0910"/>
+      <stop offset="1" stop-color="#14111A"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="2000" height="1600" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+    <style>
+      .title{font:700 64px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#F5F1EB}
+      .sub{font:400 28px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#A7A3B3}
+      .cardTitle{font:700 34px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#F5F1EB}
+      .cardSub{font:400 22px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#A7A3B3}
+      .small{font:600 20px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#F5F1EB}
+      .tiny{font:500 18px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#D0CAD8}
+      .hex{font:400 18px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#8E8898}
+      .foot{font:500 20px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; fill:#C9C3CF}
+    </style>
+  </defs>
+
+  <rect width="1800" height="1400" fill="url(#bgGrad)"/>
+  <rect x="80" y="70" width="1640" height="190" rx="38" fill="#12111A" stroke="#252230" stroke-width="2"/>
+  <text x="120" y="160" class="title">DUTY · Red Direction</text>
+  <text x="122" y="210" class="sub">4 palette proposals for a scarlet-led identity with dark surfaces, nightlife energy, and premium contrast.</text>
+
+  <g filter="url(#shadow)"><rect x="80" y="320" width="790" height="430" rx="34" fill="#12111A" stroke="#292532" stroke-width="2"/></g>
+  <text x="114" y="372" class="cardTitle">A. Scarlet Editorial</text>
+  <rect x="688" y="348" width="148" height="38" rx="18" fill="#C1121F"/>
+  <text x="712" y="373" class="tiny" fill="#FFF4F1">Recommended</text>
+  <text x="114" y="418" class="cardSub">Elegant, editorial, premium nightlife</text>
+  <rect x="114" y="446" width="722" height="92" rx="24" fill="#1C1B22"/>
+  <rect x="138" y="468" width="196" height="48" rx="18" fill="#0D0C11"/>
+  <text x="180" y="499" class="small">Primary CTA</text>
+  <rect x="626" y="468" width="186" height="48" rx="18" fill="#C1121F"/>
+  <text x="675" y="499" class="small" fill="#FFF4F1">Live now</text>
+  <rect x="114" y="566" width="108" height="86" rx="18" fill="#C1121F"/><text x="114" y="678" class="tiny">Primary</text><text x="114" y="706" class="hex">#C1121F</text>
+  <rect x="238" y="566" width="108" height="86" rx="18" fill="#8A0F18"/><text x="238" y="678" class="tiny">Deep</text><text x="238" y="706" class="hex">#8A0F18</text>
+  <rect x="362" y="566" width="108" height="86" rx="18" fill="#1C1B22"/><text x="362" y="678" class="tiny">Graphite</text><text x="362" y="706" class="hex">#1C1B22</text>
+  <rect x="486" y="566" width="108" height="86" rx="18" fill="#0D0C11"/><text x="486" y="678" class="tiny">Ink</text><text x="486" y="706" class="hex">#0D0C11</text>
+  <rect x="610" y="566" width="108" height="86" rx="18" fill="#A7A3B3"/><text x="610" y="678" class="tiny">Muted</text><text x="610" y="706" class="hex">#A7A3B3</text>
+  <rect x="734" y="566" width="108" height="86" rx="18" fill="#F5F1EB"/><text x="734" y="678" class="tiny">Paper</text><text x="734" y="706" class="hex">#F5F1EB</text>
+  <text x="114" y="716" class="foot">Best balance of elegance, contrast, and brand memorability.</text>
+
+  <g filter="url(#shadow)"><rect x="930" y="320" width="790" height="430" rx="34" fill="#12111A" stroke="#292532" stroke-width="2"/></g>
+  <text x="964" y="372" class="cardTitle">B. Crimson Luxury</text>
+  <rect x="1568" y="348" width="138" height="38" rx="18" fill="#B11226"/>
+  <text x="1594" y="373" class="tiny" fill="#FFF4F1">Luxury club</text>
+  <text x="964" y="418" class="cardSub">More luxe and private-club oriented</text>
+  <rect x="964" y="446" width="722" height="92" rx="24" fill="#18171D"/>
+  <rect x="988" y="468" width="196" height="48" rx="18" fill="#2A2831"/>
+  <text x="1030" y="499" class="small">Primary CTA</text>
+  <rect x="1476" y="468" width="186" height="48" rx="18" fill="#B11226"/>
+  <text x="1525" y="499" class="small" fill="#FFF4F1">Live now</text>
+  <rect x="964" y="566" width="108" height="86" rx="18" fill="#B11226"/><text x="964" y="678" class="tiny">Primary</text><text x="964" y="706" class="hex">#B11226</text>
+  <rect x="1088" y="566" width="108" height="86" rx="18" fill="#6E0A17"/><text x="1088" y="678" class="tiny">Shadow</text><text x="1088" y="706" class="hex">#6E0A17</text>
+  <rect x="1212" y="566" width="108" height="86" rx="18" fill="#18171D"/><text x="1212" y="678" class="tiny">Coal</text><text x="1212" y="706" class="hex">#18171D</text>
+  <rect x="1336" y="566" width="108" height="86" rx="18" fill="#2A2831"/><text x="1336" y="678" class="tiny">Surface</text><text x="1336" y="706" class="hex">#2A2831</text>
+  <rect x="1460" y="566" width="108" height="86" rx="18" fill="#C9C3CF"/><text x="1460" y="678" class="tiny">Mist</text><text x="1460" y="706" class="hex">#C9C3CF</text>
+  <rect x="1584" y="566" width="108" height="86" rx="18" fill="#F7F4F0"/><text x="1584" y="678" class="tiny">Ivory</text><text x="1584" y="706" class="hex">#F7F4F0</text>
+  <text x="964" y="716" class="foot">Feels premium and upscale, slightly less youthful.</text>
+
+  <g filter="url(#shadow)"><rect x="80" y="790" width="790" height="430" rx="34" fill="#12111A" stroke="#292532" stroke-width="2"/></g>
+  <text x="114" y="842" class="cardTitle">C. Vermilion Modern</text>
+  <rect x="700" y="818" width="136" height="38" rx="18" fill="#D72638"/>
+  <text x="724" y="843" class="tiny" fill="#FFF4F1">Bold energy</text>
+  <text x="114" y="888" class="cardSub">More energetic, brighter, modern</text>
+  <rect x="114" y="916" width="722" height="92" rx="24" fill="#15141A"/>
+  <rect x="138" y="938" width="196" height="48" rx="18" fill="#26242E"/>
+  <text x="180" y="969" class="small">Primary CTA</text>
+  <rect x="626" y="938" width="186" height="48" rx="18" fill="#D72638"/>
+  <text x="675" y="969" class="small" fill="#FFF4F1">Live now</text>
+  <rect x="114" y="1036" width="108" height="86" rx="18" fill="#D72638"/><text x="114" y="1148" class="tiny">Primary</text><text x="114" y="1176" class="hex">#D72638</text>
+  <rect x="238" y="1036" width="108" height="86" rx="18" fill="#961B26"/><text x="238" y="1148" class="tiny">Depth</text><text x="238" y="1176" class="hex">#961B26</text>
+  <rect x="362" y="1036" width="108" height="86" rx="18" fill="#15141A"/><text x="362" y="1148" class="tiny">Pitch</text><text x="362" y="1176" class="hex">#15141A</text>
+  <rect x="486" y="1036" width="108" height="86" rx="18" fill="#26242E"/><text x="486" y="1148" class="tiny">Panel</text><text x="486" y="1176" class="hex">#26242E</text>
+  <rect x="610" y="1036" width="108" height="86" rx="18" fill="#B7B2C2"/><text x="610" y="1148" class="tiny">Cool gray</text><text x="610" y="1176" class="hex">#B7B2C2</text>
+  <rect x="734" y="1036" width="108" height="86" rx="18" fill="#FAF7F4"/><text x="734" y="1148" class="tiny">Warm white</text><text x="734" y="1176" class="hex">#FAF7F4</text>
+  <text x="114" y="1186" class="foot">Most energetic and commercial, less refined than A.</text>
+
+  <g filter="url(#shadow)"><rect x="930" y="790" width="790" height="430" rx="34" fill="#12111A" stroke="#292532" stroke-width="2"/></g>
+  <text x="964" y="842" class="cardTitle">D. Oxblood Minimal</text>
+  <rect x="1567" y="818" width="139" height="38" rx="18" fill="#7E1020"/>
+  <text x="1588" y="843" class="tiny" fill="#FFF4F1">Dark luxury</text>
+  <text x="964" y="888" class="cardSub">More restrained, fashion-led, dramatic</text>
+  <rect x="964" y="916" width="722" height="92" rx="24" fill="#111015"/>
+  <rect x="988" y="938" width="196" height="48" rx="18" fill="#23212A"/>
+  <text x="1030" y="969" class="small">Primary CTA</text>
+  <rect x="1476" y="938" width="186" height="48" rx="18" fill="#B21E35"/>
+  <text x="1525" y="969" class="small" fill="#FFF4F1">Live now</text>
+  <rect x="964" y="1036" width="108" height="86" rx="18" fill="#7E1020"/><text x="964" y="1148" class="tiny">Oxblood</text><text x="964" y="1176" class="hex">#7E1020</text>
+  <rect x="1088" y="1036" width="108" height="86" rx="18" fill="#B21E35"/><text x="1088" y="1148" class="tiny">Accent</text><text x="1088" y="1176" class="hex">#B21E35</text>
+  <rect x="1212" y="1036" width="108" height="86" rx="18" fill="#111015"/><text x="1212" y="1148" class="tiny">Noir</text><text x="1212" y="1176" class="hex">#111015</text>
+  <rect x="1336" y="1036" width="108" height="86" rx="18" fill="#23212A"/><text x="1336" y="1148" class="tiny">Stone</text><text x="1336" y="1176" class="hex">#23212A</text>
+  <rect x="1460" y="1036" width="108" height="86" rx="18" fill="#908A98"/><text x="1460" y="1148" class="tiny">Smoke</text><text x="1460" y="1176" class="hex">#908A98</text>
+  <rect x="1584" y="1036" width="108" height="86" rx="18" fill="#F2EEEA"/><text x="1584" y="1148" class="tiny">Chalk</text><text x="1584" y="1176" class="hex">#F2EEEA</text>
+  <text x="964" y="1186" class="foot">Strong luxury mood, but darker and more niche.</text>
+
+  <text x="80" y="1335" class="sub">Recommendation: start with Scarlet Editorial and keep red for CTAs, tabs, badges, and featured surfaces rather than every component.</text>
+</svg>

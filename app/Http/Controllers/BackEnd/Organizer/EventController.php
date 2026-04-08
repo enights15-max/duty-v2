@@ -25,15 +25,11 @@ use App\Http\Requests\Event\StoreRequest;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\Event\UpdateRequest;
 use App\Http\Requests\TicketSettingRequest;
-<<<<<<< Updated upstream
-=======
-use App\Services\EventAuthoringService;
-use App\Services\EventQrCodeService;
 use App\Traits\HasIdentityActor;
->>>>>>> Stashed changes
 
 class EventController extends Controller
 {
+  use HasIdentityActor;
   //index
   public function index(Request $request)
   {
@@ -55,7 +51,7 @@ class EventController extends Controller
       ->when($title, function ($query) use ($title) {
         return $query->where('event_contents.title', 'like', '%' . $title . '%');
       })
-      ->where('events.organizer_id', '=', Auth::guard('organizer')->user()->id)
+      ->where('events.organizer_id', '=', $this->getOrganizerId())
       ->when($event_type, function ($query, $event_type) {
         return $query->where('events.event_type', $event_type);
       })
@@ -77,7 +73,7 @@ class EventController extends Controller
     // get all the languages from db
     $languages = Language::get();
     $countries = Country::get();
-    $information['getCurrencyInfo']  = $this->getCurrencyInfo();
+    $information['getCurrencyInfo'] = $this->getCurrencyInfo();
     $information['languages'] = $languages;
     $information['countries'] = $countries;
     return view('organizer.event.create', $information);
@@ -101,8 +97,8 @@ class EventController extends Controller
     ];
     $messages = [
       'file.required' => 'Please upload an image file.',
-      'file.image'    => 'The uploaded file must be an image.',
-      'file.mimes'    => 'Only jpg, jpeg, and png files are allowed.'
+      'file.image' => 'The uploaded file must be an image.',
+      'file.mimes' => 'Only jpg, jpeg, and png files are allowed.'
     ];
 
     $validator = Validator::make($request->all(), $rules, $messages);
@@ -116,7 +112,7 @@ class EventController extends Controller
 
     if ($width != 1170 || $height != 570) {
       return response()->json([
-        'status'  => 'error',
+        'status' => 'error',
         'msg' => 'The image dimensions must be exactly 1170x570 pixels.'
       ]);
     }
@@ -134,7 +130,7 @@ class EventController extends Controller
     $pi->save();
 
     return response()->json([
-      'status'  => 'success',
+      'status' => 'success',
       'file_id' => $pi->id
     ]);
   }
@@ -151,7 +147,7 @@ class EventController extends Controller
     //calculate duration
     if ($request->date_type == 'single') {
       $start = Carbon::parse($request->start_date . $request->start_time);
-      $end =  Carbon::parse($request->end_date . $request->end_time);
+      $end = Carbon::parse($request->end_date . $request->end_time);
       $diffent = DurationCalulate($start, $end);
     }
     //calculate duration end
@@ -161,7 +157,9 @@ class EventController extends Controller
 
     $img = $request->file('thumbnail');
 
-    $in['organizer_id'] = Auth::guard('organizer')->user()->id;
+    $in['organizer_id'] = $this->getOrganizerId();
+    $in['owner_identity_id'] = $this->getActiveIdentity()?->id;
+
     if ($request->hasFile('thumbnail')) {
       $filename = time() . '.' . $img->getClientOriginalExtension();
       $directory = public_path('assets/admin/img/event/thumbnail/');
@@ -177,7 +175,7 @@ class EventController extends Controller
       $i = 1;
       foreach ($request->m_start_date as $key => $date) {
         $start = Carbon::parse($date . $request->m_start_time[$key]);
-        $end =  Carbon::parse($request->m_end_date[$key] . $request->m_end_time[$key]);
+        $end = Carbon::parse($request->m_end_date[$key] . $request->m_end_time[$key]);
         $diffent = DurationCalulate($start, $end);
 
         EventDates::create([
@@ -227,7 +225,6 @@ class EventController extends Controller
         $event_image->save();
       }
     }
-<<<<<<< Updated upstream
     $languages = Language::all();
 
     foreach ($languages as $language) {
@@ -250,10 +247,6 @@ class EventController extends Controller
       $event_content->meta_description = $request[$language->code . '_meta_description'];
       $event_content->save();
     }
-=======
-    $authoring->syncLocalizedContent($event, $request, Language::all());
-    app(EventQrCodeService::class)->ensureSvg($event);
->>>>>>> Stashed changes
 
 
     Session::flash('success', 'Added Successfully');
@@ -270,7 +263,7 @@ class EventController extends Controller
   {
     $event = Event::find($id);
 
-    if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
+    if ($this->getOrganizerId() != $event->organizer_id) {
       return back();
     }
 
@@ -291,7 +284,7 @@ class EventController extends Controller
   public function updateFeatured(Request $request, $id)
   {
     $event = Event::find($id);
-    if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
+    if ($this->getOrganizerId() != $event->organizer_id) {
       return back();
     }
 
@@ -313,7 +306,7 @@ class EventController extends Controller
   public function edit($id)
   {
     $event = Event::with('ticket')->where('id', $id)->firstOrFail();
-    if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
+    if ($this->getOrganizerId() != $event->organizer_id) {
       return back();
     }
 
@@ -330,7 +323,7 @@ class EventController extends Controller
         ->first();
     }
 
-    $information['getCurrencyInfo']  = $this->getCurrencyInfo();
+    $information['getCurrencyInfo'] = $this->getCurrencyInfo();
     $information['languages'] = Language::all();
     // $information['countries'] = Country::get();
     // $information['cities'] = City::where('country_id',  $event->country)->get();
@@ -338,39 +331,6 @@ class EventController extends Controller
 
     return view('organizer.event.edit', $information);
   }
-
-  public function qr($id, EventQrCodeService $qrCodeService)
-  {
-    $event = $this->findOrganizerOwnedEvent($id);
-    abort_if(!$event, 404);
-    $defaultLanguage = Language::query()->where('is_default', 1)->first();
-
-    return view('backend.event.qr-preview', [
-      'layout' => 'organizer.layout',
-      'dashboardRoute' => route('organizer.dashboard'),
-      'listingRoute' => route('organizer.event_management.event', ['language' => $defaultLanguage?->code]),
-      'editRoute' => route('organizer.event_management.edit_event', ['id' => $event->id]),
-      'downloadSvgUrl' => route('organizer.event_management.qr_download', ['id' => $event->id]),
-      'eventTitle' => $qrCodeService->resolveTitle($event),
-      'eventRecord' => $event,
-      'qrSvgUrl' => $qrCodeService->svgUrl($event),
-      'scanLink' => $qrCodeService->buildScanUrl($event),
-      'workspaceLabel' => __('Organizer workspace'),
-      'workspaceKicker' => __('Event QR'),
-    ]);
-  }
-
-  public function downloadQr($id, EventQrCodeService $qrCodeService)
-  {
-    $event = $this->findOrganizerOwnedEvent($id);
-    abort_if(!$event, 404);
-    $path = $qrCodeService->ensureSvg($event);
-
-    return response()->download($path, $qrCodeService->downloadFilename($event), [
-      'Content-Type' => 'image/svg+xml',
-    ]);
-  }
-
   public function imagedbrmv(Request $request)
   {
     $pi = EventImage::where('id', $request->fileid)->first();
@@ -398,7 +358,7 @@ class EventController extends Controller
     //calculate duration
     if ($request->date_type == 'single') {
       $start = Carbon::parse($request->start_date . $request->start_time);
-      $end =  Carbon::parse($request->end_date . $request->end_time);
+      $end = Carbon::parse($request->end_date . $request->end_time);
       $diffent = DurationCalulate($start, $end);
     }
     //calculate duration end
@@ -469,7 +429,7 @@ class EventController extends Controller
       $i = 1;
       foreach ($request->m_start_date as $key => $date) {
         $start = Carbon::parse($date . $request->m_start_time[$key]);
-        $end =  Carbon::parse($request->m_end_date[$key] . $request->m_end_time[$key]);
+        $end = Carbon::parse($request->m_end_date[$key] . $request->m_end_time[$key]);
         $diffent = DurationCalulate($start, $end);
 
         if (!empty($request->date_ids[$key])) {
@@ -514,13 +474,6 @@ class EventController extends Controller
     }
 
     $event->update($in);
-<<<<<<< Updated upstream
-=======
-    $event->refresh();
-    $authoring->syncLocalizedContent($event, $request, Language::all());
-    app(EventQrCodeService::class)->ensureSvg($event);
-    $authoring->syncLineup($event, $request);
->>>>>>> Stashed changes
 
     Session::flash('success', 'Updated Successfully');
     return response()->json(['status' => 'success'], 200);
@@ -535,10 +488,9 @@ class EventController extends Controller
   public function destroy($id)
   {
     $event = Event::find($id);
-    if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
+    if ($this->getOrganizerId() != $event->organizer_id) {
       return back();
     }
-    app(EventQrCodeService::class)->delete($event);
 
     @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
 
@@ -589,7 +541,6 @@ class EventController extends Controller
       if (Auth::guard('organizer')->user()->id != $event->organizer_id) {
         return back();
       }
-      app(EventQrCodeService::class)->delete($event);
 
       @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
 
@@ -634,7 +585,7 @@ class EventController extends Controller
   }
   public function editTicketSetting($id)
   {
-    $event = Event::where('organizer_id',  Auth::guard('organizer')->user()->id)->with('ticket')->findOrFail($id);
+    $event = Event::where('organizer_id', Auth::guard('organizer')->user()->id)->with('ticket')->findOrFail($id);
     $information['event'] = $event;
     return view('organizer.event.ticket-settings', $information);
   }
@@ -778,12 +729,12 @@ class EventController extends Controller
 
     //if event state status is off then return cities
     if ($event_state_status == 0) {
-      $cities =  EventCity::where('country_id', $request->country_id)->exists();
+      $cities = EventCity::where('country_id', $request->country_id)->exists();
       return response()->json(['cities' => $cities], 200);
     }
 
     //if event state status is on then return states
-    $states =  EventState::where('country_id', $request->country_id)->exists();
+    $states = EventState::where('country_id', $request->country_id)->exists();
     return response()->json(['states' => $states], 200);
   }
 
@@ -792,7 +743,7 @@ class EventController extends Controller
    */
   public function getcities(Request $request)
   {
-    $cities =  EventCity::where('state_id', $request->state_id)->select('id', 'name')->get();
+    $cities = EventCity::where('state_id', $request->state_id)->select('id', 'name')->get();
 
     if (count($cities) > 0) {
       return response()->json(['cities' => $cities], 200);

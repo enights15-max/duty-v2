@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\FcmToken;
+use App\Models\User;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
@@ -11,13 +12,17 @@ use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
+    /**
+     * Send a push notification to a specific user.
+     *
+     * @param User $user
+     * @param string $title
+     * @param string $body
+     * @param array $data Additional data payload
+     * @return bool
+     */
     public function notifyUser($user, string $title, string $body, array $data = [])
     {
-        if (!$user || !is_object($user) || empty($user->id)) {
-            Log::warning('NotificationService notifyUser skipped: invalid notifiable actor provided.');
-            return false;
-        }
-
         $tokens = FcmToken::where('user_id', $user->id)
             ->whereNotNull('token')
             ->pluck('token')

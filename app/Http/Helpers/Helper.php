@@ -6,8 +6,13 @@ use App\Models\Event\Booking;
 use App\Models\Event\EventDates;
 use App\Models\Event\Ticket;
 use App\Models\Organizer;
+use App\Models\Venue;
 use App\Models\PaymentGateway\OnlineGateway;
 use App\Models\Transaction;
+use App\Services\EventTreasuryService;
+use App\Services\ProfessionalBalanceService;
+use App\Services\ProfessionalCatalogBridgeService;
+use App\Services\PlatformRevenueService;
 use Illuminate\Support\Facades\Auth;
 
 if (!function_exists('convertUtf8')) {
@@ -101,7 +106,8 @@ if (!function_exists('setEnvironmentValue')) {
 
     $str = substr($str, 0, -1);
 
-    if (!file_put_contents($envFile, $str)) return false;
+    if (!file_put_contents($envFile, $str))
+      return false;
     return true;
   }
 }
@@ -225,32 +231,97 @@ if (!function_exists('get_href')) {
 if (!function_exists('storeTranscation')) {
   function storeTranscation($booking)
   {
-    $organizer = Organizer::where('id', $booking->organizer_id)->first();
-    if ($organizer != NULL) {
-      $pre_balance = $organizer->amount;
-      $after_balance = $organizer->amount + ($booking->price - $booking->commission);
-    } else {
-      $pre_balance = NULL;
-      $after_balance = NULL;
+    $settlement = resolveSettlementProfessionalTarget($booking);
+    $legacyOrganizerId = $settlement['organizer_id'];
+    $organizerIdentityId = $settlement['organizer_identity_id'];
+    $legacyVenueId = $settlement['venue_id'];
+    $venueIdentityId = $settlement['venue_identity_id'];
+    $amount = (float) data_get($booking, 'price', 0) - (float) data_get($booking, 'commission', 0);
+    $treasuryService = app(EventTreasuryService::class);
+    $usesTreasury = $treasuryService->shouldReserveOwnerShare($booking);
+
+    $balancePreview = null;
+    if ($settlement['actor_type'] === 'organizer' && !$usesTreasury) {
+      $balancePreview = app(ProfessionalBalanceService::class)->previewOrganizerCredit(
+        $organizerIdentityId,
+        $legacyOrganizerId,
+        $amount
+      );
+    } elseif ($settlement['actor_type'] === 'venue' && !$usesTreasury) {
+      $balancePreview = app(ProfessionalBalanceService::class)->previewVenueCredit(
+        $venueIdentityId,
+        $legacyVenueId,
+        $amount
+      );
+    } elseif ($settlement['actor_type'] === 'organizer' && $usesTreasury) {
+      $currentBalance = app(ProfessionalBalanceService::class)->currentOrganizerBalance(
+        $organizerIdentityId,
+        $legacyOrganizerId
+      );
+      $balancePreview = [
+        'pre_balance' => $currentBalance,
+        'after_balance' => $currentBalance,
+      ];
+    } elseif ($settlement['actor_type'] === 'venue' && $usesTreasury) {
+      $currentBalance = app(ProfessionalBalanceService::class)->currentVenueBalance(
+        $venueIdentityId,
+        $legacyVenueId
+      );
+      $balancePreview = [
+        'pre_balance' => $currentBalance,
+        'after_balance' => $currentBalance,
+      ];
     }
-    //store data to transcation table
-    $transcation = Transaction::create([
+
+    $customerId = Auth::guard('customer')->check() == true
+      ? Auth::guard('customer')->user()->id
+      : data_get($booking, 'customer_id');
+
+    $transactionAttributes = [
       'transcation_id' => time(),
-      'booking_id' => $booking->id,
-      'transcation_type' => $booking->transcation_type,
-      'customer_id' => Auth::guard('customer')->check() == true ? Auth::guard('customer')->user()->id : null,
-      'organizer_id' => $booking->organizer_id,
-      'payment_status' => $booking->paymentStatus,
-      'payment_method' => $booking->paymentMethod,
-      'grand_total' => $booking->price,
-      'tax' => $booking->tax,
-      'commission' => $booking->commission,
-      'pre_balance' => $pre_balance == null ? 0 : $pre_balance,
-      'after_balance' => $after_balance,
-      'gateway_type' => $booking->gatewayType,
-      'currency_symbol' => $booking->currencySymbol,
-      'currency_symbol_position' => $booking->currencySymbolPosition,
-    ]);
+      'booking_id' => data_get($booking, 'id'),
+      'transcation_type' => data_get($booking, 'transcation_type', 1),
+      'customer_id' => $customerId,
+      'organizer_id' => $legacyOrganizerId,
+      'payment_status' => data_get($booking, 'paymentStatus'),
+      'payment_method' => data_get($booking, 'paymentMethod'),
+      'grand_total' => data_get($booking, 'price'),
+      'tax' => data_get($booking, 'tax'),
+      'commission' => data_get($booking, 'commission'),
+      'pre_balance' => $balancePreview['pre_balance'] ?? 0,
+      'after_balance' => $balancePreview['after_balance'] ?? null,
+      'gateway_type' => data_get($booking, 'gatewayType'),
+      'currency_symbol' => data_get($booking, 'currencySymbol'),
+      'currency_symbol_position' => data_get($booking, 'currencySymbolPosition'),
+    ];
+
+    foreach ([
+      'organizer_identity_id' => $organizerIdentityId,
+      'venue_id' => $legacyVenueId,
+      'venue_identity_id' => $venueIdentityId,
+    ] as $column => $value) {
+      if (Schema::hasColumn('transactions', $column)) {
+        $transactionAttributes[$column] = $value;
+      }
+    }
+
+    //store data to transcation table
+    $transcation = Transaction::create($transactionAttributes);
+
+    try {
+      app(PlatformRevenueService::class)->recordPrimaryTicketSale($booking, [
+        'policy_source' => data_get($booking, 'fee_policy_source'),
+        'policy_id' => data_get($booking, 'fee_policy_id'),
+        'charged_to' => data_get($booking, 'fee_charged_to'),
+        'fee_base_amount' => data_get($booking, 'fee_base_amount'),
+        'currency' => data_get($booking, 'currencyText'),
+      ]);
+    } catch (\Throwable $exception) {
+      logger()->warning('Failed to record primary platform revenue event.', [
+        'booking_id' => data_get($booking, 'id'),
+        'message' => $exception->getMessage(),
+      ]);
+    }
   }
 }
 
@@ -281,14 +352,187 @@ if (!function_exists('storeProductTranscation')) {
 if (!function_exists('storeOrganizer')) {
   function storeOrganizer($data)
   {
-    $organizer = Organizer::where('id', $data['organizer_id'])->first();
-    if ($organizer) {
-      $organizer->amount = $organizer->amount + ($data['price'] - ($data['commission']));
-      $organizer->save();
-      return;
-    } else {
+    ['organizer_id' => $legacyOrganizerId, 'organizer_identity_id' => $organizerIdentityId] = resolveSettlementOrganizerIdentifiers(
+      $data['organizer_id'] ?? null,
+      $data['organizer_identity_id'] ?? null
+    );
+
+    app(ProfessionalBalanceService::class)->creditOrganizerBalance(
+      $organizerIdentityId,
+      $legacyOrganizerId,
+      (float) $data['price'] - (float) ($data['commission'] ?? 0)
+    );
+  }
+}
+
+if (!function_exists('resolveSettlementVenueIdentifiers')) {
+  function resolveSettlementVenueIdentifiers($legacyVenueId = null, $venueIdentityId = null, $eventVenueIdentityId = null)
+  {
+    $bridge = app(ProfessionalCatalogBridgeService::class);
+
+    if ($venueIdentityId === null && $eventVenueIdentityId !== null) {
+      $venueIdentityId = (int) $eventVenueIdentityId;
+    }
+
+    if ($venueIdentityId === null && $legacyVenueId && Schema::hasTable('identities')) {
+      $venueIdentityId = $bridge->findIdentityForLegacy('venue', $legacyVenueId)?->id;
+    }
+
+    if ($legacyVenueId === null && $venueIdentityId && Schema::hasTable('identities')) {
+      $identity = Identity::query()->find($venueIdentityId);
+      $resolvedLegacyId = $identity ? $bridge->legacyIdForIdentity($identity, 'venue') : null;
+      $legacyVenueId = is_numeric($resolvedLegacyId) ? (int) $resolvedLegacyId : null;
+    }
+
+    return [
+      'venue_id' => $legacyVenueId ? (int) $legacyVenueId : null,
+      'venue_identity_id' => $venueIdentityId ? (int) $venueIdentityId : null,
+    ];
+  }
+}
+
+if (!function_exists('readBookingSettlementField')) {
+  function readBookingSettlementField($booking, string $field)
+  {
+    $directValue = null;
+
+    if (is_object($booking) && method_exists($booking, 'getAttributes')) {
+      $directValue = $booking->getAttributes()[$field] ?? null;
+      if ($directValue !== null) {
+        return $directValue;
+      }
+    }
+
+    if (is_array($booking) && array_key_exists($field, $booking) && $booking[$field] !== null) {
+      return $booking[$field];
+    }
+
+    foreach (['evnt', 'event'] as $relationName) {
+      $relation = null;
+
+      if (is_object($booking) && method_exists($booking, 'relationLoaded') && $booking->relationLoaded($relationName)) {
+        $relation = $booking->getRelation($relationName);
+      } elseif (is_array($booking) && isset($booking[$relationName])) {
+        $relation = $booking[$relationName];
+      }
+
+      if (is_object($relation) && method_exists($relation, 'getAttributes')) {
+        $value = $relation->getAttributes()[$field] ?? null;
+        if ($value !== null) {
+          return $value;
+        }
+      } elseif (is_array($relation) && array_key_exists($field, $relation) && $relation[$field] !== null) {
+        return $relation[$field];
+      }
+    }
+
+    return null;
+  }
+}
+
+if (!function_exists('resolveSettlementProfessionalTarget')) {
+  function resolveSettlementProfessionalTarget($booking): array
+  {
+    $organizer = resolveSettlementOrganizerIdentifiers(
+      data_get($booking, 'organizer_id'),
+      data_get($booking, 'organizer_identity_id'),
+      readBookingSettlementField($booking, 'owner_identity_id')
+    );
+
+    if ($organizer['organizer_id'] !== null || $organizer['organizer_identity_id'] !== null) {
+      return array_merge($organizer, [
+        'actor_type' => 'organizer',
+        'venue_id' => null,
+        'venue_identity_id' => null,
+      ]);
+    }
+
+    $venue = resolveSettlementVenueIdentifiers(
+      data_get($booking, 'venue_id') ?? readBookingSettlementField($booking, 'venue_id'),
+      data_get($booking, 'venue_identity_id') ?? readBookingSettlementField($booking, 'venue_identity_id'),
+      readBookingSettlementField($booking, 'venue_identity_id')
+    );
+
+    if ($venue['venue_id'] !== null || $venue['venue_identity_id'] !== null) {
+      return array_merge($venue, [
+        'actor_type' => 'venue',
+        'organizer_id' => null,
+        'organizer_identity_id' => null,
+      ]);
+    }
+
+    return [
+      'actor_type' => null,
+      'organizer_id' => null,
+      'organizer_identity_id' => null,
+      'venue_id' => null,
+      'venue_identity_id' => null,
+    ];
+  }
+}
+
+if (!function_exists('storeProfessionalOwner')) {
+  function storeProfessionalOwner($booking)
+  {
+    $settlement = resolveSettlementProfessionalTarget($booking);
+    $amount = (float) data_get($booking, 'price', 0) - (float) data_get($booking, 'commission', 0);
+    $treasuryService = app(EventTreasuryService::class);
+
+    if ($treasuryService->shouldHandleBookingThroughTreasury($booking)) {
+      $treasuryService->reserveOwnerShare($booking);
       return;
     }
+
+    if ($settlement['actor_type'] === 'organizer') {
+      app(ProfessionalBalanceService::class)->creditOrganizerBalance(
+        $settlement['organizer_identity_id'],
+        $settlement['organizer_id'],
+        $amount
+      );
+
+      return;
+    }
+
+    if ($settlement['actor_type'] === 'venue') {
+      app(ProfessionalBalanceService::class)->creditVenueBalance(
+        $settlement['venue_identity_id'],
+        $settlement['venue_id'],
+        $amount
+      );
+    }
+  }
+}
+
+if (!function_exists('resolveSettlementOrganizerIdentifiers')) {
+  function resolveSettlementOrganizerIdentifiers($legacyOrganizerId = null, $organizerIdentityId = null, $eventOwnerIdentityId = null)
+  {
+    $bridge = app(ProfessionalCatalogBridgeService::class);
+
+    if ($organizerIdentityId === null && $eventOwnerIdentityId !== null) {
+      $organizerIdentityId = (int) $eventOwnerIdentityId;
+    }
+
+    if ($organizerIdentityId === null && $legacyOrganizerId && Schema::hasTable('identities')) {
+      $organizerIdentityId = $bridge->findIdentityForLegacy('organizer', $legacyOrganizerId)?->id;
+    }
+
+    if ($legacyOrganizerId === null && $organizerIdentityId && Schema::hasTable('identities')) {
+      $identity = Identity::query()->find($organizerIdentityId);
+      $resolvedLegacyId = $identity ? $bridge->legacyIdForIdentity($identity, 'organizer') : null;
+      $legacyOrganizerId = is_numeric($resolvedLegacyId) ? (int) $resolvedLegacyId : null;
+    }
+
+    return [
+      'organizer_id' => $legacyOrganizerId ? (int) $legacyOrganizerId : null,
+      'organizer_identity_id' => $organizerIdentityId ? (int) $organizerIdentityId : null,
+    ];
+  }
+}
+
+if (!function_exists('bookingHasProfessionalOwner')) {
+  function bookingHasProfessionalOwner($booking): bool
+  {
+    return resolveSettlementProfessionalTarget($booking)['actor_type'] !== null;
   }
 }
 
@@ -535,26 +779,28 @@ if (!function_exists('TicketStockCheck')) {
     if ($ticket) {
       if ($ticket->pricing_type == 'normal' && $ticket->ticket_available_type == 'limited') {
         if ($ticket->ticket_available == 0 || $ticket->ticket_available < $quantity) {
-          $data =  'error';
+          $data = 'error';
         } else {
-          $data =  'success';
+          $data = 'success';
         }
       } elseif ($ticket->pricing_type == 'free' && $ticket->ticket_available_type == 'limited') {
         if ($ticket->ticket_available == 0 || $ticket->ticket_available < $quantity) {
-          $data =  'error';
+          $data = 'error';
         } else {
-          $data =  'success';
+          $data = 'success';
         }
       } elseif ($ticket->pricing_type == 'variation') {
         $variations = json_decode($ticket->variations);
-        foreach ($variations as $variation) {
-          if ($variation->name  == $name) {
-            if ($variation->ticket_available_type == 'unlimited') {
-              $data =  'success';
-            } elseif ($variation->ticket_available == 0 || $variation->ticket_available < $quantity) {
-              $data =  'error';
-            } else {
-              $data =  'success';
+        if ($variations) {
+          foreach ($variations as $variation) {
+            if ($variation->name == $name) {
+              if ($variation->ticket_available_type == 'unlimited') {
+                $data = 'success';
+              } elseif ($variation->ticket_available == 0 || $variation->ticket_available < $quantity) {
+                $data = 'error';
+              } else {
+                $data = 'success';
+              }
             }
           }
         }
@@ -571,78 +817,57 @@ if (!function_exists('TicketStockCheck')) {
 if (!function_exists('isTicketPurchaseOnline')) {
   function isTicketPurchaseOnline($event_id, $max_buy_ticket)
   {
-    $customer_id = Auth::guard('customer')->user()->id;
-    $bookings = Booking::where([['customer_id', $customer_id], ['event_id', $event_id], ['paymentStatus', '!=', 'rejected']])->select('quantity')->get();
-
-    $ticket = Ticket::where('event_id', $event_id)->select('max_ticket_buy_type', 'max_buy_ticket')->first();
-
-    if ($ticket) {
-      if ($ticket->max_ticket_buy_type == 'unlimited') {
-        $max_buy_ticket = 999999;
-      }
+    $customer_id = resolveAuthenticatedCustomerId();
+    if (!$customer_id) {
+      return ['status' => 'false', 'p_qty' => 0];
     }
 
-    $qty = 0;
-    foreach ($bookings as $booking) {
-      $qty += $booking->quantity;
+    $customer = Customer::find($customer_id);
+    $event = Event::find($event_id);
+    $ticket = Ticket::where('event_id', $event_id)->first();
+    if (!$customer || !$event || !$ticket) {
+      return ['status' => 'false', 'p_qty' => 0];
     }
-    if ($qty >= $max_buy_ticket) {
-      return ['status' => 'true', 'p_qty' => $qty];
-    } else {
-      return ['status' => 'false', 'p_qty' => $qty];
-    }
+
+    $summary = app(\App\Services\EventPurchaseLimitService::class)->summarize(
+      $customer,
+      $event,
+      $ticket
+    );
+
+    return [
+      'status' => $summary['limit_reached'] ? 'true' : 'false',
+      'p_qty' => (int) $summary['already_purchased'],
+    ];
   }
 }
 
 if (!function_exists('isTicketPurchaseVenue')) {
   function isTicketPurchaseVenue($event_id, $max_buy_ticket, $ticket_id, $variation_name)
   {
-    $ticket = Ticket::where('id', $ticket_id)->first();
-    if ($ticket->pricing_type == 'normal' && $ticket->max_ticket_buy_type == 'limited') {
-      $max_buy_ticket = $ticket->max_buy_ticket;
-    } elseif ($ticket->pricing_type == 'normal' && $ticket->max_ticket_buy_type == 'unlimited') {
-      $max_buy_ticket = 999999;
-    } elseif ($ticket->pricing_type == 'free' && $ticket->max_ticket_buy_type == 'limited') {
-      $max_buy_ticket = $ticket->max_buy_ticket;
-    } elseif ($ticket->pricing_type == 'free' && $ticket->max_ticket_buy_type == 'unlimited') {
-
-      $max_buy_ticket = 999999;
-    } elseif ($ticket->pricing_type == 'variation') {
-      $variations = json_decode($ticket->variations);
-      foreach ($variations as $variation) {
-        if ($variation->name == $variation_name) {
-          if ($variation->max_ticket_buy_type == 'unlimited') {
-            $max_buy_ticket = 999999;
-          } else {
-            $max_buy_ticket = $variation->v_max_ticket_buy;
-          }
-        }
-      }
-    } else {
-      $max_buy_ticket = 0;
+    $customer_id = resolveAuthenticatedCustomerId();
+    if (!$customer_id) {
+      return ['status' => 'false', 'p_qty' => 0];
     }
 
-    $customer_id = Auth::guard('customer')->user()->id;
-    $bookings = Booking::where([['customer_id', $customer_id], ['event_id', $event_id], ['paymentStatus', '!=', 'rejected']])->get();
-    $qty = 0;
-
-    if ($bookings) {
-      foreach ($bookings as $booking) {
-        $variations = json_decode($booking->variation);
-        foreach ($variations as $variation) {
-          if ($variation_name == $variation->name && $variation->ticket_id == $ticket_id) {
-            $qty += $variation->qty;
-          }
-        }
-      }
-      if ($qty > $max_buy_ticket) {
-        return ['status' => 'true', 'p_qty' => $qty];
-      } else {
-        return ['status' => 'false', 'p_qty' => $qty];
-      }
-    } else {
-      return ['status' => 'false', 'p_qty' => $qty];
+    $customer = Customer::find($customer_id);
+    $event = Event::find($event_id);
+    $ticket = Ticket::find($ticket_id);
+    if (!$customer || !$event || !$ticket) {
+      return ['status' => 'false', 'p_qty' => 0];
     }
+
+    $summary = app(\App\Services\EventPurchaseLimitService::class)->summarize(
+      $customer,
+      $event,
+      $ticket,
+      $variation_name ?: null
+    );
+
+    return [
+      'status' => $summary['limit_reached'] ? 'true' : 'false',
+      'p_qty' => (int) $summary['already_purchased'],
+    ];
   }
 }
 
@@ -662,12 +887,14 @@ if (!function_exists('isTicketPurchaseVenueBackend')) {
       $max_buy_ticket = 999999;
     } elseif ($ticket->pricing_type == 'variation') {
       $variations = json_decode($ticket->variations);
-      foreach ($variations as $variation) {
-        if ($variation->name == $variation_name) {
-          if ($variation->max_ticket_buy_type == 'unlimited') {
-            $max_buy_ticket = 999999;
-          } else {
-            $max_buy_ticket = $variation->v_max_ticket_buy;
+      if ($variations) {
+        foreach ($variations as $variation) {
+          if ($variation->name == $variation_name) {
+            if ($variation->max_ticket_buy_type == 'unlimited') {
+              $max_buy_ticket = 999999;
+            } else {
+              $max_buy_ticket = $variation->v_max_ticket_buy;
+            }
           }
         }
       }
@@ -681,9 +908,11 @@ if (!function_exists('isTicketPurchaseVenueBackend')) {
     if ($bookings) {
       foreach ($bookings as $booking) {
         $variations = json_decode($booking->variation);
-        foreach ($variations as $variation) {
-          if ($variation_name == $variation->name && $variation->ticket_id == $ticket_id) {
-            $qty += $variation->qty;
+        if ($variations) {
+          foreach ($variations as $variation) {
+            if ($variation_name == $variation->name && $variation->ticket_id == $ticket_id) {
+              $qty += $variation->qty;
+            }
           }
         }
       }
@@ -733,8 +962,8 @@ if (!function_exists('paytabInfo')) {
     return [
       'server_key' => $paytabsInfo['server_key'],
       'profile_id' => $paytabsInfo['profile_id'],
-      'url'        => $paytabsInfo['api_endpoint'],
-      'currency'   => $currency,
+      'url' => $paytabsInfo['api_endpoint'],
+      'currency' => $currency,
     ];
   }
 }

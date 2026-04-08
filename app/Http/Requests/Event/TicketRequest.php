@@ -43,10 +43,11 @@ class TicketRequest extends FormRequest
     
     // Reservation Rules
     $ruleArray['reservation_enabled'] = 'nullable|in:1,0';
-    $ruleArray['reservation_deposit_type'] = 'required_if:reservation_enabled,1|in:fixed,percentage';
-    $ruleArray['reservation_deposit_value'] = 'required_if:reservation_enabled,1|numeric|min:0';
-    $ruleArray['reservation_final_due_date'] = 'required_if:reservation_enabled,1|date';
+    $ruleArray['reservation_deposit_type'] = 'nullable|required_if:reservation_enabled,1|in:fixed,percentage';
+    $ruleArray['reservation_deposit_value'] = 'nullable|required_if:reservation_enabled,1|numeric|min:0';
+    $ruleArray['reservation_final_due_date'] = 'nullable|required_if:reservation_enabled,1|date';
     $ruleArray['reservation_min_installment_amount'] = 'nullable|numeric|min:0';
+    $ruleArray['allow_promotional_resale'] = 'nullable|in:1,0';
 
     if ($this->pricing_type_2 == 'normal') {
       $ruleArray['price'] = 'required|numeric|min:0';

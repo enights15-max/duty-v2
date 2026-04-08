@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:duty_client/core/constants/app_urls.dart';
 import 'package:duty_client/features/auth/presentation/providers/auth_provider.dart';
 import 'package:duty_client/features/chat/presentation/providers/chat_provider.dart';
+import 'package:duty_client/features/events/presentation/providers/event_details_provider.dart';
+import 'package:duty_client/features/events/presentation/providers/professional_event_provider.dart';
+import 'package:duty_client/features/profile/presentation/providers/profile_provider.dart';
 import 'package:duty_client/features/profile/presentation/providers/marketplace_provider.dart';
 import 'package:duty_client/features/profile/presentation/providers/review_prompt_provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -16,8 +19,6 @@ final notificationProvider = Provider((ref) => NotificationNotifier(ref));
 class NotificationNotifier {
   final Ref _ref;
   late final FirebaseMessaging _fcm;
-  final FlutterLocalNotificationsPlugin _localNotifications =
-      FlutterLocalNotificationsPlugin();
 
   NotificationNotifier(this._ref);
 
@@ -53,6 +54,13 @@ class NotificationNotifier {
         } else if (payload == 'reviews:pending') {
           _ref.invalidate(pendingReviewPromptsProvider);
           _ref.read(appRouterProvider).push('/reviews/pending');
+        } else if (payload != null && payload.startsWith('event-review:')) {
+          _handleEventReviewPayload(payload);
+        } else if (payload != null && payload.startsWith('event-waitlist:')) {
+          _handleWaitlistPayload(payload);
+        } else if (payload != null &&
+            payload.startsWith('collaboration-auto-release:')) {
+          _handleCollaborationAutoReleasePayload(payload);
         }
       },
     );
@@ -87,7 +95,7 @@ class NotificationNotifier {
 
     // 3. Double check if Firebase is initialized
     if (Firebase.apps.isEmpty) {
-      appLog('NotificationService: Firebase not initialized. Skipping.');
+      print('NotificationService: Firebase not initialized. Skipping.');
       return;
     }
 
@@ -110,13 +118,13 @@ class NotificationNotifier {
           if (apnsToken == null) {
             await Future.delayed(const Duration(seconds: 1));
             retryCount++;
-            appLog(
+            print(
               'NotificationService: Waiting for APNS token... ($retryCount)',
             );
           }
         }
         if (apnsToken == null) {
-          appLog(
+          print(
             'NotificationService: APNS token not set. Check Xcode/Firebase config.',
           );
           return;
@@ -129,32 +137,12 @@ class NotificationNotifier {
           await _registerToken(token);
         }
       } catch (e) {
-        appLog('NotificationService: Error getting FCM token: $e');
+        print('NotificationService: Error getting FCM token: $e');
       }
     }
 
     // Listen for token refreshes
     _fcm.onTokenRefresh.listen(_registerToken);
-
-    // Listen for user changes to re-register token (e.g., after login)
-    _ref.listen<Map<String, dynamic>?>(currentUserProvider, (
-      previous,
-      next,
-    ) async {
-      if (next != null && next['id'] != previous?['id']) {
-        appLog(
-          'NotificationService: User changed, re-registering FCM token...',
-        );
-        try {
-          String? token = await _fcm.getToken();
-          if (token != null) {
-            await _registerToken(token);
-          }
-        } catch (e) {
-          appLog('NotificationService: Error re-registering token: $e');
-        }
-      }
-    });
 
     // Handle foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -259,6 +247,96 @@ class NotificationNotifier {
             payload: transferId != null ? 'transfer:$transferId' : null,
           );
         }
+      } else if (type == 'event_review_status') {
+        _ref.invalidate(professionalDashboardProvider);
+
+        if (message.notification != null) {
+          final eventId = message.data['event_id']?.toString() ?? '';
+          final identityId = message.data['identity_id']?.toString() ?? '';
+          final payload = 'event-review:$eventId:$identityId';
+          _localNotifications.show(
+            message.hashCode,
+            message.notification?.title,
+            message.notification?.body,
+            const NotificationDetails(
+              android: AndroidNotificationDetails(
+                'duty_updates',
+                'Actualizaciones de Duty',
+                channelDescription:
+                    'Prompts de reviews y actualizaciones del ecosistema',
+                importance: Importance.high,
+                priority: Priority.high,
+                showWhen: true,
+              ),
+              iOS: DarwinNotificationDetails(
+                presentAlert: true,
+                presentBadge: true,
+                presentSound: true,
+              ),
+            ),
+            payload: payload,
+          );
+        }
+      } else if (type == 'event_waitlist_update') {
+        final eventId = message.data['event_id']?.toString() ?? '';
+        if (message.notification != null) {
+          _localNotifications.show(
+            message.hashCode,
+            message.notification?.title,
+            message.notification?.body,
+            const NotificationDetails(
+              android: AndroidNotificationDetails(
+                'duty_updates',
+                'Actualizaciones de Duty',
+                channelDescription:
+                    'Prompts de reviews y actualizaciones del ecosistema',
+                importance: Importance.high,
+                priority: Priority.high,
+                showWhen: true,
+              ),
+              iOS: DarwinNotificationDetails(
+                presentAlert: true,
+                presentBadge: true,
+                presentSound: true,
+              ),
+            ),
+            payload: eventId.isNotEmpty ? 'event-waitlist:$eventId' : null,
+          );
+        }
+      } else if (type == 'collaboration_auto_release') {
+        _ref.invalidate(professionalCollaborationsProvider);
+        _ref.invalidate(professionalDashboardProvider);
+
+        if (message.notification != null) {
+          final earningId = message.data['earning_id']?.toString() ?? '';
+          final eventId = message.data['event_id']?.toString() ?? '';
+          final identityId = message.data['identity_id']?.toString() ?? '';
+          final payload =
+              'collaboration-auto-release:$earningId:$eventId:$identityId';
+
+          _localNotifications.show(
+            message.hashCode,
+            message.notification?.title,
+            message.notification?.body,
+            const NotificationDetails(
+              android: AndroidNotificationDetails(
+                'duty_updates',
+                'Actualizaciones de Duty',
+                channelDescription:
+                    'Prompts de reviews y actualizaciones del ecosistema',
+                importance: Importance.high,
+                priority: Priority.high,
+                showWhen: true,
+              ),
+              iOS: DarwinNotificationDetails(
+                presentAlert: true,
+                presentBadge: true,
+                presentSound: true,
+              ),
+            ),
+            payload: payload,
+          );
+        }
       }
     });
 
@@ -302,7 +380,106 @@ class NotificationNotifier {
     if (type == 'review_prompt') {
       _ref.invalidate(pendingReviewPromptsProvider);
       _ref.read(appRouterProvider).push('/reviews/pending');
+      return;
     }
+
+    if (type == 'event_review_status') {
+      _ref.invalidate(professionalDashboardProvider);
+      final eventId = message.data['event_id']?.toString();
+      final identityId = message.data['identity_id']?.toString();
+      _openEventReviewDestination(eventId: eventId, identityId: identityId);
+      return;
+    }
+
+    if (type == 'event_waitlist_update') {
+      final eventId = message.data['event_id']?.toString();
+      _openWaitlistDestination(eventId);
+      return;
+    }
+
+    if (type == 'collaboration_auto_release') {
+      final eventId = message.data['event_id']?.toString();
+      final identityId = message.data['identity_id']?.toString();
+      _openCollaborationDestination(eventId: eventId, identityId: identityId);
+    }
+  }
+
+  void _handleEventReviewPayload(String payload) {
+    final parts = payload.split(':');
+    final eventId = parts.length > 1 ? parts[1] : null;
+    final identityId = parts.length > 2 ? parts[2] : null;
+    _ref.invalidate(professionalDashboardProvider);
+    _openEventReviewDestination(eventId: eventId, identityId: identityId);
+  }
+
+  void _handleWaitlistPayload(String payload) {
+    final parts = payload.split(':');
+    final eventId = parts.length > 1 ? parts[1] : null;
+    _openWaitlistDestination(eventId);
+  }
+
+  void _handleCollaborationAutoReleasePayload(String payload) {
+    final parts = payload.split(':');
+    final eventId = parts.length > 2 ? parts[2] : null;
+    final identityId = parts.length > 3 ? parts[3] : null;
+    _openCollaborationDestination(eventId: eventId, identityId: identityId);
+  }
+
+  void _openEventReviewDestination({String? eventId, String? identityId}) {
+    Future(() async {
+      if (identityId != null && identityId.isNotEmpty) {
+        try {
+          await _ref.read(profileControllerProvider).switchProfile(identityId);
+        } catch (e) {
+          appLog(
+            'NotificationService: failed to switch profile for event review: $e',
+          );
+        }
+      }
+
+      final router = _ref.read(appRouterProvider);
+      if (eventId != null && eventId.isNotEmpty) {
+        router.push('/professional/events/$eventId/edit');
+      } else {
+        router.push('/professional/events');
+      }
+    });
+  }
+
+  void _openWaitlistDestination(String? eventId) {
+    Future(() {
+      final parsedId = int.tryParse(eventId ?? '');
+      if (parsedId != null) {
+        _ref.invalidate(eventDetailsProvider(parsedId));
+        _ref.read(appRouterProvider).push('/event-details/$parsedId');
+      } else {
+        _ref.read(appRouterProvider).push('/search');
+      }
+    });
+  }
+
+  void _openCollaborationDestination({String? eventId, String? identityId}) {
+    Future(() async {
+      if (identityId != null && identityId.isNotEmpty) {
+        try {
+          await _ref.read(profileControllerProvider).switchProfile(identityId);
+        } catch (e) {
+          appLog(
+            'NotificationService: failed to switch profile for collaboration payout: $e',
+          );
+        }
+      }
+
+      _ref.invalidate(professionalCollaborationsProvider);
+      _ref.invalidate(professionalDashboardProvider);
+
+      final parsedEventId = int.tryParse(eventId ?? '');
+      if (parsedEventId != null) {
+        _ref.invalidate(professionalEventInventoryProvider(parsedEventId));
+      }
+
+      _ref.read(appRouterProvider).push('/professional/collaborations');
+    });
   }
 
   Future<void> _registerToken(String token) async {
@@ -319,7 +496,7 @@ class NotificationNotifier {
         },
       );
     } catch (e) {
-      appLog('Firebase Token Registration Error: $e');
+      print('Firebase Token Registration Error: $e');
     }
   }
 }

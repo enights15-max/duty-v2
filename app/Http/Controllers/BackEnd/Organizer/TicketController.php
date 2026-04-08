@@ -15,6 +15,7 @@ use App\Models\Event\Slot;
 use App\Models\Event\SlotImage;
 use App\Models\Event\TicketContent;
 use App\Models\Event\VariationContent;
+use App\Traits\HasIdentityActor;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Validator;
@@ -22,10 +23,11 @@ use Purifier;
 
 class TicketController extends Controller
 {
+  use HasIdentityActor;
   public function index(Request $request)
   {
     $evnt = Event::where('id', $request->event_id)->select('organizer_id')->firstOrFail();
-    if (!($evnt) || $evnt->organizer_id != Auth::guard('organizer')->user()->id) {
+    if (!($evnt) || $evnt->organizer_id != $this->getOrganizerId()) {
       return redirect()->route('organizer.dashboard');
     }
 
@@ -47,7 +49,7 @@ class TicketController extends Controller
   public function create(Request $request)
   {
     $evnt = Event::where('id', $request->event_id)->select('organizer_id')->firstOrFail();
-    if (!($evnt) || $evnt->organizer_id != Auth::guard('organizer')->user()->id) {
+    if (!($evnt) || $evnt->organizer_id != $this->getOrganizerId()) {
       return redirect()->route('organizer.dashboard');
     }
 
@@ -61,7 +63,7 @@ class TicketController extends Controller
     $information['event'] = $event;
     $eventType = Event::where('id', $request->event_id)->select('event_type')->first();
     $information['eventType'] = $eventType;
-    $information['getCurrencyInfo']  = $this->getCurrencyInfo();
+    $information['getCurrencyInfo'] = $this->getCurrencyInfo();
     return view('organizer.event.ticket.create', $information);
   }
   //store
@@ -77,7 +79,7 @@ class TicketController extends Controller
       $in['free_tickete_slot_unique_id'] = rand(000000, 999999);
       $in['slot_seat_min_price'] = 0;
 
-      $ticket =  Ticket::create($in);
+      $ticket = Ticket::create($in);
     } elseif ($request->pricing_type_2 == 'normal') {
       $in['pricing_type'] = 'normal';
       $in['price'] = $request->price;
@@ -86,7 +88,7 @@ class TicketController extends Controller
       $in['normal_ticket_slot_unique_id'] = rand(000000, 999999);
       $in['slot_seat_min_price'] = 0;
 
-      $ticket =  Ticket::create($in);
+      $ticket = Ticket::create($in);
     } elseif ($request->pricing_type_2 == 'variation') {
       $in['pricing_type'] = 'variation';
       $f_price = max($request->variation_price);
@@ -153,7 +155,7 @@ class TicketController extends Controller
   {
 
     $evnt = Event::where('id', $request->event_id)->select('organizer_id')->firstOrFail();
-    if (!($evnt) || $evnt->organizer_id != Auth::guard('organizer')->user()->id) {
+    if (!($evnt) || $evnt->organizer_id != $this->getOrganizerId()) {
       return redirect()->route('organizer.dashboard');
     }
 
@@ -173,7 +175,7 @@ class TicketController extends Controller
     $information['ticket'] = $ticket;
     $variations = json_decode($ticket->variations, true);
     $information['variations'] = $variations;
-    $information['getCurrencyInfo']  = $this->getCurrencyInfo();
+    $information['getCurrencyInfo'] = $this->getCurrencyInfo();
     $information['event_id'] = $request->event_id;
     $information['ticket_id'] = $ticket->id;
 
@@ -195,20 +197,20 @@ class TicketController extends Controller
       $in['pricing_type'] = 'free';
       $in['price'] = 0;
       $in['free_tickete_slot_enable'] = $request->free_tickete_slot_enable;
-      $this->updateSlotIsEnable((int)$request->free_tickete_slot_unique_id, $request->free_tickete_slot_enable == "1" ? 1 : 0);
-      $ticket =  Ticket::where('id', $request->ticket_id)->first();
+      $this->updateSlotIsEnable((int) $request->free_tickete_slot_unique_id, $request->free_tickete_slot_enable == "1" ? 1 : 0);
+      $ticket = Ticket::where('id', $request->ticket_id)->first();
       $ticket->update($in);
     } elseif ($request->pricing_type_2 == 'normal') {
       $in['pricing_type'] = 'normal';
       $in['price'] = $request->price;
       $in['f_price'] = $request->price;
       $in['normal_ticket_slot_enable'] = $request->slot_enable_no_vaidation;
-      $this->updateSlotIsEnable((int)$request->slot_unique_id_no_vaidation, $request->slot_enable_no_vaidation == "1" ? 1 : 0);
-      $ticket =  Ticket::where('id', $request->ticket_id)->first();
+      $this->updateSlotIsEnable((int) $request->slot_unique_id_no_vaidation, $request->slot_enable_no_vaidation == "1" ? 1 : 0);
+      $ticket = Ticket::where('id', $request->ticket_id)->first();
       $ticket->update($in);
     } elseif ($request->pricing_type_2 == 'variation') {
       $in['pricing_type'] = 'variation';
-      $ticket =  Ticket::where('id', $request->ticket_id)->first();
+      $ticket = Ticket::where('id', $request->ticket_id)->first();
 
       $this->deleteRemovedSlotIds($ticket->variations, $request->slot_unique_id_input);
 
@@ -227,10 +229,10 @@ class TicketController extends Controller
                 'max_ticket_buy_type' => $request->v_max_ticket_buy_type[$key],
                 'v_max_ticket_buy' => $request->v_max_ticket_buy[$key],
                 'slot_enable' => $request->slot_enable_input[$key] == "1" ? 1 : 0,
-                'slot_unique_id' => (int)$request->slot_unique_id_input[$key],
+                'slot_unique_id' => (int) $request->slot_unique_id_input[$key],
                 'slot_seat_min_price' => $request->slot_seat_min_price[$key],
               ];
-              $this->updateSlotIsEnable((int)$request->slot_unique_id_input[$key], $request->slot_enable_input[$key] == "1" ? 1 : 0);
+              $this->updateSlotIsEnable((int) $request->slot_unique_id_input[$key], $request->slot_enable_input[$key] == "1" ? 1 : 0);
             }
           }
         }

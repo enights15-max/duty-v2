@@ -182,6 +182,18 @@
                                         </label>
                                         <label class="selectgroup-item">
                                             <input type="checkbox" class="selectgroup-input" name="permissions[]"
+                                                value="Venue Management"
+                                                @if (is_array($rolePermissions) && in_array('Venue Management', $rolePermissions)) checked @endif>
+                                            <span class="selectgroup-button">{{ __('Venue Management') }}</span>
+                                        </label>
+                                        <label class="selectgroup-item">
+                                            <input type="checkbox" class="selectgroup-input" name="permissions[]"
+                                                value="Artist Management"
+                                                @if (is_array($rolePermissions) && in_array('Artist Management', $rolePermissions)) checked @endif>
+                                            <span class="selectgroup-button">{{ __('Artist Management') }}</span>
+                                        </label>
+                                        <label class="selectgroup-item">
+                                            <input type="checkbox" class="selectgroup-input" name="permissions[]"
                                                 value="Transaction" @if (is_array($rolePermissions) && in_array('Transaction', $rolePermissions)) checked @endif>
                                             <span class="selectgroup-button">{{ __('Transaction') }}</span>
                                         </label>
@@ -197,6 +209,20 @@
                                             <input type="checkbox" class="selectgroup-input" name="permissions[]"
                                                 value="Event Bookings" @if (is_array($rolePermissions) && in_array('Event Bookings', $rolePermissions)) checked @endif>
                                             <span class="selectgroup-button">{{ __('Event Bookings') }}</span>
+                                        </label>
+
+                                        <label class="selectgroup-item">
+                                            <input type="checkbox" class="selectgroup-input" name="permissions[]"
+                                                value="Event Booking Economy"
+                                                @if (is_array($rolePermissions) && in_array('Event Booking Economy', $rolePermissions)) checked @endif>
+                                            <span class="selectgroup-button">{{ __('Event Booking Economy') }}</span>
+                                        </label>
+
+                                        <label class="selectgroup-item">
+                                            <input type="checkbox" class="selectgroup-input" name="permissions[]"
+                                                value="Event Booking Fee Policies"
+                                                @if (is_array($rolePermissions) && in_array('Event Booking Fee Policies', $rolePermissions)) checked @endif>
+                                            <span class="selectgroup-button">{{ __('Event Booking Fee Policies') }}</span>
                                         </label>
 
                                         <label class="selectgroup-item">

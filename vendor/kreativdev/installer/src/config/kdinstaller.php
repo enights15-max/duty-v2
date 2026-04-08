@@ -1,11 +1,11 @@
 <?php 
 
     return [
-        'item_name' => "Evento",
-        "item_id" => 45659949,
-        "vension" => 4.0,
-        "released_on" => "13th May, 2025",
-        "broadcast_driver" => "log",
+        'item_name' => "Superv",
+        "item_id" => 28396210,
+        "vension" => 2.2,
+        "released_on" => "30th May, 2023",
+        "broadcast_driver" => "pusher",
         "email_api" => 'https://kreativdev.com/emailcollector/api/collect'
     ];
 

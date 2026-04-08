@@ -22,6 +22,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 class EventBookingController extends Controller
 {
+  public function __construct(
+    private ProfessionalCatalogBridgeService $catalogBridge
+  ) {
+  }
+
   public function index(Request $request)
   {
     $bookingId = $paymentStatus = null;

@@ -19,6 +19,11 @@ use Illuminate\Support\Facades\DB;
 
 class AdminScannerController extends Controller
 {
+  public function __construct(
+    private OrganizerPublicProfileService $organizerPublicProfileService
+  ) {
+  }
+
   /* ********************************
      * Submit login for authentication
      * ********************************/

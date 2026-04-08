@@ -8,19 +8,38 @@ use App\Models\Customer;
 use App\Models\TicketTransfer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 
 use App\Services\NotificationService;
+use App\Services\EventWaitlistService;
+use App\Services\FeeEngine;
+use App\Services\PlatformRevenueService;
+use App\Services\TicketJourneyService;
+use App\Services\Payments\PaymentGatewayRegistry;
 
 class MarketplaceController extends Controller
 {
     protected $notificationService;
+    protected $eventWaitlistService;
+    protected $ticketJourneyService;
+    protected $feeEngine;
+    protected $platformRevenueService;
 
-    public function __construct(NotificationService $notificationService)
+    public function __construct(
+        NotificationService $notificationService,
+        EventWaitlistService $eventWaitlistService,
+        TicketJourneyService $ticketJourneyService,
+        FeeEngine $feeEngine,
+        PlatformRevenueService $platformRevenueService
+    )
     {
         $this->notificationService = $notificationService;
+        $this->eventWaitlistService = $eventWaitlistService;
+        $this->ticketJourneyService = $ticketJourneyService;
+        $this->feeEngine = $feeEngine;
+        $this->platformRevenueService = $platformRevenueService;
     }
 
     private function resolveRecipientFromRequest(Request $request): ?Customer
@@ -62,6 +81,22 @@ class MarketplaceController extends Controller
         $event = \App\Models\Event::find($booking->event_id);
         if ($event && $event->end_date_time && now()->greaterThan($event->end_date_time)) {
             return 'Cannot transfer tickets for past events.';
+        }
+
+        return null;
+    }
+
+    private function validateBookingResaleEligibility(Booking $booking): ?string
+    {
+        if (!$booking->is_transferable) {
+            return 'This ticket is not transferable.';
+        }
+
+        if (Schema::hasColumn($booking->getTable(), 'is_resellable') && !$booking->is_resellable) {
+            return match ((string) ($booking->resale_restriction_reason ?? '')) {
+                'promotional_restriction' => 'This promotional ticket cannot be resold on the Blackmarket.',
+                default => 'This ticket cannot be resold on the Blackmarket.',
+            };
         }
 
         return null;
@@ -116,6 +151,117 @@ class MarketplaceController extends Controller
         }
 
         return 'Unknown Event';
+    }
+
+    private function paymentMethodBelongsToCustomer(Customer $customer, ?string $paymentMethodId): bool
+    {
+        if (empty($paymentMethodId)) {
+            return false;
+        }
+
+        return \App\Models\PaymentMethod::forActor($customer)
+            ->where('stripe_payment_method_id', $paymentMethodId)
+            ->exists();
+    }
+
+    private function resolveMarketplaceFundingPreview(
+        Customer $buyer,
+        Booking $booking,
+        bool $applyWalletBalance,
+        ?string $stripePaymentMethodId = null
+    ): array {
+        $walletService = app(\App\Services\WalletService::class);
+        $fundingAllocator = app(\App\Services\CheckoutFundingAllocatorService::class);
+
+        $price = round((float) $booking->listing_price, 2);
+        $walletBalance = (float) ($walletService->getOrCreateWallet($buyer)->balance ?? 0);
+        $requestedGateway = $this->resolveGatewayDescriptor($applyWalletBalance ? 'mixed' : 'stripe');
+        $fundingPlan = $fundingAllocator->allocate($price, [
+            'gateway' => (string) ($requestedGateway['gateway'] ?? ($applyWalletBalance ? 'mixed' : 'stripe')),
+            'wallet_balance' => $walletBalance,
+            'bonus_balance' => 0,
+            'apply_wallet_balance' => $applyWalletBalance,
+            'apply_bonus_balance' => false,
+        ]);
+
+        $processingQuote = [
+            'fee_amount' => 0.0,
+            'net_amount' => round((float) ($fundingPlan['card_amount'] ?? 0), 2),
+            'total_charge_amount' => round((float) ($fundingPlan['card_amount'] ?? 0), 2),
+        ];
+
+        if (((float) ($fundingPlan['card_amount'] ?? 0)) > 0) {
+            $processingQuote = $this->feeEngine->quoteBuyerChargeForNet(
+                FeeEngine::OP_MARKETPLACE_CARD_PROCESSING,
+                (float) $fundingPlan['card_amount'],
+                ['currency' => 'DOP']
+            );
+        }
+
+        $fundingPlan['processing_fee'] = round((float) ($processingQuote['fee_amount'] ?? 0), 2);
+        $fundingPlan['card_processing_fee'] = round((float) ($processingQuote['fee_amount'] ?? 0), 2);
+        $fundingPlan['card_total_charge'] = round((float) ($processingQuote['total_charge_amount'] ?? ($fundingPlan['card_amount'] ?? 0)), 2);
+        $fundingPlan['total_to_charge'] = round(
+            (float) ($fundingPlan['wallet_amount'] ?? 0) + (float) ($fundingPlan['card_total_charge'] ?? 0),
+            2
+        );
+        $fundingPlan['available_wallet_balance'] = round($walletBalance, 2);
+        $fundingPlan['has_selected_card'] = !empty($stripePaymentMethodId);
+        $fundingPlan['can_purchase'] = !((bool) ($fundingPlan['requires_card'] ?? false)) || !empty($stripePaymentMethodId);
+
+        $effectiveGateway = $this->resolveGatewayDescriptor((string) ($fundingPlan['payment_method'] ?? ($requestedGateway['gateway'] ?? 'stripe')));
+        $fundingPlan['requested_gateway'] = $requestedGateway['gateway'] ?? null;
+        $fundingPlan['gateway'] = $effectiveGateway['gateway'] ?? null;
+        $fundingPlan['gateway_family'] = $effectiveGateway['gateway_family'] ?? null;
+        $fundingPlan['verification_strategy'] = $effectiveGateway['verification_strategy'] ?? null;
+
+        return [$fundingPlan, $processingQuote];
+    }
+
+    private function resolveVisibleMarketplaceBooking(int|string $id, bool $lockForUpdate = false): ?Booking
+    {
+        $query = Booking::query()
+            ->visibleMarketplaceListings()
+            ->whereKey($id);
+
+        if ($lockForUpdate) {
+            $query->lockForUpdate();
+        }
+
+        return $query->first();
+    }
+
+    /**
+     * @return array{supported:bool,gateway:string,gateway_family:?string,verification_strategy:?string}
+     */
+    private function resolveGatewayDescriptor(string $gateway): array
+    {
+        return app(\App\Services\EventPaymentVerificationService::class)->describeGateway($gateway);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildMarketplaceGatewayMetadata(array $fundingPlan, ?string $sourceGateway = null): array
+    {
+        $metadata = [
+            'requested_gateway' => $fundingPlan['requested_gateway'] ?? null,
+            'gateway' => $fundingPlan['gateway'] ?? null,
+            'gateway_family' => $fundingPlan['gateway_family'] ?? null,
+            'verification_strategy' => $fundingPlan['verification_strategy'] ?? null,
+            'wallet_amount' => isset($fundingPlan['wallet_amount']) ? round((float) $fundingPlan['wallet_amount'], 2) : null,
+            'card_amount' => isset($fundingPlan['card_amount']) ? round((float) $fundingPlan['card_amount'], 2) : null,
+            'card_total_charge' => isset($fundingPlan['card_total_charge']) ? round((float) $fundingPlan['card_total_charge'], 2) : null,
+        ];
+
+        if ($sourceGateway !== null) {
+            $sourceDescriptor = $this->resolveGatewayDescriptor($sourceGateway);
+            $metadata['source_gateway'] = $sourceDescriptor['gateway'] ?? null;
+            $metadata['source_gateway_family'] = $sourceDescriptor['gateway_family'] ?? null;
+            $metadata['source_verification_strategy'] = $sourceDescriptor['verification_strategy'] ?? null;
+        }
+
+        return array_filter($metadata, static fn ($value) => $value !== null);
     }
 
     private function serializeTransfer(TicketTransfer $transfer, Customer $viewer): array
@@ -201,60 +347,32 @@ class MarketplaceController extends Controller
     /**
      * Transfer a ticket to another user.
      */
-    /**
-     * Verify if a recipient exists before initiating a transfer.
-     */
-    public function verifyRecipient(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'recipient' => 'required_without:recipient_id|nullable|string',
-            'recipient_id' => 'required_without:recipient|nullable|integer',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
-        }
-
-        $recipient = $this->resolveRecipientFromRequest($request);
-
-        if (!$recipient) {
-            return response()->json(['success' => false, 'message' => 'User not found.'], 404);
-        }
-
-        $currentUser = Auth::guard('sanctum')->user();
-        if ($recipient->id === $currentUser->id) {
-            return response()->json(['success' => false, 'message' => 'You cannot transfer a ticket to yourself.'], 400);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'id' => $recipient->id,
-                'name' => ($recipient->fname ?? '') . ' ' . ($recipient->lname ?? ''),
-                'username' => $recipient->username,
-                'email' => $recipient->email,
-                'photo' => $recipient->photo,
-            ]
-        ]);
-    }
-
-    /**
-     * Initiate a transfer request (pending approval by recipient).
-     */
     public function transfer(Request $request, $id)
     {
         $customer = Auth::guard('sanctum')->user();
+        $booking = Booking::where('id', $id)->where('customer_id', $customer->id)->first();
+
+        if (!$booking) {
+            return response()->json(['success' => false, 'message' => 'Ticket not found or not owned by you.'], 404);
+        }
+
+        if (!$booking->is_transferable) {
+            return response()->json(['success' => false, 'message' => 'This ticket is not transferable.'], 403);
+        }
 
         $validator = Validator::make($request->all(), [
-            'recipient' => 'required_without:recipient_id|nullable|string',
-            'recipient_id' => 'required_without:recipient|nullable|integer',
+            'recipient' => 'required', // Email or username
         ]);
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
-        $recipient = $this->resolveRecipientFromRequest($request);
+        // Find recipient
+        $recipientStr = $request->recipient;
+        $recipient = Customer::where('email', $recipientStr)
+            ->orWhere('username', $recipientStr)
+            ->first();
 
         if (!$recipient) {
             return response()->json(['success' => false, 'message' => 'Recipient user not found.'], 404);
@@ -265,23 +383,25 @@ class MarketplaceController extends Controller
         }
 
         try {
-            $result = DB::transaction(function () use ($id, $customer, $recipient) {
-                $booking = Booking::where('id', $id)
-                    ->where('customer_id', $customer->id)
-                    ->lockForUpdate()
-                    ->first();
+            DB::beginTransaction();
 
-                if (!$booking) {
-                    return [
-                        'response' => response()->json(['success' => false, 'message' => 'Ticket not found or not owned by you.'], 404),
-                    ];
-                }
+            // Log the transfer
+            TicketTransfer::create([
+                'booking_id' => $booking->id,
+                'from_customer_id' => $customer->id,
+                'to_customer_id' => $recipient->id,
+                'notes' => 'Transferred via Mobile App',
+            ]);
 
-                $transferError = $this->validateTransferableBooking($booking);
-                if ($transferError !== null) {
-                    $status = str_contains($transferError, 'past events') || str_contains($transferError, 'not transferable')
-                        ? 403
-                        : 409;
+            // Update booking ownership
+            $booking->update([
+                'customer_id' => $recipient->id,
+                'fname' => $recipient->fname,
+                'lname' => $recipient->lname,
+                'email' => $recipient->email,
+                'phone' => $recipient->phone,
+                'is_listed' => false, // Reset listing status on transfer
+            ]);
 
                     return [
                         'response' => response()->json(['success' => false, 'message' => $transferError], $status),
@@ -299,6 +419,16 @@ class MarketplaceController extends Controller
 
                 $booking->transfer_status = 'transfer_pending';
                 $booking->save();
+
+                $this->ticketJourneyService->record($booking->fresh(), 'gift_transfer_pending', [
+                    'actor_customer_id' => (int) $customer->id,
+                    'target_customer_id' => (int) $recipient->id,
+                    'transfer_id' => (int) $transfer->id,
+                    'metadata' => [
+                        'flow' => 'owner_offer',
+                        'notes' => 'Transfer request via Mobile App',
+                    ],
+                ]);
 
                 return [
                     'transfer' => $transfer,
@@ -456,6 +586,16 @@ class MarketplaceController extends Controller
                 $booking->transfer_status = 'transfer_pending';
                 $booking->save();
 
+                $this->ticketJourneyService->record($booking->fresh(), 'gift_transfer_pending', [
+                    'actor_customer_id' => (int) $customer->id,
+                    'target_customer_id' => (int) $ownerId,
+                    'transfer_id' => (int) $transfer->id,
+                    'metadata' => [
+                        'flow' => 'receiver_request',
+                        'notes' => 'Transfer request via Ticket QR',
+                    ],
+                ]);
+
                 return [
                     'transfer' => $transfer,
                     'booking' => $booking->fresh(),
@@ -489,12 +629,7 @@ class MarketplaceController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Transfer request sent to the ticket owner. Waiting for approval.',
-                'data' => [
-                    'transfer_id' => $transfer->id,
-                    'status' => 'pending',
-                    'flow' => 'receiver_request',
-                ],
+                'message' => 'Ticket transferred successfully to ' . ($recipient->fname ?? $recipient->username),
             ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Transfer request failed: ' . $e->getMessage()], 500);
@@ -617,6 +752,15 @@ class MarketplaceController extends Controller
 
                 $transfer->update(['status' => 'accepted']);
 
+                $this->ticketJourneyService->record($booking->fresh(), 'gift_transfer_accepted', [
+                    'actor_customer_id' => (int) $transfer->from_customer_id,
+                    'target_customer_id' => (int) $newOwner->id,
+                    'transfer_id' => (int) $transfer->id,
+                    'metadata' => [
+                        'flow' => $transfer->flow ?? 'owner_offer',
+                    ],
+                ]);
+
                 return [
                     'transfer' => $transfer->fresh(),
                     'booking' => $booking->fresh(),
@@ -689,6 +833,14 @@ class MarketplaceController extends Controller
                 $booking = Booking::where('id', $transfer->booking_id)->lockForUpdate()->first();
                 if ($booking) {
                     $booking->update(['transfer_status' => null]);
+                    $this->ticketJourneyService->record($booking->fresh(), 'gift_transfer_rejected', [
+                        'actor_customer_id' => (int) $transfer->from_customer_id,
+                        'target_customer_id' => (int) $customer->id,
+                        'transfer_id' => (int) $transfer->id,
+                        'metadata' => [
+                            'flow' => $transfer->flow ?? 'owner_offer',
+                        ],
+                    ]);
                 }
 
                 $transfer->update(['status' => 'rejected']);
@@ -761,6 +913,14 @@ class MarketplaceController extends Controller
                 $booking = Booking::where('id', $transfer->booking_id)->lockForUpdate()->first();
                 if ($booking) {
                     $booking->update(['transfer_status' => null]);
+                    $this->ticketJourneyService->record($booking->fresh(), 'gift_transfer_cancelled', [
+                        'actor_customer_id' => (int) $customer->id,
+                        'target_customer_id' => (int) $transfer->to_customer_id,
+                        'transfer_id' => (int) $transfer->id,
+                        'metadata' => [
+                            'flow' => $transfer->flow ?? 'owner_offer',
+                        ],
+                    ]);
                 }
 
                 $transfer->update(['status' => 'cancelled']);
@@ -822,6 +982,11 @@ class MarketplaceController extends Controller
             return response()->json(['success' => false, 'message' => 'Cannot list tickets for past events.'], 403);
         }
 
+        $resaleError = $this->validateBookingResaleEligibility($booking);
+        if ($resaleError !== null) {
+            return response()->json(['success' => false, 'message' => $resaleError], 403);
+        }
+
         $basic = \App\Models\BasicSettings\Basic::select('marketplace_max_price_rule')->first();
 
         $maxPriceRule = '';
@@ -830,10 +995,8 @@ class MarketplaceController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'price' => 'required|numeric|min:0' . $maxPriceRule,
+            'price' => 'required|numeric|min:0',
             'is_listed' => 'required|boolean',
-        ], [
-            'price.max' => 'The listing price cannot exceed the original purchase price (' . $booking->price . ').'
         ]);
 
         if ($validator->fails()) {
@@ -842,10 +1005,23 @@ class MarketplaceController extends Controller
 
         $booking->update([
             'is_listed' => $request->is_listed,
-            'listing_price' => $request->price,
+            'listing_price' => $request->boolean('is_listed') ? $request->price : 0,
         ]);
 
         $status = $request->is_listed ? 'listed' : 'unlisted';
+
+        $this->ticketJourneyService->record($booking->fresh(), $request->boolean('is_listed') ? 'listed' : 'unlisted', [
+            'actor_customer_id' => (int) $customer->id,
+            'target_customer_id' => (int) $customer->id,
+            'price' => $request->boolean('is_listed') ? (float) $request->price : null,
+            'metadata' => [
+                'source' => 'blackmarket',
+            ],
+        ]);
+
+        if ($request->boolean('is_listed') && $event) {
+            $this->eventWaitlistService->notifyMarketplaceAvailability($event);
+        }
 
         return response()->json([
             'success' => true,
@@ -867,8 +1043,20 @@ class MarketplaceController extends Controller
         $minPrice = $request->input('min_price');
         $maxPrice = $request->input('max_price');
 
-        $bookings = Booking::where('is_listed', true)
-            ->where('customer_id', '!=', Auth::guard('sanctum')->id()) // Don't show own tickets
+        // Clean up stale resale listings so the app never keeps offering tickets
+        // whose seller or event no longer exists.
+        Booking::where('is_listed', true)
+            ->where(function ($query) {
+                $query->whereDoesntHave('customerInfo')
+                    ->orWhereDoesntHave('evnt');
+            })
+            ->update([
+                'is_listed' => false,
+                'listing_price' => 0,
+            ]);
+
+        $bookings = Booking::query()
+            ->visibleMarketplaceListings(Auth::guard('sanctum')->id())
             ->when($search, function ($query, $search) {
                 return $query->whereHas('event', function ($q) use ($search) {
                     $q->where('title', 'like', '%' . $search . '%');
@@ -914,17 +1102,119 @@ class MarketplaceController extends Controller
     }
 
     /**
+     * Preview a ticket purchase from the marketplace.
+     */
+    public function purchasePreview(Request $request, $id)
+    {
+        $buyer = Auth::guard('sanctum')->user();
+
+        try {
+            $booking = $this->resolveVisibleMarketplaceBooking($id);
+            if (!$booking) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ticket no longer available.',
+                ], 404);
+            }
+
+            if ((int) $booking->customer_id === (int) $buyer->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You cannot buy your own ticket.',
+                ], 400);
+            }
+
+            $seller = Customer::find($booking->customer_id);
+
+            $price = (float) $booking->listing_price;
+            $applyWalletBalance = filter_var($request->input('apply_wallet_balance', true), FILTER_VALIDATE_BOOLEAN);
+            $stripePaymentMethodId = $request->input('stripe_payment_method_id');
+            if (!empty($stripePaymentMethodId) && !$this->paymentMethodBelongsToCustomer($buyer, (string) $stripePaymentMethodId)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The selected card is not available for this account.',
+                ], 422);
+            }
+
+            [$fundingPlan, $processingQuote] = $this->resolveMarketplaceFundingPreview(
+                $buyer,
+                $booking,
+                $applyWalletBalance,
+                $stripePaymentMethodId
+            );
+
+            $feeBreakdown = $this->feeEngine->calculate(FeeEngine::OP_MARKETPLACE_RESALE, $price, [
+                'fee_base_amount' => $price,
+                'total_charge_amount' => $price,
+                'currency' => 'DOP',
+            ]);
+            $sellerPayout = (float) ($feeBreakdown['net_amount'] ?? $price);
+            $sellerFee = (float) ($feeBreakdown['fee_amount'] ?? 0);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'booking_id' => (int) $booking->id,
+                    'can_purchase' => (bool) ($fundingPlan['can_purchase'] ?? false),
+                    'wallet_balance' => round((float) ($fundingPlan['available_wallet_balance'] ?? 0), 2),
+                    'required_amount' => round((float) ($fundingPlan['total_to_charge'] ?? $price), 2),
+                    'shortage_amount' => round((float) ($fundingPlan['card_total_charge'] ?? 0), 2),
+                    'payment_summary' => [
+                        'requested_gateway' => $fundingPlan['requested_gateway'] ?? null,
+                        'gateway' => $fundingPlan['gateway'] ?? null,
+                        'gateway_family' => $fundingPlan['gateway_family'] ?? null,
+                        'verification_strategy' => $fundingPlan['verification_strategy'] ?? null,
+                        'subtotal' => round($price, 2),
+                        'bonus_amount' => 0.0,
+                        'wallet_amount' => round((float) ($fundingPlan['wallet_amount'] ?? 0), 2),
+                        'card_amount' => round((float) ($fundingPlan['card_amount'] ?? 0), 2),
+                        'processing_fee' => round((float) ($processingQuote['fee_amount'] ?? 0), 2),
+                        'card_processing_fee' => round((float) ($processingQuote['fee_amount'] ?? 0), 2),
+                        'card_total_charge' => round((float) ($fundingPlan['card_total_charge'] ?? 0), 2),
+                        'remaining_balance' => round((float) ($fundingPlan['card_amount'] ?? 0), 2),
+                        'requires_card' => (bool) ($fundingPlan['requires_card'] ?? false),
+                        'has_selected_card' => (bool) ($fundingPlan['has_selected_card'] ?? false),
+                        'total_to_pay' => round((float) ($fundingPlan['total_to_charge'] ?? $price), 2),
+                    ],
+                    'seller_summary' => [
+                        'gross_amount' => round($price, 2),
+                        'fee_amount' => round($sellerFee, 2),
+                        'net_amount' => round($sellerPayout, 2),
+                    ],
+                    'event' => [
+                        'id' => (int) ($booking->event_id ?? 0),
+                        'title' => $this->resolveEventTitleFromBooking($booking),
+                        'date' => $booking->event_date,
+                    ],
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Could not preview this resale purchase right now.',
+            ], 500);
+        }
+    }
+
+    /**
      * Purchase a ticket from the marketplace.
      */
     public function purchase(Request $request, $id)
     {
         $buyer = Auth::guard('sanctum')->user();
+        $validated = $request->validate([
+            'apply_wallet_balance' => 'nullable|boolean',
+            'stripe_payment_method_id' => 'nullable|string',
+        ]);
+        $capturedStripe = null;
+        $capturedGateway = null;
 
         try {
             $walletService = app(\App\Services\WalletService::class);
-            $result = DB::transaction(function () use ($id, $buyer, $walletService) {
-                $booking = Booking::where('id', $id)->lockForUpdate()->first();
-                if (!$booking || !$booking->is_listed) {
+            $paymentGatewayRegistry = app(PaymentGatewayRegistry::class);
+            $result = DB::transaction(function () use ($id, $buyer, $walletService, $paymentGatewayRegistry, $validated, &$capturedStripe, &$capturedGateway) {
+                $booking = $this->resolveVisibleMarketplaceBooking($id, true);
+                if (!$booking) {
                     return [
                         'response' => response()->json(['success' => false, 'message' => 'Ticket no longer available.'], 404),
                     ];
@@ -939,50 +1229,99 @@ class MarketplaceController extends Controller
                 $seller = Customer::find($booking->customer_id);
                 if (!$seller) {
                     return [
-                        'response' => response()->json(['success' => false, 'message' => 'Seller not found.'], 404),
+                        'response' => response()->json([
+                            'success' => false,
+                            'message' => 'This resale listing is no longer available.',
+                        ], 404),
                     ];
                 }
 
                 $price = (float) $booking->listing_price;
-                $basicSetting = \App\Models\BasicSettings\Basic::select('marketplace_commission')->first();
-                $platformFeePercent = ($basicSetting->marketplace_commission ?? 5) / 100;
-                $fee = $price * $platformFeePercent;
-                $sellerPayout = $price - $fee;
+                $stripePaymentMethodId = $validated['stripe_payment_method_id'] ?? null;
+                $applyWalletBalance = filter_var($validated['apply_wallet_balance'] ?? true, FILTER_VALIDATE_BOOLEAN);
 
-                // Check if buyer has enough funds before trying debit.
-                $buyerWallet = $walletService->getOrCreateWallet($buyer);
-                if (!$buyerWallet || $buyerWallet->balance < $price) {
+                if (!empty($stripePaymentMethodId) && !$this->paymentMethodBelongsToCustomer($buyer, (string) $stripePaymentMethodId)) {
                     return [
-                        'response' => response()->json(['success' => false, 'message' => 'Insufficient wallet balance.'], 402),
+                        'response' => response()->json([
+                            'success' => false,
+                            'message' => 'The selected card is not available for this account.',
+                        ], 422),
                     ];
                 }
 
-                // Deterministic idempotency key per (booking, buyer) pair.
+                [$fundingPlan, $processingQuote] = $this->resolveMarketplaceFundingPreview(
+                    $buyer,
+                    $booking,
+                    $applyWalletBalance,
+                    $stripePaymentMethodId
+                );
+
+                if ((bool) ($fundingPlan['requires_card'] ?? false) && empty($stripePaymentMethodId)) {
+                    return [
+                        'response' => response()->json([
+                            'success' => false,
+                            'message' => 'Select a saved card to cover the remaining balance.',
+                        ], 422),
+                    ];
+                }
+
+                $feeBreakdown = $this->feeEngine->calculate(FeeEngine::OP_MARKETPLACE_RESALE, $price, [
+                    'fee_base_amount' => $price,
+                    'total_charge_amount' => $price,
+                    'currency' => 'DOP',
+                ]);
+                $fee = (float) ($feeBreakdown['fee_amount'] ?? 0);
+                $sellerPayout = (float) ($feeBreakdown['net_amount'] ?? max(0, $price - $fee));
+
                 $operationKey = 'marketplace_booking_' . $booking->id . '_buyer_' . $buyer->id;
 
-                $walletService->debit(
-                    $buyer,
-                    $price,
-                    'Marketplace Purchase',
-                    (string) $booking->id,
-                    'MP_BUY_' . $operationKey
-                );
+                if (((float) ($fundingPlan['wallet_amount'] ?? 0)) > 0) {
+                    $walletService->debit(
+                        $buyer,
+                        (float) $fundingPlan['wallet_amount'],
+                        'Marketplace Purchase',
+                        (string) $booking->id,
+                        'MP_BUY_WALLET_' . $operationKey,
+                        0,
+                        (float) $fundingPlan['wallet_amount'],
+                        $this->buildMarketplaceGatewayMetadata($fundingPlan, 'wallet')
+                    );
+                }
+
+                if (((float) ($fundingPlan['card_total_charge'] ?? 0)) > 0) {
+                    $capturedGateway = (string) ($fundingPlan['requested_gateway'] ?? 'stripe');
+                    $capturedStripe = $paymentGatewayRegistry->chargeSavedCard(
+                        $capturedGateway,
+                        $buyer,
+                        (float) $fundingPlan['card_total_charge'],
+                        'DOP',
+                        'Marketplace Purchase #' . $booking->id,
+                        (string) $stripePaymentMethodId,
+                        [
+                            'booking_id' => (string) $booking->id,
+                            'event_id' => (string) $booking->event_id,
+                            'purchase_source' => 'marketplace',
+                            'funding_mode' => (string) ($fundingPlan['mode'] ?? 'card'),
+                        ]
+                    );
+                }
 
                 $walletService->credit(
                     $seller,
                     $sellerPayout,
                     'Marketplace Sale',
                     (string) $booking->id,
-                    'MP_SELL_' . $operationKey
+                    'MP_SELL_' . $operationKey,
+                    $fee,
+                    $price,
+                    $this->buildMarketplaceGatewayMetadata($fundingPlan)
                 );
 
-                TicketTransfer::create([
+                $transfer = TicketTransfer::create([
                     'booking_id' => $booking->id,
                     'from_customer_id' => $booking->customer_id,
                     'to_customer_id' => $buyer->id,
                     'notes' => 'Marketplace Purchase',
-                    'status' => 'accepted',
-                    'flow' => 'owner_offer',
                 ]);
 
                 $booking->update([
@@ -993,11 +1332,58 @@ class MarketplaceController extends Controller
                     'phone' => $buyer->phone,
                     'is_listed' => false,
                     'listing_price' => 0,
+                    'transfer_status' => null,
                 ]);
+
+                $this->ticketJourneyService->record($booking->fresh(), 'marketplace_purchase', [
+                    'actor_customer_id' => (int) $buyer->id,
+                    'target_customer_id' => (int) $buyer->id,
+                    'transfer_id' => (int) $transfer->id,
+                    'price' => $price,
+                    'metadata' => [
+                        'seller_customer_id' => (int) $seller->id,
+                        'seller_payout' => round($sellerPayout, 2),
+                        'marketplace_fee' => round($fee, 2),
+                        'buyer_processing_fee' => round((float) ($processingQuote['fee_amount'] ?? 0), 2),
+                        'wallet_amount' => round((float) ($fundingPlan['wallet_amount'] ?? 0), 2),
+                        'card_total_charge' => round((float) ($fundingPlan['card_total_charge'] ?? 0), 2),
+                    ] + $this->buildMarketplaceGatewayMetadata($fundingPlan),
+                ]);
+
+                $this->platformRevenueService->recordMarketplaceResale(
+                    $booking->fresh(),
+                    $buyer,
+                    $seller,
+                    $feeBreakdown,
+                    $transfer,
+                    $this->buildMarketplaceGatewayMetadata($fundingPlan)
+                );
+
+                if (((float) ($processingQuote['fee_amount'] ?? 0)) > 0) {
+                    $this->platformRevenueService->recordMarketplaceCardProcessing(
+                        $booking->fresh(),
+                        $buyer,
+                        $processingQuote,
+                        $transfer,
+                        $this->buildMarketplaceGatewayMetadata($fundingPlan)
+                    );
+                }
 
                 return [
                     'seller' => $seller,
                     'booking' => $booking->fresh(),
+                    'payment_summary' => [
+                        'requested_gateway' => $fundingPlan['requested_gateway'] ?? null,
+                        'gateway' => $fundingPlan['gateway'] ?? null,
+                        'gateway_family' => $fundingPlan['gateway_family'] ?? null,
+                        'verification_strategy' => $fundingPlan['verification_strategy'] ?? null,
+                        'subtotal' => round($price, 2),
+                        'wallet_amount' => round((float) ($fundingPlan['wallet_amount'] ?? 0), 2),
+                        'card_amount' => round((float) ($fundingPlan['card_amount'] ?? 0), 2),
+                        'processing_fee' => round((float) ($processingQuote['fee_amount'] ?? 0), 2),
+                        'card_total_charge' => round((float) ($fundingPlan['card_total_charge'] ?? 0), 2),
+                        'total_to_pay' => round((float) ($fundingPlan['total_to_charge'] ?? $price), 2),
+                    ],
                 ];
             });
 
@@ -1007,8 +1393,8 @@ class MarketplaceController extends Controller
 
             $seller = $result['seller'];
             $booking = $result['booking'];
+            $paymentSummary = $result['payment_summary'] ?? null;
 
-            // Notifications must not fail the purchase flow after commit.
             try {
                 $eventTitle = optional($booking->evnt)->title ?? 'an event';
                 $this->notificationService->notifyUser(
@@ -1025,26 +1411,26 @@ class MarketplaceController extends Controller
                 report($notifyError);
             }
 
-            $loyaltyCustomer = $buyer instanceof Customer ? $buyer : Customer::find(optional($buyer)->id);
-            if ($loyaltyCustomer) {
-                app(\App\Services\LoyaltyService::class)->awardFromRule(
-                    $loyaltyCustomer,
-                    'marketplace_purchase',
-                    'marketplace_booking',
-                    (string) $booking->id,
-                    [
-                        'event_id' => (int) ($booking->event_id ?? 0),
-                        'purchase_source' => 'marketplace',
-                    ]
-                );
-            }
-
             return response()->json([
                 'success' => true,
                 'message' => 'Ticket purchased successfully!',
-                'data' => $booking
+                'data' => $booking,
+                'payment_summary' => $paymentSummary,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            if (is_object($capturedStripe) && !empty($capturedStripe->id ?? null)) {
+                try {
+                    app(PaymentGatewayRegistry::class)->refund(
+                        (string) ($capturedGateway ?: 'stripe'),
+                        (string) $capturedStripe->id,
+                        null,
+                        ['reason' => 'marketplace_purchase_failed']
+                    );
+                } catch (\Throwable $refundError) {
+                    report($refundError);
+                }
+            }
+
             return response()->json(['success' => false, 'message' => 'Purchase failed: ' . $e->getMessage()], 500);
         }
     }

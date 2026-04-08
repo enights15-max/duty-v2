@@ -9,6 +9,7 @@ use App\Models\BasicSettings\MailTemplate;
 use App\Models\Event;
 use App\Models\Event\EventContent;
 use App\Models\Event\EventImage;
+use App\Models\Identity;
 use App\Models\Language;
 use App\Models\Organizer;
 use App\Models\OrganizerInfo;
@@ -28,7 +29,10 @@ use PHPMailer\PHPMailer\PHPMailer;
 class OrganizerManagementController extends Controller
 {
   private $admin_user_name;
-  public function __construct()
+  public function __construct(
+    private ProfessionalCatalogBridgeService $catalogBridge,
+    private ProfessionalBalanceService $professionalBalanceService
+  )
   {
     $admin = Admin::select('username')->first();
     $this->admin_user_name = $admin->username;
@@ -74,12 +78,15 @@ class OrganizerManagementController extends Controller
       $searchKey = $request['info'];
     }
 
-    $organizers = Organizer::when($searchKey, function ($query, $searchKey) {
+    $organizers = Organizer::with('organizer_info')
+      ->when($searchKey, function ($query, $searchKey) {
       return $query->where('username', 'like', '%' . $searchKey . '%')
         ->orWhere('email', 'like', '%' . $searchKey . '%');
     })
       ->orderBy('id', 'desc')
       ->paginate(10);
+
+    $this->attachIdentityContextToOrganizers($organizers->getCollection());
 
     return view('backend.end-user.organizer.index', compact('organizers'));
   }
@@ -195,6 +202,10 @@ class OrganizerManagementController extends Controller
 
     $organizer = Organizer::findOrFail($id);
     $information['organizer'] = $organizer;
+    $identityContext = $this->buildOrganizerIdentityContext($organizer);
+    $organizerIdentityId = $identityContext['identity']?->id;
+    $information['current_balance'] = $this->professionalBalanceService->currentOrganizerBalance($organizerIdentityId, $organizer->id);
+    $information['identityContext'] = $identityContext;
 
     return view('backend.end-user.organizer.details', $information);
   }
@@ -257,6 +268,73 @@ class OrganizerManagementController extends Controller
     $information['currencyInfo'] = $this->getCurrencyInfo();
     $information['languages'] = $languages;
     return view('backend.end-user.organizer.edit', $information);
+  }
+
+  private function attachIdentityContextToOrganizers($organizers): void
+  {
+    $identityMap = $this->catalogBridge
+      ->resolveIdentityMap('organizer', $organizers->pluck('id')->all())
+      ->values();
+
+    if ($identityMap->isNotEmpty()) {
+      $identityMap = Identity::query()
+        ->with('owner')
+        ->whereIn('id', $identityMap->pluck('id')->all())
+        ->get()
+        ->keyBy(function (Identity $identity) {
+          return (string) ($this->catalogBridge->legacyIdForIdentity($identity, 'organizer') ?? $identity->id);
+        });
+    }
+
+    foreach ($organizers as $organizer) {
+      $identity = $identityMap->get((string) $organizer->id);
+      $context = $this->formatIdentityContext($identity);
+
+      $organizer->linked_identity = $identity;
+      $organizer->identity_context = $context;
+    }
+  }
+
+  private function buildOrganizerIdentityContext(Organizer $organizer): array
+  {
+    $identity = $this->catalogBridge->findIdentityForLegacy('organizer', $organizer->id);
+    if ($identity) {
+      $identity->loadMissing('owner');
+    }
+
+    return $this->formatIdentityContext($identity);
+  }
+
+  private function formatIdentityContext(?Identity $identity): array
+  {
+    $latestHistory = collect(data_get($identity?->meta, 'moderation_history', []))
+      ->filter(fn ($entry) => is_array($entry))
+      ->last();
+
+    return [
+      'identity' => $identity,
+      'status' => $identity?->status,
+      'status_label' => match ($identity?->status) {
+        'pending' => 'Pending',
+        'active' => 'Active',
+        'rejected' => 'Rejected',
+        'suspended' => 'Suspended',
+        null => 'Not linked',
+        default => ucfirst((string) $identity?->status),
+      },
+      'status_class' => match ($identity?->status) {
+        'pending' => 'warning',
+        'active' => 'success',
+        'rejected' => 'danger',
+        'suspended' => 'dark',
+        null => 'secondary',
+        default => 'secondary',
+      },
+      'owner_name' => trim((string) optional($identity?->owner)->first_name . ' ' . optional($identity?->owner)->last_name),
+      'owner_email' => optional($identity?->owner)->email,
+      'latest_action' => $latestHistory['action'] ?? null,
+      'latest_action_at' => $latestHistory['at'] ?? null,
+    ];
   }
 
   //update

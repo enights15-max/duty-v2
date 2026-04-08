@@ -15,6 +15,12 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 class WithdrawController extends Controller
 {
+  public function __construct(
+    private ProfessionalCatalogBridgeService $catalogBridge,
+    private ProfessionalBalanceService $professionalBalanceService
+  ) {
+  }
+
   //index
   public function index()
   {

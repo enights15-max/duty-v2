@@ -14,6 +14,8 @@ use App\Models\Event\Slot;
 use App\Models\Event\SlotImage;
 use App\Models\Event\TicketContent;
 use App\Models\Event\VariationContent;
+use App\Services\TicketPriceScheduleService;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 
 class TicketController extends Controller
@@ -59,6 +61,8 @@ class TicketController extends Controller
     $in = $request->all();
     $in['early_bird_discount'] = $request->early_bird_discount_type;
     $in['early_bird_discount_type'] = $request->discount_type;
+    $this->normalizeReservationPayload($in, $request);
+    $this->normalizePromotionalResalePayload($in, $request);
     if ($request->pricing_type_2 == 'free') {
       $in['pricing_type'] = 'free';
       $in['price'] = 0;
@@ -170,11 +174,8 @@ class TicketController extends Controller
     $in['max_buy_ticket'] = $request->max_ticket_buy_type == 'limited' ? $request->max_buy_ticket : null;
     
     // Handle Reservation Fields
-    $in['reservation_enabled'] = $request->input('reservation_enabled', 0);
-    $in['reservation_deposit_type'] = $request->reservation_deposit_type;
-    $in['reservation_deposit_value'] = $request->reservation_deposit_value;
-    $in['reservation_final_due_date'] = $request->reservation_final_due_date;
-    $in['reservation_min_installment_amount'] = $request->reservation_min_installment_amount;
+    $this->normalizeReservationPayload($in, $request);
+    $this->normalizePromotionalResalePayload($in, $request);
 
     if ($request->pricing_type_2 == 'free') {
       $in['pricing_type'] = 'free';
@@ -262,6 +263,36 @@ class TicketController extends Controller
     Session::flash('success', 'Updated Successfully');
 
     return response()->json(['status' => 'success'], 200);
+  }
+
+  private function normalizeReservationPayload(array &$payload, Request $request): void
+  {
+    $reservationEnabled = (string) $request->input('reservation_enabled', '0') === '1' ? 1 : 0;
+
+    $payload['reservation_enabled'] = $reservationEnabled;
+
+    if ($reservationEnabled !== 1) {
+      $payload['reservation_deposit_type'] = null;
+      $payload['reservation_deposit_value'] = null;
+      $payload['reservation_final_due_date'] = null;
+      $payload['reservation_min_installment_amount'] = null;
+      return;
+    }
+
+    $payload['reservation_deposit_type'] = $request->reservation_deposit_type;
+    $payload['reservation_deposit_value'] = $request->reservation_deposit_value;
+    $payload['reservation_final_due_date'] = $request->reservation_final_due_date;
+    $payload['reservation_min_installment_amount'] = $request->reservation_min_installment_amount;
+  }
+
+  private function normalizePromotionalResalePayload(array &$payload, Request $request): void
+  {
+    if (!Schema::hasColumn('tickets', 'allow_promotional_resale')) {
+      unset($payload['allow_promotional_resale']);
+      return;
+    }
+
+    $payload['allow_promotional_resale'] = (string) $request->input('allow_promotional_resale', '1') === '1' ? 1 : 0;
   }
   //destroy
   public function destroy(Request $request)

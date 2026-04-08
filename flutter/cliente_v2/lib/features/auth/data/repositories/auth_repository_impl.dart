@@ -1,64 +1,114 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/app_urls.dart';
 import '../datasources/auth_remote_data_source.dart';
 
 class AuthRepository {
   final AuthRemoteDataSource _remoteDataSource;
   final SharedPreferences _prefs;
+  final FlutterSecureStorage _secureStorage;
 
-  AuthRepository(this._remoteDataSource, this._prefs);
+  AuthRepository(this._remoteDataSource, this._prefs, this._secureStorage);
 
-  Future<void> login(String email, String password) async {
-    try {
-      // The API seems to have both GET /login (likely for view) and POST /login/submit
-      // Checking api.php line 71: Route::post('/login/submit', [CustomerController::class, 'loginSubmit'])
-      // We should use the submit endpoint for actual authentication.
+  List<dynamic> _hydrateIdentityAvatars(
+    dynamic rawIdentities,
+    Map<String, dynamic>? customer,
+  ) {
+    if (rawIdentities is! List) {
+      return const [];
+    }
 
-<<<<<<< Updated upstream
-=======
-  Future<Map<String, dynamic>> login(
-    String email,
-    String password, {
-    bool keepSignedIn = true,
+    final personalAvatarUrl = AppUrls.getCustomerAvatarUrl(customer);
+
+    return rawIdentities.map((item) {
+      if (item is! Map) {
+        return item;
+      }
+
+      final next = Map<String, dynamic>.from(item);
+      final type = next['type']?.toString();
+      if (type == 'personal' &&
+          personalAvatarUrl != null &&
+          (next['avatar_url'] == null ||
+              next['avatar_url'].toString().trim().isEmpty)) {
+        next['avatar_url'] = personalAvatarUrl;
+      }
+      return next;
+    }).toList();
+  }
+
+  Future<void> _persistSessionPayload(
+    Map<String, dynamic> response, {
+    required bool keepSignedIn,
+  }) async {
+    final token = response['token'];
+    if (token != null) {
+      await _secureStorage.write(
+        key: AppConstants.secureTokenKey,
+        value: token,
+      );
+    }
+
+    final customer = response['customer'];
+    if (customer != null) {
+      await _prefs.setString(AppConstants.userKey, jsonEncode(customer));
+    }
+
+    final identities = _hydrateIdentityAvatars(
+      response['identities'],
+      customer is Map<String, dynamic>
+          ? customer
+          : customer is Map
+          ? Map<String, dynamic>.from(customer)
+          : null,
+    );
+    if (identities.isNotEmpty) {
+      await _prefs.setString('user_identities_key', jsonEncode(identities));
+    }
+
+    final defaultIdentityId = response['default_identity_id'];
+    if (defaultIdentityId != null) {
+      await _prefs.setString(
+        'active_identity_id_key',
+        defaultIdentityId.toString(),
+      );
+    }
+
+    await _prefs.setBool(AppConstants.keepSignedInKey, keepSignedIn);
+  }
+
+  Future<Map<String, dynamic>> checkAvailability({
+    String? email,
+    String? phone,
+    String? username,
   }) async {
     try {
->>>>>>> Stashed changes
+      final response = await _remoteDataSource.checkAvailability(
+        email: email,
+        phone: phone,
+        username: username,
+      );
+      return response;
+    } catch (e) {
+      if (e is DioException) {
+        throw Exception(_handleDioError(e));
+      }
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    try {
       final response = await _remoteDataSource.submitLogin(email, password);
 
       if (response['status'] == 'success' || response['success'] == true) {
-        // Adjust based on actual API response
-        final token = response['token'];
-        if (token != null) {
-          await _prefs.setString(AppConstants.tokenKey, token);
-        }
-<<<<<<< Updated upstream
-        // Save user data if available
-        // await _prefs.setString(AppConstants.userKey, jsonEncode(response['user']));
-=======
-
-        final customer = response['customer'];
-        if (customer != null) {
-          await _prefs.setString(AppConstants.userKey, jsonEncode(customer));
-        }
-
-        final identities = response['identities'];
-        if (identities != null) {
-          await _prefs.setString('user_identities_key', jsonEncode(identities));
-        }
-
-        final defaultIdentityId = response['default_identity_id'];
-        if (defaultIdentityId != null) {
-          await _prefs.setString(
-            'active_identity_id_key',
-            defaultIdentityId.toString(),
-          );
-        }
-        await _prefs.setBool(AppConstants.keepSignedInKey, keepSignedIn);
+        await _persistSessionPayload(response, keepSignedIn: keepSignedIn);
         return response;
       } else if (response['status'] == 'needs_phone_verification') {
         return response;
->>>>>>> Stashed changes
       } else {
         throw Exception(response['message'] ?? 'Login failed');
       }
@@ -70,43 +120,12 @@ class AuthRepository {
     }
   }
 
-<<<<<<< Updated upstream
-  Future<void> signup(Map<String, dynamic> data) async {
-=======
-  Future<Map<String, dynamic>> loginWithFirebase(
-    String idToken, {
-    bool keepSignedIn = true,
-  }) async {
+  Future<Map<String, dynamic>> loginWithFirebase(String idToken) async {
     try {
       final response = await _remoteDataSource.loginFirebase(idToken);
 
       if (response['status'] == 'success') {
-        final token = response['token'];
-        if (token != null) {
-          await _secureStorage.write(
-            key: AppConstants.secureTokenKey,
-            value: token,
-          );
-        }
-
-        final customer = response['customer'];
-        if (customer != null) {
-          await _prefs.setString(AppConstants.userKey, jsonEncode(customer));
-        }
-
-        final identities = response['identities'];
-        if (identities != null) {
-          await _prefs.setString('user_identities_key', jsonEncode(identities));
-        }
-
-        final defaultIdentityId = response['default_identity_id'];
-        if (defaultIdentityId != null) {
-          await _prefs.setString(
-            'active_identity_id_key',
-            defaultIdentityId.toString(),
-          );
-        }
-        await _prefs.setBool(AppConstants.keepSignedInKey, keepSignedIn);
+        await _persistSessionPayload(response, keepSignedIn: keepSignedIn);
         return response;
       } else if (response['status'] == 'user_not_found') {
         return response;
@@ -129,7 +148,6 @@ class AuthRepository {
     required String lname,
     required String email,
     String? dateOfBirth,
-    bool keepSignedIn = true,
   }) async {
     try {
       final response = await _remoteDataSource.signupFirebase(
@@ -141,32 +159,7 @@ class AuthRepository {
       );
 
       if (response['status'] == 'success') {
-        final token = response['token'];
-        if (token != null) {
-          await _secureStorage.write(
-            key: AppConstants.secureTokenKey,
-            value: token,
-          );
-        }
-
-        final customer = response['customer'];
-        if (customer != null) {
-          await _prefs.setString(AppConstants.userKey, jsonEncode(customer));
-        }
-
-        final identities = response['identities'];
-        if (identities != null) {
-          await _prefs.setString('user_identities_key', jsonEncode(identities));
-        }
-
-        final defaultIdentityId = response['default_identity_id'];
-        if (defaultIdentityId != null) {
-          await _prefs.setString(
-            'active_identity_id_key',
-            defaultIdentityId.toString(),
-          );
-        }
-        await _prefs.setBool(AppConstants.keepSignedInKey, keepSignedIn);
+        await _persistSessionPayload(response, keepSignedIn: keepSignedIn);
         return response; // RETURN RESPONSE
       } else {
         throw Exception(response['message'] ?? 'Signup failed');
@@ -179,24 +172,11 @@ class AuthRepository {
     }
   }
 
-  Future<Map<String, dynamic>> signup(
-    Map<String, dynamic> data, {
-    bool keepSignedIn = true,
-  }) async {
->>>>>>> Stashed changes
+  Future<Map<String, dynamic>> signup(Map<String, dynamic> data) async {
     try {
       final response = await _remoteDataSource.signup(data);
 
       if (response['success'] == true) {
-<<<<<<< Updated upstream
-        // Signup successful, usually sends verification email or logs in
-        // Check if data contains token/user for auto-login
-        /*
-         if (response['data'] != null) {
-            // Auto login logic if API supported returning token on signup
-         }
-         */
-=======
         final token = response['token'];
         if (token != null) {
           await _secureStorage.write(
@@ -209,9 +189,7 @@ class AuthRepository {
         if (customer != null) {
           await _prefs.setString(AppConstants.userKey, jsonEncode(customer));
         }
-        await _prefs.setBool(AppConstants.keepSignedInKey, keepSignedIn);
         return response;
->>>>>>> Stashed changes
       } else {
         throw Exception(response['message'] ?? 'Signup failed');
       }
@@ -223,17 +201,11 @@ class AuthRepository {
     }
   }
 
-<<<<<<< Updated upstream
-  Future<void> logout() async {
-    await _prefs.remove(AppConstants.tokenKey);
-    await _prefs.remove(AppConstants.userKey);
-=======
   Future<Map<String, dynamic>> setupEmail({
     required String email,
     required String fname,
     required String lname,
     required String token,
-    bool keepSignedIn = true,
   }) async {
     try {
       final response = await _remoteDataSource.setupEmail(
@@ -244,19 +216,7 @@ class AuthRepository {
       );
 
       if (response['status'] == 'success') {
-        final finalToken = response['token'];
-        if (finalToken != null) {
-          await _secureStorage.write(
-            key: AppConstants.secureTokenKey,
-            value: finalToken,
-          );
-        }
-
-        final customer = response['customer'];
-        if (customer != null) {
-          await _prefs.setString(AppConstants.userKey, jsonEncode(customer));
-        }
-        await _prefs.setBool(AppConstants.keepSignedInKey, keepSignedIn);
+        await _persistSessionPayload(response, keepSignedIn: keepSignedIn);
         return response;
       } else {
         throw Exception(response['message'] ?? 'Email setup failed');
@@ -270,7 +230,6 @@ class AuthRepository {
   Future<Map<String, dynamic>> verifyPhoneLink({
     required String idToken,
     required String token,
-    bool keepSignedIn = true,
   }) async {
     try {
       final response = await _remoteDataSource.verifyPhoneLink(
@@ -279,19 +238,7 @@ class AuthRepository {
       );
 
       if (response['status'] == 'success') {
-        final finalToken = response['token'];
-        if (finalToken != null) {
-          await _secureStorage.write(
-            key: AppConstants.secureTokenKey,
-            value: finalToken,
-          );
-        }
-
-        final customer = response['customer'];
-        if (customer != null) {
-          await _prefs.setString(AppConstants.userKey, jsonEncode(customer));
-        }
-        await _prefs.setBool(AppConstants.keepSignedInKey, keepSignedIn);
+        await _persistSessionPayload(response, keepSignedIn: keepSignedIn);
         return response;
       } else {
         throw Exception(response['message'] ?? 'Phone verification failed');
@@ -322,49 +269,20 @@ class AuthRepository {
     }
   }
 
-  Future<Map<String, dynamic>> requestPasswordResetCode(String email) async {
-    try {
-      return await _remoteDataSource.requestPasswordResetCode(email);
-    } catch (e) {
-      if (e is DioException) throw Exception(_handleDioError(e));
-      rethrow;
-    }
-  }
-
-  Future<Map<String, dynamic>> resetPassword({
-    required String email,
-    required String code,
-    required String newPassword,
-    required String newPasswordConfirmation,
-  }) async {
-    try {
-      return await _remoteDataSource.resetPassword(
-        email: email,
-        code: code,
-        newPassword: newPassword,
-        newPasswordConfirmation: newPasswordConfirmation,
-      );
-    } catch (e) {
-      if (e is DioException) throw Exception(_handleDioError(e));
-      rethrow;
-    }
-  }
-
   Future<void> logout() async {
-    await _secureStorage.delete(key: AppConstants.tokenKey);
     await _secureStorage.delete(key: AppConstants.secureTokenKey);
     await _prefs.remove(AppConstants.userKey);
-    await _prefs.remove(AppConstants.tokenKey);
-    await _prefs.remove(AppConstants.userProfilesKey);
-    await _prefs.remove(AppConstants.activeProfileIdKey);
     await _prefs.remove('user_identities_key');
     await _prefs.remove('active_identity_id_key');
-    await _prefs.remove(AppConstants.keepSignedInKey);
->>>>>>> Stashed changes
   }
 
-  bool isAuthenticated() {
-    return _prefs.containsKey(AppConstants.tokenKey);
+  Future<bool> isAuthenticated() async {
+    final token = await _secureStorage.read(key: AppConstants.secureTokenKey);
+    return token != null;
+  }
+
+  Future<String?> getToken() async {
+    return await _secureStorage.read(key: AppConstants.secureTokenKey);
   }
 
   String _handleDioError(DioException error) {

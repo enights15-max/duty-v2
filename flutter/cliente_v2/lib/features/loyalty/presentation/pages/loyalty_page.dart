@@ -15,6 +15,7 @@ class LoyaltyPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = context.dutyTheme;
     ref.listen<LoyaltyRedeemState>(loyaltyRedeemProvider, (previous, next) {
       final messenger = ScaffoldMessenger.maybeOf(context);
       if (messenger == null) {
@@ -24,7 +25,12 @@ class LoyaltyPage extends ConsumerWidget {
       if (next.error != null && next.error != previous?.error) {
         messenger
           ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(next.error!)));
+          ..showSnackBar(
+            SnackBar(
+              content: Text(next.error!),
+              backgroundColor: palette.danger,
+            ),
+          );
       }
     });
 
@@ -52,7 +58,7 @@ class LoyaltyPage extends ConsumerWidget {
             redemptionsAsync.isLoading);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF130E1C),
+      backgroundColor: palette.background,
       body: Stack(
         children: [
           const _LoyaltyBackground(),
@@ -82,7 +88,7 @@ class LoyaltyPage extends ConsumerWidget {
                             Text(
                               'Duty Rewards',
                               style: GoogleFonts.splineSans(
-                                color: Colors.white,
+                                color: palette.textPrimary,
                                 fontSize: 24,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -90,7 +96,7 @@ class LoyaltyPage extends ConsumerWidget {
                             Text(
                               'Puntos, bonos internos y perks canjeables dentro de Duty.',
                               style: GoogleFonts.splineSans(
-                                color: Colors.white70,
+                                color: palette.textSecondary,
                                 fontSize: 12,
                               ),
                             ),
@@ -109,6 +115,8 @@ class LoyaltyPage extends ConsumerWidget {
                       ? const Center(child: CircularProgressIndicator())
                       : RefreshIndicator(
                           onRefresh: () => _refresh(ref),
+                          color: palette.primary,
+                          backgroundColor: palette.surface,
                           child: ListView(
                             physics: const AlwaysScrollableScrollPhysics(),
                             padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
@@ -156,7 +164,10 @@ class LoyaltyPage extends ConsumerWidget {
                                   ScaffoldMessenger.of(context)
                                     ..hideCurrentSnackBar()
                                     ..showSnackBar(
-                                      SnackBar(content: Text(details)),
+                                      SnackBar(
+                                        content: Text(details),
+                                        backgroundColor: palette.success,
+                                      ),
                                     );
                                 },
                               ),
@@ -213,22 +224,20 @@ class _LoyaltyBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Stack(
       children: [
         Positioned(
           top: -140,
           right: -50,
-          child: _BlurOrb(
-            size: 260,
-            color: const Color(0xFFFFC857).withValues(alpha: 0.28),
-          ),
+          child: _BlurOrb(size: 260, color: kWarmGold.withValues(alpha: 0.18)),
         ),
         Positioned(
           top: 120,
           left: -80,
           child: _BlurOrb(
             size: 220,
-            color: const Color(0xFF00D1B2).withValues(alpha: 0.18),
+            color: palette.success.withValues(alpha: 0.16),
           ),
         ),
         Positioned(
@@ -236,7 +245,7 @@ class _LoyaltyBackground extends StatelessWidget {
           right: -40,
           child: _BlurOrb(
             size: 260,
-            color: kPrimaryColor.withValues(alpha: 0.2),
+            color: palette.primaryGlow.withValues(alpha: 0.2),
           ),
         ),
       ],
@@ -275,6 +284,7 @@ class _GlassCircleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return InkWell(
       borderRadius: BorderRadius.circular(999),
       onTap: onTap,
@@ -283,10 +293,10 @@ class _GlassCircleButton extends StatelessWidget {
         height: 44,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.06),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          color: palette.surfaceAlt.withValues(alpha: 0.88),
+          border: Border.all(color: palette.border),
         ),
-        child: Icon(icon, color: Colors.white),
+        child: Icon(icon, color: palette.textPrimary),
       ),
     );
   }
@@ -307,6 +317,7 @@ class _SummaryHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     final currentPoints = summary?.currentPoints ?? 0;
     final nextReward = rewards
         .where((reward) => reward.pointsCost > currentPoints)
@@ -323,15 +334,19 @@ class _SummaryHero extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF201428), Color(0xFF281A36), Color(0xFF40253A)],
+        gradient: LinearGradient(
+          colors: [
+            palette.heroGradientStart,
+            palette.backgroundAlt,
+            palette.primarySurface,
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: palette.border),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFFFC857).withValues(alpha: 0.15),
+            color: palette.primaryGlow.withValues(alpha: 0.16),
             blurRadius: 40,
             offset: const Offset(0, 18),
           ),
@@ -349,12 +364,12 @@ class _SummaryHero extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
-                  color: const Color(0xFFFFC857).withValues(alpha: 0.14),
+                  color: kWarmGold.withValues(alpha: 0.14),
                 ),
                 child: Text(
                   'Saldo loyalty',
                   style: GoogleFonts.splineSans(
-                    color: const Color(0xFFFFD878),
+                    color: kWarmGold,
                     fontWeight: FontWeight.w700,
                     fontSize: 11,
                   ),
@@ -373,7 +388,7 @@ class _SummaryHero extends StatelessWidget {
           Text(
             _points(summary?.currentPoints ?? 0),
             style: GoogleFonts.splineSans(
-              color: Colors.white,
+              color: palette.textPrimary,
               fontSize: 46,
               fontWeight: FontWeight.w700,
               height: 0.96,
@@ -387,7 +402,7 @@ class _SummaryHero extends StatelessWidget {
                 ? 'Te faltan ${_points(gap)} para desbloquear ${nextReward.title}.'
                 : 'Ya puedes reclamar cualquier recompensa activa del catalogo.',
             style: GoogleFonts.splineSans(
-              color: Colors.white70,
+              color: palette.textSecondary,
               fontSize: 14,
               height: 1.4,
             ),
@@ -400,17 +415,17 @@ class _SummaryHero extends StatelessWidget {
               _MiniMetric(
                 label: 'Disponibles ahora',
                 value: '${summary?.availableRewards ?? 0} rewards',
-                accent: const Color(0xFFFFC857),
+                accent: kWarmGold,
               ),
               const _MiniMetric(
                 label: 'Uso recomendado',
                 value: 'Checkout mixto',
-                accent: Color(0xFF00D1B2),
+                accent: kSuccessColor,
               ),
               const _MiniMetric(
                 label: 'Acreditacion',
                 value: 'Bono interno',
-                accent: Color(0xFF7DE2D1),
+                accent: kInfoColor,
               ),
             ],
           ),
@@ -433,13 +448,14 @@ class _MiniMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Container(
       width: 148,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        color: Colors.white.withValues(alpha: 0.04),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: palette.surface.withValues(alpha: 0.58),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -459,7 +475,7 @@ class _MiniMetric extends StatelessWidget {
                 child: Text(
                   label,
                   style: GoogleFonts.splineSans(
-                    color: Colors.white54,
+                    color: palette.textMuted,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -471,7 +487,7 @@ class _MiniMetric extends StatelessWidget {
           Text(
             value,
             style: GoogleFonts.splineSans(
-              color: Colors.white,
+              color: palette.textPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -496,7 +512,7 @@ class _StatStrip extends StatelessWidget {
             label: 'Lifetime',
             value: _points(summary?.lifetimePoints ?? 0),
             icon: Icons.ssid_chart_rounded,
-            accent: const Color(0xFF7DE2D1),
+            accent: kInfoColor,
           ),
         ),
         const SizedBox(width: 12),
@@ -505,7 +521,7 @@ class _StatStrip extends StatelessWidget {
             label: 'Canjeados',
             value: _points(summary?.redeemedPoints ?? 0),
             icon: Icons.redeem_rounded,
-            accent: const Color(0xFFFF8FAB),
+            accent: kDustRose,
           ),
         ),
         const SizedBox(width: 12),
@@ -514,7 +530,7 @@ class _StatStrip extends StatelessWidget {
             label: 'Listos',
             value: '${summary?.availableRewards ?? 0}',
             icon: Icons.local_offer_rounded,
-            accent: const Color(0xFFFFC857),
+            accent: kWarmGold,
           ),
         ),
       ],
@@ -537,12 +553,13 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        color: Colors.white.withValues(alpha: 0.045),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: palette.surfaceAlt,
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -552,7 +569,7 @@ class _StatCard extends StatelessWidget {
           Text(
             value,
             style: GoogleFonts.splineSans(
-              color: Colors.white,
+              color: palette.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.w700,
             ),
@@ -560,7 +577,10 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: GoogleFonts.splineSans(color: Colors.white60, fontSize: 12),
+            style: GoogleFonts.splineSans(
+              color: palette.textMuted,
+              fontSize: 12,
+            ),
           ),
         ],
       ),
@@ -573,6 +593,7 @@ class _EarnWaysCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     const items = [
       (
         icon: Icons.confirmation_number_rounded,
@@ -599,9 +620,9 @@ class _EarnWaysCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF17111F),
+        color: palette.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -609,7 +630,7 @@ class _EarnWaysCard extends StatelessWidget {
           Text(
             'Como se gana hoy',
             style: GoogleFonts.splineSans(
-              color: Colors.white,
+              color: palette.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.w700,
             ),
@@ -618,7 +639,7 @@ class _EarnWaysCard extends StatelessWidget {
           Text(
             'El programa esta separado del wallet real: primero acumulas puntos, luego los conviertes en bono o perks.',
             style: GoogleFonts.splineSans(
-              color: Colors.white60,
+              color: palette.textSecondary,
               fontSize: 13,
               height: 1.45,
             ),
@@ -634,10 +655,10 @@ class _EarnWaysCard extends StatelessWidget {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
+                      color: palette.surfaceAlt,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: Icon(item.icon, color: const Color(0xFFFFC857)),
+                    child: Icon(item.icon, color: kWarmGold),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -647,7 +668,7 @@ class _EarnWaysCard extends StatelessWidget {
                         Text(
                           item.title,
                           style: GoogleFonts.splineSans(
-                            color: Colors.white,
+                            color: palette.textPrimary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -655,7 +676,7 @@ class _EarnWaysCard extends StatelessWidget {
                         Text(
                           item.subtitle,
                           style: GoogleFonts.splineSans(
-                            color: Colors.white60,
+                            color: palette.textSecondary,
                             fontSize: 12,
                             height: 1.45,
                           ),
@@ -686,13 +707,14 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           eyebrow,
           style: GoogleFonts.splineSans(
-            color: const Color(0xFFFFC857),
+            color: kWarmGold,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.8,
             fontSize: 11,
@@ -702,7 +724,7 @@ class _SectionHeader extends StatelessWidget {
         Text(
           title,
           style: GoogleFonts.splineSans(
-            color: Colors.white,
+            color: palette.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.w700,
             height: 1.1,
@@ -712,7 +734,7 @@ class _SectionHeader extends StatelessWidget {
         Text(
           subtitle,
           style: GoogleFonts.splineSans(
-            color: Colors.white60,
+            color: palette.textSecondary,
             fontSize: 13,
             height: 1.45,
           ),
@@ -741,10 +763,11 @@ class _RewardsShelf extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     if (isLoading && rewards.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 310,
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: CircularProgressIndicator(color: palette.primary)),
       );
     }
 
@@ -781,18 +804,20 @@ class _RewardsShelf extends StatelessWidget {
               borderRadius: BorderRadius.circular(28),
               gradient: LinearGradient(
                 colors: reward.isFeatured
-                    ? [const Color(0xFFFFC857), const Color(0xFFFF8A3D)]
-                    : [const Color(0xFF20182B), const Color(0xFF312042)],
+                    ? [kWarmGold, kEditorialBlush]
+                    : [palette.surface, palette.surfaceAlt],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
+              border: Border.all(
+                color: reward.isFeatured
+                    ? kWarmGold.withValues(alpha: 0.25)
+                    : palette.border,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color:
-                      (reward.isFeatured
-                              ? const Color(0xFFFFC857)
-                              : kPrimaryColor)
-                          .withValues(alpha: 0.18),
+                  color: (reward.isFeatured ? kWarmGold : palette.primaryGlow)
+                      .withValues(alpha: 0.18),
                   blurRadius: 28,
                   offset: const Offset(0, 16),
                 ),
@@ -811,31 +836,26 @@ class _RewardsShelf extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(999),
                         color: reward.isFeatured
-                            ? Colors.black.withValues(alpha: 0.18)
-                            : Colors.white.withValues(alpha: 0.07),
+                            ? palette.textPrimary.withValues(alpha: 0.08)
+                            : palette.surfaceMuted,
                       ),
                       child: Text(
                         reward.rewardTypeLabel,
                         style: GoogleFonts.splineSans(
                           color: reward.isFeatured
-                              ? const Color(0xFF2D1800)
-                              : Colors.white70,
+                              ? kGraphiteWine
+                              : palette.textSecondary,
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                     const Spacer(),
-                    Icon(
-                      switch (reward.rewardType) {
-                        'bonus_credit' => Icons.bolt_rounded,
-                        'event_coupon' => Icons.confirmation_number_rounded,
-                        _ => Icons.card_giftcard_rounded,
-                      },
-                      color: reward.isFeatured
-                          ? const Color(0xFF2D1800)
-                          : const Color(0xFFFFC857),
-                    ),
+                    Icon(switch (reward.rewardType) {
+                      'bonus_credit' => Icons.bolt_rounded,
+                      'event_coupon' => Icons.confirmation_number_rounded,
+                      _ => Icons.card_giftcard_rounded,
+                    }, color: reward.isFeatured ? kGraphiteWine : kWarmGold),
                   ],
                 ),
                 const SizedBox(height: 18),
@@ -845,8 +865,8 @@ class _RewardsShelf extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.splineSans(
                     color: reward.isFeatured
-                        ? const Color(0xFF2D1800)
-                        : Colors.white,
+                        ? kGraphiteWine
+                        : palette.textPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     height: 1.05,
@@ -861,8 +881,8 @@ class _RewardsShelf extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.splineSans(
                     color: reward.isFeatured
-                        ? const Color(0xFF55310C)
-                        : Colors.white70,
+                        ? kGraphiteWine.withValues(alpha: 0.78)
+                        : palette.textSecondary,
                     fontSize: 13,
                     height: 1,
                   ),
@@ -872,8 +892,8 @@ class _RewardsShelf extends StatelessWidget {
                   '${_points(reward.pointsCost)} pts',
                   style: GoogleFonts.splineSans(
                     color: reward.isFeatured
-                        ? const Color(0xFF2D1800)
-                        : Colors.white,
+                        ? kGraphiteWine
+                        : palette.textPrimary,
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
                   ),
@@ -889,8 +909,8 @@ class _RewardsShelf extends StatelessWidget {
                           'Acredita RD\$${reward.bonusAmount.toStringAsFixed(2)} al bono interno',
                           style: GoogleFonts.splineSans(
                             color: reward.isFeatured
-                                ? const Color(0xFF55310C)
-                                : Colors.white70,
+                                ? kGraphiteWine.withValues(alpha: 0.78)
+                                : palette.textSecondary,
                             fontSize: 12,
                           ),
                         ),
@@ -901,8 +921,8 @@ class _RewardsShelf extends StatelessWidget {
                               'Expira ${reward.bonusExpiresInDays} dias despues del canje',
                               style: GoogleFonts.splineSans(
                                 color: reward.isFeatured
-                                    ? const Color(0xFF55310C)
-                                    : Colors.white60,
+                                    ? kGraphiteWine.withValues(alpha: 0.72)
+                                    : palette.textMuted,
                                 fontSize: 11,
                               ),
                             ),
@@ -917,8 +937,8 @@ class _RewardsShelf extends StatelessWidget {
                       _eventCouponDescription(reward),
                       style: GoogleFonts.splineSans(
                         color: reward.isFeatured
-                            ? const Color(0xFF55310C)
-                            : Colors.white70,
+                            ? kGraphiteWine.withValues(alpha: 0.78)
+                            : palette.textSecondary,
                         fontSize: 12,
                       ),
                     ),
@@ -932,15 +952,13 @@ class _RewardsShelf extends StatelessWidget {
                         : () => onRedeem(reward),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: reward.isFeatured
-                          ? const Color(0xFF2D1800)
-                          : Colors.white,
+                          ? kGraphiteWine
+                          : palette.primary,
                       foregroundColor: reward.isFeatured
-                          ? Colors.white
-                          : const Color(0xFF1E1427),
-                      disabledBackgroundColor: Colors.white.withValues(
-                        alpha: 0.16,
-                      ),
-                      disabledForegroundColor: Colors.white38,
+                          ? palette.onPrimary
+                          : palette.onPrimary,
+                      disabledBackgroundColor: palette.surfaceMuted,
+                      disabledForegroundColor: palette.textMuted,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -985,6 +1003,7 @@ class _HistoryPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     if (isLoading && items.isEmpty) {
       return const _PanelLoader();
     }
@@ -1007,8 +1026,8 @@ class _HistoryPanel extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: Colors.white.withValues(alpha: 0.04),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+        color: palette.surface,
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         children: items
@@ -1027,9 +1046,8 @@ class _HistoryItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = item.isCredit
-        ? const Color(0xFF00D1B2)
-        : const Color(0xFFFF8FAB);
+    final palette = context.dutyTheme;
+    final accent = item.isCredit ? palette.success : kDustRose;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -1057,7 +1075,7 @@ class _HistoryItemTile extends StatelessWidget {
                 Text(
                   item.title,
                   style: GoogleFonts.splineSans(
-                    color: Colors.white,
+                    color: palette.textPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -1066,7 +1084,7 @@ class _HistoryItemTile extends StatelessWidget {
                   Text(
                     item.subtitle!,
                     style: GoogleFonts.splineSans(
-                      color: Colors.white60,
+                      color: palette.textSecondary,
                       fontSize: 12,
                     ),
                   ),
@@ -1078,7 +1096,7 @@ class _HistoryItemTile extends StatelessWidget {
                       'd MMM, h:mm a',
                     ).format(item.createdAt!.toLocal()),
                     style: GoogleFonts.splineSans(
-                      color: Colors.white38,
+                      color: palette.textMuted,
                       fontSize: 11,
                     ),
                   ),
@@ -1102,7 +1120,7 @@ class _HistoryItemTile extends StatelessWidget {
               Text(
                 'Saldo ${_points(item.balanceAfter)}',
                 style: GoogleFonts.splineSans(
-                  color: Colors.white54,
+                  color: palette.textMuted,
                   fontSize: 11,
                 ),
               ),
@@ -1127,6 +1145,7 @@ class _RedemptionsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     if (isLoading && items.isEmpty) {
       return const _PanelLoader();
     }
@@ -1146,9 +1165,7 @@ class _RedemptionsPanel extends StatelessWidget {
 
     return Column(
       children: items.take(5).map((item) {
-        final accent = item.isCompleted
-            ? const Color(0xFF00D1B2)
-            : const Color(0xFFFFC857);
+        final accent = item.isCompleted ? palette.success : kWarmGold;
         final code = item.claimCode;
         final instructions = item.instructions;
         final expiry = item.expiresAt;
@@ -1157,8 +1174,8 @@ class _RedemptionsPanel extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(22),
-            color: Colors.white.withValues(alpha: 0.04),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+            color: palette.surface,
+            border: Border.all(color: palette.border),
           ),
           child: Row(
             children: [
@@ -1179,7 +1196,7 @@ class _RedemptionsPanel extends StatelessWidget {
                     Text(
                       item.title,
                       style: GoogleFonts.splineSans(
-                        color: Colors.white,
+                        color: palette.textPrimary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -1187,7 +1204,7 @@ class _RedemptionsPanel extends StatelessWidget {
                     Text(
                       '${item.statusLabel} - ${_points(item.pointsCost)} pts',
                       style: GoogleFonts.splineSans(
-                        color: Colors.white60,
+                        color: palette.textSecondary,
                         fontSize: 12,
                       ),
                     ),
@@ -1218,7 +1235,7 @@ class _RedemptionsPanel extends StatelessWidget {
                       Text(
                         'Bono acreditado: RD\$${item.bonusAmount.toStringAsFixed(2)}',
                         style: GoogleFonts.splineSans(
-                          color: Colors.white70,
+                          color: palette.textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -1228,7 +1245,7 @@ class _RedemptionsPanel extends StatelessWidget {
                       Text(
                         instructions,
                         style: GoogleFonts.splineSans(
-                          color: Colors.white60,
+                          color: palette.textSecondary,
                           fontSize: 12,
                           height: 1.35,
                         ),
@@ -1239,7 +1256,7 @@ class _RedemptionsPanel extends StatelessWidget {
                       Text(
                         'Expira ${DateFormat('d MMM yyyy').format(expiry.toLocal())}',
                         style: GoogleFonts.splineSans(
-                          color: Colors.white38,
+                          color: palette.textMuted,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1255,7 +1272,7 @@ class _RedemptionsPanel extends StatelessWidget {
                       .toLocal(),
                 ),
                 style: GoogleFonts.splineSans(
-                  color: Colors.white38,
+                  color: palette.textMuted,
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1294,13 +1311,14 @@ class _PanelLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Container(
       height: 120,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: Colors.white.withValues(alpha: 0.04),
+        color: palette.surface,
       ),
-      child: const Center(child: CircularProgressIndicator()),
+      child: Center(child: CircularProgressIndicator(color: palette.primary)),
     );
   }
 }
@@ -1313,12 +1331,13 @@ class _EmptyStateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: Colors.white.withValues(alpha: 0.04),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+        color: palette.surface,
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1326,7 +1345,7 @@ class _EmptyStateCard extends StatelessWidget {
           Text(
             title,
             style: GoogleFonts.splineSans(
-              color: Colors.white,
+              color: palette.textPrimary,
               fontWeight: FontWeight.w700,
               fontSize: 16,
             ),
@@ -1335,7 +1354,7 @@ class _EmptyStateCard extends StatelessWidget {
           Text(
             subtitle,
             style: GoogleFonts.splineSans(
-              color: Colors.white60,
+              color: palette.textSecondary,
               fontSize: 13,
               height: 1.45,
             ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_status_card.dart';
 
@@ -115,9 +116,10 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    final palette = context.dutyTheme;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: palette.primaryDeep),
+    );
   }
 
   InputDecoration _inputDecoration({
@@ -125,10 +127,11 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     required IconData icon,
     Widget? suffixIcon,
   }) {
+    final palette = context.dutyTheme;
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
-      prefixIcon: Icon(icon, color: Colors.white.withValues(alpha: 0.5)),
+      labelStyle: TextStyle(color: palette.textMuted),
+      prefixIcon: Icon(icon, color: palette.textMuted),
       suffixIcon: suffixIcon,
       border: InputBorder.none,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -136,29 +139,28 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   }
 
   Widget _inputShell({required Widget child}) {
+    final palette = context.dutyTheme;
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E2C).withValues(alpha: 0.5),
+        color: palette.surfaceAlt.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: palette.border),
       ),
       child: child,
     );
   }
 
   Widget _stepPill(int number, String label, bool active) {
+    final palette = context.dutyTheme;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: active
-            ? const Color(0xFF6200EE).withValues(alpha: 0.22)
-            : Colors.white.withValues(alpha: 0.04),
+            ? palette.primarySurface
+            : palette.surface.withValues(alpha: 0.82),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: active
-              ? const Color(0xFFA855F7).withValues(alpha: 0.8)
-              : Colors.white.withValues(alpha: 0.08),
-        ),
+        border: Border.all(color: active ? palette.primary : palette.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -168,15 +170,13 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             height: 24,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: active
-                  ? const Color(0xFF6200EE)
-                  : Colors.white.withValues(alpha: 0.08),
+              color: active ? palette.primary : palette.surfaceMuted,
             ),
             alignment: Alignment.center,
             child: Text(
               '$number',
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: active ? palette.onPrimary : palette.textSecondary,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
@@ -186,7 +186,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: active ? 0.95 : 0.55),
+              color: active ? palette.textPrimary : palette.textMuted,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -197,6 +197,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     ref.listen<AsyncValue<void>>(authControllerProvider, (previous, next) {
       if (next.hasError && mounted) {
         _showMessage(next.error.toString().replaceFirst('Exception: ', ''));
@@ -206,13 +207,13 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     final authState = ref.watch(authControllerProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A),
+      backgroundColor: palette.background,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: RadialGradient(
             center: Alignment.topRight,
             radius: 1.5,
-            colors: [Color(0xFF2A1B3D), Color(0xFF0F0F1A)],
+            colors: [palette.heroGradientStart, palette.background],
           ),
         ),
         child: SafeArea(
@@ -228,9 +229,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                       children: [
                         IconButton(
                           onPressed: () => context.pop(),
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.arrow_back,
-                            color: Colors.white,
+                            color: palette.textPrimary,
                           ),
                         ),
                         const Spacer(),
@@ -246,7 +247,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                           return const Icon(
                             Icons.confirmation_number,
                             size: 40,
-                            color: Color(0xFF6200EE),
+                            color: kPrimaryColor,
                           );
                         },
                       ),
@@ -258,7 +259,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                           : 'Recover account access',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.outfit(
-                        color: Colors.white,
+                        color: palette.textPrimary,
                         fontSize: 34,
                         fontWeight: FontWeight.w700,
                         height: 1.05,
@@ -273,7 +274,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                           : 'Everything is ready. Head back to login and sign in with your new password.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
-                        color: Colors.white.withValues(alpha: 0.62),
+                        color: palette.textSecondary,
                         fontSize: 15,
                         height: 1.55,
                       ),
@@ -296,8 +297,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                           ? 'Open the latest email from Duty, grab the 6-digit code, and set your new password here.'
                           : 'This keeps account recovery simple without taking you out of the app.',
                       accentColor: _step == _ForgotPasswordStep.success
-                          ? const Color(0xFF22C55E)
-                          : const Color(0xFF8655F6),
+                          ? palette.success
+                          : palette.primary,
                     ),
                     const SizedBox(height: 28),
                     Wrap(
@@ -326,11 +327,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                     Container(
                       padding: const EdgeInsets.all(22),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.04),
+                        color: palette.surface,
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.08),
-                        ),
+                        border: Border.all(color: palette.border),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -341,7 +340,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                               enabled: _step != _ForgotPasswordStep.success,
                               keyboardType: TextInputType.emailAddress,
                               autofillHints: const [AutofillHints.email],
-                              style: const TextStyle(color: Colors.white),
+                              style: TextStyle(color: palette.textPrimary),
                               decoration: _inputDecoration(
                                 label: 'Email address',
                                 icon: Icons.alternate_email,
@@ -357,7 +356,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                                 enabled:
                                     _step == _ForgotPasswordStep.resetPassword,
                                 keyboardType: TextInputType.number,
-                                style: const TextStyle(color: Colors.white),
+                                style: TextStyle(color: palette.textPrimary),
                                 decoration: _inputDecoration(
                                   label: '6-digit code',
                                   icon: Icons.pin_outlined,
@@ -371,7 +370,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                                 enabled:
                                     _step == _ForgotPasswordStep.resetPassword,
                                 obscureText: _obscureNewPassword,
-                                style: const TextStyle(color: Colors.white),
+                                style: TextStyle(color: palette.textPrimary),
                                 decoration: _inputDecoration(
                                   label: 'New password',
                                   icon: Icons.lock_outline,
@@ -386,9 +385,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                                       _obscureNewPassword
                                           ? Icons.visibility_off
                                           : Icons.visibility,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.5,
-                                      ),
+                                      color: palette.textMuted,
                                     ),
                                   ),
                                 ),
@@ -401,7 +398,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                                 enabled:
                                     _step == _ForgotPasswordStep.resetPassword,
                                 obscureText: _obscureConfirmPassword,
-                                style: const TextStyle(color: Colors.white),
+                                style: TextStyle(color: palette.textPrimary),
                                 decoration: _inputDecoration(
                                   label: 'Confirm new password',
                                   icon: Icons.verified_user_outlined,
@@ -416,9 +413,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                                       _obscureConfirmPassword
                                           ? Icons.visibility_off
                                           : Icons.visibility,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.5,
-                                      ),
+                                      color: palette.textMuted,
                                     ),
                                   ),
                                 ),
@@ -432,8 +427,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                                   ? null
                                   : _requestCode,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.black,
+                                backgroundColor: palette.primary,
+                                foregroundColor: palette.onPrimary,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 18,
                                 ),
@@ -443,12 +438,12 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                                 elevation: 0,
                               ),
                               child: authState.isLoading
-                                  ? const SizedBox(
+                                  ? SizedBox(
                                       height: 20,
                                       width: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: Colors.black,
+                                        color: palette.onPrimary,
                                       ),
                                     )
                                   : Text(
@@ -465,8 +460,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                                   ? null
                                   : _resetPassword,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.black,
+                                backgroundColor: palette.primary,
+                                foregroundColor: palette.onPrimary,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 18,
                                 ),
@@ -476,12 +471,12 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                                 elevation: 0,
                               ),
                               child: authState.isLoading
-                                  ? const SizedBox(
+                                  ? SizedBox(
                                       height: 20,
                                       width: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: Colors.black,
+                                        color: palette.onPrimary,
                                       ),
                                     )
                                   : Text(
@@ -497,9 +492,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                               onPressed: authState.isLoading
                                   ? null
                                   : _requestCode,
-                              child: const Text(
+                              child: Text(
                                 'Resend code',
-                                style: TextStyle(color: Color(0xFF6200EE)),
+                                style: TextStyle(color: palette.primary),
                               ),
                             ),
                           ],
@@ -507,8 +502,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                             ElevatedButton(
                               onPressed: () => context.go('/login'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.black,
+                                backgroundColor: palette.primary,
+                                foregroundColor: palette.onPrimary,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 18,
                                 ),

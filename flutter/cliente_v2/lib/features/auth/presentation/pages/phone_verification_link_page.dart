@@ -1,26 +1,18 @@
-import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/providers/profile_state_provider.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../providers/auth_provider.dart';
-import '../utils/phone_auth_utils.dart';
-import '../widgets/auth_status_card.dart';
 
 class PhoneVerificationLinkPage extends ConsumerStatefulWidget {
   final String verificationToken;
-  final String? phoneNumber;
 
-  const PhoneVerificationLinkPage({
-    super.key,
-    required this.verificationToken,
-    this.phoneNumber,
-  });
+  const PhoneVerificationLinkPage({super.key, required this.verificationToken});
 
   @override
   ConsumerState<PhoneVerificationLinkPage> createState() =>
@@ -38,10 +30,6 @@ class _PhoneVerificationLinkPageState
   bool _codeSent = false;
   String? _verificationId;
   String? _fullPhone;
-  int? _resendToken;
-  Timer? _resendTimer;
-  int _secondsUntilResend = 0;
-  bool _isSuccess = false;
 
   @override
   void initState() {
@@ -51,31 +39,10 @@ class _PhoneVerificationLinkPageState
     } catch (e) {
       // Firebase not initialized
     }
-
-    if (widget.phoneNumber != null && widget.phoneNumber!.isNotEmpty) {
-      final normalized = PhoneAuthUtils.normalizeDominicanPhone(
-        selectedAreaCode: _selectedAreaCode,
-        rawInput: widget.phoneNumber!,
-      );
-      if (normalized != null) {
-        _selectedAreaCode = normalized.areaCode;
-        _phoneController.text = normalized.localNumber;
-      } else {
-        var phone = widget.phoneNumber!;
-        if (phone.startsWith('+')) {
-          phone = phone.substring(phone.length > 7 ? 5 : 1);
-        }
-        if (phone.length > 7) {
-          phone = phone.substring(phone.length - 7);
-        }
-        _phoneController.text = phone;
-      }
-    }
   }
 
   @override
   void dispose() {
-    _resendTimer?.cancel();
     _phoneController.dispose();
     _otpController.dispose();
     super.dispose();
@@ -99,14 +66,16 @@ class _PhoneVerificationLinkPageState
   }
 
   Future<void> _pasteCodeFromClipboard() async {
+    final palette = context.dutyTheme;
     final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
     final code = PhoneAuthUtils.extractOtpCode(clipboardData?.text);
     if (!mounted) return;
 
     if (code == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('No 6-digit code was found in your clipboard.'),
+          backgroundColor: palette.warning,
         ),
       );
       return;
@@ -123,52 +92,51 @@ class _PhoneVerificationLinkPageState
   }
 
   Future<void> _sendCode() async {
+    final palette = context.dutyTheme;
     if (Firebase.apps.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Firebase no está inicializado')),
-      );
-      return;
-    }
-
-    final normalized = PhoneAuthUtils.normalizeDominicanPhone(
-      selectedAreaCode: _selectedAreaCode,
-      rawInput: _phoneController.text,
-    );
-    if (normalized == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Enter a valid Dominican phone number. You can use 7 or 10 digits.',
-          ),
+        SnackBar(
+          content: Text('Firebase no está inicializado'),
+          backgroundColor: palette.danger,
         ),
       );
       return;
     }
 
-    _selectedAreaCode = normalized.areaCode;
-    _phoneController.text = normalized.localNumber;
-    _fullPhone = normalized.e164;
+    final phoneText = _phoneController.text.trim();
+    if (phoneText.isEmpty || phoneText.length < 7) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Enter a valid Dominican phone number. You can use 7 or 10 digits.',
+          ),
+          backgroundColor: palette.warning,
+        ),
+      );
+      return;
+    }
+
+    _fullPhone = _selectedAreaCode.replaceAll(' ', '') + phoneText;
 
     setState(() => _isLoading = true);
 
     try {
       await _auth.verifyPhoneNumber(
         phoneNumber: _fullPhone,
-        forceResendingToken: _resendToken,
         verificationCompleted: (PhoneAuthCredential credential) async {
           // Auto-verification
         },
         verificationFailed: (FirebaseAuthException e) {
           setState(() => _isLoading = false);
-          appLog('Firebase Auth Error Code: ${e.code}');
-          appLog('Firebase Auth Error Message: ${e.message}');
-
+          debugPrint('Firebase Auth Error Code: ${e.code}');
+          debugPrint('Firebase Auth Error Message: ${e.message}');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                 PhoneAuthUtils.codeSendErrorMessage(e.code, e.message),
               ),
               duration: const Duration(seconds: 4),
+              backgroundColor: palette.danger,
             ),
           );
         },
@@ -177,31 +145,29 @@ class _PhoneVerificationLinkPageState
             _isLoading = false;
             _codeSent = true;
             _verificationId = verificationId;
-            _resendToken = resendToken;
           });
-          _startResendCountdown();
         },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          _verificationId = verificationId;
-        },
+        codeAutoRetrievalTimeout: (String verificationId) {},
       );
     } catch (e) {
-      if (!mounted) return;
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Error al enviar el código. Verifique su conexión.'),
+          backgroundColor: palette.danger,
         ),
       );
     }
   }
 
   Future<void> _verifyOtp() async {
+    final palette = context.dutyTheme;
     final code = _otpController.text.trim();
     if (code.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Por favor ingrese el código de 6 dígitos'),
+          backgroundColor: palette.warning,
         ),
       );
       return;
@@ -230,21 +196,23 @@ class _PhoneVerificationLinkPageState
         if (result != null && result['status'] == 'success') {
           setState(() => _isSuccess = true);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
                 'Phone linked successfully. Opening your account...',
               ),
               behavior: SnackBarBehavior.floating,
+              backgroundColor: palette.success,
             ),
           );
           await Future.delayed(const Duration(milliseconds: 350));
           if (!mounted) return;
-          context.go('/home');
+          context.go(ref.read(activeProfileLandingRouteProvider));
         } else {
           setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result?['message'] ?? 'Falló la vinculación'),
+              backgroundColor: palette.danger,
             ),
           );
         }
@@ -257,14 +225,15 @@ class _PhoneVerificationLinkPageState
           content: Text(
             PhoneAuthUtils.codeVerifyErrorMessage(e.code, e.message),
           ),
+          backgroundColor: palette.danger,
         ),
       );
     } catch (e) {
-      if (!mounted) return;
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('We could not complete the verification right now.'),
+          backgroundColor: palette.danger,
         ),
       );
     }
@@ -272,13 +241,14 @@ class _PhoneVerificationLinkPageState
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A),
+      backgroundColor: palette.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios, color: palette.textPrimary),
           onPressed: () {
             if (_codeSent) {
               setState(() {
@@ -292,11 +262,11 @@ class _PhoneVerificationLinkPageState
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: RadialGradient(
             center: Alignment.topRight,
             radius: 1.5,
-            colors: [Color(0xFF2A1B3D), Color(0xFF0F0F1A)],
+            colors: [palette.heroGradientStart, palette.background],
           ),
         ),
         child: SafeArea(
@@ -309,7 +279,7 @@ class _PhoneVerificationLinkPageState
                 Text(
                   _codeSent ? 'Verify Phone' : 'Link Phone Number',
                   style: GoogleFonts.outfit(
-                    color: Colors.white,
+                    color: palette.textPrimary,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
@@ -317,10 +287,10 @@ class _PhoneVerificationLinkPageState
                 const SizedBox(height: 8),
                 Text(
                   _codeSent
-                      ? 'Enter the 6-digit code sent to ${PhoneAuthUtils.prettyPhone(_fullPhone ?? widget.phoneNumber ?? "")}'
+                      ? 'Enter the 6-digit code sent to $_fullPhone'
                       : 'Please link and verify your mobile number to continue using your account securely.',
                   style: GoogleFonts.inter(
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: palette.textSecondary,
                     fontSize: 16,
                   ),
                 ),
@@ -341,9 +311,7 @@ class _PhoneVerificationLinkPageState
                             ? 'Your phone is now connected to this account.'
                             : 'Paste the code from SMS or wait for AutoFill to pick it up for you.')
                       : 'We use your phone to protect account access and make sign-in recovery easier.',
-                  accentColor: _isSuccess
-                      ? const Color(0xFF22C55E)
-                      : const Color(0xFF8655F6),
+                  accentColor: _isSuccess ? palette.success : palette.primary,
                 ),
                 const SizedBox(height: 48),
                 if (!_codeSent) _buildPhoneInput() else _buildOtpInput(),
@@ -356,16 +324,16 @@ class _PhoneVerificationLinkPageState
                       icon: Icon(
                         Icons.content_paste_rounded,
                         color: _isLoading
-                            ? Colors.white.withValues(alpha: 0.35)
-                            : const Color(0xFF6200EE),
+                            ? palette.textMuted.withValues(alpha: 0.6)
+                            : palette.primary,
                         size: 18,
                       ),
                       label: Text(
                         'Paste code',
                         style: TextStyle(
                           color: _isLoading
-                              ? Colors.white.withValues(alpha: 0.35)
-                              : const Color(0xFF6200EE),
+                              ? palette.textMuted.withValues(alpha: 0.6)
+                              : palette.primary,
                         ),
                       ),
                     ),
@@ -377,25 +345,25 @@ class _PhoneVerificationLinkPageState
                       ? null
                       : (_codeSent ? _verifyOtp : _sendCode),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
+                    backgroundColor: palette.primary,
+                    foregroundColor: palette.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
                   child: _isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.black,
+                            color: palette.onPrimary,
                           ),
                         )
                       : Text(
                           _codeSent
-                              ? (_isSuccess ? 'Verified' : 'Verify & Continue')
+                              ? 'Verify & Continue'
                               : 'Send Verification Code',
                           style: GoogleFonts.outfit(
                             fontSize: 16,
@@ -416,8 +384,8 @@ class _PhoneVerificationLinkPageState
                             : 'Resend in ${_secondsUntilResend}s',
                         style: TextStyle(
                           color: _secondsUntilResend == 0
-                              ? const Color(0xFF6200EE)
-                              : Colors.white.withValues(alpha: 0.5),
+                              ? palette.primary
+                              : palette.textMuted,
                         ),
                       ),
                     ),
@@ -432,11 +400,12 @@ class _PhoneVerificationLinkPageState
   }
 
   Widget _buildPhoneInput() {
+    final palette = context.dutyTheme;
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E2C).withValues(alpha: 0.5),
+        color: palette.surfaceAlt.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: palette.border),
       ),
       child: Row(
         children: [
@@ -445,9 +414,9 @@ class _PhoneVerificationLinkPageState
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _selectedAreaCode,
-                dropdownColor: const Color(0xFF1E1E2C),
-                icon: const Icon(Icons.arrow_drop_down, color: Colors.white70),
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                dropdownColor: palette.surface,
+                icon: Icon(Icons.arrow_drop_down, color: palette.textSecondary),
+                style: TextStyle(color: palette.textPrimary, fontSize: 16),
                 onChanged: (String? newValue) {
                   if (newValue != null) {
                     setState(() => _selectedAreaCode = newValue);
@@ -467,7 +436,7 @@ class _PhoneVerificationLinkPageState
           Container(
             height: 24,
             width: 1,
-            color: Colors.white.withValues(alpha: 0.2),
+            color: palette.border,
             margin: const EdgeInsets.symmetric(horizontal: 12),
           ),
           Expanded(
@@ -475,7 +444,7 @@ class _PhoneVerificationLinkPageState
               controller: _phoneController,
               keyboardType: TextInputType.phone,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: palette.textPrimary),
               maxLength: 10,
               buildCounter:
                   (
@@ -486,9 +455,7 @@ class _PhoneVerificationLinkPageState
                   }) => null,
               decoration: InputDecoration(
                 hintText: '8091234567 or 1234567',
-                hintStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
-                ),
+                hintStyle: TextStyle(color: palette.textMuted),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 16),
               ),
@@ -500,11 +467,12 @@ class _PhoneVerificationLinkPageState
   }
 
   Widget _buildOtpInput() {
+    final palette = context.dutyTheme;
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E2C).withValues(alpha: 0.5),
+        color: palette.surfaceAlt.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: palette.border),
       ),
       child: TextField(
         controller: _otpController,
@@ -512,20 +480,18 @@ class _PhoneVerificationLinkPageState
         textInputAction: TextInputAction.done,
         autofillHints: const [AutofillHints.oneTimeCode],
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: palette.textPrimary,
           fontSize: 24,
           letterSpacing: 10,
         ),
         textAlign: TextAlign.center,
         maxLength: 6,
-        onChanged: _handleOtpChanged,
-        onSubmitted: (_) => _verifyOtp(),
         decoration: InputDecoration(
           counterText: "",
           hintText: '000000',
           hintStyle: TextStyle(
-            color: Colors.white.withValues(alpha: 0.2),
+            color: palette.textMuted.withValues(alpha: 0.55),
             letterSpacing: 10,
           ),
           border: InputBorder.none,

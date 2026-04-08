@@ -1,30 +1,26 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-<<<<<<< Updated upstream
-=======
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
->>>>>>> Stashed changes
 import 'package:qr_flutter/qr_flutter.dart';
+import '../../../../core/theme/colors.dart';
 import '../../data/models/booking_model.dart';
+import '../providers/marketplace_provider.dart';
 
-class TicketDetailsPage extends StatelessWidget {
+import '../../data/models/reward_instance_model.dart';
+
+class TicketDetailsPage extends ConsumerWidget {
   final BookingModel booking;
 
   const TicketDetailsPage({super.key, required this.booking});
-
-<<<<<<< Updated upstream
-=======
-  static const Color kPrimaryColor = Color(0xFF8655F6);
-  static const Color kDarkBackground = Color(0xFF151022);
-
   void _handleTransfer(BuildContext context, WidgetRef ref) {
     if (booking.transferStatus == 'transfer_pending') {
+      final palette = context.dutyTheme;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('This ticket already has a pending transfer request.'),
-          backgroundColor: Colors.orange,
+          backgroundColor: palette.warning,
         ),
       );
       return;
@@ -32,7 +28,7 @@ class TicketDetailsPage extends StatelessWidget {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF151022),
+      backgroundColor: context.dutyTheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -44,12 +40,12 @@ class TicketDetailsPage extends StatelessWidget {
     );
   }
 
-  void _showManualTransferSheet(BuildContext context) {
+  void _handleTransfer(BuildContext context, WidgetRef ref) {
     final recipientController = TextEditingController();
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF151022),
+      backgroundColor: context.dutyTheme.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -62,6 +58,7 @@ class TicketDetailsPage extends StatelessWidget {
   }
 
   Future<void> _showTransferQrSheet(BuildContext context, WidgetRef ref) async {
+    final palette = context.dutyTheme;
     final qrData = await ref
         .read(marketplaceProvider.notifier)
         .getTransferTicketQr(bookingId: booking.id);
@@ -70,9 +67,9 @@ class TicketDetailsPage extends StatelessWidget {
 
     if (qrData == null || qrData['qr_value'] == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('We could not generate a transfer QR for this ticket.'),
-          backgroundColor: Colors.red,
+          backgroundColor: palette.danger,
         ),
       );
       return;
@@ -82,43 +79,50 @@ class TicketDetailsPage extends StatelessWidget {
 
     await showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF151022),
+      backgroundColor: palette.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          left: 24,
+          right: 24,
+          top: 24,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Show Ticket Transfer QR',
+              'Transfer Ticket',
               style: GoogleFonts.manrope(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: palette.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Let someone scan this QR from the main scanner in Duty to request your ticket. You still approve the transfer before it moves.',
-              style: GoogleFonts.manrope(color: Colors.white54, height: 1.5),
+              style: GoogleFonts.manrope(
+                color: palette.textSecondary,
+                height: 1.5,
+              ),
             ),
             const SizedBox(height: 24),
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: QrImageView(
-                  data: qrValue,
-                  version: QrVersions.auto,
-                  size: 240,
-                  backgroundColor: Colors.white,
+            TextField(
+              controller: recipientController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Email or Username',
+                hintStyle: const TextStyle(color: Colors.white24),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.05),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
                 ),
               ),
             ),
@@ -126,19 +130,19 @@ class TicketDetailsPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.10),
+                color: palette.warning.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.info_outline, color: Colors.amber, size: 18),
+                  Icon(Icons.info_outline, color: palette.warning, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Only show this to the person you want to let request the ticket. They still need your approval from the transfer inbox.',
                       style: GoogleFonts.manrope(
-                        color: Colors.amber,
+                        color: palette.warning,
                         fontSize: 12,
                         height: 1.45,
                       ),
@@ -152,8 +156,8 @@ class TicketDetailsPage extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white24),
+                  foregroundColor: palette.textPrimary,
+                  side: BorderSide(color: palette.border),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -163,13 +167,13 @@ class TicketDetailsPage extends StatelessWidget {
                   await Clipboard.setData(ClipboardData(text: qrValue));
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Transfer QR copied to clipboard.'),
+                    SnackBar(
+                      content: const Text('Transfer QR copied to clipboard.'),
+                      backgroundColor: palette.success,
                     ),
                   );
                 },
-                icon: const Icon(Icons.copy_rounded),
-                label: const Text('Copy QR value'),
+                child: const Text('Send Transfer'),
               ),
             ),
           ],
@@ -179,13 +183,14 @@ class TicketDetailsPage extends StatelessWidget {
   }
 
   void _handleSell(BuildContext context, WidgetRef ref) {
+    final palette = context.dutyTheme;
     final priceController = TextEditingController(
       text: booking.listingPrice > 0 ? booking.listingPrice.toString() : '',
     );
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF151022),
+      backgroundColor: palette.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -206,26 +211,26 @@ class TicketDetailsPage extends StatelessWidget {
               style: GoogleFonts.manrope(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: palette.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Set your price and list your ticket for other fans to buy.',
-              style: GoogleFonts.manrope(color: Colors.white54),
+              style: GoogleFonts.manrope(color: palette.textSecondary),
             ),
             const SizedBox(height: 24),
             TextField(
               controller: priceController,
               keyboardType: TextInputType.number,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: palette.textPrimary),
               decoration: InputDecoration(
                 prefixText: '\$ ',
-                prefixStyle: const TextStyle(color: Colors.white),
+                prefixStyle: TextStyle(color: palette.textPrimary),
                 hintText: 'Listing Price',
-                hintStyle: const TextStyle(color: Colors.white24),
+                hintStyle: TextStyle(color: palette.textMuted),
                 filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.05),
+                fillColor: palette.surfaceAlt,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide.none,
@@ -239,8 +244,8 @@ class TicketDetailsPage extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.redAccent,
-                        side: const BorderSide(color: Colors.redAccent),
+                        foregroundColor: palette.danger,
+                        side: BorderSide(color: palette.danger),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -255,15 +260,14 @@ class TicketDetailsPage extends StatelessWidget {
                               isListed: false,
                             );
                         final state = ref.read(marketplaceProvider);
-                        if (!context.mounted) return;
                         if (!state.hasError) {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
                                 'Ticket unlisted from marketplace.',
                               ),
-                              backgroundColor: Colors.blueGrey,
+                              backgroundColor: palette.info,
                             ),
                           );
                         }
@@ -276,8 +280,8 @@ class TicketDetailsPage extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
+                      backgroundColor: palette.primary,
+                      foregroundColor: palette.textPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -296,20 +300,19 @@ class TicketDetailsPage extends StatelessWidget {
                           );
 
                       final state = ref.read(marketplaceProvider);
-                      if (!context.mounted) return;
                       if (state.hasError) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Error: ${state.error}'),
-                            backgroundColor: Colors.red,
+                            backgroundColor: palette.danger,
                           ),
                         );
                       } else {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text('Ticket listed successfully!'),
-                            backgroundColor: Colors.blueAccent,
+                            backgroundColor: palette.success,
                           ),
                         );
                       }
@@ -328,19 +331,20 @@ class TicketDetailsPage extends StatelessWidget {
   }
 
   void _handleAddToWallet(BuildContext context) async {
+    final palette = context.dutyTheme;
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
+      builder: (context) => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(color: kPrimaryColor),
-            SizedBox(height: 16),
+            CircularProgressIndicator(color: palette.primary),
+            const SizedBox(height: 16),
             Text(
               'Adding to Apple Wallet...',
               style: TextStyle(
-                color: Colors.white,
+                color: palette.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -355,27 +359,60 @@ class TicketDetailsPage extends StatelessWidget {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFF151022),
-          title: const Row(
+          backgroundColor: palette.surface,
+          title: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.green),
+              Icon(Icons.check_circle, color: palette.success),
               SizedBox(width: 8),
-              Text('Success', style: TextStyle(color: Colors.white)),
+              Text('Success', style: TextStyle(color: palette.textPrimary)),
             ],
           ),
-          content: const Text(
+          content: Text(
             'Ticket successfully added to your Apple Wallet.',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: palette.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK', style: TextStyle(color: kPrimaryColor)),
+              child: Text('OK', style: TextStyle(color: palette.primary)),
             ),
           ],
         ),
       );
     }
+  }
+
+  void _showComingSoonDialog(BuildContext context, String feature) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1528),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          'Coming Soon',
+          style: GoogleFonts.manrope(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          '$feature functionality will be available in the next update. Stay tuned!',
+          style: GoogleFonts.manrope(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Understood',
+              style: GoogleFonts.manrope(
+                color: kPrimaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleViewInvoice(BuildContext context) async {
@@ -392,97 +429,436 @@ class TicketDetailsPage extends StatelessWidget {
     context.push('/invoice-details', extra: urlString);
   }
 
->>>>>>> Stashed changes
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final palette = context.dutyTheme;
+    final pendingPrompts =
+        ref.watch(pendingReviewPromptsProvider).valueOrNull ??
+        const <ReviewPromptModel>[];
+    ReviewPromptModel? pendingPrompt;
+    for (final item in pendingPrompts) {
+      if (item.bookingId == booking.id) {
+        pendingPrompt = item;
+        break;
+      }
+    }
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Detalle de Entrada')),
-      backgroundColor: Colors.grey[100],
+      backgroundColor: palette.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.close_rounded, color: palette.textPrimary),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home');
+            }
+          },
+        ),
+        title: Text(
+          'Mobile Ticket',
+          style: GoogleFonts.manrope(
+            color: palette.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share_rounded, color: Colors.white),
+            onPressed: _handleShare,
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(0, 5),
+            _buildPhysicalTicket(context),
+            const SizedBox(height: 32),
+            if (booking.rewards.isNotEmpty) ...[
+              _buildRewardsSection(context),
+              const SizedBox(height: 32),
+            ],
+            if (pendingPrompt != null && booking.isPastEvent) ...[
+              _buildReviewPromptCard(context, pendingPrompt.targets.length),
+              const SizedBox(height: 20),
+            ],
+            _buildActionButtons(context, ref),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReviewPromptCard(BuildContext context, int pendingTargetsCount) {
+    final palette = context.dutyTheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [palette.primaryDeep, palette.primary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: palette.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: palette.onPrimary.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  Icons.rate_review_rounded,
+                  color: palette.textPrimary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Tienes $pendingTargetsCount review${pendingTargetsCount == 1 ? '' : 's'} pendiente${pendingTargetsCount == 1 ? '' : 's'}',
+                  style: GoogleFonts.manrope(
+                    color: palette.textPrimary,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Comparte tu experiencia del evento, el organizador y los artistas desde tu inbox de reviews.',
+            style: GoogleFonts.manrope(
+              color: palette.onPrimary.withValues(alpha: 0.82),
+              fontSize: 13,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: palette.onPrimary,
+                foregroundColor: palette.primaryDeep,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              onPressed: () => context.push('/reviews/pending'),
+              icon: const Icon(Icons.arrow_forward_rounded),
+              label: Text(
+                'Calificar ahora',
+                style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRewardsSection(BuildContext context) {
+    final palette = context.dutyTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.stars_rounded, color: palette.primary, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              'REWARDS & PERKS',
+              style: GoogleFonts.manrope(
+                color: palette.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        ...booking.rewards.map((reward) => _buildRewardItem(context, reward)),
+      ],
+    );
+  }
+
+  Widget _buildRewardItem(BuildContext context, RewardInstanceModel reward) {
+    final palette = context.dutyTheme;
+    final bool isClaimed = reward.isClaimed;
+    final bool isActivated = reward.isActivated;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: palette.surfaceAlt,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: palette.border.withValues(alpha: 0.5)),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: (isClaimed ? Colors.grey : palette.primary).withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            _getRewardIcon(reward.rewardType),
+            color: isClaimed ? palette.textMuted : palette.primary,
+          ),
+        ),
+        title: Text(
+          reward.title,
+          style: GoogleFonts.manrope(
+            color: isClaimed ? palette.textMuted : palette.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            decoration: isClaimed ? TextDecoration.lineThrough : null,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isClaimed
+                  ? 'Already claimed'
+                  : (isActivated ? 'Ready to claim' : 'Requires ticket entry scan'),
+              style: GoogleFonts.manrope(
+                color: isClaimed
+                    ? palette.textMuted
+                    : (isActivated ? palette.success : palette.textSecondary),
+                fontSize: 12,
+              ),
+            ),
+            if (reward.sponsorName != null && !isClaimed) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Text(
+                    'Powered by ',
+                    style: GoogleFonts.manrope(
+                      color: palette.textSecondary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    reward.sponsorName!,
+                    style: GoogleFonts.manrope(
+                      color: palette.primary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
-              child: Column(
-                children: [
-                  // Event Image Header
-                  if (booking.eventImage != null)
-                    ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(16),
+            ],
+          ],
+        ),
+        trailing: Icon(
+          isClaimed ? Icons.check_circle_outline : Icons.qr_code_2_rounded,
+          color: isClaimed ? palette.textMuted : (isActivated ? palette.primary : palette.border),
+        ),
+        onTap: isClaimed ? null : () => _showRewardQrSheet(context, reward),
+      ),
+    );
+  }
+
+  IconData _getRewardIcon(String type) {
+    switch (type) {
+      case 'drink':
+        return Icons.local_bar_rounded;
+      case 'merch':
+        return Icons.checkroom_rounded;
+      case 'perk_access':
+        return Icons.verified_user_rounded;
+      case 'voucher':
+        return Icons.confirmation_number_rounded;
+      default:
+        return Icons.card_giftcard_rounded;
+    }
+  }
+
+  void _showRewardQrSheet(BuildContext context, RewardInstanceModel reward) {
+    final palette = context.dutyTheme;
+    final bool isActivated = reward.isActivated;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: palette.surface,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: palette.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              reward.title,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.manrope(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: palette.textPrimary,
+              ),
+            ),
+            if (reward.sponsorName != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: palette.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (reward.sponsorLogoUrl != null) ...[
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: CachedNetworkImage(
+                          imageUrl: reward.sponsorLogoUrl!,
+                          width: 16,
+                          height: 16,
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                      child: Image.network(
-                        booking.eventImage!,
-                        height: 150,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      'POWERED BY ${reward.sponsorName!.toUpperCase()}',
+                      style: GoogleFonts.manrope(
+                        color: palette.primary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
                       ),
                     ),
-
-                  Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        Text(
-                          booking.eventTitle,
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          booking.eventDate ?? '',
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                        const Divider(height: 40),
-
-                        // QR Code Section
-                        Text(
-                          'Escanea este código a la entrada',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const SizedBox(height: 16),
-                        QrImageView(
-                          data: booking
-                              .bookingId, // Encoding Booking ID or unique ticket hash
-                          version: QrVersions.auto,
-                          size: 200.0,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'ID: ${booking.bookingId}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-
-                        const Divider(height: 40),
-
-                        // Ticket Info
-                        _buildInfoRow('Entradas', '${booking.quantity}'),
-                        const SizedBox(height: 8),
-                        _buildInfoRow('Total Pagado', '\$${booking.total}'),
-                        const SizedBox(height: 8),
-                        _buildInfoRow(
-                          'Estado',
-                          booking.paymentStatus.toUpperCase(),
-                        ),
-                      ],
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            Text(
+              isActivated
+                  ? 'Show this code to the staff member to redeem'
+                  : 'This reward will be activated automatically when your ticket is scanned at the entrance.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.manrope(
+                color: palette.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 32),
+            if (isActivated && reward.claimQrPayload != null)
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: palette.primary.withValues(alpha: 0.1),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    )
+                  ],
+                ),
+                child: QrImageView(
+                  data: reward.claimQrPayload!,
+                  version: QrVersions.auto,
+                  size: 220,
+                ),
+              )
+            else
+              Container(
+                height: 260,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: palette.surfaceAlt,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: palette.border),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.lock_clock_rounded,
+                      size: 64,
+                      color: palette.textMuted,
                     ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Locked until arrival',
+                      style: GoogleFonts.manrope(
+                        color: palette.textMuted,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 32),
+            if (reward.claimCode != null) ...[
+              Text(
+                'CLAIM CODE',
+                style: GoogleFonts.manrope(
+                  color: palette.textMuted,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                reward.claimCode!,
+                style: GoogleFonts.spaceMono(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: palette.textPrimary,
+                ),
+              ),
+            ],
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Close',
+                  style: GoogleFonts.manrope(
+                    color: palette.textPrimary,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
+                ),
               ),
             ),
           ],
@@ -491,18 +867,450 @@ class TicketDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildPhysicalTicket(BuildContext context) {
+    final palette = context.dutyTheme;
+    return PhysicalModel(
+      color: Colors.transparent,
+      elevation: 8,
+      shadowColor: palette.primaryGlow.withValues(alpha: 0.3),
+      borderRadius: BorderRadius.circular(24),
+      child: Column(
+        children: [
+          // Top Part (Event Image & Info)
+          Container(
+            decoration: BoxDecoration(
+              color: palette.onPrimary,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Event Image
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(24),
+                  ),
+                  child: CachedNetworkImage(
+                    imageUrl:
+                        booking.eventImage ??
+                        'https://via.placeholder.com/800x400',
+                    height: 260,
+                    width: double.infinity,
+                    fit: BoxFit.fill,
+                    errorWidget: (_, __, ___) => Container(
+                      height: 180,
+                      color: Colors.grey[300],
+                      child: const Center(
+                        child: Icon(Icons.image_not_supported),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        booking.eventTitle,
+                        style: GoogleFonts.manrope(
+                          color: palette.background,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today_rounded,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            booking.eventDate ?? 'Date TBD',
+                            style: GoogleFonts.manrope(
+                              color: palette.background,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Icon(
+                            Icons.location_on_rounded,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Venue TBD', // Placeholder as venue is not in model
+                              style: GoogleFonts.manrope(
+                                color: palette.background,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.business_rounded,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Organized by: ${booking.organizerName ?? "Staff"}',
+                              style: GoogleFonts.manrope(
+                                color: palette.background,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Perforation
+          _buildPerforationLine(context),
+
+          // Bottom Part (QR Code)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: palette.onPrimary,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+            ),
+            child: Column(
+              children: [
+                // Fee Breakdown
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    children: [
+                      _buildBreakdownRow(
+                        context,
+                        'Ticket Price',
+                        '\$${booking.price.toStringAsFixed(2)}',
+                        isDark: true,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildBreakdownRow(
+                        context,
+                        'Processing Fee',
+                        '\$${booking.tax.toStringAsFixed(2)}',
+                        isDark: true,
+                      ),
+                      if (booking.discount > 0) ...[
+                        const SizedBox(height: 8),
+                        _buildBreakdownRow(
+                          context,
+                          'Discount',
+                          '-\$${booking.discount.toStringAsFixed(2)}',
+                          isDark: true,
+                        ),
+                      ],
+                      Divider(color: palette.border, height: 24),
+                      _buildBreakdownRow(
+                        context,
+                        'Total Paid',
+                        '\$${booking.total.toStringAsFixed(2)}',
+                        isDark: true,
+                        isTotal: true,
+                      ),
+                    ],
+                  ),
+                ),
+                QrImageView(
+                  data: booking.bookingId,
+                  version: QrVersions.auto,
+                  size: 200.0,
+                  foregroundColor: Colors.black,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'SCAN THIS CODE AT THE GATE',
+                  style: GoogleFonts.manrope(
+                    color: Colors.grey[500],
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+                Text(
+                  booking.bookingId,
+                  style: GoogleFonts.spaceMono(
+                    color: palette.background,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBreakdownRow(
+    BuildContext context,
+    String label,
+    String value, {
+    bool isTotal = false,
+    bool isDark = false,
+  }) {
+    final palette = context.dutyTheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: Colors.grey)),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: GoogleFonts.manrope(
+            color: isDark
+                ? (isTotal ? palette.background : palette.textSecondary)
+                : palette.textSecondary,
+            fontSize: isTotal ? 16 : 14,
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.manrope(
+            color: isTotal
+                ? palette.primary
+                : (isDark ? palette.background : palette.textPrimary),
+            fontSize: isTotal ? 20 : 14,
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPerforationLine(BuildContext context) {
+    final palette = context.dutyTheme;
+    return Container(
+      color: palette.onPrimary,
+      child: Stack(
+        children: [
+          SizedBox(
+            height: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(
+                20,
+                (index) => Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Container(height: 1, color: palette.border),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: -10,
+            top: -10,
+            bottom: -10,
+            child: Container(
+              width: 20,
+              decoration: BoxDecoration(
+                color: palette.background,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            right: -10,
+            top: -10,
+            bottom: -10,
+            child: Container(
+              width: 20,
+              decoration: BoxDecoration(
+                color: palette.background,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoColumn(
+    String label,
+    String value, {
+    bool isRightAligned = false,
+  }) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: isRightAligned
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.manrope(
+              color: Colors.grey[500],
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: GoogleFonts.manrope(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context, WidgetRef ref) {
+    final palette = context.dutyTheme;
+
+    return Column(
+      children: [
+        if (!booking.isPastEvent) ...[
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: palette.primary,
+                foregroundColor: palette.onPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+            onPressed: () => _handleViewInvoice(context),
+            icon: const Icon(Icons.receipt_long_rounded),
+            label: Text(
+              'View Invoice',
+              style: GoogleFonts.manrope(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: palette.surfaceAlt,
+                foregroundColor: palette.textPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              onPressed: () => _handleAddToWallet(context),
+              icon: const Icon(Icons.wallet_rounded),
+              label: Text(
+                'Add to Apple Wallet',
+                style: GoogleFonts.manrope(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+        // Only show action buttons for active (non-past) events
+        if (booking.isPastEvent) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: palette.surfaceAlt,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: palette.border),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.history, color: palette.textMuted, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'Past Event — View Only',
+                  style: GoogleFonts.manrope(
+                    color: palette.textMuted,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ] else ...[
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: palette.textPrimary,
+                    side: BorderSide(color: palette.border),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  onPressed: () => _handleTransfer(context, ref),
+                  child: Text(
+                    'Transfer',
+                    style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: palette.textPrimary,
+                    side: BorderSide(color: palette.border),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  onPressed: () => _handleSell(context, ref),
+                  child: Text(
+                    'Sell',
+                    style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
 }
-<<<<<<< Updated upstream
-=======
 
 class _TransferOptionsSheet extends StatelessWidget {
   const _TransferOptionsSheet({
@@ -517,6 +1325,8 @@ class _TransferOptionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
       child: Column(
@@ -528,13 +1338,13 @@ class _TransferOptionsSheet extends StatelessWidget {
             style: GoogleFonts.manrope(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: palette.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Send ${booking.eventTitle} by scanning the receiver code, or fall back to email and username if needed.',
-            style: GoogleFonts.manrope(color: Colors.white54),
+            style: GoogleFonts.manrope(color: palette.textSecondary),
           ),
           const SizedBox(height: 24),
           _TransferActionTile(
@@ -599,26 +1409,52 @@ class _TransferActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
+
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: palette.surfaceAlt,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white10),
+          border: Border.all(color: palette.border),
         ),
-        child: Row(
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            onPressed: () => _handleAddToWallet(context),
+            icon: const Icon(Icons.wallet_rounded),
+            label: Text(
+              'Add to Apple Wallet',
+              style: GoogleFonts.manrope(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
           children: [
             Container(
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: const Color(0xFF8655F6).withValues(alpha: 0.18),
+                color: palette.primarySurface,
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: Icon(icon, color: const Color(0xFFE9B4FF)),
+              child: Icon(icon, color: palette.primary),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -628,7 +1464,7 @@ class _TransferActionTile extends StatelessWidget {
                   Text(
                     title,
                     style: GoogleFonts.manrope(
-                      color: Colors.white,
+                      color: palette.textPrimary,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
@@ -637,7 +1473,7 @@ class _TransferActionTile extends StatelessWidget {
                   Text(
                     subtitle,
                     style: GoogleFonts.manrope(
-                      color: Colors.white54,
+                      color: palette.textSecondary,
                       fontSize: 13,
                       height: 1.45,
                     ),
@@ -646,7 +1482,7 @@ class _TransferActionTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            const Icon(Icons.chevron_right_rounded, color: Colors.white38),
+            Icon(Icons.chevron_right_rounded, color: palette.textMuted),
           ],
         ),
       ),
@@ -670,8 +1506,6 @@ class _TransferBottomSheet extends ConsumerStatefulWidget {
 }
 
 class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
-  static const Color kPrimaryColor = Color(0xFF8655F6);
-
   Map<String, dynamic>? _recipientInfo;
   bool _isVerifying = false;
   bool _isSending = false;
@@ -701,6 +1535,8 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
   }
 
   Future<void> _sendTransfer() async {
+    final palette = context.dutyTheme;
+
     setState(() => _isSending = true);
 
     await ref
@@ -720,9 +1556,9 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Transfer request sent! Waiting for approval.'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('Transfer request sent! Waiting for approval.'),
+            backgroundColor: palette.success,
           ),
         );
       }
@@ -731,6 +1567,8 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
@@ -747,7 +1585,7 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
             style: GoogleFonts.manrope(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: palette.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -755,7 +1593,7 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
             _recipientInfo == null
                 ? 'Enter the email or username of the recipient.'
                 : 'Confirm the recipient below.',
-            style: GoogleFonts.manrope(color: Colors.white54),
+            style: GoogleFonts.manrope(color: palette.textSecondary),
           ),
           const SizedBox(height: 24),
 
@@ -763,20 +1601,17 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
           if (_recipientInfo == null) ...[
             TextField(
               controller: widget.recipientController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: palette.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Email or Username',
-                hintStyle: const TextStyle(color: Colors.white24),
+                hintStyle: TextStyle(color: palette.textMuted),
                 filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.05),
+                fillColor: palette.surfaceAlt,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide.none,
                 ),
-                prefixIcon: const Icon(
-                  Icons.person_search,
-                  color: Colors.white38,
-                ),
+                prefixIcon: Icon(Icons.person_search, color: palette.textMuted),
               ),
             ),
             if (_errorMessage != null) ...[
@@ -787,23 +1622,21 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.1),
+                  color: palette.danger.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: palette.danger.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.redAccent,
-                      size: 18,
-                    ),
+                    Icon(Icons.error_outline, color: palette.danger, size: 18),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _errorMessage!,
                         style: GoogleFonts.manrope(
-                          color: Colors.redAccent,
+                          color: palette.danger,
                           fontSize: 13,
                         ),
                       ),
@@ -817,7 +1650,7 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: kPrimaryColor,
+                  backgroundColor: palette.primary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -825,19 +1658,19 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
                 ),
                 onPressed: _isVerifying ? null : _verifyRecipient,
                 child: _isVerifying
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: palette.onPrimary,
                         ),
                       )
                     : Text(
                         'Verify Recipient',
                         style: GoogleFonts.manrope(
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: palette.onPrimary,
                         ),
                       ),
               ),
@@ -849,22 +1682,24 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: palette.surfaceAlt,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: kPrimaryColor.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: palette.primary.withValues(alpha: 0.28),
+                ),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 24,
-                    backgroundColor: kPrimaryColor.withValues(alpha: 0.2),
+                    backgroundColor: palette.primarySurface,
                     child: Text(
                       (_recipientInfo!['name'] ?? 'U')
                           .toString()
                           .substring(0, 1)
                           .toUpperCase(),
                       style: GoogleFonts.manrope(
-                        color: kPrimaryColor,
+                        color: palette.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -878,7 +1713,7 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
                         Text(
                           _recipientInfo!['name'] ?? 'Unknown',
                           style: GoogleFonts.manrope(
-                            color: Colors.white,
+                            color: palette.textPrimary,
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
@@ -887,21 +1722,21 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
                           Text(
                             '@${_recipientInfo!['username']}',
                             style: GoogleFonts.manrope(
-                              color: Colors.white54,
+                              color: palette.textSecondary,
                               fontSize: 13,
                             ),
                           ),
                         Text(
                           _recipientInfo!['email'] ?? '',
                           style: GoogleFonts.manrope(
-                            color: Colors.white38,
+                            color: palette.textMuted,
                             fontSize: 12,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Icon(Icons.check_circle, color: Colors.greenAccent, size: 28),
+                  Icon(Icons.check_circle, color: palette.success, size: 28),
                 ],
               ),
             ),
@@ -909,18 +1744,21 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.1),
+                color: palette.warning.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: palette.warning.withValues(alpha: 0.2),
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, color: Colors.amber, size: 18),
+                  Icon(Icons.info_outline, color: palette.warning, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'The recipient must accept the transfer before the ticket is moved.',
                       style: GoogleFonts.manrope(
-                        color: Colors.amber,
+                        color: palette.warning,
                         fontSize: 12,
                       ),
                     ),
@@ -934,8 +1772,8 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
                 Expanded(
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white24),
+                      foregroundColor: palette.textPrimary,
+                      side: BorderSide(color: palette.border),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -958,7 +1796,7 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
                   flex: 2,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: kPrimaryColor,
+                      backgroundColor: palette.primary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -966,19 +1804,19 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
                     ),
                     onPressed: _isSending ? null : _sendTransfer,
                     child: _isSending
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: palette.onPrimary,
                             ),
                           )
                         : Text(
                             'Send Transfer Request',
                             style: GoogleFonts.manrope(
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: palette.onPrimary,
                             ),
                           ),
                   ),
@@ -991,4 +1829,3 @@ class _TransferBottomSheetState extends ConsumerState<_TransferBottomSheet> {
     );
   }
 }
->>>>>>> Stashed changes

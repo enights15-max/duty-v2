@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Language &amp; Regional Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8655f6",
+                        "background-light": "#f6f5f8",
+                        "background-dark": "#151022",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display">
+<!-- iOS Status Bar Placeholder -->
+<div class="h-12 w-full flex items-center justify-between px-8 sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 ios-blur">
+<span class="text-sm font-semibold">9:41</span>
+<div class="flex items-center gap-1">
+<span class="material-icons text-xs">signal_cellular_alt</span>
+<span class="material-icons text-xs">wifi</span>
+<span class="material-icons text-xs">battery_full</span>
+</div>
+</div>
+<!-- Header -->
+<header class="px-6 py-4 flex items-center justify-between">
+<button class="w-10 h-10 flex items-center justify-start text-primary">
+<span class="material-icons text-2xl">arrow_back_ios</span>
+</button>
+<h1 class="text-lg font-bold tracking-tight">Language &amp; Region</h1>
+<div class="w-10"></div>
+</header>
+<main class="px-6 pb-32">
+<!-- System Sync -->
+<div class="mb-8 mt-4 bg-primary/5 dark:bg-primary/10 border border-primary/20 p-5 rounded-2xl flex items-center justify-between">
+<div>
+<h3 class="font-semibold text-slate-900 dark:text-white">Sync with Device</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Follow global iOS preferences</p>
+</div>
+<div class="w-12 h-7 bg-primary rounded-full relative flex items-center px-1">
+<div class="w-5 h-5 bg-white rounded-full shadow-sm ml-auto"></div>
+</div>
+</div>
+<!-- Section: App Language -->
+<section class="mb-8">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-sm font-semibold uppercase tracking-widest text-slate-400">App Language</h2>
+<button class="text-primary text-xs font-semibold">Search</button>
+</div>
+<div class="space-y-3">
+<!-- Language Item Selected -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-primary/5 border border-primary/40">
+<div class="flex items-center gap-4">
+<img alt="US" class="w-6 h-6 rounded-full object-cover" data-alt="United States Flag icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsZ72GEZjfWru8PiPFD18ixZcLKbgHabr_wpX1U-IfwABy1QTq6jxMySB4TOc1wH6Y8NHwLFFuDcD9kS8sSUVrK3ox9V2zwj2y0rG2UQuAZEqg9aLQrpJthoZT672E2go1QUW2RXz3QjCs_RqnYI_czfI4KrCvwAgc_oNZHH6RY5QS4BCKsgEfmXWWVnAtb6Tzq-6F8-novkWMA5eClIg8GaEtQMRQqDM0xojuhljQFtOKEeVvcVTRGUkYmZ8sVjtowZR0yLd5YtU7"/>
+<span class="font-medium">English (US)</span>
+</div>
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+<span class="material-icons text-white text-sm">check</span>
+</div>
+</div>
+<!-- Language Item -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-white/5 border border-transparent hover:border-primary/20">
+<div class="flex items-center gap-4">
+<img alt="UK" class="w-6 h-6 rounded-full object-cover" data-alt="United Kingdom Flag icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADJG79fiVypsGA8jfKhAc2wbfZh2Q9GpS45H2CyYhnYCnBmW6LK9_DJhH8KykZnYHmSp_XqzW39X1EYNr_FAncTz2xtIQMM1tBIlDtMH5gguTncprhcv0qYBqZVqB0oMQp6GNUhu4gRVTN2QKvTCUnZ5TXGITy5mFrEEHER8DTM1J3is3vYpyGRZe-mwJAkoSzzream50bWdOCnj8ekTWHvsePE4bPq8oZTeDJjdPzk5tNwmerqHzjfJhAL55L7MlrE0tZsWZP3eeS"/>
+<span class="font-medium">English (UK)</span>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-slate-300 dark:border-slate-700"></div>
+</div>
+<!-- Language Item -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-white/5 border border-transparent hover:border-primary/20">
+<div class="flex items-center gap-4">
+<img alt="FR" class="w-6 h-6 rounded-full object-cover" data-alt="France Flag icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQFTJDGcWXc1iGtE29d4IQCZ3r6OQhgRgMbNxR2XYRXpvGoWWCfhcbSFz5l53CXcOdKjR06K03ES6egBFMZ8U1yE4J51mCqEd_ab3B9NLl5iSjXre3m0UbtmvrmjnaeW9b224p_m2lSdqLrTD6P4vmItAQb9bhDFEK9pVwGUTg4xNqdCpqHrQfEQp5G83g9PHiENbd5HkgUn5XqIzseyKB4pfEraadGDZ5R5c4Lu7A1U0pvGz4OH1znvYznjhLQ1z6R0IyDa51KssX"/>
+<span class="font-medium">French</span>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-slate-300 dark:border-slate-700"></div>
+</div>
+<!-- Language Item -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-white/5 border border-transparent hover:border-primary/20">
+<div class="flex items-center gap-4">
+<img alt="DE" class="w-6 h-6 rounded-full object-cover" data-alt="Germany Flag icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASi3zq6O8eWnZk0aqqjRRBzOqkhYJdfCmAQv6bLkjD7fXGtsK3r-_Be1Ge8VLuTZOlgbYxYM2tlZHSHdXL30XTZa80NmhiQO_6xjqB4yUnftlA748y7KsSzQbxyjhVf_XClVIySra_UDwwmL957gHq8sW4DAYH8kg1FLnUnP6rCo2D4L3O89AZJNjJ6qMu4hnBhqUph4hT1g3ZnTo2B86xl2Rg4JrbGnm_uFupbh4JASayQ5glPXRuuBZDvJfarOQA4_Ea4dnJC6x3"/>
+<span class="font-medium">German</span>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-slate-300 dark:border-slate-700"></div>
+</div>
+</div>
+</section>
+<!-- Section: Currency -->
+<section class="mb-8">
+<h2 class="text-sm font-semibold uppercase tracking-widest text-slate-400 mb-4">Default Currency</h2>
+<div class="bg-white dark:bg-white/5 p-2 rounded-xl flex gap-1">
+<button class="flex-1 py-3 px-2 rounded-lg bg-primary text-white font-semibold text-sm shadow-lg shadow-primary/20">
+                    USD ($)
+                </button>
+<button class="flex-1 py-3 px-2 rounded-lg text-slate-500 dark:text-slate-400 font-semibold text-sm">
+                    EUR (€)
+                </button>
+<button class="flex-1 py-3 px-2 rounded-lg text-slate-500 dark:text-slate-400 font-semibold text-sm">
+                    Local
+                </button>
+</div>
+<p class="text-[10px] text-slate-500 mt-3 px-2 italic">Currency updates affect wallet displays and event ticket pricing.</p>
+</section>
+<!-- Section: Time Zone -->
+<section class="mb-8">
+<h2 class="text-sm font-semibold uppercase tracking-widest text-slate-400 mb-4">Regional Settings</h2>
+<div class="space-y-4">
+<div class="bg-white dark:bg-white/5 p-4 rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-icons">schedule</span>
+</div>
+<div>
+<span class="block text-xs text-slate-500">Time Zone</span>
+<span class="font-semibold">(GMT+01:00) Central Europe</span>
+</div>
+</div>
+<span class="material-icons text-slate-400">chevron_right</span>
+</div>
+<div class="bg-white dark:bg-white/5 p-4 rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-icons">calendar_today</span>
+</div>
+<div>
+<span class="block text-xs text-slate-500">Date Format</span>
+<span class="font-semibold">DD/MM/YYYY</span>
+</div>
+</div>
+<span class="material-icons text-slate-400">expand_more</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Action -->
+<div class="fixed bottom-0 left-0 right-0 p-6 ios-blur bg-background-light/80 dark:bg-background-dark/80 border-t border-slate-200 dark:border-white/5">
+<button class="w-full bg-primary py-4 rounded-xl text-white font-bold text-lg shadow-xl shadow-primary/30 active:scale-95 transition-transform">
+            Save Changes
+        </button>
+<div class="h-6 w-32 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto mt-4 opacity-50"></div> <!-- iOS Home Indicator -->
+</div>
+</body></html>

@@ -17,6 +17,8 @@ class Transaction extends Model
         'transcation_type',
         'customer_id',
         'organizer_id',
+        'venue_id',
+        'artist_id',
         'payment_status',
         'payment_method',
         'grand_total',

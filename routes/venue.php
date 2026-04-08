@@ -34,8 +34,6 @@ Route::prefix('/venue')->middleware('auth:venue', 'adminLang')->group(function (
     Route::post('/event/{id}/update-status', 'BackEnd\Venue\EventController@updateStatus')->name('venue.event_management.event.event_status');
     Route::post('/delete-event/{id}', 'BackEnd\Venue\EventController@destroy')->name('venue.event_management.delete_event');
     Route::get('/edit-event/{id}', 'BackEnd\Venue\EventController@edit')->name('venue.event_management.edit_event');
-    Route::get('/event/{id}/qr', 'BackEnd\Venue\EventController@qr')->name('venue.event_management.qr');
-    Route::get('/event/{id}/qr/download', 'BackEnd\Venue\EventController@downloadQr')->name('venue.event_management.qr_download');
     Route::post('/event-update', 'BackEnd\Venue\EventController@update')->name('venue.event.update');
     Route::post('bulk/delete/event', 'BackEnd\Venue\EventController@bulk_delete')->name('venue.event_management.bulk_delete_event');
 
@@ -47,23 +45,11 @@ Route::prefix('/venue')->middleware('auth:venue', 'adminLang')->group(function (
     Route::get('/event-bookings', 'BackEnd\Venue\BookingController@index')->name('venue.event.booking');
     Route::get('/event-booking/{id}/details', 'BackEnd\Venue\BookingController@details')->name('venue.event_booking.details');
     Route::get('/event-booking/report', 'BackEnd\Venue\BookingController@report')->name('venue.event_booking.report');
-    Route::prefix('/event-booking/reservations')->group(function () {
-        Route::get('', 'BackEnd\Venue\ReservationController@index')->name('venue.event_reservation.index');
-        Route::get('/export', 'BackEnd\Venue\ReservationController@export')->name('venue.event_reservation.export');
-        Route::get('/{id}', 'BackEnd\Venue\ReservationController@show')->name('venue.event_reservation.details');
-        Route::post('/{id}/extend', 'BackEnd\Venue\ReservationController@extend')->name('venue.event_reservation.extend');
-        Route::post('/{id}/cancel', 'BackEnd\Venue\ReservationController@cancel')->name('venue.event_reservation.cancel');
-        Route::post('/{id}/default', 'BackEnd\Venue\ReservationController@markDefaulted')->name('venue.event_reservation.default');
-        Route::post('/{id}/reactivate', 'BackEnd\Venue\ReservationController@reactivate')->name('venue.event_reservation.reactivate');
-        Route::post('/{id}/convert', 'BackEnd\Venue\ReservationController@convert')->name('venue.event_reservation.convert');
-    });
 
     // Withdrawals
     Route::get('/withdraw', 'BackEnd\Venue\WithdrawController@index')->name('venue.withdraw');
     Route::get('/withdraw/create', 'BackEnd\Venue\WithdrawController@create')->name('venue.withdraw.create');
     Route::post('/withdraw/store', 'BackEnd\Venue\WithdrawController@store')->name('venue.withdraw.store');
-    Route::get('/get-withdraw-method/input/{id}', 'BackEnd\Organizer\OrganizerWithdrawController@get_inputs')->name('venue.withdraw.get_inputs');
-    Route::get('/withdraw/balance-calculation/{method}/{amount}', 'BackEnd\Venue\WithdrawController@balance_calculation')->name('venue.withdraw.balance_calculation');
 
     // Support Tickets
     Route::get('/support-tickets', 'BackEnd\Venue\TicketController@index')->name('venue.support_tickets');

@@ -38,6 +38,13 @@ class User extends Authenticatable
   ];
 
   /**
+   * The accessors to append to the model's array form.
+   *
+   * @var array
+   */
+  protected $appends = ['is_vip'];
+
+  /**
    * The attributes that should be hidden for arrays.
    *
    * @var array
@@ -61,6 +68,11 @@ class User extends Authenticatable
     return $this->hasMany(CourseEnrolment::class, 'user_id', 'id');
   }
 
+  public function wallet()
+  {
+    return $this->hasOne(Wallet::class);
+  }
+
   public function review()
   {
     return $this->hasMany(CourseReview::class, 'user_id', 'id');
@@ -69,5 +81,38 @@ class User extends Authenticatable
   public function quizScore()
   {
     return $this->hasMany(QuizScore::class, 'user_id', 'id');
+  }
+
+  public function paymentMethods()
+  {
+    return $this->hasMany(PaymentMethod::class);
+  }
+
+  public function subscriptions()
+  {
+    return $this->hasMany(Subscription::class);
+  }
+
+  /**
+   * Check if the user has an active VIP subscription.
+   */
+  public function isVip(): bool
+  {
+    return $this->subscriptions()->active()->exists();
+  }
+
+  /**
+   * Accessor for is_vip attribute.
+   */
+  public function getIsVipAttribute(): bool
+  {
+    return $this->isVip();
+  }
+
+  public function usersIdentities()
+  {
+    return $this->belongsToMany(Identity::class, 'identity_members')
+      ->withPivot(['role', 'permissions', 'status'])
+      ->withTimestamps();
   }
 }

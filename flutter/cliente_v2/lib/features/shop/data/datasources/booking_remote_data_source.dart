@@ -28,8 +28,6 @@ class BookingRemoteDataSource {
         data: bookingData,
       );
       return response.data;
-<<<<<<< Updated upstream
-=======
       // Expected response for Stripe:
       // {
       //   "status": "success",
@@ -42,23 +40,9 @@ class BookingRemoteDataSource {
     }
   }
 
-  Future<Map<String, dynamic>> applyCoupon(Map<String, dynamic> data) async {
-    try {
-      final response = await _apiClient.dio.post(
-        AppUrls.eventCouponApply,
-        data: data,
-      );
-      return response.data;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Future<Map<String, dynamic>> getPaymentMethods() async {
     try {
-      final response = await _apiClient.dio.get(
-        '${AppUrls.apiBaseUrl}/customers/payment-methods',
-      );
+      final response = await _apiClient.dio.get('/customers/payment-methods');
       return response.data;
     } catch (e) {
       rethrow;
@@ -68,7 +52,7 @@ class BookingRemoteDataSource {
   Future<Map<String, dynamic>> createSetupIntent() async {
     try {
       final response = await _apiClient.dio.post(
-        '${AppUrls.apiBaseUrl}/customers/payment-methods/setup-intent',
+        '/customers/payment-methods/setup-intent',
       );
       return response.data;
     } catch (e) {
@@ -78,18 +62,8 @@ class BookingRemoteDataSource {
 
   Future<Map<String, dynamic>> getWallet() async {
     try {
-      final response = await _apiClient.dio.get(AppUrls.wallet);
+      final response = await _apiClient.dio.get('/customers/wallet');
       return response.data;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<Map<String, dynamic>> getBonusWallet() async {
-    try {
-      final response = await _apiClient.dio.get(AppUrls.bonusWallet);
-      return response.data;
->>>>>>> Stashed changes
     } catch (e) {
       rethrow;
     }

@@ -39,6 +39,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use PHPMailer\PHPMailer\PHPMailer;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -61,7 +62,7 @@ class BookingController extends Controller
     $event = Session::get('event');
 
     //when event type venue and selTickete is exits
-    if ($event->event_type == 'venue' &&  Session::has('selTickets')) {
+    if ($event->event_type == 'venue' && Session::has('selTickets')) {
       $selTickets = Session::get('selTickets');
       $selected_slot_seat = collect($selTickets)
         ->filter(function ($item) {
@@ -243,7 +244,7 @@ class BookingController extends Controller
           } else {
             //generate qr code for without wise ticket
             for ($i = 1; $i <= $bookingInfo->quantity; $i++) {
-              @unlink(public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $i .  '.svg');
+              @unlink(public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $i . '.svg');
             }
           }
           // then, update the invoice field info in database
@@ -282,6 +283,7 @@ class BookingController extends Controller
         }
       }
       $variations = Session::get('selTickets');
+      $ticketId = null;
       if ($variations) {
         foreach ($variations as $variation) {
           $ticket = Ticket::where('id', $variation['ticket_id'])->first();
@@ -292,11 +294,11 @@ class BookingController extends Controller
             }
           } elseif ($ticket->pricing_type == 'variation') {
 
-            $ticket_variations =  json_decode($ticket->variations, true);
+            $ticket_variations = json_decode($ticket->variations, true);
             $update_variation = [];
             foreach ($ticket_variations as $ticket_variation) {
               // when seat mapping enable not change ticket quantity;
-              if ($ticket_variation['name']  == $variation['name'] && $ticket_variation['slot_enable'] == 0) {
+              if ($ticket_variation['name'] == $variation['name'] && $ticket_variation['slot_enable'] == 0) {
                 if ($ticket_variation['ticket_available_type'] == 'limited') {
                   $ticket_available = intval($ticket_variation['ticket_available']) - intval($variation['qty']);
                 } else {
@@ -310,8 +312,8 @@ class BookingController extends Controller
                   'max_ticket_buy_type' => $ticket_variation['max_ticket_buy_type'],
                   'v_max_ticket_buy' => $ticket_variation['v_max_ticket_buy'],
                   'slot_enable' => $ticket_variation['slot_enable'] ?? 0,
-                  'slot_unique_id' =>  $ticket_variation['slot_unique_id'] ?? rand(000000, 99999),
-                  'slot_seat_min_price' =>  $ticket_variation['slot_seat_min_price'] ?? 0.00,
+                  'slot_unique_id' => $ticket_variation['slot_unique_id'] ?? rand(000000, 99999),
+                  'slot_seat_min_price' => $ticket_variation['slot_seat_min_price'] ?? 0.00,
                 ];
               } else {
                 $update_variation[] = [
@@ -322,8 +324,8 @@ class BookingController extends Controller
                   'max_ticket_buy_type' => $ticket_variation['max_ticket_buy_type'],
                   'v_max_ticket_buy' => $ticket_variation['v_max_ticket_buy'],
                   'slot_enable' => $ticket_variation['slot_enable'] ?? 0,
-                  'slot_unique_id' =>  $ticket_variation['slot_unique_id'] ?? rand(000000, 99999),
-                  'slot_seat_min_price' =>  $ticket_variation['slot_seat_min_price'] ?? 0.00,
+                  'slot_unique_id' => $ticket_variation['slot_unique_id'] ?? rand(000000, 99999),
+                  'slot_seat_min_price' => $ticket_variation['slot_seat_min_price'] ?? 0.00,
                 ];
               }
             }
@@ -340,6 +342,7 @@ class BookingController extends Controller
          * update selltickets for each ticket
          ******************************************/
         $variations = Session::get('selTickets');
+        $ticketId = $variations[0]['ticket_id'] ?? null;
         $c_variations = [];
         foreach ($variations as $variation) {
           for ($i = 1; $i <= $variation['qty']; $i++) {
@@ -353,19 +356,19 @@ class BookingController extends Controller
               'unique_id' => Str::random(9),
             ];
             $lastIndex = array_key_last($c_variations);
-            if (array_key_exists('seat_id',  $variation)) {
+            if (array_key_exists('seat_id', $variation)) {
               $c_variations[$lastIndex]['seat_id'] = $variation['seat_id'];
             }
-            if (array_key_exists('seat_name',  $variation)) {
+            if (array_key_exists('seat_name', $variation)) {
               $c_variations[$lastIndex]['seat_name'] = $variation['seat_name'];
             }
-            if (array_key_exists('slot_id',  $variation)) {
+            if (array_key_exists('slot_id', $variation)) {
               $c_variations[$lastIndex]['slot_id'] = $variation['slot_id'];
             }
-            if (array_key_exists('slot_name',  $variation)) {
+            if (array_key_exists('slot_name', $variation)) {
               $c_variations[$lastIndex]['slot_name'] = $variation['slot_name'];
             }
-            if (array_key_exists('slot_unique_id',  $variation)) {
+            if (array_key_exists('slot_unique_id', $variation)) {
               $c_variations[$lastIndex]['slot_unique_id'] = $variation['slot_unique_id'];
             }
           }
@@ -373,12 +376,13 @@ class BookingController extends Controller
         $variations = json_encode($c_variations);
       } else {
         $ticket = $event->ticket()->first();
-        $ticket->ticket_available = $ticket->ticket_available - (int)$info['quantity'];
+        $ticket->ticket_available = $ticket->ticket_available - (int) $info['quantity'];
         $ticket->save();
+        $ticketId = $ticket->id;
       }
 
-      $basic  = Basic::where('uniqid', 12345)->select('tax', 'commission')->first();
-      $booking = Booking::create([
+      $basic = Basic::where('uniqid', 12345)->select('tax', 'commission')->first();
+      $payload = [
         'customer_id' => Auth::guard('customer')->user()->id ?? 'guest',
         'booking_id' => uniqid(),
         'fname' => $info['fname'],
@@ -412,7 +416,13 @@ class BookingController extends Controller
         'attachmentFile' => array_key_exists('attachmentFile', $info) ? $info['attachmentFile'] : null,
         'conversation_id' => array_key_exists('conversation_id', $info) ? $info['conversation_id'] : null,
         'event_date' => Session::get('event_date'),
-      ]);
+      ];
+
+      if (Schema::hasColumn('bookings', 'ticket_id')) {
+        $payload['ticket_id'] = $ticketId;
+      }
+
+      $booking = Booking::create($payload);
 
       return $booking;
     } catch (\Exception $th) {
@@ -457,8 +467,16 @@ class BookingController extends Controller
     return redirect()->route('check-out');
   }
 
-  public function sendMail($bookingInfo)
+  public function sendMail($bookings)
   {
+    // Check if collection or single object (backward compatibility or safety)
+    if ($bookings instanceof \Illuminate\Support\Collection) {
+      $firstBooking = $bookings->first();
+    } else {
+      $firstBooking = $bookings;
+      $bookings = collect([$bookings]);
+    }
+
     // first get the mail template info from db
     $mailTemplate = MailTemplate::where('mail_type', 'event_booking')->first();
     $mailSubject = $mailTemplate->mail_subject;
@@ -469,12 +487,12 @@ class BookingController extends Controller
       ->select('website_title', 'smtp_status', 'smtp_host', 'smtp_port', 'encryption', 'smtp_username', 'smtp_password', 'from_mail', 'from_name')
       ->first();
 
-    $customerName = $bookingInfo->fname . ' ' . $bookingInfo->lname;
-    $orderId = $bookingInfo->booking_id;
+    $customerName = $firstBooking->fname . ' ' . $firstBooking->lname;
+    $orderId = $firstBooking->order_number ?? $firstBooking->booking_id; // Use order_number if available
 
     $language = $this->getLanguage();
-    $eventContent = EventContent::where('event_id', $bookingInfo->event_id)->where('language_id', $language->id)->first();
-    $event = Event::where('id', $bookingInfo->event_id)->first();
+    $eventContent = EventContent::where('event_id', $firstBooking->event_id)->where('language_id', $language->id)->first();
+    $event = Event::where('id', $firstBooking->event_id)->first();
     $eventTitle = $eventContent ? $eventContent->title : '';
 
     $websiteTitle = $info->website_title;
@@ -498,32 +516,33 @@ class BookingController extends Controller
     // if smtp status == 1, then set some value for PHPMailer
     if ($info->smtp_status == 1) {
       $mail->isSMTP();
-      $mail->Host       = $info->smtp_host;
-      $mail->SMTPAuth   = true;
-      $mail->Username   = $info->smtp_username;
-      $mail->Password   = $info->smtp_password;
+      $mail->Host = $info->smtp_host;
+      $mail->SMTPAuth = true;
+      $mail->Username = $info->smtp_username;
+      $mail->Password = $info->smtp_password;
 
       if ($info->encryption == 'TLS') {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
       }
 
-      $mail->Port       = $info->smtp_port;
+      $mail->Port = $info->smtp_port;
     }
 
     // finally add other informations and send the mail
     try {
       // Recipients
       $mail->setFrom($info->from_mail, $info->from_name);
-      $mail->addAddress($bookingInfo->email);
+      $mail->addAddress($firstBooking->email);
       // dd($bookingInfo->email);
 
       // Attachments (Invoice)
-      $mail->addAttachment(public_path('assets/admin/file/invoices/') . $bookingInfo->invoice);
+      // Invoice was saved to the first booking (and all others)
+      $mail->addAttachment(public_path('assets/admin/file/invoices/') . $firstBooking->invoice);
 
       // Content
       $mail->isHTML(true);
       $mail->Subject = $mailSubject;
-      $mail->Body    = $mailBody;
+      $mail->Body = $mailBody;
 
       $mail->send();
 
@@ -532,10 +551,18 @@ class BookingController extends Controller
       return session()->flash('error', 'Mail could not be sent! Mailer Error: ' . $e);
     }
   }
-  public function generateInvoice($bookingInfo, $eventId)
+  public function generateInvoice($bookings, $eventId)
   {
     try {
-      $fileName = $bookingInfo->booking_id . '.pdf';
+      if ($bookings instanceof \Illuminate\Support\Collection) {
+        $firstBooking = $bookings->first();
+      } else {
+        $firstBooking = $bookings;
+        $bookings = collect([$bookings]);
+      }
+
+      $orderId = $firstBooking->order_number ?? $firstBooking->booking_id;
+      $fileName = $orderId . '.pdf';
       $directory = public_path('assets/admin/file/invoices/');
 
       @mkdir($directory, 0775, true);
@@ -543,25 +570,28 @@ class BookingController extends Controller
       $fileLocated = $directory . $fileName;
       //generate qr code
       @mkdir(public_path('assets/admin/qrcodes/'), 0775, true);
-      if ($bookingInfo->variation != null) {
-        //generate qr code for without wise ticket
-        $variations = json_decode($bookingInfo->variation, true);
-        foreach ($variations as $variation) {
-          QrCode::size(200)->generate($bookingInfo->booking_id . '__' . $variation['unique_id'], public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $variation['unique_id'] . '.svg');
-        }
-      } else {
-        //generate qr code for without wise ticket
-        for ($i = 1; $i <= $bookingInfo->quantity; $i++) {
-          QrCode::size(200)->generate($bookingInfo->booking_id . '__' . $i, public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $i . '.svg');
+
+      foreach ($bookings as $bookingInfo) {
+        if ($bookingInfo->variation != null) {
+          //generate qr code for without wise ticket
+          $variations = json_decode($bookingInfo->variation, true);
+          foreach ($variations as $variation) {
+            QrCode::size(200)->generate($bookingInfo->booking_id . '__' . $variation['unique_id'], public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $variation['unique_id'] . '.svg');
+          }
+        } else {
+          //generate qr code for without wise ticket
+          for ($i = 1; $i <= $bookingInfo->quantity; $i++) {
+            QrCode::size(200)->generate($bookingInfo->booking_id . '__' . $i, public_path('assets/admin/qrcodes/') . $bookingInfo->booking_id . '__' . $i . '.svg');
+          }
         }
       }
       //generate qr code end
 
       // get course title
-      $language =  Language::where('is_default', 1)->first();
-      $event = Event::find($bookingInfo->event_id);
+      $language = Language::where('is_default', 1)->first();
+      $event = Event::find($firstBooking->event_id);
 
-      $eventInfo = EventContent::where('event_id', $bookingInfo->event_id)->where('language_id', $language->id)->first();
+      $eventInfo = EventContent::where('event_id', $firstBooking->event_id)->where('language_id', $language->id)->first();
 
       $width = "50%";
       $float = "right";
@@ -570,7 +600,8 @@ class BookingController extends Controller
 
       $websiteInfo = Basic::first();
 
-      PDF::loadView('frontend.event.invoice', compact('bookingInfo', 'event', 'eventInfo', 'width', 'float', 'mb', 'ml', 'language', 'websiteInfo'))->save($fileLocated);
+      // Pass $bookings collection to the view
+      PDF::loadView('frontend.event.invoice', compact('bookings', 'event', 'eventInfo', 'width', 'float', 'mb', 'ml', 'language', 'websiteInfo'))->save($fileLocated);
 
       return $fileName;
     } catch (\Exception $e) {
@@ -580,9 +611,9 @@ class BookingController extends Controller
       return "z";
     }
   }
-  public function slotBookedDeactiveCheck($selectedSlotSeat): bool
+  public function slotBookedDeactiveCheck($selectedSlotSeat, $event_id): bool
   {
-    $check =  app(\App\Services\BookingServices::class)->checkBookingAndDeactiveSlotSeat($selectedSlotSeat);
+    $check = app(\App\Services\BookingServices::class)->checkBookingAndDeactiveSlotSeat($selectedSlotSeat, $event_id);
     return $check;
   }
 }

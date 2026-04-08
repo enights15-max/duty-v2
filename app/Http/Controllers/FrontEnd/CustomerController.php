@@ -93,8 +93,9 @@ class CustomerController extends Controller
 
     // send a mail to user for verify his/her email address
     $mail_status = $this->sendVerificationMail($request, $token);
-    if($mail_status == false){
-      return redirect()->back()->with(['alert-type' => 'warning', 'message' => 'Mail could not be sent !']);;
+    if ($mail_status == false) {
+      return redirect()->back()->with(['alert-type' => 'warning', 'message' => 'Mail could not be sent !']);
+      ;
     }
     Customer::create($in);
 
@@ -127,16 +128,16 @@ class CustomerController extends Controller
     // if smtp status == 1, then set some value for PHPMailer
     if ($info->smtp_status == 1) {
       $mail->isSMTP();
-      $mail->Host       = $info->smtp_host;
-      $mail->SMTPAuth   = true;
-      $mail->Username   = $info->smtp_username;
-      $mail->Password   = $info->smtp_password;
+      $mail->Host = $info->smtp_host;
+      $mail->SMTPAuth = true;
+      $mail->Username = $info->smtp_username;
+      $mail->Password = $info->smtp_password;
 
       if ($info->encryption == 'TLS') {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
       }
 
-      $mail->Port       = $info->smtp_port;
+      $mail->Port = $info->smtp_port;
     }
 
     // finally add other informations and send the mail
@@ -156,7 +157,7 @@ class CustomerController extends Controller
     }
     return $mail_status;
   }
-  
+
   public function signupVerify(Request $request, $token)
   {
     try {
@@ -309,7 +310,7 @@ class CustomerController extends Controller
       ->first();
 
     $name = $user->name;
-    $token =  Str::random(32);
+    $token = Str::random(32);
     DB::table('password_resets')->insert([
       'email' => $user->email,
       'token' => $token,
@@ -329,16 +330,16 @@ class CustomerController extends Controller
     // if smtp status == 1, then set some value for PHPMailer
     if ($info->smtp_status == 1) {
       $mail->isSMTP();
-      $mail->Host       = $info->smtp_host;
-      $mail->SMTPAuth   = true;
-      $mail->Username   = $info->smtp_username;
-      $mail->Password   = $info->smtp_password;
+      $mail->Host = $info->smtp_host;
+      $mail->SMTPAuth = true;
+      $mail->Username = $info->smtp_username;
+      $mail->Password = $info->smtp_password;
 
       if ($info->encryption == 'TLS') {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
       }
 
-      $mail->Port       = $info->smtp_port;
+      $mail->Port = $info->smtp_port;
     }
 
     // finally add other informations and send the mail
@@ -377,7 +378,7 @@ class CustomerController extends Controller
     ]);
     $reset = DB::table('password_resets')->where('token', $request->token)->first();
     $email = $reset->email;
-    $customer = Customer::where('email',  $email)->first();
+    $customer = Customer::where('email', $email)->first();
     $customer->password = Hash::make($request->password);
     $customer->save();
     Session::flash('success', 'Your password has been reset.');
@@ -454,7 +455,9 @@ class CustomerController extends Controller
       'photo' => $request->hasFile('photo') ? 'mimes:jpg,jpeg,png' : ''
     ]);
 
-    $in = $request->all();
+    $in = $request->except('is_private');
+    $in['is_private'] = $request->is_private ? 1 : 0;
+
     $file = $request->file('photo');
     if ($file) {
       $extension = $file->getClientOriginalExtension();
@@ -550,7 +553,21 @@ class CustomerController extends Controller
         Auth::guard('customer')->login($createUser);
         return redirect()->route('customer.dashboard');
       }
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
+    }
+  }
+
+  public function publicProfile(Request $request, $username)
+  {
+    try {
+      $customer = Customer::where('username', $username)->firstOrFail();
+      
+      // If profile is private and user is not looking at their own profile, hide details
+      $is_owner = Auth::guard('customer')->check() && Auth::guard('customer')->user()->id == $customer->id;
+      
+      return view('frontend.customer.profile', compact('customer', 'is_owner'));
+    } catch (ModelNotFoundException $e) {
+      return view('errors.404');
     }
   }
 }

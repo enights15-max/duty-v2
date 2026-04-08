@@ -16,6 +16,7 @@ Route::prefix('/scanner')->group(function () {
       Route::get('/events', [OrganizerScannerController::class, 'events'])->name('api.organizer.events');
       Route::post('/ticket/scanned-status-change', [OrganizerScannerController::class, 'ticketScanStatusChanged'])->name('api.organizer.scanned_status_change');
       Route::post('/check-qrcode', [OrganizerScannerController::class, 'check_qrcode'])->name('api.organizer.check-qrcode');
+      Route::post('/claim-reward', [OrganizerScannerController::class, 'claimReward'])->name('api.organizer.claim_reward');
       Route::post('/logout', [OrganizerScannerController::class, 'logoutSubmit'])->name('api.organizer.logout');
     });
   });

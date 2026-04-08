@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:local_auth/local_auth.dart';
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/providers/profile_state_provider.dart';
+import '../../../../core/theme/colors.dart';
 import '../providers/auth_provider.dart';
-import '../widgets/auth_status_card.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -16,14 +19,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _keepSignedIn = true;
-
-  @override
-  void initState() {
-    super.initState();
-    final prefs = ref.read(sharedPreferencesProvider);
-    _keepSignedIn = prefs.getBool(AppConstants.keepSignedInKey) ?? true;
-  }
+  bool _keepSignedIn = false;
 
   @override
   void dispose() {
@@ -32,36 +28,32 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  void _login() {
-    ref
+  Future<void> _login() async {
+    final palette = context.dutyTheme;
+    final result = await ref
         .read(authControllerProvider.notifier)
-<<<<<<< Updated upstream
         .login(_usernameController.text, _passwordController.text);
-=======
-        .login(
-          _usernameController.text,
-          _passwordController.text,
-          keepSignedIn: _keepSignedIn,
-        );
 
     if (mounted && result != null) {
       final status = result['status'];
       if (status == 'success') {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Welcome back. Opening your scene...'),
             behavior: SnackBarBehavior.floating,
+            backgroundColor: palette.success,
           ),
         );
         await Future.delayed(const Duration(milliseconds: 300));
         if (!mounted) return;
-        context.go('/home');
+        context.go(ref.read(activeProfileLandingRouteProvider));
       } else if (status == 'needs_phone_verification') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               result['message'] ?? 'Please verify your phone number',
             ),
+            backgroundColor: palette.warning,
           ),
         );
         context.push('/verify-phone-link', extra: result['verification_token']);
@@ -70,13 +62,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _loginWithBiometrics() async {
+    final palette = context.dutyTheme;
     final auth = LocalAuthentication();
     final isFaceIdEnabled = ref.read(faceIdEnabledProvider);
 
     if (!isFaceIdEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Por favor, activa Face ID en Configuración primero.'),
+          backgroundColor: palette.warning,
         ),
       );
       return;
@@ -90,8 +84,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (!canAuthenticate) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Biometría no soportada en este dispositivo'),
+            backgroundColor: palette.warning,
           ),
         );
         return;
@@ -112,53 +107,52 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
         if (token != null && token.isNotEmpty) {
           // Ya hay sesión guardada y la biometría fue exitosa
-          context.go('/home');
+          context.go(ref.read(activeProfileLandingRouteProvider));
         } else {
           // Biometría exitosa pero no hay token (debe hacer login manual primero)
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Sesión expirada. Inicia sesión manualmente.'),
+              backgroundColor: palette.warning,
             ),
           );
         }
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error de Face ID: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error de Face ID: $e'),
+          backgroundColor: palette.danger,
+        ),
+      );
     }
->>>>>>> Stashed changes
   }
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     ref.listen<AsyncValue<void>>(authControllerProvider, (previous, next) {
       if (next.hasError) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(next.error.toString())));
-      } else if (!next.isLoading && !next.hasError && next.hasValue) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Login Exitoso!')));
-        context.go('/home');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error.toString()),
+            backgroundColor: palette.danger,
+          ),
+        );
       }
     });
 
     final authState = ref.watch(authControllerProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A), // Dark background
+      backgroundColor: palette.background,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: RadialGradient(
             center: Alignment.topRight,
             radius: 1.5,
-            colors: [
-              Color(0xFF2A1B3D), // Purple glow
-              Color(0xFF0F0F1A), // Dark base
-            ],
+            colors: [palette.heroGradientStart, palette.background],
           ),
         ),
         child: SafeArea(
@@ -176,10 +170,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         height: 30,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
+                          return Icon(
                             Icons.confirmation_number,
                             size: 80,
-                            color: Color(0xFF6200EE),
+                            color: palette.primary,
                           );
                         },
                       ),
@@ -197,89 +191,81 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 8),
                   Text(
                     'Access your unified events ecosystem.',
-                    textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.5),
+                      color: palette.textSecondary,
                       fontSize: 16,
                     ),
                   ),
-                  const SizedBox(height: 18),
-                  AuthStatusCard(
-                    icon: ref.watch(faceIdEnabledProvider)
-                        ? Icons.verified_user_rounded
-                        : Icons.login_rounded,
-                    title: ref.watch(faceIdEnabledProvider)
-                        ? 'This device is ready for quick unlock'
-                        : 'Use email, password, or phone login',
-                    subtitle: ref.watch(faceIdEnabledProvider)
-                        ? 'Your saved session can reopen with Face ID when you keep this device signed in.'
-                        : 'Email login gets you in fast. Phone OTP is available when you need a code-based fallback.',
-                  ),
                   const SizedBox(height: 40),
 
-                  // Biometrics mock
-                  Center(
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color(0xFF6200EE).withOpacity(0.3),
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF6200EE).withOpacity(0.1),
-                                blurRadius: 20,
-                                spreadRadius: 5,
+                  // Biometrics button
+                  if (ref.watch(faceIdEnabledProvider))
+                    Center(
+                      child: GestureDetector(
+                        onTap: _loginWithBiometrics,
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: palette.primary.withValues(alpha: 0.3),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: palette.primary.withValues(
+                                      alpha: 0.14,
+                                    ),
+                                    blurRadius: 20,
+                                    spreadRadius: 5,
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.face,
-                            size: 40,
-                            color: Colors.white,
-                          ),
+                              child: Icon(
+                                Icons.face,
+                                size: 40,
+                                color: palette.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Fast Login',
+                              style: TextStyle(
+                                color: palette.textPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'Face ID enabled',
+                              style: TextStyle(
+                                color: palette.textMuted,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Fast Login',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'Biometrics enabled',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.5),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-
-                  const SizedBox(height: 48),
+                  if (ref.watch(faceIdEnabledProvider))
+                    const SizedBox(height: 40),
 
                   // Inputs
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E2C).withOpacity(0.5),
+                      color: palette.surfaceAlt.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: palette.border),
                     ),
                     child: TextField(
                       controller: _usernameController,
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: palette.textPrimary),
                       decoration: InputDecoration(
                         labelText: 'Username',
-                        labelStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
-                        ),
+                        labelStyle: TextStyle(color: palette.textMuted),
                         prefixIcon: Icon(
                           Icons.person_outline,
-                          color: Colors.white.withOpacity(0.5),
+                          color: palette.textMuted,
                         ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
@@ -292,28 +278,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 16),
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E2C).withOpacity(0.5),
+                      color: palette.surfaceAlt.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: palette.border),
                     ),
                     child: TextField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: palette.textPrimary),
                       decoration: InputDecoration(
                         labelText: 'Security Password',
-                        labelStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
-                        ),
+                        labelStyle: TextStyle(color: palette.textMuted),
                         prefixIcon: Icon(
                           Icons.lock_outline,
-                          color: Colors.white.withOpacity(0.5),
+                          color: palette.textMuted,
                         ),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword
                                 ? Icons.visibility_off
                                 : Icons.visibility,
-                            color: Colors.white.withOpacity(0.5),
+                            color: palette.textMuted,
                           ),
                           onPressed: () {
                             setState(() {
@@ -342,16 +327,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             value: _keepSignedIn,
                             onChanged: (v) =>
                                 setState(() => _keepSignedIn = v!),
-                            activeColor: const Color(0xFF6200EE),
-                            side: BorderSide(
-                              color: Colors.white.withOpacity(0.5),
-                            ),
+                            activeColor: palette.primary,
+                            side: BorderSide(color: palette.textMuted),
                           ),
                           Text(
                             'Keep me signed in',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
-                            ),
+                            style: TextStyle(color: palette.textSecondary),
                           ),
                         ],
                       ),
@@ -364,9 +345,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               : '';
                           context.push('/forgot-password$query');
                         },
-                        child: const Text(
+                        child: Text(
                           'Forgot Password?',
-                          style: TextStyle(color: Color(0xFF6200EE)),
+                          style: TextStyle(color: palette.primary),
                         ),
                       ),
                     ],
@@ -383,8 +364,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ? 'We will keep your session available here and use Face ID lock if you enabled it.'
                         : 'Good for shared or temporary devices. You will need to sign in again next time.',
                     accentColor: _keepSignedIn
-                        ? const Color(0xFF8655F6)
-                        : const Color(0xFFF59E0B),
+                        ? palette.primary
+                        : palette.warning,
                   ),
 
                   const SizedBox(height: 24),
@@ -393,8 +374,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ElevatedButton(
                     onPressed: authState.isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
+                      backgroundColor: palette.primary,
+                      foregroundColor: palette.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 18),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -402,12 +383,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       elevation: 0,
                     ),
                     child: authState.isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.black,
+                              color: palette.onPrimary,
                             ),
                           )
                         : Text(
@@ -424,106 +405,42 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   // Alternative
                   Row(
                     children: [
-                      Expanded(
-<<<<<<< Updated upstream
-                        child: Divider(color: Colors.white.withOpacity(0.1)),
-=======
-                        child: Divider(
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
->>>>>>> Stashed changes
-                      ),
+                      Expanded(child: Divider(color: palette.border)),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           'ALTERNATIVE ACCESS',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.3),
+                            color: palette.textMuted,
                             fontSize: 10,
                             letterSpacing: 1.5,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                      Expanded(
-<<<<<<< Updated upstream
-                        child: Divider(color: Colors.white.withOpacity(0.1)),
-=======
-                        child: Divider(
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
->>>>>>> Stashed changes
-                      ),
+                      Expanded(child: Divider(color: palette.border)),
                     ],
                   ),
 
                   const SizedBox(height: 32),
 
                   // Social
-<<<<<<< Updated upstream
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.apple, color: Colors.white),
-                          label: const Text(
-                            'Apple',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: Colors.white.withOpacity(0.2),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-=======
                   const SizedBox(height: 32),
                   OutlinedButton.icon(
                     onPressed: () => context.push('/phone-login'),
-                    icon: const Icon(Icons.phone_android, color: Colors.white),
-                    label: const Text(
+                    icon: Icon(Icons.phone_android, color: palette.textPrimary),
+                    label: Text(
                       'Login with Phone Number',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: palette.textPrimary),
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.2),
-                      ),
+                      side: BorderSide(color: palette.borderStrong),
+                      backgroundColor: palette.surface,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
->>>>>>> Stashed changes
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.g_mobiledata,
-                            color: Colors.white,
-                            size: 28,
-                          ), // Mock Google Icon
-                          label: const Text(
-                            'Google',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: Colors.white.withOpacity(0.2),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
 
                   const SizedBox(height: 48),
@@ -539,7 +456,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             TextSpan(
                               text: 'Create Account',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: kTextPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

@@ -3,6 +3,7 @@
 namespace App\Models\Event;
 
 use App\Models\Event;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -39,11 +40,73 @@ class Ticket extends Model
     'free_tickete_slot_unique_id',
 
     'slot_seat_min_price',
+    'reservation_enabled',
+    'reservation_deposit_type',
+    'reservation_deposit_value',
+    'reservation_final_due_date',
+    'reservation_min_installment_amount',
+    'allow_promotional_resale',
+    'sale_status',
+    'archived_at',
+    'gate_ticket_id',
+    'gate_trigger',
+    'gate_trigger_date',
+  ];
+
+  protected $casts = [
+    'archived_at' => 'datetime',
+    'gate_trigger_date' => 'datetime',
+    'reservation_enabled' => 'boolean',
+    'allow_promotional_resale' => 'boolean',
+    'reservation_deposit_value' => 'float',
+    'reservation_min_installment_amount' => 'float',
+    'price' => 'float',
+    'f_price' => 'float',
+    'early_bird_discount_amount' => 'float',
   ];
 
   public function event()
   {
     return $this->belongsTo(Event::class,'event_id','id');
+  }
+
+  /**
+   * The ticket that gates (blocks) this ticket from being sold.
+   */
+  public function gateTicket()
+  {
+    return $this->belongsTo(self::class, 'gate_ticket_id');
+  }
+
+  /**
+   * Tickets that are gated (blocked) by this ticket.
+   */
+  public function gatedTickets()
+  {
+    return $this->hasMany(self::class, 'gate_ticket_id');
+  }
+
+  public function priceSchedules()
+  {
+    return $this->hasMany(TicketPriceSchedule::class, 'ticket_id')->orderBy('effective_from')->orderBy('sort_order');
+  }
+
+  public function contents()
+  {
+    return $this->hasMany(TicketContent::class, 'ticket_id');
+  }
+
+  public function scopeSellable(Builder $query): Builder
+  {
+    if (Schema::hasColumn($this->getTable(), 'sale_status')) {
+      $query->where($this->getTable() . '.sale_status', 'active');
+    }
+
+    if (Schema::hasColumn($this->getTable(), 'archived_at')) {
+      $query->whereNull($this->getTable() . '.archived_at');
+    }
+
+    return $query;
   }
 
     // when ticket delete

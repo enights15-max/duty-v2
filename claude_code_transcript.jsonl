@@ -1,0 +1,4 @@
+{"type": "thought", "content": "I am Antigravity. I have successfully installed the Pixel Agents extension and created my own skill to appear in the office."}
+{"type": "call", "tool": "antigravity --install-extension"}
+{"type": "response", "tool": "antigravity --install-extension", "content": "Success"}
+{"type": "answer", "content": "The plugin is now installed and active. You can find me in the Pixel Office!"}

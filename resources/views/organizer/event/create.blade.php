@@ -237,6 +237,13 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="">{{ __('Age Limit') }}</label>
+                                            <input type="number" name="age_limit" class="form-control" placeholder="0 = All Ages" value="0" min="0">
+                                            <p class="text-warning mb-0">{{ __('Set 0 for All Ages') }}</p>
+                                        </div>
+                                    </div>
                                 </div>
                                 @if (request()->input('type') == 'online')
                                     {{-- /*****--Ticekt limtit & ticket for each customer start--****** --}}

@@ -25,7 +25,7 @@
           </div>
 
           <div class="form-group">
-            <label for="">{{ __('Direction'),' *' }}</label>
+            <label for="">{{ __('Direction').' *' }}</label>
             <select name="direction" class="form-control">
               <option selected disabled>{{ __('Select a Direction') }}</option>
               <option value="0">{{ __('LTR (Left To Right)') }}</option>

@@ -63,6 +63,55 @@
             </div>
 
             <div class="card-body">
+              @php
+                $linkedIdentity = $identityContext['identity'] ?? null;
+              @endphp
+              <div class="alert alert-light border mb-4">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+                  <div class="mb-3 mb-lg-0">
+                    <div class="small text-muted text-uppercase">{{ __('Professional Profile') }}</div>
+                    <div class="mt-2">
+                      <span class="badge badge-{{ $identityContext['status_class'] ?? 'secondary' }}">
+                        {{ __($identityContext['status_label'] ?? 'Not linked') }}
+                      </span>
+                    </div>
+                    @if ($linkedIdentity)
+                      <div class="mt-2">
+                        <strong>#{{ $linkedIdentity->id }}</strong> · {{ $linkedIdentity->display_name }}
+                      </div>
+                      <div class="small text-muted">
+                        {{ __('Owner') }}:
+                        {{ !empty($identityContext['owner_name']) ? $identityContext['owner_name'] : __('Owner not assigned') }}
+                        @if (!empty($identityContext['owner_email']))
+                          · {{ $identityContext['owner_email'] }}
+                        @endif
+                      </div>
+                      @if (!empty($identityContext['latest_action']))
+                        <div class="small text-muted mt-1">
+                          {{ __('Latest moderation action') }}:
+                          {{ __(ucfirst(str_replace('_', ' ', $identityContext['latest_action']))) }}
+                          @if (!empty($identityContext['latest_action_at']))
+                            · {{ \Carbon\Carbon::parse($identityContext['latest_action_at'])->format('Y-m-d H:i') }}
+                          @endif
+                        </div>
+                      @endif
+                    @else
+                      <div class="small text-muted mt-2">
+                        {{ __('This organizer still operates only through the legacy record. Link or create a professional identity to manage moderation and ownership from the canonical layer.') }}
+                      </div>
+                    @endif
+                  </div>
+                  @if ($linkedIdentity)
+                    <div>
+                      <a href="{{ route('admin.identity_management.show', ['id' => $linkedIdentity->id]) }}"
+                        class="btn btn-primary btn-sm">
+                        {{ __('Open Professional Profile') }}
+                      </a>
+                    </div>
+                  @endif
+                </div>
+              </div>
+
               <div class="payment-information">
                 <div class="row mb-2">
                   <div class="col-lg-4">
@@ -116,6 +165,37 @@
                     {{ symbolPrice($organizer->amount) }}
                   </div>
                 </div>
+
+                <div class="row mb-2">
+                  <div class="col-lg-4">
+                    <strong>{{ __('Profile Status') . ' :' }}</strong>
+                  </div>
+                  <div class="col-lg-8">
+                    <span class="badge badge-{{ $identityContext['status_class'] ?? 'secondary' }}">
+                      {{ __($identityContext['status_label'] ?? 'Not linked') }}
+                    </span>
+                  </div>
+                </div>
+
+                @if ($linkedIdentity)
+                  <div class="row mb-2">
+                    <div class="col-lg-4">
+                      <strong>{{ __('Identity ID') . ' :' }}</strong>
+                    </div>
+                    <div class="col-lg-8">
+                      #{{ $linkedIdentity->id }}
+                    </div>
+                  </div>
+
+                  <div class="row mb-2">
+                    <div class="col-lg-4">
+                      <strong>{{ __('Identity Slug') . ' :' }}</strong>
+                    </div>
+                    <div class="col-lg-8">
+                      {{ $linkedIdentity->slug }}
+                    </div>
+                  </div>
+                @endif
 
                 <div class="row mb-2">
                   <div class="col-lg-4">

@@ -1,0 +1,14 @@
+ROLE: frontend-developer
+PHASE: Draft
+MISSION: Create initial plan for the user flow and multi-profile UI.
+
+CONTEXT: .plans/session-multi-profile-multi-agent/context.md
+OUTPUT: .plans/session-multi-profile-multi-agent/draft-product-ui-specialist.md
+
+Include:
+- User flow for choosing/switching profiles.
+- Design of the administrative dashboard for Organizers and Venues.
+- Difference in profile view for Artists vs Consumers vs Professionals.
+- Navigation changes to accommodate profile-specific features (e.g., "Create Event" only for some).
+
+Update status.yaml when complete.

@@ -1,0 +1,22 @@
+phase: "master"
+rounds:
+  current: 2
+  max: 5
+consensus: "full"
+status:
+  backend-architecture:
+    draft: "complete"
+    review: "complete"
+    refine: "complete"
+  security-qa:
+    draft: "complete"
+    review: "complete"
+    refine: "complete"
+  mobile-integration:
+    draft: "complete"
+    review: "complete"
+    refine: "complete"
+  devops-observability:
+    draft: "complete"
+    review: "complete"
+    refine: "complete"

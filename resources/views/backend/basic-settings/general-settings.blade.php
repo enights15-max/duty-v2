@@ -249,6 +249,42 @@
                             </div>
 
                             <div class="col-lg-8 mx-auto">
+                                <h2 class="mt-3 text-warning">{{ __('Regional Defaults') }}</h2>
+                                <hr>
+                                <div class="alert alert-primary">
+                                    {{ __('Define the primary country and the list of supported countries for the app. For now Duty is optimized for the Dominican Republic, but you can expand this list later.') }}
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>{{ __('Primary Country ISO2') . '*' }}</label>
+                                            <input type="text" class="form-control ltr" name="app_default_country_iso2"
+                                                maxlength="2"
+                                                value="{{ old('app_default_country_iso2', $data->app_default_country_iso2 ?? ($regionalSettings['default_country_iso2'] ?? 'DO')) }}"
+                                                placeholder="DO">
+                                            @if ($errors->has('app_default_country_iso2'))
+                                                <p class="mb-0 text-danger">{{ $errors->first('app_default_country_iso2') }}</p>
+                                            @endif
+                                            <small class="text-muted">{{ __('Example: DO') }}</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>{{ __('Supported Country ISO2s') . '*' }}</label>
+                                            <input type="text" class="form-control ltr" name="app_supported_country_iso2s"
+                                                value="{{ old('app_supported_country_iso2s', implode(',', $regionalSettings['supported_country_iso2s'] ?? ['DO'])) }}"
+                                                placeholder="DO,PR">
+                                            @if ($errors->has('app_supported_country_iso2s'))
+                                                <p class="mb-0 text-danger">{{ $errors->first('app_supported_country_iso2s') }}</p>
+                                            @endif
+                                            <small class="text-muted">{{ __('Comma separated ISO2 codes. The primary country is always included automatically.') }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-8 mx-auto">
                                 <h2 class="mt-3 text-warning">{{ __('Website Appearance') }}</h2>
                                 <hr>
                                 <div class="row">

@@ -1,5 +1,9 @@
 @extends('backend.layout')
 
+@section('style')
+    @includeIf('backend.partials.scarlet-operations-workspace')
+@endsection
+
 @section('content')
     <div class="page-header">
         <h4 class="page-title">{{ __('Maintenance Mode') }}</h4>
@@ -24,9 +28,34 @@
         </ul>
     </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
+    <div class="ops-shell">
+        <div class="ops-hero">
+            <div class="ops-hero__grid">
+                <div>
+                    <span class="ops-hero__eyebrow">{{ __('Maintenance') }}</span>
+                    <h1 class="ops-hero__title">{{ __('Control the public downtime experience') }}</h1>
+                    <p class="ops-hero__copy">
+                        {{ __('Set the message, artwork and bypass token used when the public website enters maintenance mode. This is a high-sensitivity settings surface, so clarity matters.') }}
+                    </p>
+                </div>
+                <div class="ops-hero__meta">
+                    <div class="ops-hero__stat">
+                        <span class="ops-hero__stat-label">{{ __('Current status') }}</span>
+                        <span class="ops-hero__stat-value">{{ (int) $data->maintenance_status === 1 ? __('Active') : __('Inactive') }}</span>
+                        <span class="ops-hero__stat-note">{{ __('Public website availability right now') }}</span>
+                    </div>
+                    <div class="ops-hero__stat">
+                        <span class="ops-hero__stat-label">{{ __('Bypass token') }}</span>
+                        <span class="ops-hero__stat-value">{{ !empty($data->bypass_token) ? __('Configured') : __('Missing') }}</span>
+                        <span class="ops-hero__stat-note">{{ __('Use it to enter while maintenance is active') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card ops-panel">
                 <div class="card-header">
                     <div class="row">
                         <div class="col-lg-12">
@@ -41,6 +70,9 @@
                             <form id="maintenanceForm" action="{{ route('admin.basic_settings.update_maintenance_mode') }}"
                                 method="POST" enctype="multipart/form-data">
                                 @csrf
+                                <div class="scarlet-inline-note mb-4">
+                                    {{ __('Tip: keep the message short, direct and operational. If you enable maintenance for a deployment window, update the bypass token before sharing it internally.') }}
+                                </div>
                                 <div class="form-group">
                                     <label for="">{{ __('Maintenance Mode Image') . '*' }}</label>
                                     <br>

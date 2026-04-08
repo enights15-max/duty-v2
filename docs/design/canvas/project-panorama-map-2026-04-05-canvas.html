@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panorama Completo del Proyecto</title>
+  <style>
+    :root {
+      --bg: #0f0d13;
+      --bg-alt: #17131b;
+      --text: #f7f1eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, #1a141c 0%, var(--bg) 45%, var(--bg-alt) 100%);
+      color: var(--text);
+      font-family: Georgia, serif;
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+    }
+    .frame {
+      width: min(100%, 1840px);
+      background: rgba(255,255,255,0.02);
+      border: 1px solid #2b2530;
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: 0 28px 60px rgba(0,0,0,0.35);
+      overflow: auto;
+    }
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <canvas id="board" width="1800" height="1520"></canvas>
+  </div>
+  <script>
+    const STATUS = {
+      implemented: { label: "IMPLEMENTADO", color: "#238A57" },
+      advanced: { label: "MUY AVANZADO", color: "#C68500" },
+      transition: { label: "EN TRANSICION", color: "#4459E6" },
+      pending: { label: "PENDIENTE / NUEVA IDEA", color: "#C1121F" },
+    };
+
+    const sections = [
+      {
+        title: "Core Platform & Identity",
+        subtitle: "Cuenta, identidades, ownership y superficies base del producto",
+        x: 74, y: 286, w: 812, h: 372,
+        cards: [
+          ["Account Center + Identity Core", "perfil activo, switching, base canonica", "implemented"],
+          ["Scarlet Editorial System", "consumer app, pro mobile y admin web", "implemented"],
+          ["Event Ownership Identity-First", "owner_identity_id y authoring profesional", "implemented"],
+          ["Discovery / Search / Public Organizer", "profiles y discovery bastante alineados", "implemented"],
+          ["Customer Booking Identity-First", "falta rematar invoices y algunos gateways legacy", "advanced"],
+          ["Reviews / Reputation Identity-First", "queda deuda organizer legacy en algunos caminos", "advanced"],
+          ["Venue / Artist Public Maturity", "bastante bien, pero no tan maduro como organizer", "advanced"],
+          ["Chat / Polymorphic Messaging", "funciona, pero todavia no esta 100% identity-first", "transition"],
+          ["POS / Terminales", "todavia arrastra naming y ownership legacy", "transition"],
+        ],
+      },
+      {
+        title: "Consumer, Events & Experience",
+        subtitle: "Home, search, checkout, tickets, scanner, marketplace y experiencia publica",
+        x: 914, y: 286, w: 812, h: 372,
+        cards: [
+          ["Home / Search / Explore / Event Details", "migrados a Scarlet y bastante consistentes", "implemented"],
+          ["Checkout / Wallet / My Tickets", "surface principal de compra y post-compra lista", "implemented"],
+          ["Scanner / Transfer / Blackmarket", "flujo publico funcional y visualmente alineado", "implemented"],
+          ["Reservations Core", "reservas, pagos, expiracion y conversion a booking", "implemented"],
+          ["Loyalty + Tips + Rewards Base", "base funcional existente, aun expandible", "implemented"],
+          ["Marketplace Fallback & Purchase Rules", "inventario, visibilidad y compra alineados", "implemented"],
+          ["Ticket Rewards / Welcome Drink QR", "perks operativos ligados al ticket y claim por bar", "pending"],
+          ["Structured Event Details", "menos texto manual, mas modulos de datos", "pending"],
+          ["Community / Memberships", "revenue recurrente, perks y relacion organizer-audiencia", "pending"],
+        ],
+      },
+      {
+        title: "Professional, Treasury & Admin Operations",
+        subtitle: "Operacion financiera, collaborator economy, dashboards y tooling admin",
+        x: 74, y: 694, w: 812, h: 410,
+        cards: [
+          ["Professional Event Authoring", "create/edit, tickets, inventory, dashboard, stats", "implemented"],
+          ["Settlement Review + Reconciliation", "queue, detail, export y actions log en admin", "implemented"],
+          ["Refund Governance & Insights", "reason codes, flags, analytics, reporting", "implemented"],
+          ["Collaborator Economy v2", "fixed splits, gross basis, release modes, reconciliation", "implemented"],
+          ["Gateway Contract + Registry", "payments/refunds desacoplados y telemetry persistida", "implemented"],
+          ["Admin Web Scarlet + Ops Workspaces", "dashboard, economy, reservations, bookings, withdrawals", "implemented"],
+          ["Sponsors Catalog + Event Sponsors", "admin-curated sponsor list y seleccion por organizer", "pending"],
+          ["Promoter / Co-organizer Actor", "nueva capa profesional para collaboration y revenue split", "pending"],
+          ["Organizer CRM / Audience Ops", "members, segments, VIP lists, repeat buyers", "pending"],
+        ],
+      },
+      {
+        title: "Algorithms, Readiness & Remaining Closures",
+        subtitle: "Algoritmos core, runbooks, QA live y cierres tecnicos de salida",
+        x: 914, y: 694, w: 812, h: 410,
+        cards: [
+          ["Purchase Limits Hardened", "mixed variations, gift slots y guardrails reales", "implemented"],
+          ["Pricing Schedule Hardened", "fallbacks, sort order y start price corregidos", "implemented"],
+          ["Inventory / Waitlist / Marketplace Rules", "visibilidad y fallback alineados de punta a punta", "implemented"],
+          ["Live Readiness Tooling", "bundle, board, wrappers, runbook y check-only listos", "advanced"],
+          ["Staging Dry Run Real", "falta ejecutar con credenciales y evidencia real", "transition"],
+          ["Identity Residual in Legacy Invoices", "booking/payment/invoice paths aun con deuda puntual", "transition"],
+          ["Financial Reporting Executive Layer", "base operativa existe; puede crecer a reporting ejecutivo", "advanced"],
+          ["Feed Relevance / Social Ranking", "queda pendiente endurecer senales y cobertura", "transition"],
+          ["Marketplace Premium / Member Layer", "perks, acceso anticipado y ventajas para comunidad", "pending"],
+        ],
+      },
+    ];
+
+    const counts = sections.flatMap(s => s.cards).reduce((acc, card) => {
+      acc[card[2]] = (acc[card[2]] || 0) + 1;
+      return acc;
+    }, {});
+
+    const canvas = document.getElementById("board");
+    const ctx = canvas.getContext("2d");
+
+    function roundRect(x, y, w, h, r, fill, stroke) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+    }
+
+    function shadow(alpha = 0.32) {
+      ctx.shadowColor = `rgba(0,0,0,${alpha})`;
+      ctx.shadowBlur = 28;
+      ctx.shadowOffsetY = 18;
+    }
+
+    function clearShadow() {
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+    }
+
+    function drawText(text, x, y, options = {}) {
+      const { font = "16px Arial", color = "#FFF8F5", maxWidth, lineHeight = 18 } = options;
+      ctx.font = font;
+      ctx.fillStyle = color;
+      if (!maxWidth) {
+        ctx.fillText(text, x, y);
+        return y + lineHeight;
+      }
+      const words = text.split(" ");
+      let line = "";
+      let yy = y;
+      for (const word of words) {
+        const test = line ? `${line} ${word}` : word;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          ctx.fillText(line, x, yy);
+          line = word;
+          yy += lineHeight;
+        } else {
+          line = test;
+        }
+      }
+      if (line) ctx.fillText(line, x, yy);
+      return yy + lineHeight;
+    }
+
+    function background() {
+      const g = ctx.createLinearGradient(0, 0, 1800, 1520);
+      g.addColorStop(0, "#0F0D13");
+      g.addColorStop(1, "#17131B");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 1800, 1520);
+      roundRect(36, 30, 1728, 1460, 30, "rgba(255,255,255,0.02)", "#2B2530");
+    }
+
+    function header() {
+      ctx.fillStyle = "#F7F1EB";
+      ctx.font = "700 40px Georgia";
+      ctx.fillText("Panorama Completo del Proyecto", 74, 94);
+      ctx.fillStyle = "#CDBFC5";
+      ctx.font = "18px Arial";
+      ctx.fillText("Mapa visual de modulos implementados, muy avanzados, en transicion y nuevas ideas por construir", 74, 126);
+
+      shadow();
+      roundRect(74, 154, 1652, 96, 24, "#15121A", "#342C34");
+      clearShadow();
+
+      const legend = [
+        ["#238A57", "Implementado / estable"],
+        ["#C68500", "Muy avanzado / falta cierre"],
+        ["#4459E6", "En transicion / siguiente corte"],
+        ["#C1121F", "Pendiente / nueva idea"],
+      ];
+      let lx = 104;
+      for (const [color, label] of legend) {
+        roundRect(lx, 183, 18, 18, 6, color, null);
+        ctx.fillStyle = "#F3E8E9";
+        ctx.font = "700 14px Arial";
+        ctx.fillText(label, lx + 30, 197);
+        lx += ctx.measureText(label).width + 90;
+      }
+
+      ctx.fillStyle = "#FFF8F5";
+      ctx.font = "700 28px Arial";
+      ctx.fillText(String(counts.implemented || 0), 1284, 194);
+      ctx.fillStyle = "#D0C1C7";
+      ctx.font = "13px Arial";
+      ctx.fillText("implementados", 1326, 194);
+      const openCount = (counts.advanced || 0) + (counts.transition || 0) + (counts.pending || 0);
+      ctx.fillStyle = "#FFF8F5";
+      ctx.font = "700 28px Arial";
+      ctx.fillText(String(openCount), 1460, 194);
+      ctx.fillStyle = "#D0C1C7";
+      ctx.font = "13px Arial";
+      ctx.fillText("por cerrar o abrir", 1495, 194);
+    }
+
+    function drawSection(section) {
+      shadow();
+      roundRect(section.x, section.y, section.w, section.h, 28, "#17131B", "#342C34");
+      clearShadow();
+      const ag = ctx.createLinearGradient(section.x, section.y, section.x + section.w, section.y + 10);
+      ag.addColorStop(0, "#C1121F");
+      ag.addColorStop(1, "#8A0F18");
+      ctx.fillStyle = ag;
+      ctx.fillRect(section.x, section.y, section.w, 10);
+      ctx.fillStyle = "#FFF7F4";
+      ctx.font = "700 24px Arial";
+      ctx.fillText(section.title, section.x + 30, section.y + 42);
+      ctx.fillStyle = "#BFAFB7";
+      ctx.font = "14px Arial";
+      ctx.fillText(section.subtitle, section.x + 30, section.y + 66);
+
+      const cardW = 236;
+      const cardH = 92;
+      const gapX = 18;
+      const gapY = 18;
+      const startX = section.x + 30;
+      const startY = section.y + 100;
+
+      section.cards.forEach((card, idx) => {
+        const col = idx % 3;
+        const row = Math.floor(idx / 3);
+        const x = startX + col * (cardW + gapX);
+        const y = startY + row * (cardH + gapY);
+        const status = STATUS[card[2]];
+        roundRect(x, y, cardW, cardH, 18, status.color, null);
+        drawText(status.label, x + 18, y + 31, { font: "700 12px Arial", color: "#FFF8F5", maxWidth: cardW - 36, lineHeight: 12 });
+        drawText(card[0], x + 18, y + 56, { font: "700 16px Arial", color: "#FFF8F5", maxWidth: cardW - 36, lineHeight: 18 });
+        drawText(card[1], x + 18, y + 76, { font: "12px Arial", color: "#F1E5E8", maxWidth: cardW - 36, lineHeight: 14 });
+      });
+    }
+
+    function footer() {
+      shadow();
+      roundRect(74, 1142, 1652, 304, 28, "#141119", "#342C34");
+      clearShadow();
+      ctx.fillStyle = "#FFF7F4";
+      ctx.font = "700 24px Arial";
+      ctx.fillText("Lectura Ejecutiva", 104, 1186);
+
+      ctx.fillStyle = "#FFF8F5";
+      ctx.font = "700 16px Arial";
+      ctx.fillText("Lo que ya esta fuerte", 104, 1218);
+      drawText("Identity core, event authoring profesional, consumer purchase/post-purchase, treasury, refunds, collaborator economy, gateway contract, admin ops y gran parte del sistema visual.", 104, 1242, { font: "12px Arial", color: "#E5D8DB", maxWidth: 1500, lineHeight: 16 });
+
+      ctx.fillStyle = "#FFF8F5";
+      ctx.font = "700 16px Arial";
+      ctx.fillText("Lo que conviene cerrar antes de abrir demasiado", 104, 1282);
+      drawText("Staging dry run real, deuda residual identity-first en invoices/payment paths, reporting ejecutivo y algunos algoritmos sociales.", 104, 1306, { font: "12px Arial", color: "#E5D8DB", maxWidth: 1500, lineHeight: 16 });
+
+      ctx.fillStyle = "#FFF8F5";
+      ctx.font = "700 16px Arial";
+      ctx.fillText("Lo que mejor expande el negocio despues", 104, 1346);
+      drawText("1. Ticket Rewards  2. Sponsors  3. Promoter / Co-organizer  4. Structured Event Details  5. Community / Memberships.", 104, 1370, { font: "12px Arial", color: "#E5D8DB", maxWidth: 1500, lineHeight: 16 });
+      drawText("Si quieres foco: primero cerramos los dos o tres residuos criticos, y luego entramos al bloque comercial nuevo con una narrativa limpia de producto.", 104, 1410, { font: "12px Arial", color: "#E5D8DB", maxWidth: 1500, lineHeight: 16 });
+    }
+
+    function render() {
+      background();
+      header();
+      sections.forEach(drawSection);
+      footer();
+    }
+
+    render();
+  </script>
+</body>
+</html>

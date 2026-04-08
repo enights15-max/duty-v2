@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/colors.dart';
 
 class AuthStatusCard extends StatelessWidget {
   final IconData icon;
@@ -12,17 +13,18 @@ class AuthStatusCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
-    this.accentColor = const Color(0xFF8655F6),
+    this.accentColor = kPrimaryColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: palette.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: palette.border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,7 +47,7 @@ class AuthStatusCard extends StatelessWidget {
                 Text(
                   title,
                   style: GoogleFonts.outfit(
-                    color: Colors.white,
+                    color: palette.textPrimary,
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -54,7 +56,7 @@ class AuthStatusCard extends StatelessWidget {
                 Text(
                   subtitle,
                   style: GoogleFonts.inter(
-                    color: Colors.white.withValues(alpha: 0.64),
+                    color: palette.textSecondary,
                     fontSize: 13,
                     height: 1.45,
                   ),

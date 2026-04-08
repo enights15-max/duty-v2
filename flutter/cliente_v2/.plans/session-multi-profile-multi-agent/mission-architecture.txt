@@ -1,0 +1,14 @@
+ROLE: architect-review
+PHASE: Draft
+MISSION: Create initial plan for the multi-profile data structure and state management.
+
+CONTEXT: .plans/session-multi-profile-multi-agent/context.md
+OUTPUT: .plans/session-multi-profile-multi-agent/draft-architecture-specialist.md
+
+Include:
+- Data model for User, Profile, and Role.
+- How to handle the separation of "Admin User" and "Public Profile" for Organizers/Venues.
+- Riverpod providers for managing the active profile.
+- API structure for profile-specific actions.
+
+Update status.yaml when complete.

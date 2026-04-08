@@ -5,11 +5,17 @@ namespace App\Http\Controllers\ScannerApi;
 use App\Http\Controllers\Controller;
 use App\Models\Language;
 use App\Models\PaymentGateway\OnlineGateway;
+use App\Services\RegionalSettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class BasicController extends Controller
 {
+  public function __construct(
+    private RegionalSettingsService $regionalSettingsService
+  ) {
+  }
+
   /* *****************************
      * basic data
     * *****************************/
@@ -24,6 +30,7 @@ class BasicController extends Controller
     $basicData->mobile_favicon = asset('assets/img/mobile-interface/' . $basicData->mobile_favicon);
 
     $data['basic_data'] = $basicData;
+    $data['regional_settings'] = $this->regionalSettingsService->getSettings();
     $data['languages'] = Language::all();
 
     return response()->json([

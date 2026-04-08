@@ -13,14 +13,15 @@ use App\Models\Event;
 use App\Models\Event\Booking;
 use App\Models\Event\EventContent;
 use App\Models\Language;
-use App\Models\Organizer;
-use App\Models\OrganizerInfo;
+use App\Models\User;
+use App\Services\EventTicketRewardService;
+use App\Services\OrganizerPublicProfileService;
+use App\Support\PublicAssetUrl;
 use App\Rules\MatchEmailRule;
 use App\Traits\ApiFormatTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 
@@ -28,20 +29,24 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use PHPMailer\PHPMailer\PHPMailer;
 use Laravel\Socialite\Facades\Socialite;
+use Kreait\Firebase\Factory;
 
 class CustomerController extends Controller
 {
   use ApiFormatTrait;
 
   private $admin_user_name;
-  public function __construct()
-  {
+  protected OrganizerPublicProfileService $organizerPublicProfileService;
+  protected EventTicketRewardService $rewardService;
+
+  public function __construct(
+    OrganizerPublicProfileService $organizerPublicProfileService = null,
+    EventTicketRewardService $rewardService = null
+  ) {
     $admin = Admin::select('username')->first();
-<<<<<<< Updated upstream
-    $this->admin_user_name = $admin->username;
-=======
     $this->admin_user_name = $admin->username ?? '';
     $this->organizerPublicProfileService = $organizerPublicProfileService ?? app(OrganizerPublicProfileService::class);
+    $this->rewardService = $rewardService ?? app(EventTicketRewardService::class);
   }
 
   private function downloadProfilePhoto($url)
@@ -311,13 +316,31 @@ class CustomerController extends Controller
 
     $this->ensurePersonalIdentity($user, $customer);
 
-    $identities = $user->usersIdentities()->get()->map(function ($identity) {
+    $identities = $user->usersIdentities()->get()->map(function ($identity) use ($customer) {
+      $meta = is_array($identity->meta) ? $identity->meta : [];
+      $avatarUrl = match ($identity->type) {
+        'artist' => PublicAssetUrl::url($meta['photo'] ?? $meta['image'] ?? null, 'assets/admin/img/artist'),
+        'venue' => PublicAssetUrl::url($meta['photo'] ?? $meta['image'] ?? null, 'assets/admin/img/venue'),
+        'organizer' => PublicAssetUrl::url($meta['photo'] ?? $meta['image'] ?? null, 'assets/admin/img/organizer-photo'),
+        default => PublicAssetUrl::url($customer->photo, 'assets/admin/img/customer-profile'),
+      };
+      $coverPhotoUrl = match ($identity->type) {
+        'artist' => PublicAssetUrl::url($meta['cover_photo'] ?? null, 'assets/admin/img/artist'),
+        'venue' => PublicAssetUrl::url($meta['cover_photo'] ?? null, 'assets/admin/img/venue'),
+        'organizer' => PublicAssetUrl::url($meta['cover_photo'] ?? null, 'assets/admin/img/organizer-cover'),
+        default => null,
+      };
+
       return [
         'id' => $identity->id,
         'type' => $identity->type,
         'display_name' => $identity->display_name,
+        'slug' => $identity->slug,
         'status' => $identity->status,
         'role' => $identity->pivot->role,
+        'avatar_url' => $avatarUrl,
+        'cover_photo_url' => $coverPhotoUrl,
+        'meta' => $meta,
       ];
     })->values()->all();
 
@@ -366,12 +389,11 @@ class CustomerController extends Controller
     $admin = Admin::first();
 
     return $this->format_organizer_data($admin, 'admin');
->>>>>>> Stashed changes
   }
 
   /* ******************************
-     * Show login page
-     * ******************************/
+   * Show login page
+   * ******************************/
   public function login(Request $request)
   {
     //get language
@@ -391,8 +413,8 @@ class CustomerController extends Controller
   }
 
   /* ********************************
-     * Submit login for authentication
-     * ********************************/
+   * Submit login for authentication
+   * ********************************/
   public function loginSubmit(Request $request)
   {
     $rules = [
@@ -429,39 +451,48 @@ class CustomerController extends Controller
       ], 401);
     }
 
-    if (is_null($customer->email_verified_at)) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Please verify your email address.'
-      ], 403);
-    }
+    // Removing forced email and phone verification requirements from login
+    // Users can now log in without verified emails or phones.
+    // Verification is enforced at the checkout step.
 
-    if ($customer->status == 0) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Sorry, your account has been deactivated.'
-      ], 403);
-    }
-
-    // Delete old tokens and create new one
-    $customer->tokens()->where('name', 'customer-login')->delete();
-    $token = $customer->createToken($request->device_name ?? 'unknown-device')->plainTextToken;
+    // Delete ALL old tokens and create new one (prevents stale token buildup)
+    $customer->tokens()->delete();
+    $token = $customer->createToken($request->device_name ?? 'mobile')->plainTextToken;
 
     // Add full photo URL if exists
     if (!empty($customer->photo)) {
       $customer->photo = asset('assets/admin/img/customer-profile/' . $customer->photo);
     }
-    Auth::guard('sanctum')->user($customer);
+
+    // Get identities for the user
+    $user = \App\Models\User::where('email', $customer->email)->first();
+    $identities = [];
+    $defaultIdentityId = null;
+
+    if ($user) {
+      $identities = $user->usersIdentities()->get()->map(function ($identity) {
+        return [
+          'id' => $identity->id,
+          'type' => $identity->type,
+          'display_name' => $identity->display_name,
+          'status' => $identity->status,
+          'role' => $identity->pivot->role,
+        ];
+      });
+
+      $personalIdentity = $identities->where('type', 'personal')->first();
+      $defaultIdentityId = $personalIdentity ? $personalIdentity['id'] : null;
+    }
 
     return response()->json([
       'status' => 'success',
       'customer' => $customer,
-      'token' => $token
+      'token' => $token,
+      'identities' => $identities,
+      'default_identity_id' => $defaultIdentityId
     ], 200);
   }
 
-<<<<<<< Updated upstream
-=======
   /**
    * Handle Login/Signup via Firebase verified token
    */
@@ -477,14 +508,16 @@ class CustomerController extends Controller
     }
 
     try {
-      $firebaseIdentity = $this->resolveFirebaseIdentity($request->idToken);
-      $uid = $firebaseIdentity['uid'] ?? null;
-      $phone = $firebaseIdentity['phone'] ?? null;
-      $firebasePhotoUrl = $firebaseIdentity['photo_url'] ?? null;
+      // 1. Initialize Firebase
+      $firebase_admin_json = DB::table('basic_settings')->where('uniqid', 12345)->value('firebase_admin_json');
+      $factory = (new Factory)->withServiceAccount(public_path('assets/file/') . $firebase_admin_json);
+      $auth = $factory->createAuth();
 
-      if (!$uid) {
-        return response()->json(['status' => 'error', 'message' => 'Firebase identity could not be resolved'], 400);
-      }
+      // 2. Verify idToken
+      $verifiedIdToken = $auth->verifyIdToken($request->idToken);
+      $uid = $verifiedIdToken->claims()->get('sub');
+      $firebaseUser = $auth->getUser($uid);
+      $phone = $firebaseUser->phoneNumber;
 
       if (!$phone) {
         return response()->json(['status' => 'error', 'message' => 'Phone number not found in token'], 400);
@@ -516,16 +549,10 @@ class CustomerController extends Controller
         ], 200);
       }
 
-      // Update firebase_uid, photo and phone_verified_at if needed
+      // Update firebase_uid and phone_verified_at if needed
       $updates = ['phone_verified_at' => now()];
       if (!$customer->firebase_uid) {
         $updates['firebase_uid'] = $uid;
-      }
-      if (empty($customer->photo) && !empty($firebasePhotoUrl)) {
-        $localPhoto = $this->downloadProfilePhoto($firebasePhotoUrl);
-        if ($localPhoto) {
-          $updates['photo'] = $localPhoto;
-        }
       }
       $customer->update($updates);
 
@@ -550,14 +577,32 @@ class CustomerController extends Controller
       $customer->tokens()->delete();
       $token = $customer->createToken($request->device_name ?? 'mobile')->plainTextToken;
 
-      $identityPayload = $this->buildIdentityPayload($customer);
+      // Get identities for the user
+      $user = \App\Models\User::where('email', $customer->email)->first();
+      $identities = [];
+      $defaultIdentityId = null;
+
+      if ($user) {
+        $identities = $user->usersIdentities()->get()->map(function ($identity) {
+          return [
+            'id' => $identity->id,
+            'type' => $identity->type,
+            'display_name' => $identity->display_name,
+            'status' => $identity->status,
+            'role' => $identity->pivot->role,
+          ];
+        });
+
+        $personalIdentity = $identities->where('type', 'personal')->first();
+        $defaultIdentityId = $personalIdentity ? $personalIdentity['id'] : null;
+      }
 
       return response()->json([
         'status' => 'success',
         'customer' => $customer,
         'token' => $token,
-        'identities' => $identityPayload['identities'],
-        'default_identity_id' => $identityPayload['default_identity_id']
+        'identities' => $identities,
+        'default_identity_id' => $defaultIdentityId
       ], 200);
 
     } catch (\Exception $e) {
@@ -583,14 +628,16 @@ class CustomerController extends Controller
     }
 
     try {
-      $firebaseIdentity = $this->resolveFirebaseIdentity($request->idToken);
-      $uid = $firebaseIdentity['uid'] ?? null;
-      $phone = $firebaseIdentity['phone'] ?? null;
-      $firebasePhotoUrl = $firebaseIdentity['photo_url'] ?? null;
+      // 1. Initialize Firebase
+      $firebase_admin_json = DB::table('basic_settings')->where('uniqid', 12345)->value('firebase_admin_json');
+      $factory = (new Factory)->withServiceAccount(public_path('assets/file/') . $firebase_admin_json);
+      $auth = $factory->createAuth();
 
-      if (!$uid) {
-        return response()->json(['status' => 'error', 'message' => 'Firebase identity could not be resolved'], 400);
-      }
+      // 2. Verify idToken
+      $verifiedIdToken = $auth->verifyIdToken($request->idToken);
+      $uid = $verifiedIdToken->claims()->get('sub');
+      $firebaseUser = $auth->getUser($uid);
+      $phone = $firebaseUser->phoneNumber;
 
       if (!$phone) {
         return response()->json(['status' => 'error', 'message' => 'Phone number not found in token'], 400);
@@ -617,7 +664,6 @@ class CustomerController extends Controller
           'lname' => $request->lname,
           'email' => $request->email,
           'username' => 'user_' . Str::random(8),
-          'photo' => $this->downloadProfilePhoto($firebasePhotoUrl) ?? '',
           'phone' => $phone,
           'firebase_uid' => $uid,
           'status' => 1,
@@ -635,14 +681,32 @@ class CustomerController extends Controller
       // 4. Issue Sanctum Token
       $token = $customer->createToken($request->device_name ?? 'mobile')->plainTextToken;
 
-      $identityPayload = $this->buildIdentityPayload($customer);
+      // Get identities for the user
+      $user = \App\Models\User::where('email', $customer->email)->first();
+      $identities = [];
+      $defaultIdentityId = null;
+
+      if ($user) {
+        $identities = $user->usersIdentities()->get()->map(function ($identity) {
+          return [
+            'id' => $identity->id,
+            'type' => $identity->type,
+            'display_name' => $identity->display_name,
+            'status' => $identity->status,
+            'role' => $identity->pivot->role,
+          ];
+        });
+
+        $personalIdentity = $identities->where('type', 'personal')->first();
+        $defaultIdentityId = $personalIdentity ? $personalIdentity['id'] : null;
+      }
 
       return response()->json([
         'status' => 'success',
         'customer' => $customer,
         'token' => $token,
-        'identities' => $identityPayload['identities'],
-        'default_identity_id' => $identityPayload['default_identity_id']
+        'identities' => $identities,
+        'default_identity_id' => $defaultIdentityId
       ], 200);
 
     } catch (\Exception $e) {
@@ -681,14 +745,12 @@ class CustomerController extends Controller
     $customer->tokens()->where('name', 'customer-email-setup')->delete();
     $token = $customer->createToken($request->device_name ?? 'mobile')->plainTextToken;
 
-    $identityPayload = $this->buildIdentityPayload($customer);
-
     return response()->json([
       'status' => 'success',
       'customer' => $customer,
       'token' => $token,
-      'identities' => $identityPayload['identities'],
-      'default_identity_id' => $identityPayload['default_identity_id']
+      'identities' => [],
+      'default_identity_id' => null
     ], 200);
   }
 
@@ -712,14 +774,16 @@ class CustomerController extends Controller
     }
 
     try {
-      $firebaseIdentity = $this->resolveFirebaseIdentity($request->idToken);
-      $uid = $firebaseIdentity['uid'] ?? null;
-      $phone = $firebaseIdentity['phone'] ?? null;
-      $firebasePhotoUrl = $firebaseIdentity['photo_url'] ?? null;
+      // 1. Initialize Firebase
+      $firebase_admin_json = DB::table('basic_settings')->where('uniqid', 12345)->value('firebase_admin_json');
+      $factory = (new Factory)->withServiceAccount(public_path('assets/file/') . $firebase_admin_json);
+      $auth = $factory->createAuth();
 
-      if (!$uid) {
-        return response()->json(['status' => 'error', 'message' => 'Firebase identity could not be resolved'], 400);
-      }
+      // 2. Verify idToken
+      $verifiedIdToken = $auth->verifyIdToken($request->idToken);
+      $uid = $verifiedIdToken->claims()->get('sub');
+      $firebaseUser = $auth->getUser($uid);
+      $phone = $firebaseUser->phoneNumber;
 
       if (!$phone) {
         return response()->json(['status' => 'error', 'message' => 'Phone number not found in token'], 400);
@@ -732,35 +796,16 @@ class CustomerController extends Controller
       }
 
       // 4. Update customer
-      $updates = [
+      $customer->update([
         'phone' => $phone,
         'firebase_uid' => $uid,
         'phone_verified_at' => now(),
-      ];
-
-      if (empty($customer->photo) && !empty($firebasePhotoUrl)) {
-        $localPhoto = $this->downloadProfilePhoto($firebasePhotoUrl);
-        if ($localPhoto) {
-          $updates['photo'] = $localPhoto;
-        }
-      }
-
-      $customer->update($updates);
+      ]);
 
       // 5. Issue real Sanctum token
       $customer->tokens()->where('name', 'customer-phone-verification')->delete();
       $customer->tokens()->where('name', 'customer-login')->delete();
       $token = $customer->createToken($request->device_name ?? 'mobile')->plainTextToken;
-
-      $identityPayload = $this->buildIdentityPayload($customer);
-
-      return response()->json([
-        'status' => 'success',
-        'customer' => $customer,
-        'token' => $token,
-        'identities' => $identityPayload['identities'],
-        'default_identity_id' => $identityPayload['default_identity_id']
-      ], 200);
 
     } catch (\Exception $e) {
       \Log::error('verifyPhoneLink exception: ' . $e->getMessage());
@@ -803,11 +848,76 @@ class CustomerController extends Controller
 
     return response()->json($response, 200);
   }
->>>>>>> Stashed changes
 
   /* ******************************
-     * forget password
-  * ******************************/
+   * Account Verification Endpoints
+   * ******************************/
+
+  public function sendEmailVerification(Request $request)
+  {
+    $customer = Auth::guard('sanctum')->user();
+    if (!$customer) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthenticated.'], 401);
+    }
+
+    if ($customer->email_verified_at) {
+      return response()->json(['status' => 'error', 'message' => 'Email is already verified.'], 400);
+    }
+
+    try {
+      // Generate a 6-digit OTP
+      $otp = rand(100000, 999999);
+
+      // Store in password_resets for temporary holding (or custom table, but password_resets works)
+      \DB::table('password_resets')->updateOrInsert(
+        ['email' => $customer->email],
+        ['token' => $otp, 'created_at' => now()]
+      );
+
+      // Send basic email (using Mail facade for simplicity given the environment)
+      \Mail::raw("Your Duty verification code is: $otp", function ($message) use ($customer) {
+        $message->to($customer->email)
+          ->subject('Verify your email address');
+      });
+
+      return response()->json(['status' => 'success', 'message' => 'Verification code sent to email.']);
+    } catch (\Exception $e) {
+      \Log::error('sendEmailVerification error: ' . $e->getMessage());
+      return response()->json(['status' => 'error', 'message' => 'Could not send verification email.'], 500);
+    }
+  }
+
+  public function verifyEmailOtp(Request $request)
+  {
+    $customer = Auth::guard('sanctum')->user();
+    if (!$customer) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthenticated.'], 401);
+    }
+
+    $request->validate([
+      'otp' => 'required|numeric|digits:6'
+    ]);
+
+    $record = \DB::table('password_resets')
+      ->where('email', $customer->email)
+      ->first();
+
+    if (!$record || $record->token !== $request->otp) {
+      return response()->json(['status' => 'error', 'message' => 'Invalid or expired verification code.'], 400);
+    }
+
+    // Mark as verified
+    $customer->update(['email_verified_at' => now()]);
+
+    // Cleanup
+    \DB::table('password_resets')->where('email', $customer->email)->delete();
+
+    return response()->json(['status' => 'success', 'message' => 'Email verified successfully.']);
+  }
+
+  /* ******************************
+   * forget password
+   * ******************************/
 
   public function forget_mail(Request $request)
   {
@@ -861,16 +971,16 @@ class CustomerController extends Controller
     // if smtp status == 1, then set some value for PHPMailer
     if ($info->smtp_status == 1) {
       $mail->isSMTP();
-      $mail->Host       = $info->smtp_host;
-      $mail->SMTPAuth   = true;
-      $mail->Username   = $info->smtp_username;
-      $mail->Password   = $info->smtp_password;
+      $mail->Host = $info->smtp_host;
+      $mail->SMTPAuth = true;
+      $mail->Username = $info->smtp_username;
+      $mail->Password = $info->smtp_password;
 
       if ($info->encryption == 'TLS') {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
       }
 
-      $mail->Port       = $info->smtp_port;
+      $mail->Port = $info->smtp_port;
     }
 
     // finally add other informations and send the mail
@@ -899,8 +1009,8 @@ class CustomerController extends Controller
   }
 
   /* ******************************
-     * reset password
-  * ******************************/
+   * reset password
+   * ******************************/
 
 
   public function reset_password_submit(Request $request)
@@ -965,8 +1075,8 @@ class CustomerController extends Controller
   }
 
   /* ******************************
-     * Show customer signup page
-     * ******************************/
+   * Show customer signup page
+   * ******************************/
   public function signup(Request $request)
   {
     //get language
@@ -986,8 +1096,8 @@ class CustomerController extends Controller
   }
 
   /* **************************************
-     * Request for sign up as a new customer
-     * **************************************/
+   * Request for sign up as a new customer
+   * **************************************/
   public function signupSubmit(Request $request)
   {
     //validation rules
@@ -995,6 +1105,7 @@ class CustomerController extends Controller
       'fname' => 'required',
       'lname' => 'required',
       'email' => 'required|email|unique:customers',
+      'phone' => 'required|unique:customers',
       'username' => [
         'required',
         'alpha_dash',
@@ -1041,16 +1152,20 @@ class CustomerController extends Controller
     $customer_controller->sendVerificationMail($request, $token);
     $customer = Customer::create($in);
 
+    // Generate Sanctum token for auto-login
+    $authToken = $customer->createToken($request->device_name ?? 'mobile')->plainTextToken;
+
     return response()->json([
       'success' => true,
-      'message' => __('A verification mail has been sent to your email address'),
+      'message' => __('Registration successful. You are now logged in.'),
+      'token' => $authToken,
       'data' => $customer
     ]);
   }
 
   /* ****************************
-     * Customer Dashboard
-     * ****************************/
+   * Customer Dashboard
+   * ****************************/
   public function dashboard(Request $request)
   {
     $customer = Auth::guard('sanctum')->user();
@@ -1090,9 +1205,9 @@ class CustomerController extends Controller
       }
       $organizerName = isset($organizerInfo) && !is_null($organizerInfo) ? $organizerInfo->name : "";
 
-      $booking->event_title =  $event_title;
-      $booking->thumbnail =  asset('assets/admin/img/event/thumbnail/' . $thumbnail);
-      $booking->organizer_name =  $organizerName;
+      $booking->event_title = $event_title;
+      $booking->thumbnail = asset('assets/admin/img/event/thumbnail/' . $thumbnail);
+      $booking->organizer_name = $organizerName;
       return $booking;
     });
 
@@ -1105,10 +1220,17 @@ class CustomerController extends Controller
   }
 
   /* ****************************
-     * Customer bookings
-     * ****************************/
+   * Customer bookings
+   * ****************************/
   public function bookings(Request $request)
   {
+    // DEBUG: Log what the server receives
+    \Log::info('BOOKINGS DEBUG', [
+      'auth_header' => $request->header('Authorization'),
+      'bearer_token' => $request->bearerToken(),
+      'sanctum_user' => Auth::guard('sanctum')->user() ? Auth::guard('sanctum')->user()->id : 'NULL',
+    ]);
+
     // Authenticate customer
     $customer = Auth::guard('sanctum')->user();
     if (!$customer) {
@@ -1152,25 +1274,26 @@ class CustomerController extends Controller
       }
       $organizerName = isset($organizerInfo) && !is_null($organizerInfo) ? $organizerInfo->name : "";
 
-      $booking->event_title =  $event_title;
-      $booking->thumbnail =  asset('assets/admin/img/event/thumbnail/' . $thumbnail);
-      $booking->organizer_name =  $organizerName;
+      $booking->event_title = $event_title;
+      $booking->thumbnail = asset('assets/admin/img/event/thumbnail/' . $thumbnail);
+      $booking->organizer_name = $organizerName;
+      $booking->invoice = !empty($booking->invoice) ? asset('assets/admin/file/invoices/' . $booking->invoice) : null;
       return $booking;
     });
 
     //  Assign transformed bookings to data
-    $data['bookings'] = $bookingsData;
+    $data['bookings'] = $bookingsData->values();
 
     //  Return response
     return response()->json([
       'success' => true,
-      'data'    => $data,
+      'data' => $data,
     ]);
   }
 
   /* ****************************
-     * Customer booking details
-     * ****************************/
+   * Customer booking details
+   * ****************************/
   public function booking_details(Request $request)
   {
     // Authenticate customer
@@ -1207,9 +1330,6 @@ class CustomerController extends Controller
     //calculation total_paid
     $booking->total_paid = number_format($booking->price + $booking->tax, 2);
     // attached invoice with path
-<<<<<<< Updated upstream
-    $booking->invoice = !empty($booking->invoice) ? asset('assets/admin/file/invoices/'.$booking->invoice) : null;
-=======
     $booking->invoice = !empty($booking->invoice) ? asset('assets/admin/file/invoices/' . $booking->invoice) : null;
 
     // Load venue info
@@ -1223,7 +1343,9 @@ class CustomerController extends Controller
     $booking->venue_name = $event && $event->venue ? $event->venue->name : ($event?->venue_name_snapshot ?: null);
     $booking->event_end_date = $event ? $event->end_date_time : null;
 
->>>>>>> Stashed changes
+    $rewards = $this->rewardService->getRewardsForBooking($booking);
+    $booking->setAttribute('rewards', $rewards->values());
+
     $data['booking'] = $booking;
 
     //organizer
@@ -1237,16 +1359,19 @@ class CustomerController extends Controller
       $data['organizer'] = $this->format_organizer_data($admin, 'admin');
     }
 
+    // Rewards
+    $data['rewards'] = $rewards->values();
+
     //  Return response
     return response()->json([
       'success' => true,
-      'data'    => $data,
+      'data' => $data,
     ]);
   }
 
   /* **************************
-     * Edit profile
-     * **************************/
+   * Edit profile
+   * **************************/
   public function edit_profile(Request $request)
   {
     // Authenticate customer
@@ -1266,14 +1391,14 @@ class CustomerController extends Controller
 
     return response()->json([
       'success' => true,
-      'data'    => $data,
+      'data' => $data,
     ]);
   }
 
 
   /* **************************
-     * update profile
-     * **************************/
+   * update profile
+   * **************************/
   public function update_profile(Request $request)
   {
     // Authenticate customer
@@ -1299,7 +1424,8 @@ class CustomerController extends Controller
         "not_in:$this->admin_user_name",
         Rule::unique('customers', 'username')->ignore($customer->id)
       ],
-      'photo' => $request->hasFile('photo') ? 'mimes:jpg,jpeg,png' : ''
+      'date_of_birth' => 'nullable|date|before:today',
+      'photo' => $request->hasFile('photo') ? 'image|mimes:jpg,jpeg,png|max:10240' : ''
     ];
 
     $messages = [
@@ -1317,7 +1443,7 @@ class CustomerController extends Controller
 
     $in = $request->all();
     $file = $request->file('photo');
-    if ($file) {
+    if ($file && $file->isValid()) {
       $extension = $file->getClientOriginalExtension();
       $directory = public_path('assets/admin/img/customer-profile/');
       $fileName = uniqid() . '.' . $extension;
@@ -1329,13 +1455,17 @@ class CustomerController extends Controller
     Customer::find($id)->update($in);
 
     $customer_info = Customer::find($id);
-    $customer_info->photo = asset('assets/admin/img/customer-profile/' . $customer_info->photo);
+    $customer_payload = $customer_info ? $customer_info->toArray() : [];
+    $customer_payload['photo_url'] = PublicAssetUrl::url(
+      $customer_info?->photo,
+      'assets/admin/img/customer-profile'
+    );
 
-    $data['customer_info'] = $customer_info;
+    $data['customer_info'] = $customer_payload;
 
     return response()->json([
       'success' => true,
-      'data'    => $data,
+      'data' => $data,
       'message' => __('Updated Successfully')
     ]);
   }
@@ -1388,8 +1518,8 @@ class CustomerController extends Controller
   }
 
   /* **************************
-     * Logout customer
-     * **************************/
+   * Logout customer
+   * **************************/
   public function logoutSubmit(Request $request)
   {
     $request->user()->currentAccessToken()->delete();
@@ -1399,8 +1529,8 @@ class CustomerController extends Controller
     ], 200);
   }
   /*
-  * Login facebook
-  */
+   * Login facebook
+   */
   public function handleFacebookCallback()
   {
     return $this->authenticationViaProvider('facebook');
@@ -1411,8 +1541,8 @@ class CustomerController extends Controller
     return Socialite::driver('facebook')->redirect();
   }
   /*
-  * Handle Google Login
-  */
+   * Handle Google Login
+   */
   public function handleGoogleCallback(Request $request)
   {
     return $this->authenticationViaProvider('google');
@@ -1428,7 +1558,7 @@ class CustomerController extends Controller
     try {
 
       $user = Socialite::driver($driver)->user();
-      $isUser = Customer::where('provider_id', $user->id)->first();
+      $isUser = Customer::where('provider_id', $user->getId())->first();
 
       if ($isUser) {
         Auth::guard('sanctum')->login($isUser);
@@ -1449,11 +1579,11 @@ class CustomerController extends Controller
 
         $createUser = Customer::create([
           'photo' => $avatarName,
-          'fname' => $user->name,
-          'email' => $user->email,
-          'username' => $user->id,
+          'fname' => $user->getName(),
+          'email' => $user->getEmail(),
+          'username' => $user->getId(),
           'provider' => $driver,
-          'provider_id' => $user->id,
+          'provider_id' => $user->getId(),
           'password' => encrypt('123456'),
           'email_verified_at' => now()
         ]);

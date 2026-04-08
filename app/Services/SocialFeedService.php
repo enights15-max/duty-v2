@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Artist;
 use App\Models\Customer;
 use App\Models\Event;
 use App\Models\Event\Booking;
@@ -11,12 +12,13 @@ use App\Models\Organizer;
 use App\Models\Venue;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class SocialFeedService
 {
     public function __construct(
-        private readonly SocialVisibilityService $socialVisibilityService,
-        private readonly OrganizerPublicProfileService $organizerPublicProfileService
+        private SocialVisibilityService $socialVisibilityService,
+        private OrganizerPublicProfileService $organizerPublicProfileService
     ) {
     }
 
@@ -40,6 +42,13 @@ class SocialFeedService
             ->unique()
             ->values();
 
+        $followedArtistIds = $acceptedFollows
+            ->where('followable_type', Artist::class)
+            ->pluck('followable_id')
+            ->map(static fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
         $followedVenueIds = $acceptedFollows
             ->where('followable_type', Venue::class)
             ->pluck('followable_id')
@@ -48,9 +57,9 @@ class SocialFeedService
             ->values();
 
         $items = collect()
-            ->concat($this->buildFollowedAttendanceItems($viewer, $followedCustomerIds))
-            ->concat($this->buildFollowedInterestItems($viewer, $followedCustomerIds))
-            ->concat($this->buildFollowedProfileItems($followedOrganizerIds, $followedVenueIds, $languageId));
+            ->concat($this->buildFollowedAttendanceItems($viewer, $followedCustomerIds, $languageId))
+            ->concat($this->buildFollowedInterestItems($viewer, $followedCustomerIds, $languageId))
+            ->concat($this->buildFollowedProfileItems($followedOrganizerIds, $followedArtistIds, $followedVenueIds, $languageId));
 
         $deduped = collect();
         $seenEventIds = [];
@@ -79,13 +88,13 @@ class SocialFeedService
             'items' => $deduped->values()->all(),
             'summary' => [
                 'following_people_count' => $followedCustomerIds->count(),
-                'following_profiles_count' => $followedOrganizerIds->count() + $followedVenueIds->count(),
+                'following_profiles_count' => $followedOrganizerIds->count() + $followedArtistIds->count() + $followedVenueIds->count(),
                 'pending_requests_count' => $pendingRequests,
             ],
         ];
     }
 
-    private function buildFollowedAttendanceItems(Customer $viewer, Collection $followedCustomerIds): Collection
+    private function buildFollowedAttendanceItems(Customer $viewer, Collection $followedCustomerIds, ?int $languageId): Collection
     {
         if ($followedCustomerIds->isEmpty()) {
             return collect();
@@ -116,11 +125,12 @@ class SocialFeedService
             $customers,
             $viewer,
             'upcoming',
-            'followed_people_going'
+            'followed_people_going',
+            $languageId
         );
     }
 
-    private function buildFollowedInterestItems(Customer $viewer, Collection $followedCustomerIds): Collection
+    private function buildFollowedInterestItems(Customer $viewer, Collection $followedCustomerIds, ?int $languageId): Collection
     {
         if ($followedCustomerIds->isEmpty()) {
             return collect();
@@ -150,13 +160,19 @@ class SocialFeedService
             $customers,
             $viewer,
             'interested',
-            'followed_people_interested'
+            'followed_people_interested',
+            $languageId
         );
     }
 
-    private function buildFollowedProfileItems(Collection $followedOrganizerIds, Collection $followedVenueIds, ?int $languageId): Collection
+    private function buildFollowedProfileItems(
+        Collection $followedOrganizerIds,
+        Collection $followedArtistIds,
+        Collection $followedVenueIds,
+        ?int $languageId
+    ): Collection
     {
-        if ($followedOrganizerIds->isEmpty() && $followedVenueIds->isEmpty()) {
+        if ($followedOrganizerIds->isEmpty() && $followedArtistIds->isEmpty() && $followedVenueIds->isEmpty()) {
             return collect();
         }
 
@@ -208,7 +224,7 @@ class SocialFeedService
                 'event_contents.title',
             ]);
 
-        return $events->map(function ($event) use ($languageId, $followedVenueIds) {
+        $profileEvents = $events->map(function ($event) use ($languageId, $followedVenueIds) {
             $reason = $followedVenueIds->contains((int) ($event->venue_id ?? 0))
                 ? 'A place you follow is hosting this'
                 : 'From profiles you follow';
@@ -232,6 +248,64 @@ class SocialFeedService
                 'people_count' => 0,
             ];
         });
+
+        if ($followedArtistIds->isEmpty()) {
+            return $profileEvents;
+        }
+
+        $artistEvents = DB::table('event_artist')
+            ->join('events', 'events.id', '=', 'event_artist.event_id')
+            ->leftJoin('event_contents', function ($join) use ($languageId) {
+                $join->on('event_contents.event_id', '=', 'events.id');
+                if ($languageId !== null) {
+                    $join->where('event_contents.language_id', '=', $languageId);
+                }
+            })
+            ->join('artists', 'artists.id', '=', 'event_artist.artist_id')
+            ->whereIn('event_artist.artist_id', $followedArtistIds->all())
+            ->where('events.status', 1)
+            ->where(function ($query) {
+                $query->whereNull('events.end_date_time')
+                    ->orWhere('events.end_date_time', '>', now());
+            })
+            ->orderBy('events.start_date')
+            ->limit(12)
+            ->get([
+                'events.id as event_id',
+                'events.thumbnail',
+                'events.start_date',
+                'events.start_time',
+                'event_contents.address',
+                'events.event_type',
+                'events.organizer_id',
+                'events.owner_identity_id',
+                'artists.name as artist_name',
+                'event_contents.title',
+            ])
+            ->map(function ($event) use ($languageId) {
+                $artistName = trim((string) ($event->artist_name ?? 'An artist you follow'));
+
+                return [
+                    'event_id' => (int) $event->event_id,
+                    'title' => $event->title ?: ('Event #' . $event->event_id),
+                    'thumbnail' => $this->eventThumbnailUrl($event->thumbnail ?? null),
+                    'starts_at' => $event->start_date,
+                    'start_time' => $event->start_time,
+                    'organizer_name' => $this->organizerPublicProfileService->organizerNameForEvent(
+                        $event->owner_identity_id ?? null,
+                        $event->organizer_id ?? null,
+                        $languageId
+                    ),
+                    'address' => $event->address,
+                    'event_type' => $event->event_type,
+                    'reason_type' => 'followed_artist_event',
+                    'reason_label' => $artistName . ' is on this lineup',
+                    'people' => [],
+                    'people_count' => 0,
+                ];
+            });
+
+        return $profileEvents->concat($artistEvents)->values();
     }
 
     private function groupEventItemsFromCustomerActivity(
@@ -239,7 +313,8 @@ class SocialFeedService
         Collection $customers,
         Customer $viewer,
         string $visibilityKey,
-        string $reasonType
+        string $reasonType,
+        ?int $languageId = null
     ): Collection {
         $grouped = [];
 
@@ -290,9 +365,10 @@ class SocialFeedService
                     'start_time' => $event->start_time,
                     'organizer_name' => $this->organizerPublicProfileService->organizerNameForEvent(
                         $event->owner_identity_id,
-                        $event->organizer_id
+                        $event->organizer_id,
+                        $languageId
                     ),
-                    'address' => $event->address,
+                    'address' => $event->information?->address,
                     'event_type' => $event->event_type,
                     'reason_type' => $reasonType,
                     'reason_label' => $this->reasonLabel($reasonType, $people),

@@ -2,10 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/theme/colors.dart';
 import '../utils/phone_auth_utils.dart';
 import '../widgets/auth_status_card.dart';
 
@@ -39,23 +39,24 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
   }
 
   Future<void> _verifyPhone() async {
+    final palette = context.dutyTheme;
     final normalized = PhoneAuthUtils.normalizeDominicanPhone(
       selectedAreaCode: _selectedAreaCode,
       rawInput: _phoneController.text,
     );
     if (normalized == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
             'Enter a valid Dominican phone number. You can use 7 or 10 digits.',
           ),
+          backgroundColor: palette.warning,
         ),
       );
       return;
     }
-    _phoneController.text = normalized.localNumber;
-    _selectedAreaCode = normalized.areaCode;
-    final fullPhone = normalized.e164;
+
+    final fullPhone = _selectedAreaCode.replaceAll(' ', '') + phoneText;
 
     setState(() => _isLoading = true);
 
@@ -67,14 +68,13 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
         },
         verificationFailed: (FirebaseAuthException e) {
           setState(() => _isLoading = false);
-          appLog('Firebase Auth Error Code: ${e.code}');
-          appLog('Firebase Auth Error Message: ${e.message}');
+          debugPrint('Firebase Auth Error Code: ${e.code}');
+          debugPrint('Firebase Auth Error Message: ${e.message}');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                PhoneAuthUtils.codeSendErrorMessage(e.code, e.message),
-              ),
+              content: Text('Error [${e.code}]: ${e.message}'),
               duration: const Duration(seconds: 5),
+              backgroundColor: palette.danger,
             ),
           );
         },
@@ -82,42 +82,41 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
           setState(() => _isLoading = false);
           context.push(
             '/otp-verification',
-            extra: {
-              'verificationId': verificationId,
-              'phoneNumber': fullPhone,
-              'resendToken': resendToken,
-            },
+            extra: {'verificationId': verificationId, 'phoneNumber': fullPhone},
           );
         },
         codeAutoRetrievalTimeout: (String verificationId) {},
       );
     } catch (e) {
-      if (!mounted) return;
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Ocurrió un error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ocurrió un error: $e'),
+          backgroundColor: palette.danger,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.dutyTheme;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A),
+      backgroundColor: palette.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios, color: palette.textPrimary),
           onPressed: () => context.pop(),
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: RadialGradient(
             center: Alignment.topRight,
             radius: 1.5,
-            colors: [Color(0xFF2A1B3D), Color(0xFF0F0F1A)],
+            colors: [palette.heroGradientStart, palette.background],
           ),
         ),
         child: SafeArea(
@@ -130,7 +129,7 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
                 Text(
                   'Login with Phone',
                   style: GoogleFonts.outfit(
-                    color: Colors.white,
+                    color: palette.textPrimary,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
@@ -139,25 +138,16 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
                 Text(
                   'Enter your mobile number to receive a verification code.',
                   style: GoogleFonts.inter(
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: palette.textSecondary,
                     fontSize: 16,
                   ),
-                ),
-                const SizedBox(height: 18),
-                const AuthStatusCard(
-                  icon: Icons.sms_outlined,
-                  title: 'One-time code login',
-                  subtitle:
-                      'We will text a 6-digit code to your phone. In this beta we support Dominican numbers only.',
                 ),
                 const SizedBox(height: 48),
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E2C).withValues(alpha: 0.5),
+                    color: palette.surfaceAlt.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.1),
-                    ),
+                    border: Border.all(color: palette.border),
                   ),
                   child: Row(
                     children: [
@@ -166,13 +156,13 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _selectedAreaCode,
-                            dropdownColor: const Color(0xFF1E1E2C),
-                            icon: const Icon(
+                            dropdownColor: palette.surface,
+                            icon: Icon(
                               Icons.arrow_drop_down,
-                              color: Colors.white70,
+                              color: palette.textSecondary,
                             ),
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: palette.textPrimary,
                               fontSize: 16,
                             ),
                             onChanged: (String? newValue) {
@@ -196,7 +186,7 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
                       Container(
                         height: 24,
                         width: 1,
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: palette.border,
                         margin: const EdgeInsets.symmetric(horizontal: 12),
                       ),
                       Expanded(
@@ -206,7 +196,7 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
                           ],
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: palette.textPrimary),
                           maxLength: 10,
                           buildCounter:
                               (
@@ -217,9 +207,7 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
                               }) => null, // Hide counter
                           decoration: InputDecoration(
                             hintText: '8091234567 or 1234567',
-                            hintStyle: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.5),
-                            ),
+                            hintStyle: TextStyle(color: palette.textMuted),
                             border: InputBorder.none,
                             contentPadding: const EdgeInsets.symmetric(
                               vertical: 16,
@@ -236,20 +224,20 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
                       ? null
                       : _verifyPhone,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
+                    backgroundColor: palette.primary,
+                    foregroundColor: palette.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
                   child: _isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.black,
+                            color: palette.onPrimary,
                           ),
                         )
                       : Text(
@@ -265,7 +253,7 @@ class _PhoneLoginPageState extends ConsumerState<PhoneLoginPage> {
                   'Tip: you can type 1234567 or a full local number like 8091234567.',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
-                    color: Colors.white.withValues(alpha: 0.42),
+                    color: palette.textMuted,
                     fontSize: 12,
                     height: 1.45,
                   ),

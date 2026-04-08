@@ -1,6 +1,13 @@
 import '../../../core/services/app_link_service.dart';
 
-enum DutyScanType { event, transferRecipient, transferTicket, unsupported }
+enum DutyScanType {
+  event,
+  transferRecipient,
+  transferTicket,
+  wallet,
+  rewardClaim,
+  unsupported,
+}
 
 class DutyScanResult {
   const DutyScanResult._({
@@ -8,6 +15,8 @@ class DutyScanResult {
     this.eventId,
     this.recipientId,
     this.transferToken,
+    this.walletId,
+    this.rewardCode,
     required this.rawValue,
   });
 
@@ -15,6 +24,8 @@ class DutyScanResult {
   final int? eventId;
   final int? recipientId;
   final String? transferToken;
+  final String? walletId;
+  final String? rewardCode;
   final String rawValue;
 
   factory DutyScanResult.event({
@@ -50,6 +61,28 @@ class DutyScanResult {
     );
   }
 
+  factory DutyScanResult.wallet({
+    required String walletId,
+    required String rawValue,
+  }) {
+    return DutyScanResult._(
+      type: DutyScanType.wallet,
+      walletId: walletId,
+      rawValue: rawValue,
+    );
+  }
+
+  factory DutyScanResult.rewardClaim({
+    required String rewardCode,
+    required String rawValue,
+  }) {
+    return DutyScanResult._(
+      type: DutyScanType.rewardClaim,
+      rewardCode: rewardCode,
+      rawValue: rawValue,
+    );
+  }
+
   factory DutyScanResult.unsupported(String rawValue) {
     return DutyScanResult._(type: DutyScanType.unsupported, rawValue: rawValue);
   }
@@ -62,6 +95,13 @@ class DutyScanParser {
     final raw = rawValue.trim();
     if (raw.isEmpty) {
       return DutyScanResult.unsupported(rawValue);
+    }
+
+    if (raw.startsWith('duty-wallet://')) {
+      final walletId = raw.replaceFirst('duty-wallet://', '');
+      if (walletId.isNotEmpty) {
+        return DutyScanResult.wallet(walletId: walletId, rawValue: rawValue);
+      }
     }
 
     final uri = Uri.tryParse(raw);
@@ -86,6 +126,14 @@ class DutyScanParser {
     if (transferToken != null && transferToken.isNotEmpty) {
       return DutyScanResult.transferTicket(
         transferToken: transferToken,
+        rawValue: rawValue,
+      );
+    }
+
+    final rewardCode = AppLinkParser.rewardClaimCodeFromUri(uri);
+    if (rewardCode != null && rewardCode.isNotEmpty) {
+      return DutyScanResult.rewardClaim(
+        rewardCode: rewardCode,
         rawValue: rawValue,
       );
     }

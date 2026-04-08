@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1280" viewBox="0 0 1800 1280" fill="none">
+  <rect width="1800" height="1280" fill="#F6F2ED"/>
+  <rect x="60" y="60" width="1680" height="1160" rx="36" fill="#FFF8F5" stroke="#E4DCD8"/>
+  <text x="120" y="145" fill="#16121A" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">Scarlet Editorial System v2</text>
+  <text x="120" y="190" fill="#8C8391" font-family="Arial, Helvetica, sans-serif" font-size="24">Light-first admin and dark-first consumer palette with separated semantic states.</text>
+
+  <text x="120" y="260" fill="#16121A" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Brand Core</text>
+  <g transform="translate(120 290)">
+    <rect width="220" height="130" rx="24" fill="#C1121F"/>
+    <text x="20" y="42" fill="#FFF8F5" font-family="Arial" font-size="24" font-weight="700">Primary Scarlet</text>
+    <text x="20" y="82" fill="#F8D8DB" font-family="Arial" font-size="22">#C1121F</text>
+  </g>
+  <g transform="translate(360 290)">
+    <rect width="220" height="130" rx="24" fill="#8A0F18"/>
+    <text x="20" y="42" fill="#FFF8F5" font-family="Arial" font-size="24" font-weight="700">Primary Deep</text>
+    <text x="20" y="82" fill="#E6B7BC" font-family="Arial" font-size="22">#8A0F18</text>
+  </g>
+  <g transform="translate(600 290)">
+    <rect width="220" height="130" rx="24" fill="#E6B7BC"/>
+    <text x="20" y="42" fill="#2D1619" font-family="Arial" font-size="24" font-weight="700">Editorial Blush</text>
+    <text x="20" y="82" fill="#5D5564" font-family="Arial" font-size="22">#E6B7BC</text>
+  </g>
+  <g transform="translate(840 290)">
+    <rect width="220" height="130" rx="24" fill="#C84F5B"/>
+    <text x="20" y="42" fill="#FFF8F5" font-family="Arial" font-size="24" font-weight="700">Dust Rose</text>
+    <text x="20" y="82" fill="#F7D6DA" font-family="Arial" font-size="22">#C84F5B</text>
+  </g>
+  <g transform="translate(1080 290)">
+    <rect width="220" height="130" rx="24" fill="#D4A63C"/>
+    <text x="20" y="42" fill="#2D1619" font-family="Arial" font-size="24" font-weight="700">Warm Gold</text>
+    <text x="20" y="82" fill="#6E5A26" font-family="Arial" font-size="22">#D4A63C</text>
+  </g>
+  <g transform="translate(1320 290)">
+    <rect width="220" height="130" rx="24" fill="#2D1619"/>
+    <text x="20" y="42" fill="#FFF8F5" font-family="Arial" font-size="24" font-weight="700">Graphite Wine</text>
+    <text x="20" y="82" fill="#D6C2C5" font-family="Arial" font-size="22">#2D1619</text>
+  </g>
+
+  <text x="120" y="505" fill="#16121A" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Light Mode Foundation</text>
+  <g transform="translate(120 535)">
+    <rect width="690" height="270" rx="28" fill="#FFFFFF" stroke="#E4DCD8"/>
+    <rect x="28" y="28" width="634" height="56" rx="18" fill="#FFF8F5" stroke="#E4DCD8"/>
+    <circle cx="70" cy="56" r="11" fill="#C1121F"/>
+    <text x="100" y="63" fill="#16121A" font-family="Arial" font-size="24" font-weight="700">Light Admin Surface</text>
+    <rect x="28" y="108" width="194" height="126" rx="20" fill="#F4ECE5" stroke="#D7CAC4"/>
+    <rect x="242" y="108" width="194" height="126" rx="20" fill="#FFFFFF" stroke="#D7CAC4"/>
+    <rect x="456" y="108" width="178" height="126" rx="20" fill="#C1121F"/>
+    <text x="46" y="150" fill="#5D5564" font-family="Arial" font-size="21">Background</text>
+    <text x="46" y="186" fill="#16121A" font-family="Arial" font-size="22" font-weight="700">#F6F2ED</text>
+    <text x="260" y="150" fill="#5D5564" font-family="Arial" font-size="21">Surface</text>
+    <text x="260" y="186" fill="#16121A" font-family="Arial" font-size="22" font-weight="700">#FFF8F5</text>
+    <text x="476" y="150" fill="#FFF8F5" font-family="Arial" font-size="21">CTA</text>
+    <text x="476" y="186" fill="#FFF8F5" font-family="Arial" font-size="22" font-weight="700">#C1121F</text>
+  </g>
+
+  <text x="910" y="505" fill="#16121A" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Dark Mode Foundation</text>
+  <g transform="translate(910 535)">
+    <rect width="690" height="270" rx="28" fill="#120F15" stroke="#312936"/>
+    <rect x="28" y="28" width="634" height="56" rx="18" fill="#17131B" stroke="#312936"/>
+    <circle cx="70" cy="56" r="11" fill="#C1121F"/>
+    <text x="100" y="63" fill="#F5F1EB" font-family="Arial" font-size="24" font-weight="700">Dark Consumer Surface</text>
+    <rect x="28" y="108" width="194" height="126" rx="20" fill="#17131B" stroke="#312936"/>
+    <rect x="242" y="108" width="194" height="126" rx="20" fill="#211922" stroke="#453947"/>
+    <rect x="456" y="108" width="178" height="126" rx="20" fill="#8A0F18"/>
+    <text x="46" y="150" fill="#C7C0CC" font-family="Arial" font-size="21">Background</text>
+    <text x="46" y="186" fill="#F5F1EB" font-family="Arial" font-size="22" font-weight="700">#100E14</text>
+    <text x="260" y="150" fill="#C7C0CC" font-family="Arial" font-size="21">Surface</text>
+    <text x="260" y="186" fill="#F5F1EB" font-family="Arial" font-size="22" font-weight="700">#17131B</text>
+    <text x="476" y="150" fill="#FFF8F5" font-family="Arial" font-size="21">CTA</text>
+    <text x="476" y="186" fill="#FFF8F5" font-family="Arial" font-size="22" font-weight="700">#8A0F18</text>
+  </g>
+
+  <text x="120" y="890" fill="#16121A" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Semantic States</text>
+  <g transform="translate(120 925)">
+    <rect width="220" height="120" rx="20" fill="#238A57"/>
+    <text x="20" y="42" fill="#F3FFF7" font-family="Arial" font-size="24" font-weight="700">Success</text>
+    <text x="20" y="78" fill="#D7F4E3" font-family="Arial" font-size="22">#238A57</text>
+  </g>
+  <g transform="translate(360 925)">
+    <rect width="220" height="120" rx="20" fill="#C68500"/>
+    <text x="20" y="42" fill="#FFF9E9" font-family="Arial" font-size="24" font-weight="700">Warning</text>
+    <text x="20" y="78" fill="#FFE6A8" font-family="Arial" font-size="22">#C68500</text>
+  </g>
+  <g transform="translate(600 925)">
+    <rect width="220" height="120" rx="20" fill="#D32F2F"/>
+    <text x="20" y="42" fill="#FFF2F2" font-family="Arial" font-size="24" font-weight="700">Danger</text>
+    <text x="20" y="78" fill="#FFD3D3" font-family="Arial" font-size="22">#D32F2F</text>
+  </g>
+  <g transform="translate(840 925)">
+    <rect width="220" height="120" rx="20" fill="#4459E6"/>
+    <text x="20" y="42" fill="#F5F7FF" font-family="Arial" font-size="24" font-weight="700">Info</text>
+    <text x="20" y="78" fill="#DCE1FF" font-family="Arial" font-size="22">#4459E6</text>
+  </g>
+
+  <text x="1100" y="915" fill="#16121A" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Use it like this</text>
+  <text x="1100" y="960" fill="#5D5564" font-family="Arial" font-size="24">• Brand scarlet for CTA, active tabs, focus and identity.</text>
+  <text x="1100" y="1000" fill="#5D5564" font-family="Arial" font-size="24">• Keep error red separate from the brand red.</text>
+  <text x="1100" y="1040" fill="#5D5564" font-family="Arial" font-size="24">• Consumer app: dark-first.</text>
+  <text x="1100" y="1080" fill="#5D5564" font-family="Arial" font-size="24">• Admin and professional web: light-first.</text>
+  <text x="1100" y="1120" fill="#5D5564" font-family="Arial" font-size="24">• Use warm gold only for premium payout moments.</text>
+</svg>
