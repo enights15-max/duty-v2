@@ -1,30 +1,99 @@
-/public/assets/admin/img
-/node_modules
+# ============================================================
+# Laravel
+# ============================================================
+/vendor/
+/node_modules/
 /public/hot
-/public/updater
 /public/storage
+/public/updater
+/public/assets/admin/img
+/public/assets/admin/file/invoices/*.pdf
 /storage/*.key
-.env.backup
-.phpunit.result.cache
-docker-compose.override.yml
-Homestead.json
-Homestead.yaml
-npm-debug.log
-yarn-error.log
+bootstrap/cache/*.php
+
+# ============================================================
+# Environment & secrets
+# ============================================================
 .env
-<<<<<<< Updated upstream
-=======
-.staging-live-readiness.env
-.mobile-release.env
+.env.*
+!.env.example
+install/.env
+
+# ============================================================
+# Credentials & certificates
+# ============================================================
 AuthKey_*.p8
 *firebase-adminsdk-*.json
-*_v2tickets.sql
+google-services.json
+GoogleService-Info.plist
+client_*.plist
 *.mobileprovision
 *.cer
 *.csr
 *.key
->>>>>>> Stashed changes
+*.p12
+*.keystore
+
+# ============================================================
+# Database dumps
+# ============================================================
+*_v2tickets.sql
+backup_*.sql
+*.sql.gz
+
+# ============================================================
+# Install directory vendor
+# ============================================================
+/install/vendor/
+/install/node_modules/
+
+# ============================================================
+# Flutter
+# ============================================================
+flutter/**/build/
+flutter/**/.dart_tool/
+flutter/**/.flutter-plugins
+flutter/**/.flutter-plugins-dependencies
+flutter/**/.packages
+flutter/**/pubspec.lock
+flutter/**/android/local.properties
+flutter/**/android/key.properties
+flutter/**/ios/Pods/
+flutter/**/ios/Flutter/Generated.xcconfig
+flutter/**/ios/Flutter/flutter_export_environment.sh
+flutter/**/lib/firebase_options.dart
+
+# ============================================================
+# OS & editor
+# ============================================================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.iml
+
+# ============================================================
+# Testing & CI
+# ============================================================
+.phpunit.result.cache
 test-results/
 junit*.xml
+/coverage/
+
+# ============================================================
+# Logs & runtime
+# ============================================================
 error_log
-/public/assets/admin/file/invoices/*.pdf
+npm-debug.log
+yarn-error.log
+*.log
+
+# ============================================================
+# Misc Laravel dev tools
+# ============================================================
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+.env.backup
