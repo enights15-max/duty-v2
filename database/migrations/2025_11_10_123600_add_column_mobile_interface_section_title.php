@@ -13,10 +13,25 @@ return new class extends Migration
      */
     public function up()
     {
+        if (!Schema::hasTable('section_titles')) {
+            Schema::create('section_titles', function (Blueprint $table) {
+                $table->id();
+                $table->timestamps();
+            });
+        }
+
         Schema::table('section_titles', function (Blueprint $table) {
-            $table->string('category_title')->nullable();
-            $table->string('upcoming_event_title')->nullable();
-            $table->string('features_title')->nullable();
+            if (!Schema::hasColumn('section_titles', 'category_title')) {
+                $table->string('category_title')->nullable();
+            }
+
+            if (!Schema::hasColumn('section_titles', 'upcoming_event_title')) {
+                $table->string('upcoming_event_title')->nullable();
+            }
+
+            if (!Schema::hasColumn('section_titles', 'features_title')) {
+                $table->string('features_title')->nullable();
+            }
         });
     }
 
@@ -27,8 +42,22 @@ return new class extends Migration
      */
     public function down()
     {
+        if (!Schema::hasTable('section_titles')) {
+            return;
+        }
+
         Schema::table('section_titles', function (Blueprint $table) {
-            //
+            if (Schema::hasColumn('section_titles', 'category_title')) {
+                $table->dropColumn('category_title');
+            }
+
+            if (Schema::hasColumn('section_titles', 'upcoming_event_title')) {
+                $table->dropColumn('upcoming_event_title');
+            }
+
+            if (Schema::hasColumn('section_titles', 'features_title')) {
+                $table->dropColumn('features_title');
+            }
         });
     }
 };

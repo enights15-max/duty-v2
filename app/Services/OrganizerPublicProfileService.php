@@ -101,7 +101,7 @@ class OrganizerPublicProfileService
         $reviewCount = 0;
         $reviews = [];
 
-        if ($legacyId !== null) {
+        if ($legacyId !== null && Schema::hasTable('follows')) {
             $followersCount = DB::table('follows')
                 ->where('followable_id', $legacyId)
                 ->where('followable_type', Organizer::class)
@@ -472,7 +472,7 @@ class OrganizerPublicProfileService
 
     private function acceptedFollowerCounts(Collection $legacyIds): Collection
     {
-        if ($legacyIds->isEmpty()) {
+        if ($legacyIds->isEmpty() || !Schema::hasTable('follows')) {
             return collect();
         }
 

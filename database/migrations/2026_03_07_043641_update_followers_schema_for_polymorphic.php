@@ -12,6 +12,18 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (!Schema::hasTable('followers')) {
+            return;
+        }
+
+        if (!Schema::hasColumn('followers', 'organizer_id')) {
+            return;
+        }
+
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         try {
             Schema::table('followers', function (Blueprint $table) {
                 $table->dropForeign(['organizer_id']);
@@ -39,6 +51,10 @@ return new class extends Migration {
      */
     public function down()
     {
+        if (!Schema::hasTable('followers') || Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::table('followers', function (Blueprint $table) {
             $table->dropUnique('followers_polymorphic_unique');
             $table->unsignedBigInteger('organizer_id');

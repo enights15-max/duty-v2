@@ -92,7 +92,7 @@ class VenuePublicProfileService
         $averageRating = 0.0;
         $reviewCount = 0;
 
-        if ($legacyId !== null) {
+        if ($legacyId !== null && Schema::hasTable('follows')) {
             $followersCount = DB::table('follows')
                 ->where('followable_id', $legacyId)
                 ->where('followable_type', Venue::class)
@@ -411,7 +411,7 @@ class VenuePublicProfileService
 
     private function acceptedFollowerCounts(Collection $venueIds): Collection
     {
-        if ($venueIds->isEmpty()) {
+        if ($venueIds->isEmpty() || !Schema::hasTable('follows')) {
             return collect();
         }
 

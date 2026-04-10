@@ -6,6 +6,7 @@ use App\Models\Language;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Schema;
 
 class ChangeLanguage
 {
@@ -23,8 +24,10 @@ class ChangeLanguage
     }
     if (empty($locale)) {
       // set the default language as system locale
-      $language = Language::where('is_default', 1)->first();
-      $languageCode = $language->code;
+      $language = Schema::hasTable('languages')
+        ? Language::where('is_default', 1)->first()
+        : null;
+      $languageCode = $language->code ?? config('app.locale', 'en');
 
       App::setLocale($languageCode);
     } else {

@@ -3,10 +3,13 @@
 namespace App\Services;
 
 use Illuminate\Contracts\Auth\Authenticatable;
+use App\Models\Artist;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use App\Models\Customer;
+use App\Models\Organizer;
 use App\Models\User;
+use App\Models\Venue;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -195,6 +198,18 @@ class WalletService
 
         if ($normalized === strtolower(Customer::class) || $normalized === 'customer') {
             return 'customer';
+        }
+
+        if ($normalized === strtolower(Artist::class) || $normalized === 'artist') {
+            return 'artist';
+        }
+
+        if ($normalized === strtolower(Organizer::class) || $normalized === 'organizer') {
+            return 'organizer';
+        }
+
+        if ($normalized === strtolower(Venue::class) || $normalized === 'venue') {
+            return 'venue';
         }
 
         return 'customer';

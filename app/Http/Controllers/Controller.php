@@ -57,6 +57,13 @@ class Controller extends BaseController
 
   public function getLanguage()
   {
+    if (!Schema::hasTable('languages')) {
+      return (object) [
+        'id' => 1,
+        'code' => config('app.locale', 'en'),
+      ];
+    }
+
     // get the current locale of this system
     if (Session::has('lang')) {
       $locale = Session::get('lang');
@@ -70,7 +77,10 @@ class Controller extends BaseController
       }
     }
 
-    return $language;
+    return $language ?: (object) [
+      'id' => 1,
+      'code' => config('app.locale', 'en'),
+    ];
   }
 
 

@@ -12,6 +12,10 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (!Schema::hasTable('wallets') || Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::table('wallets', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
             // We keep the column but without strict constraint to users table
@@ -26,6 +30,10 @@ return new class extends Migration {
      */
     public function down()
     {
+        if (!Schema::hasTable('wallets') || !Schema::hasTable('users') || Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::table('wallets', function (Blueprint $table) {
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });

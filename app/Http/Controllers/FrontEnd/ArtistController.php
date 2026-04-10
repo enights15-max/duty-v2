@@ -8,6 +8,7 @@ use App\Models\Event\EventCategory;
 use App\Services\ArtistPublicProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ArtistController extends Controller
 {
@@ -31,9 +32,7 @@ class ArtistController extends Controller
             );
 
             $information = [];
-            $information['basicInfo'] = DB::table('basic_settings')
-                ->select('breadcrumb', 'google_recaptcha_status')
-                ->first();
+            $information['basicInfo'] = $this->basicInfo();
             $information['artist'] = (object) [
                 'name' => $payload['name'],
                 'username' => $payload['username'],
@@ -58,7 +57,22 @@ class ArtistController extends Controller
                 'average_rating' => $payload['average_rating'] ?? '0.0',
                 'review_count' => $payload['review_count'] ?? 0,
             ];
-            $information['events'] = collect($payload['events'] ?? [])->values()->all();
+            $information['events'] = collect($payload['events'] ?? [])
+                ->map(function (array $event) {
+                    $slug = $event['slug'] ?? null;
+
+                    return (object) [
+                        'id' => $event['id'] ?? null,
+                        'title' => $event['title'] ?? null,
+                        'slug' => $slug,
+                        'thumbnail_url' => $event['thumbnail'] ?? null,
+                        'date' => $event['date'] ?? null,
+                        'location' => $event['address'] ?? null,
+                        'is_past' => (bool) ($event['is_past'] ?? false),
+                        'event_url' => $slug ? route('event.details', [$slug, $event['id']]) : '#',
+                    ];
+                })
+                ->values();
             $information['categories'] = EventCategory::where('status', 1)
                 ->where('language_id', $language->id)
                 ->orderBy('serial_number', 'asc')
@@ -66,7 +80,35 @@ class ArtistController extends Controller
 
             return view('frontend.artist.details', $information);
         } catch (\Exception $e) {
+            if (app()->environment('testing')) {
+                throw $e;
+            }
+
             return view('errors.404');
         }
+    }
+
+    private function basicInfo(): object
+    {
+        if (!Schema::hasTable('basic_settings')) {
+            return (object) [
+                'breadcrumb' => null,
+                'google_recaptcha_status' => 0,
+            ];
+        }
+
+        $columns = collect(['breadcrumb', 'google_recaptcha_status'])
+            ->filter(fn (string $column) => Schema::hasColumn('basic_settings', $column))
+            ->values()
+            ->all();
+
+        $basicInfo = !empty($columns)
+            ? DB::table('basic_settings')->select($columns)->first()
+            : null;
+
+        return (object) array_merge([
+            'breadcrumb' => null,
+            'google_recaptcha_status' => 0,
+        ], (array) $basicInfo);
     }
 }

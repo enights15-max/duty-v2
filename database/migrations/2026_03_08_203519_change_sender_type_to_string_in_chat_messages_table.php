@@ -11,9 +11,15 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (!Schema::hasTable('chat_messages') || !Schema::hasColumn('chat_messages', 'sender_type')) {
+            return;
+        }
+
         // Use raw SQL because doctrine/dbal might not be installed, 
         // and we need to change an ENUM to a STRING.
-        DB::statement("ALTER TABLE chat_messages MODIFY sender_type VARCHAR(255)");
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE chat_messages MODIFY sender_type VARCHAR(255)");
+        }
     }
 
     /**
@@ -21,7 +27,13 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        if (!Schema::hasTable('chat_messages') || !Schema::hasColumn('chat_messages', 'sender_type')) {
+            return;
+        }
+
         // Note: Reverting to ENUM might fail if there are values other than 'customer' or 'organizer'
-        DB::statement("ALTER TABLE chat_messages MODIFY sender_type ENUM('customer', 'organizer')");
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE chat_messages MODIFY sender_type ENUM('customer', 'organizer')");
+        }
     }
 };

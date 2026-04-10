@@ -13,10 +13,31 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (!Schema::hasTable('customers')) {
+            Schema::create('customers', function (Blueprint $table) {
+                $table->id();
+                $table->string('fname')->nullable();
+                $table->string('lname')->nullable();
+                $table->string('email')->nullable();
+                $table->string('password')->nullable();
+                $table->string('provider_id')->nullable();
+                $table->timestamps();
+            });
+        }
+
         Schema::table('customers', function (Blueprint $table) {
-            $table->string('firebase_uid')->nullable()->after('provider_id');
+            if (!Schema::hasColumn('customers', 'provider_id')) {
+                $table->string('provider_id')->nullable();
+            }
+
+            if (!Schema::hasColumn('customers', 'firebase_uid')) {
+                $table->string('firebase_uid')->nullable()->after('provider_id');
+            }
         });
-        DB::statement('ALTER TABLE customers MODIFY COLUMN email VARCHAR(255) NULL');
+
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE customers MODIFY COLUMN email VARCHAR(255) NULL');
+        }
     }
 
     /**
@@ -26,9 +47,18 @@ return new class extends Migration {
      */
     public function down()
     {
+        if (!Schema::hasTable('customers')) {
+            return;
+        }
+
         Schema::table('customers', function (Blueprint $table) {
-            $table->dropColumn('firebase_uid');
+            if (Schema::hasColumn('customers', 'firebase_uid')) {
+                $table->dropColumn('firebase_uid');
+            }
         });
-        DB::statement('ALTER TABLE customers MODIFY COLUMN email VARCHAR(255) NOT NULL');
+
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE customers MODIFY COLUMN email VARCHAR(255) NOT NULL');
+        }
     }
 };

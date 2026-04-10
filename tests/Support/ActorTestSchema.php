@@ -321,10 +321,13 @@ trait ActorTestSchema
                 $table->string('first_name')->nullable();
                 $table->string('last_name')->nullable();
                 $table->string('phone')->nullable();
+                $table->string('contact_number')->nullable();
                 $table->string('country')->nullable();
                 $table->string('city')->nullable();
+                $table->string('state')->nullable();
                 $table->string('address')->nullable();
                 $table->string('stripe_customer_id')->nullable();
+                $table->timestamp('email_verified_at')->nullable();
                 $table->string('password')->nullable();
                 $table->tinyInteger('status')->default(1);
                 $table->timestamps();
@@ -346,6 +349,7 @@ trait ActorTestSchema
                 $table->string('address')->nullable();
                 $table->string('photo')->nullable();
                 $table->string('stripe_customer_id')->nullable();
+                $table->timestamp('email_verified_at')->nullable();
                 $table->string('password')->nullable();
                 $table->boolean('is_private')->default(false);
                 $table->boolean('show_interested_events')->default(true);
@@ -386,6 +390,12 @@ trait ActorTestSchema
             });
         }
 
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'contact_number')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('contact_number')->nullable();
+            });
+        }
+
         if (Schema::hasTable('users') && !Schema::hasColumn('users', 'country')) {
             Schema::table('users', function (Blueprint $table) {
                 $table->string('country')->nullable();
@@ -398,9 +408,21 @@ trait ActorTestSchema
             });
         }
 
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'state')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('state')->nullable();
+            });
+        }
+
         if (Schema::hasTable('users') && !Schema::hasColumn('users', 'address')) {
             Schema::table('users', function (Blueprint $table) {
                 $table->string('address')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'email_verified_at')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->timestamp('email_verified_at')->nullable();
             });
         }
 
@@ -413,6 +435,12 @@ trait ActorTestSchema
         if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'stripe_customer_id')) {
             Schema::table('customers', function (Blueprint $table) {
                 $table->string('stripe_customer_id')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'email_verified_at')) {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->timestamp('email_verified_at')->nullable();
             });
         }
 

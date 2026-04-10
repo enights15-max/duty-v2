@@ -2,14 +2,19 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use App\Models\User;
 use App\Services\WalletService;
+use Illuminate\Support\Facades\Hash;
+use Tests\Support\ActorFeatureTestCase;
 
-class WalletLedgerTest extends TestCase
+class WalletLedgerTest extends ActorFeatureTestCase
 {
-    use RefreshDatabase;
+    protected array $baselineSchema = ['users_customers', 'wallets'];
+    protected array $baselineTruncate = [
+        'wallet_transactions',
+        'wallets',
+        'users',
+    ];
 
     protected $walletService;
 
@@ -21,7 +26,7 @@ class WalletLedgerTest extends TestCase
 
     public function test_can_credit_wallet_and_prevent_duplicate_idempotency_keys()
     {
-        $user = User::factory()->create();
+        $user = $this->createWalletUser('wallet-credit@example.com');
         $amount = 1000.50;
         $idempotencyKey = 'unique_topup_123';
 
@@ -42,7 +47,7 @@ class WalletLedgerTest extends TestCase
 
     public function test_can_debit_wallet()
     {
-        $user = User::factory()->create();
+        $user = $this->createWalletUser('wallet-debit@example.com');
         // Setup initial balance
         $this->walletService->credit($user, 1000, 'topup', 'setup', 'key_1');
 
@@ -56,7 +61,7 @@ class WalletLedgerTest extends TestCase
 
     public function test_insufficient_funds_throws_exception()
     {
-        $user = User::factory()->create();
+        $user = $this->createWalletUser('wallet-insufficient@example.com');
         $this->walletService->credit($user, 500, 'topup', 'setup', 'key_1');
 
         $this->expectException(\Exception::class);
@@ -64,5 +69,17 @@ class WalletLedgerTest extends TestCase
 
         // Trying to spend 600 when only 500 is available
         $this->walletService->debit($user, 600, 'ticket', 'tkt_1', 'key_2');
+    }
+
+    private function createWalletUser(string $email): User
+    {
+        return User::query()->create([
+            'username' => str_replace('@example.com', '', $email),
+            'email' => $email,
+            'first_name' => 'Wallet',
+            'last_name' => 'Tester',
+            'password' => Hash::make('secret'),
+            'status' => 1,
+        ]);
     }
 }

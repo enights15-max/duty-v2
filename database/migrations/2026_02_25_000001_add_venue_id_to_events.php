@@ -12,9 +12,22 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (!Schema::hasTable('events')) {
+            Schema::create('events', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('organizer_id')->nullable();
+                $table->timestamps();
+            });
+        }
+
         Schema::table('events', function (Blueprint $table) {
-            $table->unsignedBigInteger('venue_id')->nullable()->after('organizer_id');
-            $table->foreign('venue_id')->references('id')->on('venues')->onDelete('set null');
+            if (!Schema::hasColumn('events', 'venue_id')) {
+                $table->unsignedBigInteger('venue_id')->nullable()->after('organizer_id');
+            }
+
+            if (Schema::hasTable('venues') && Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->foreign('venue_id')->references('id')->on('venues')->onDelete('set null');
+            }
         });
     }
 
@@ -25,9 +38,18 @@ return new class extends Migration {
      */
     public function down()
     {
+        if (!Schema::hasTable('events')) {
+            return;
+        }
+
         Schema::table('events', function (Blueprint $table) {
-            $table->dropForeign(['venue_id']);
-            $table->dropColumn('venue_id');
+            if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->dropForeign(['venue_id']);
+            }
+
+            if (Schema::hasColumn('events', 'venue_id')) {
+                $table->dropColumn('venue_id');
+            }
         });
     }
 };

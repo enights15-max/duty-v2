@@ -9,15 +9,22 @@ use App\Models\Event\EventCategory;
 use App\Models\Event\EventContent;
 use App\Models\Organizer;
 use App\Models\OrganizerInfo;
+use App\Services\OrganizerPublicProfileService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use PHPMailer\PHPMailer\PHPMailer;
 
 class OrganizerController extends Controller
 {
+  public function __construct(
+    private OrganizerPublicProfileService $organizerPublicProfileService
+  ) {
+  }
+
   //show
   public function index(Request $request)
   {
@@ -78,30 +85,69 @@ class OrganizerController extends Controller
     try {
       $language = $this->getLanguage();
       $information = [];
-      $information['basicInfos'] = DB::table('basic_settings')
-        ->select('google_recaptcha_status')
-        ->first();
+      $information['basicInfo'] = $this->basicInfo();
 
       if (filled($request->admin)) {
         $admin = Admin::first();
         $information['organizer'] = $admin;
         $information['admin'] = true;
 
-        $events = Event::with(['tickets', 'information' => function ($query) use ($language) {
+        $relations = ['information' => function ($query) use ($language) {
           return $query->where('language_id', $language->id);
-        }])->where('organizer_id', NULL)->get();
+        }];
+        if (Schema::hasTable('tickets')) {
+          $relations[] = 'tickets';
+        }
+
+        $events = Event::with($relations)->where('organizer_id', NULL)->get();
         $information['organizer_info'] = [];
       } else {
-        $organizer = Organizer::where('id', $id)->first();
+        $target = $this->organizerPublicProfileService->resolveByPublicId($id, $language->id);
+        if (!$target) {
+          abort(404);
+        }
 
-        $information['organizer_info'] = OrganizerInfo::where('organizer_id', $id)->where('language_id', $language->id)->first();
+        $payload = $this->organizerPublicProfileService->buildPublicPayload(
+          $target,
+          auth('customer')->user()
+        );
+        $legacyOrganizer = $target['legacy'];
 
-        $information['organizer'] = $organizer;
+        $information['organizer_info'] = (object) [
+          'name' => $payload['name'],
+          'details' => $payload['details'],
+          'city' => $payload['city'],
+          'state' => $payload['state'],
+          'country' => $payload['country'],
+          'address' => $payload['address'],
+          'zip_code' => $payload['zip_code'],
+          'designation' => $payload['designation'],
+        ];
+
+        $information['organizer'] = (object) [
+          'id' => $payload['id'],
+          'username' => $legacyOrganizer?->username ?? $payload['username'],
+          'photo' => $payload['photo'],
+          'email' => $payload['email'],
+          'phone' => $payload['phone'],
+          'facebook' => $payload['facebook'],
+          'twitter' => $payload['twitter'],
+          'linkedin' => $payload['linkedin'],
+          'created_at' => $target['created_at'],
+        ];
         $information['admin'] = false;
 
-        $events = Event::with(['tickets', 'information' => function ($query) use ($language) {
+        $relations = ['information' => function ($query) use ($language) {
           return $query->where('language_id', $language->id);
-        }])->where('organizer_id', $organizer->id)->get();
+        }];
+        if (Schema::hasTable('tickets')) {
+          $relations[] = 'tickets';
+        }
+
+        $events = Event::with($relations)->ownedByOrganizerActor(
+          $target['identity']?->id,
+          $target['legacy_id']
+        )->orderBy('start_date')->get();
         
       }
 
@@ -114,8 +160,36 @@ class OrganizerController extends Controller
       $information['events'] = $events;
       return view('frontend.organizer.details', $information); //code...
     } catch (\Exception $th) {
+      if (app()->environment('testing')) {
+        throw $th;
+      }
+
       return view('errors.404');
     }
+  }
+
+  private function basicInfo(): object
+  {
+    if (!Schema::hasTable('basic_settings')) {
+      return (object) [
+        'breadcrumb' => null,
+        'google_recaptcha_status' => 0,
+      ];
+    }
+
+    $columns = collect(['breadcrumb', 'google_recaptcha_status'])
+      ->filter(fn (string $column) => Schema::hasColumn('basic_settings', $column))
+      ->values()
+      ->all();
+
+    $basicInfo = !empty($columns)
+      ? DB::table('basic_settings')->select($columns)->first()
+      : null;
+
+    return (object) array_merge([
+      'breadcrumb' => null,
+      'google_recaptcha_status' => 0,
+    ], (array) $basicInfo);
   }
 
 

@@ -63,7 +63,7 @@ class ArtistPublicProfileService
         $averageRating = 0.0;
         $reviewCount = 0;
 
-        if ($legacyId !== null) {
+        if ($legacyId !== null && Schema::hasTable('follows')) {
             $followersCount = DB::table('follows')
                 ->where('followable_id', $legacyId)
                 ->where('followable_type', Artist::class)
@@ -326,7 +326,7 @@ class ArtistPublicProfileService
 
     private function acceptedFollowerCounts(Collection $artistIds): Collection
     {
-        if ($artistIds->isEmpty()) {
+        if ($artistIds->isEmpty() || !Schema::hasTable('follows')) {
             return collect();
         }
 

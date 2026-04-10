@@ -12,15 +12,28 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (!Schema::hasTable('events')) {
+            Schema::create('events', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('organizer_id')->nullable();
+                $table->unsignedBigInteger('venue_id')->nullable();
+                $table->timestamps();
+            });
+        }
+
         Schema::table('events', function (Blueprint $table) {
-            $table->unsignedBigInteger('owner_identity_id')->nullable()->after('venue_id');
-            $table->unsignedBigInteger('venue_identity_id')->nullable()->after('owner_identity_id');
+            if (!Schema::hasColumn('events', 'owner_identity_id')) {
+                $table->unsignedBigInteger('owner_identity_id')->nullable()->after('venue_id');
+            }
 
-            $table->foreign('owner_identity_id')->references('id')->on('identities')->onDelete('set null');
-            $table->foreign('venue_identity_id')->references('id')->on('identities')->onDelete('set null');
+            if (!Schema::hasColumn('events', 'venue_identity_id')) {
+                $table->unsignedBigInteger('venue_identity_id')->nullable()->after('owner_identity_id');
+            }
 
-            $table->index('owner_identity_id');
-            $table->index('venue_identity_id');
+            if (Schema::hasTable('identities') && Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->foreign('owner_identity_id')->references('id')->on('identities')->onDelete('set null');
+                $table->foreign('venue_identity_id')->references('id')->on('identities')->onDelete('set null');
+            }
         });
     }
 
@@ -31,10 +44,24 @@ return new class extends Migration {
      */
     public function down()
     {
+        if (!Schema::hasTable('events')) {
+            return;
+        }
+
         Schema::table('events', function (Blueprint $table) {
-            $table->dropForeign(['owner_identity_id']);
-            $table->dropForeign(['venue_identity_id']);
-            $table->dropColumn(['owner_identity_id', 'venue_identity_id']);
+            if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->dropForeign(['owner_identity_id']);
+                $table->dropForeign(['venue_identity_id']);
+            }
+
+            $columns = array_values(array_filter([
+                Schema::hasColumn('events', 'owner_identity_id') ? 'owner_identity_id' : null,
+                Schema::hasColumn('events', 'venue_identity_id') ? 'venue_identity_id' : null,
+            ]));
+
+            if (!empty($columns)) {
+                $table->dropColumn($columns);
+            }
         });
     }
 };

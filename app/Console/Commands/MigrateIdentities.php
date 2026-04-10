@@ -26,11 +26,11 @@ class MigrateIdentities extends Command
             // 1. Migrate Customers to Users (if not already there)
             $this->migrateCustomersToUsers();
 
-            // 2. Create Personal Identities for all Users
-            $this->createPersonalIdentities();
-
-            // 3. Map existing Organizers, Venues, Artists to Identities
+            // 2. Map existing Organizers, Venues, Artists to Identities
             $this->mapExistingEntitiesToIdentities();
+
+            // 3. Create Personal Identities for all Users
+            $this->createPersonalIdentities();
 
             // 4. Update existing Events to point to new Identities
             $this->updateEventIdentities();
@@ -111,7 +111,7 @@ class MigrateIdentities extends Command
         // Organizers
         $this->comment('Mapping organizers to identities...');
         foreach (Organizer::all() as $org) {
-            $user = User::where('email', $org->email)->first();
+            $user = $this->userForProfessionalActor($org, 'organizer');
             if ($user) {
                 $this->createIdentityFromModel($org, 'organizer', $user);
             }
@@ -120,7 +120,7 @@ class MigrateIdentities extends Command
         // Venues
         $this->comment('Mapping venues to identities...');
         foreach (Venue::all() as $venue) {
-            $user = User::where('email', $venue->email)->first();
+            $user = $this->userForProfessionalActor($venue, 'venue');
             if ($user) {
                 $this->createIdentityFromModel($venue, 'venue', $user);
             }
@@ -129,7 +129,7 @@ class MigrateIdentities extends Command
         // Artists
         $this->comment('Mapping artists to identities...');
         foreach (Artist::all() as $artist) {
-            $user = User::where('email', $artist->email)->first();
+            $user = $this->userForProfessionalActor($artist, 'artist');
             if ($user) {
                 $this->createIdentityFromModel($artist, 'artist', $user);
             }
@@ -138,13 +138,25 @@ class MigrateIdentities extends Command
 
     protected function createIdentityFromModel($model, $type, $user)
     {
-        $existing = Identity::where('owner_user_id', $user->id)
+        $existing = Identity::where('type', $type)
             ->where('type', $type)
-            ->where('display_name', $model->name ?? $model->username)
-            ->first();
+            ->get()
+            ->first(function (Identity $identity) use ($model) {
+                $meta = is_array($identity->meta) ? $identity->meta : [];
+
+                return (int) ($meta['legacy_id'] ?? $meta['id'] ?? 0) === (int) $model->id;
+            });
 
         if (!$existing) {
             $displayName = $model->name ?? $model->username;
+            $meta = collect($model->toArray())
+                ->except(['password', 'remember_token'])
+                ->merge([
+                    'id' => $model->id,
+                    'legacy_id' => $model->id,
+                    'legacy_source' => $type,
+                ])
+                ->all();
 
             $identity = Identity::create([
                 'type' => $type,
@@ -152,7 +164,7 @@ class MigrateIdentities extends Command
                 'owner_user_id' => $user->id,
                 'display_name' => $displayName,
                 'slug' => $model->slug ?? $this->generateUniqueSlug($displayName, 'identities'),
-                'meta' => $model->toArray(), // Map all existing fields to meta
+                'meta' => $meta,
             ]);
 
             IdentityMember::create([
@@ -162,6 +174,46 @@ class MigrateIdentities extends Command
                 'status' => 'active',
             ]);
         }
+    }
+
+    protected function userForProfessionalActor($model, string $type): ?User
+    {
+        if (empty($model->email)) {
+            return null;
+        }
+
+        $existing = User::where('email', $model->email)->first();
+        if ($existing) {
+            return $existing;
+        }
+
+        $displayName = $model->name ?? $model->username ?? Str::headline($type);
+        [$firstName, $lastName] = $this->splitName($displayName);
+
+        return User::create([
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'username' => $model->username ?? Str::slug($displayName),
+            'email' => $model->email,
+            'password' => $model->password,
+            'contact_number' => $model->phone ?? null,
+            'address' => $model->address ?? null,
+            'city' => $model->city ?? null,
+            'state' => $model->state ?? null,
+            'country' => $model->country ?? null,
+            'status' => (int) ($model->status ?? 1) === 1 ? 1 : 0,
+            'email_verified_at' => $model->email_verified_at ?? null,
+        ]);
+    }
+
+    protected function splitName(string $displayName): array
+    {
+        $parts = preg_split('/\s+/', trim($displayName), 2);
+
+        return [
+            $parts[0] ?? 'User',
+            $parts[1] ?? '',
+        ];
     }
 
     protected function updateEventIdentities()
