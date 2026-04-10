@@ -42,10 +42,12 @@ backup_*.sql
 *.sql.gz
 
 # ============================================================
-# Install directory vendor
+# Install directory vendor & large files
 # ============================================================
 /install/vendor/
 /install/node_modules/
+/install/*.zip
+/install/public/assets/admin/img/**/*.zip
 
 # ============================================================
 # Flutter
