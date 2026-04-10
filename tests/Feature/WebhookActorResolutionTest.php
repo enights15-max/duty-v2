@@ -11,6 +11,7 @@ use App\Services\ProfessionalBalanceService;
 use App\Services\StripeService;
 use App\Services\SubscriptionService;
 use App\Services\WalletService;
+use Closure;
 use Illuminate\Support\Facades\DB;
 use Mockery;
 use ReflectionClass;

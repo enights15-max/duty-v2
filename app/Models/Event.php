@@ -6,10 +6,13 @@ use App\Models\Event\Booking;
 use App\Models\Event\EventContent;
 use App\Models\Event\EventDates;
 use App\Models\Event\EventImage;
+use App\Models\Event\EventLineup;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Event\Ticket;
 use App\Models\Event\Wishlist;
+use App\Models\Reservation\TicketReservation;
 
 class Event extends Model
 {
@@ -19,6 +22,14 @@ class Event extends Model
     'organizer_id',
     'owner_identity_id',
     'venue_identity_id',
+    'venue_source',
+    'venue_name_snapshot',
+    'venue_address_snapshot',
+    'venue_city_snapshot',
+    'venue_state_snapshot',
+    'venue_country_snapshot',
+    'venue_postal_code_snapshot',
+    'venue_google_place_id',
     'thumbnail',
     'status',
     'review_status',

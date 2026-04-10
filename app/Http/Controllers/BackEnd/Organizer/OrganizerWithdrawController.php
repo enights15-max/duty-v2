@@ -10,6 +10,8 @@ use App\Models\Transaction;
 use App\Models\Withdraw;
 use App\Models\WithdrawMethodInput;
 use App\Models\WithdrawPaymentMethod;
+use App\Services\ProfessionalBalanceService;
+use App\Services\ProfessionalCatalogBridgeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
@@ -77,7 +79,8 @@ class OrganizerWithdrawController extends Controller
     $method = WithdrawPaymentMethod::where('id', $request->withdraw_method)->first();
 
     $organizer = Organizer::where('id', Auth::guard('organizer')->user()->id)->first();
-
+    $organizerIdentityId = $this->catalogBridge->findIdentityForLegacy('organizer', $organizer->id)?->id;
+    $currentBalance = $this->professionalBalanceService->currentOrganizerBalance($organizerIdentityId, $organizer->id);
 
     if (intval($request->withdraw_amount) < $method->min_limit) {
       return Response::json(
@@ -101,7 +104,7 @@ class OrganizerWithdrawController extends Controller
         ],
         400
       );
-    } elseif ($organizer->amount < $request->withdraw_amount) {
+    } elseif ($currentBalance < (float) $request->withdraw_amount) {
       return Response::json(
         [
           'errors' => [
@@ -158,14 +161,17 @@ class OrganizerWithdrawController extends Controller
     $save = new Withdraw;
     $save->withdraw_id = uniqid();
     $save->organizer_id = Auth::guard('organizer')->user()->id;
+    $save->organizer_identity_id = $organizerIdentityId;
     $save->method_id = $request->withdraw_method;
 
 
-    $organizer = Organizer::where('id', Auth::guard('organizer')->user()->id)->first();
-    $pre_balance = $organizer->amount;
-    $organizer->amount = ($organizer->amount - ($request->withdraw_amount));
-    $organizer->save();
-    $after_balance = $organizer->amount;
+    $balancePreview = $this->professionalBalanceService->debitOrganizerBalance(
+      $organizerIdentityId,
+      $organizer->id,
+      (float) $request->withdraw_amount
+    );
+    $pre_balance = $balancePreview['pre_balance'];
+    $after_balance = $balancePreview['after_balance'];
 
     $save->amount = $request->withdraw_amount;
     $save->payable_amount = $receive_balance;
@@ -182,6 +188,7 @@ class OrganizerWithdrawController extends Controller
       'transcation_type' => 3,
       'user_id' => null,
       'organizer_id' => Auth::guard('organizer')->user()->id,
+      'organizer_identity_id' => $organizerIdentityId,
       'payment_status' => 0,
       'payment_method' => $save->method_id,
       'grand_total' => $save->amount,

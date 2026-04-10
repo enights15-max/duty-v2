@@ -17,6 +17,8 @@ use App\Models\Event\Booking;
 use App\Models\Language;
 use App\Models\OrganizerInfo;
 use App\Models\Transaction;
+use App\Services\ProfessionalBalanceService;
+use App\Services\ProfessionalCatalogBridgeService;
 use App\Rules\MatchOldPasswordRule;
 use DateTime;
 use Illuminate\Log\Logger;

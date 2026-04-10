@@ -19,7 +19,18 @@ class MercadoPagoController extends Controller
   public function __construct()
   {
     $data = OnlineGateway::whereKeyword('mercadopago')->first();
+    if (!$data || empty($data->information)) {
+      $this->token = null;
+      $this->sandbox_status = null;
+      return;
+    }
+
     $mercadopagoData = json_decode($data->information, true);
+    if (!is_array($mercadopagoData)) {
+      $this->token = null;
+      $this->sandbox_status = null;
+      return;
+    }
 
     $this->token = $mercadopagoData['token'];
     $this->sandbox_status = $mercadopagoData['sandbox_status'];

@@ -5,6 +5,7 @@ namespace App\Models\Event;
 use App\Models\Customer;
 use App\Models\Event;
 use App\Models\Organizer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
@@ -14,10 +15,12 @@ class Booking extends Model
   use HasFactory;
   protected $fillable = [
     'customer_id',
+    'reservation_id',
     'booking_id',
     'order_number',
     'event_id',
     'organizer_id',
+    'organizer_identity_id',
     'ticket_id',
     'fname',
     'lname',
@@ -166,13 +169,18 @@ class Booking extends Model
 
   public function scopeVisibleMarketplaceListings(Builder $query, ?int $excludeCustomerId = null): Builder
   {
+    if (!Schema::hasColumn($this->getTable(), 'is_listed')) {
+      $query->whereRaw('1 = 0');
+
+      return $query;
+    }
+
     $query
       ->where('is_listed', true)
       ->where(function (Builder $builder) {
         $builder->whereNull('paymentStatus')
           ->orWhereNotIn('paymentStatus', ['pending', 'rejected']);
       })
-      ->whereHas('customerInfo')
       ->whereHas('evnt', function (Builder $eventQuery) {
         $eventQuery->where(function (Builder $dateQuery) {
           $dateQuery->whereNull('end_date_time')
@@ -180,7 +188,11 @@ class Booking extends Model
         });
       });
 
-    if ($excludeCustomerId !== null) {
+    if (Schema::hasColumn($this->getTable(), 'customer_id')) {
+      $query->whereHas('customerInfo');
+    }
+
+    if ($excludeCustomerId !== null && Schema::hasColumn($this->getTable(), 'customer_id')) {
       $query->where('customer_id', '!=', $excludeCustomerId);
     }
 

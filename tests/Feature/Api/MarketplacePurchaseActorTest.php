@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\MarketplaceController;
 use App\Models\Customer;
 use App\Services\NotificationService;
 use App\Services\StripeService;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;

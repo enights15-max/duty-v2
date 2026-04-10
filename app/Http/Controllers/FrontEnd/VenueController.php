@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Venue;
 use App\Models\Event\EventCategory;
 use App\Models\Event;
+use App\Services\VenuePublicProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 

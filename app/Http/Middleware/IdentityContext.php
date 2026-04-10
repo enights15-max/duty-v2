@@ -4,8 +4,10 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use App\Models\Identity;
 use App\Models\IdentityMember;
+use App\Models\User;
 
 class IdentityContext
 {
@@ -21,12 +23,13 @@ class IdentityContext
     {
         $identityId = $request->header('X-Identity-Id');
         $user = $request->user();
+        $memberUserIds = $this->resolveMemberUserIds($user);
 
-        if ($identityId && $user) {
+        if ($identityId && $memberUserIds !== []) {
             $identity = Identity::where('id', $identityId)
                 ->where('status', 'active')
-                ->whereHas('members', function ($query) use ($user) {
-                    $query->where('user_id', $user->id)
+                ->whereHas('members', function ($query) use ($memberUserIds) {
+                    $query->whereIn('user_id', $memberUserIds)
                         ->where('status', 'active');
                 })
                 ->first();
@@ -37,16 +40,17 @@ class IdentityContext
 
                 // Also get the member record for role check later if needed
                 $member = IdentityMember::where('identity_id', $identity->id)
-                    ->where('user_id', $user->id)
+                    ->whereIn('user_id', $memberUserIds)
                     ->first();
                 $request->merge(['identity_member' => $member]);
 
                 // Compatibility Injection: Inject legacy IDs if available in meta
-                if ($identity->type === 'organizer' && isset($identity->meta['id'])) {
-                    $request->merge(['organizer_id_actor' => $identity->meta['id']]);
+                $legacyId = $this->resolveLegacyId($identity);
+                if ($identity->type === 'organizer' && $legacyId !== null) {
+                    $request->merge(['organizer_id_actor' => $legacyId]);
                 }
-                if ($identity->type === 'venue' && isset($identity->meta['id'])) {
-                    $request->merge(['venue_id_actor' => $identity->meta['id']]);
+                if ($identity->type === 'venue' && $legacyId !== null) {
+                    $request->merge(['venue_id_actor' => $legacyId]);
                 }
 
                 return $next($request);
@@ -68,5 +72,50 @@ class IdentityContext
         }
 
         return $next($request);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function resolveMemberUserIds($user): array
+    {
+        if (!$user) {
+            return [];
+        }
+
+        $ids = [];
+
+        if ($user instanceof User) {
+            $ids[] = (int) $user->id;
+        }
+
+        if (isset($user->user_id) && is_numeric((string) $user->user_id)) {
+            $ids[] = (int) $user->user_id;
+        }
+
+        if (isset($user->email) && $user->email && Schema::hasTable('users')) {
+            $matchedUserId = User::query()
+                ->where('email', $user->email)
+                ->value('id');
+
+            if ($matchedUserId) {
+                $ids[] = (int) $matchedUserId;
+            }
+        }
+
+        return array_values(array_unique(array_filter($ids, fn ($id) => $id > 0)));
+    }
+
+    private function resolveLegacyId(Identity $identity): ?int
+    {
+        $meta = is_array($identity->meta) ? $identity->meta : [];
+
+        foreach (['legacy_id', 'id'] as $key) {
+            if (isset($meta[$key]) && is_numeric((string) $meta[$key])) {
+                return (int) $meta[$key];
+            }
+        }
+
+        return null;
     }
 }

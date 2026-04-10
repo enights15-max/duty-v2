@@ -11,6 +11,8 @@ use App\Models\Event\Ticket;
 use App\Models\Event\Wishlist;
 use App\Models\Language;
 use App\Models\Organizer;
+use App\Services\BookingScanService;
+use App\Services\OrganizerPublicProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +22,8 @@ use Illuminate\Support\Facades\DB;
 class AdminScannerController extends Controller
 {
   public function __construct(
-    private OrganizerPublicProfileService $organizerPublicProfileService
+    private OrganizerPublicProfileService $organizerPublicProfileService,
+    private BookingScanService $bookingScanService
   ) {
   }
 
@@ -83,39 +86,21 @@ class AdminScannerController extends Controller
       if ($check) {
         // check payment status completed or not
         if ($check->paymentStatus == 'completed' || $check->paymentStatus == 'free') {
-          //check scanned_tickets column empty or not
-          if (is_null($check->scanned_tickets)) {
-            $scannedTicketArr = [
-              $unique_id
-            ];
-            $check->scanned_tickets = json_encode($scannedTicketArr);
-            $check->save();
-            return response()
-            ->json([
+          $result = $this->bookingScanService->setTicketScanStatus($check, $unique_id, true);
+
+          if ($result['changed']) {
+            return response()->json([
               'alert_type' => 'success',
               'message' => 'Verified',
               'booking_id' => $request->booking_id
             ]);
-          } else {
-            //ticket random id will be insert
-            $scannedTicketArr = json_decode($check->scanned_tickets, true);
-            if (! in_array($unique_id, $scannedTicketArr)) {
-              array_push($scannedTicketArr, $unique_id);
-              $check->scanned_tickets = json_encode($scannedTicketArr);
-              $check->save();
-              return response()->json(
-                ['alert_type' => 'success',
-                 'message' => 'Verified',
-                'booking_id' => $request->booking_id
-              ]);
-            } else {
-              return response()->json(
-                ['alert_type' => 'error',
-                 'message' => 'Already Scanned',
-                'booking_id' => $request->booking_id]
-              );
-            }
           }
+
+          return response()->json([
+            'alert_type' => 'error',
+            'message' => 'Already Scanned',
+            'booking_id' => $request->booking_id
+          ]);
         } elseif ($check->paymentStatus == 'pending') {
           return response()->json([
             'alert_type' => 'error',
@@ -267,12 +252,12 @@ class AdminScannerController extends Controller
 
     if ($event->event_type == 'online') {
       $ticket = Ticket::where('event_id', $event->id)->orderBy('price', 'asc')->first();
-      $start_price = $ticket->price;
+      $start_price = $ticket?->price;
     } else {
       $ticket = Ticket::where('event_id', $event->id)->whereNotNull('price')->orderBy('price', 'asc')->first();
       if (!$ticket) {
         $ticket = Ticket::where('event_id', $event->id)->whereNotNull('f_price')->orderBy('price', 'asc')->first();
-        $start_price = $ticket->f_price;
+        $start_price = $ticket?->f_price;
       } else {
         $start_price = $ticket->price;
       }
@@ -300,7 +285,7 @@ class AdminScannerController extends Controller
       'organizer' => $organizer_name,
       'event_type' => $event->event_type,
       'address' => $event->address,
-      'start_price' => $ticket->pricing_type == 'free' ? $ticket->pricing_type : $start_price,
+      'start_price' => $ticket && $ticket->pricing_type == 'free' ? $ticket->pricing_type : $start_price,
       'wishlist' => !is_null($wishlist) ? 'yes' : 'no',
       'dates' => $dates,
     ];

@@ -352,7 +352,7 @@ class SocialFeedService
         }
 
         return collect($grouped)
-            ->map(function (array $group) use ($reasonType) {
+            ->map(function (array $group) use ($reasonType, $languageId) {
                 /** @var Event $event */
                 $event = $group['event'];
                 $people = array_slice($group['people'], 0, 4);

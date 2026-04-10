@@ -13,6 +13,8 @@ use App\Models\Event;
 use App\Models\Event\Booking;
 use App\Models\Event\EventContent;
 use App\Models\Language;
+use App\Models\Organizer;
+use App\Models\OrganizerInfo;
 use App\Models\User;
 use App\Services\EventTicketRewardService;
 use App\Services\OrganizerPublicProfileService;
@@ -1189,21 +1191,14 @@ class CustomerController extends Controller
       ->get();
 
     $bookingsData = $bookings->map(function ($booking) use ($language) {
+      $event = Event::find($booking->event_id);
       $event_title = EventContent::where([
         ['event_id', $booking->event_id],
         ['language_id', $language->id]
       ])->pluck('title')->first();
 
-      $thumbnail = Event::where('id', $booking->event_id)->pluck('thumbnail')->first();
-
-
-      if (!empty($booking->organizer_id)) {
-        $organizerInfo = OrganizerInfo::where([
-          'language_id' => $language->id,
-          'organizer_id' => $booking->organizer_id,
-        ])->first();
-      }
-      $organizerName = isset($organizerInfo) && !is_null($organizerInfo) ? $organizerInfo->name : "";
+      $thumbnail = $event?->thumbnail;
+      $organizerName = $this->resolveBookingOrganizerName($booking, $event, $language->id);
 
       $booking->event_title = $event_title;
       $booking->thumbnail = asset('assets/admin/img/event/thumbnail/' . $thumbnail);
@@ -1258,21 +1253,14 @@ class CustomerController extends Controller
 
     //  Transform collection
     $bookingsData = $bookings->map(function ($booking) use ($language) {
+      $event = Event::find($booking->event_id);
       $event_title = EventContent::where([
         ['event_id', $booking->event_id],
         ['language_id', $language->id]
       ])->pluck('title')->first();
 
-      $thumbnail = Event::where('id', $booking->event_id)->pluck('thumbnail')->first();
-
-
-      if (!empty($booking->organizer_id)) {
-        $organizerInfo = OrganizerInfo::where([
-          'language_id' => $language->id,
-          'organizer_id' => $booking->organizer_id,
-        ])->first();
-      }
-      $organizerName = isset($organizerInfo) && !is_null($organizerInfo) ? $organizerInfo->name : "";
+      $thumbnail = $event?->thumbnail;
+      $organizerName = $this->resolveBookingOrganizerName($booking, $event, $language->id);
 
       $booking->event_title = $event_title;
       $booking->thumbnail = asset('assets/admin/img/event/thumbnail/' . $thumbnail);
@@ -1348,16 +1336,7 @@ class CustomerController extends Controller
 
     $data['booking'] = $booking;
 
-    //organizer
-    if (!is_null(@$booking->organizer_id)) {
-      $organizer = Organizer::join('organizer_infos', 'organizers.id', '=', 'organizer_infos.organizer_id')
-        ->where('organizer_id', $booking->organizer_id)
-        ->first();
-      $data['organizer'] = $this->format_organizer_data($organizer, 'organizer');
-    } else {
-      $admin = Admin::first();
-      $data['organizer'] = $this->format_organizer_data($admin, 'admin');
-    }
+    $data['organizer'] = $this->resolveBookingOrganizerPayload($booking, $event, $language->id);
 
     // Rewards
     $data['rewards'] = $rewards->values();

@@ -13,10 +13,24 @@ return new class extends Migration
    */
   public function up()
   {
+    if (!Schema::hasTable('event_contents')) {
+      Schema::create('event_contents', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('event_id')->nullable();
+        $table->timestamps();
+      });
+    }
+
     Schema::table('event_contents', function (Blueprint $table) {
-      $table->bigInteger('country_id')->nullable()->after('event_id');
-      $table->bigInteger('city_id')->nullable()->after('country_id');
-      $table->bigInteger('state_id')->nullable()->after('city_id');
+      if (!Schema::hasColumn('event_contents', 'country_id')) {
+        $table->bigInteger('country_id')->nullable()->after('event_id');
+      }
+      if (!Schema::hasColumn('event_contents', 'city_id')) {
+        $table->bigInteger('city_id')->nullable()->after('country_id');
+      }
+      if (!Schema::hasColumn('event_contents', 'state_id')) {
+        $table->bigInteger('state_id')->nullable()->after('city_id');
+      }
     });
   }
 
@@ -27,10 +41,16 @@ return new class extends Migration
    */
   public function down()
   {
+    if (!Schema::hasTable('event_contents')) {
+      return;
+    }
+
     Schema::table('event_contents', function (Blueprint $table) {
-      $table->dropColumn('country_id');
-      $table->dropColumn('city_id');
-      $table->dropColumn('state_id');
+      foreach (['country_id', 'city_id', 'state_id'] as $column) {
+        if (Schema::hasColumn('event_contents', $column)) {
+          $table->dropColumn($column);
+        }
+      }
     });
   }
 };

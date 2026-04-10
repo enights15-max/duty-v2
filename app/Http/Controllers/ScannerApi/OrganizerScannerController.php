@@ -17,6 +17,7 @@ use App\Services\OrganizerPublicProfileService;
 use App\Services\ProfessionalCatalogBridgeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,8 @@ class OrganizerScannerController extends Controller
   public function __construct(
     private ProfessionalCatalogBridgeService $catalogBridge,
     private OrganizerPublicProfileService $organizerPublicProfileService,
-    private EventTicketRewardService $rewardService
+    private EventTicketRewardService $rewardService,
+    private BookingScanService $bookingScanService
   ) {
   }
 
@@ -89,50 +91,32 @@ class OrganizerScannerController extends Controller
   //check qr-code
   public function check_qrcode(Request $request)
   {
-    $organizer_id = Auth::guard('organizer_sanctum')->user()->id;
+    $actor = $this->currentOrganizerActor();
 
     if (str_contains($request->booking_id, '__')) {
       $ids = explode('__', $request->booking_id);
       $booking_id = $ids[0];
       $unique_id = $ids[1];
-      $check = Booking::where([['booking_id', $booking_id]])->first();
+      $check = Booking::with('evnt')->where([['booking_id', $booking_id]])->first();
       if ($check) {
-        if ($check->organizer_id == $organizer_id) {
+        if ($check->isOwnedByOrganizerActor($actor['identity_id'], $actor['legacy_id'])) {
           // check payment status completed or not
           if ($check->paymentStatus == 'completed' || $check->paymentStatus == 'free') {
-            //check scanned_tickets column empty or not
-            if (is_null($check->scanned_tickets)) {
-              $scannedTicketArr = [
-                $unique_id
-              ];
-              $check->scanned_tickets = json_encode($scannedTicketArr);
-              $check->save();
-              return response()->json(
-                ['alert_type' => 'success',
-                 'message' => 'Verified',
+            $result = $this->bookingScanService->setTicketScanStatus($check, $unique_id, true);
+
+            if ($result['changed']) {
+              return response()->json([
+                'alert_type' => 'success',
+                'message' => 'Verified',
                 'booking_id' => $request->booking_id
               ]);
-            } else {
-              //ticket random id will be insert
-              $scannedTicketArr = json_decode($check->scanned_tickets, true);
-              if (!in_array($unique_id, $scannedTicketArr)) {
-                array_push($scannedTicketArr, $unique_id);
-                $check->scanned_tickets = json_encode($scannedTicketArr);
-                $check->save();
-                return response()->json([
-                  'alert_type' => 'success',
-                  'message' => 'Verified',
-                  'booking_id' => $request->booking_id
-                ]);
-              } else {
-
-                return response()->json([
-                  'alert_type' => 'error',
-                  'message' => 'Already Scanned',
-                  'booking_id' => $request->booking_id
-                ]);
-              }
             }
+
+            return response()->json([
+              'alert_type' => 'error',
+              'message' => 'Already Scanned',
+              'booking_id' => $request->booking_id
+            ]);
           } elseif ($check->paymentStatus == 'pending') {
             return response()->json([
               'alert_type' => 'error',
@@ -228,12 +212,12 @@ class OrganizerScannerController extends Controller
 
   public function events(Request $request,$id = null)
   {
-    $organizer_id = Auth::guard('organizer_sanctum')->user()->id;
+    $actor = $this->currentOrganizerActor();
     $locale = $request->header('Accept-Language');
 
     $ids = [];
     if(is_null($request->id)){
-      $ids = $this->organizerEvents($organizer_id);
+      $ids = $this->organizerEvents($actor['identity_id'], $actor['legacy_id']);
     }else{
       $ids[]= (int)$request->id;
     }
@@ -245,7 +229,6 @@ class OrganizerScannerController extends Controller
       ->join('events', 'events.id', '=', 'event_contents.event_id')
       ->where([
         ['event_contents.language_id', $language->id],
-        ['events.organizer_id', $organizer_id],
       ])
       ->whereIn('events.id',$ids)
       ->orderBy('events.created_at', 'desc')
@@ -326,18 +309,27 @@ class OrganizerScannerController extends Controller
       $organizer = Organizer::find($event->organizer_id);
       $organizer_name = $organizer ? $organizer->username : null;
     } else {
-      $admin = Admin::first();
-      $organizer_name = $admin->username;
+      $organizer_name = null;
+      if (Schema::hasTable('identities') && !empty($event->owner_identity_id)) {
+        $organizer_name = DB::table('identities')
+          ->where('id', $event->owner_identity_id)
+          ->value('display_name');
+      }
+
+      if ($organizer_name === null && Schema::hasTable('admins')) {
+        $admin = Admin::first();
+        $organizer_name = $admin?->username;
+      }
     }
 
     if ($event->event_type == 'online') {
       $ticket = Ticket::where('event_id', $event->id)->orderBy('price', 'asc')->first();
-      $start_price = $ticket->price;
+      $start_price = $ticket?->price;
     } else {
       $ticket = Ticket::where('event_id', $event->id)->whereNotNull('price')->orderBy('price', 'asc')->first();
       if (!$ticket) {
         $ticket = Ticket::where('event_id', $event->id)->whereNotNull('f_price')->orderBy('price', 'asc')->first();
-        $start_price = $ticket->f_price;
+        $start_price = $ticket?->f_price;
       } else {
         $start_price = $ticket->price;
       }
@@ -366,15 +358,19 @@ class OrganizerScannerController extends Controller
       'organizer' => $organizer_name,
       'event_type' => $event->event_type,
       'address' => $event->address,
-      'start_price' => $ticket->pricing_type == 'free' ? $ticket->pricing_type : $start_price,
+      'start_price' => $ticket && $ticket->pricing_type == 'free' ? $ticket->pricing_type : $start_price,
       'wishlist' => !is_null($wishlist) ? 'yes' : 'no',
       'dates' => $dates,
     ];
   }
-  private function organizerEvents($organizer_id)
+  private function organizerEvents(?int $identityId, ?int $legacyOrganizerId)
   {
-    $events = Event::where('organizer_id',$organizer_id)->pluck('id')->toArray();
-    return $events;
+    return Event::query()
+      ->ownedByOrganizerActor($identityId, $legacyOrganizerId)
+      ->pluck('id')
+      ->map(fn ($id) => (int) $id)
+      ->values()
+      ->all();
   }
   public function ticketScanStatusChanged(Request $request)
   {
@@ -422,5 +418,19 @@ class OrganizerScannerController extends Controller
       'status' => 'success',
       'message' => 'Ticket scan status updated successfully',
     ], 200);
+  }
+
+  private function currentOrganizerActor(): array
+  {
+    $organizer = Auth::guard('organizer_sanctum')->user();
+    $legacyId = $organizer?->id ? (int) $organizer->id : null;
+    $identityId = $legacyId !== null
+      ? $this->catalogBridge->findIdentityForLegacy('organizer', $legacyId)?->id
+      : null;
+
+    return [
+      'identity_id' => $identityId,
+      'legacy_id' => $legacyId,
+    ];
   }
 }

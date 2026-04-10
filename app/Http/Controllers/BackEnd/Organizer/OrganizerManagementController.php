@@ -14,6 +14,8 @@ use App\Models\Language;
 use App\Models\Organizer;
 use App\Models\OrganizerInfo;
 use App\Models\Transaction;
+use App\Services\ProfessionalBalanceService;
+use App\Services\ProfessionalCatalogBridgeService;
 use Exception;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\FrontEnd;
 use App\Http\Controllers\Controller;
 use App\Models\Artist;
 use App\Models\Event\EventCategory;
+use App\Services\ArtistPublicProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -19,10 +20,20 @@ class ArtistController extends Controller
     {
         try {
             $language = $this->getLanguage();
-            $information = [];
-            $information['basicSettings'] = DB::table('basic_settings')->select('google_recaptcha_status')->first();
+            $target = $this->artistPublicProfileService->resolveByPublicId($id);
+            if (!$target) {
+                abort(404);
+            }
 
-            $payload = $this->artistPublicProfileService->buildPublicPayload($target);
+            $payload = $this->artistPublicProfileService->buildPublicPayload(
+                $target,
+                auth('customer')->user()
+            );
+
+            $information = [];
+            $information['basicInfo'] = DB::table('basic_settings')
+                ->select('breadcrumb', 'google_recaptcha_status')
+                ->first();
             $information['artist'] = (object) [
                 'name' => $payload['name'],
                 'username' => $payload['username'],
@@ -43,21 +54,15 @@ class ArtistController extends Controller
                 'twitter' => $payload['socials']['twitter'] ?? null,
                 'linkedin' => $payload['socials']['linkedin'] ?? null,
                 'created_at' => $target['created_at'],
+                'followers_count' => $payload['followers_count'] ?? 0,
+                'average_rating' => $payload['average_rating'] ?? '0.0',
+                'review_count' => $payload['review_count'] ?? 0,
             ];
-            $information['events'] = collect($payload['events'] ?? [])
-                ->map(function (array $event) {
-                    $slug = $event['slug'] ?: Str::slug((string) ($event['title'] ?? 'event'));
-
-            $information['events'] = $artist->events()->with([
-                'tickets',
-                'information' => function ($query) use ($language) {
-                    return $query->where('language_id', $language->id);
-                }
-            ])->get();
-
+            $information['events'] = collect($payload['events'] ?? [])->values()->all();
             $information['categories'] = EventCategory::where('status', 1)
                 ->where('language_id', $language->id)
-                ->orderBy('serial_number', 'asc')->get();
+                ->orderBy('serial_number', 'asc')
+                ->get();
 
             return view('frontend.artist.details', $information);
         } catch (\Exception $e) {

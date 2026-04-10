@@ -506,7 +506,7 @@ class DiscoverControllerApiTest extends ActorFeatureTestCase
         $this->assertSame($identityId, $upcomingEvent['venue']['identity']['id']);
     }
 
-    private function ensureReviewsTable(): void
+    protected function ensureReviewsTable(): void
     {
         if (Schema::hasTable('reviews')) {
             return;

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\BasicSettings\PageHeading;
+use App\Models\Customer;
 use App\Models\Event\EventCategory;
 use App\Models\Event\EventDates;
 use App\Models\Event\Ticket;
@@ -13,10 +14,12 @@ use App\Models\Follower;
 use App\Models\Language;
 use App\Models\Organizer;
 use App\Models\Venue;
+use App\Services\OrganizerPublicProfileService;
 use App\Traits\ApiFormatTrait;
 use Illuminate\Http\Request;
 use DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use PHPMailer\PHPMailer\PHPMailer;
 use stdClass;
@@ -203,6 +206,77 @@ class OrganizerController extends Controller
     ]);
   }
 
+  public function profile(Request $request, $id)
+  {
+    $locale = $request->header('Accept-Language');
+    $language = $locale ? Language::where('code', $locale)->first()
+      : Language::where('is_default', 1)->first();
+    $languageId = $language?->id;
+
+    $target = $this->organizerPublicProfileService->resolveByPublicId($id, $languageId);
+    if (!$target) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Organizer profile not found.',
+      ], 404);
+    }
+
+    $categories = EventCategory::where('status', 1)
+      ->when($languageId !== null, fn ($query) => $query->where('language_id', $languageId))
+      ->orderBy('serial_number', 'asc')
+      ->get();
+
+    $information = [
+      'admin' => false,
+      'organizer' => (object) $this->organizerPublicProfileService->buildPublicPayload(
+        $target,
+        Auth::guard('sanctum')->user() instanceof Customer ? Auth::guard('sanctum')->user() : null
+      ),
+      'categories' => $categories,
+    ];
+
+    foreach ($categories as $category) {
+      $events = DB::table('event_contents')
+        ->join('events', 'events.id', '=', 'event_contents.event_id')
+        ->where('event_contents.event_category_id', $category->id)
+        ->when($languageId !== null, fn ($query) => $query->where('event_contents.language_id', $languageId))
+        ->where('events.status', 1)
+        ->where(function ($query) use ($target) {
+          if (!empty($target['identity']?->id)) {
+            $query->where('events.owner_identity_id', $target['identity']->id);
+
+            if (!empty($target['legacy_id'])) {
+              $query->orWhere(function ($fallback) use ($target) {
+                $fallback->whereNull('events.owner_identity_id')
+                  ->where('events.organizer_id', $target['legacy_id']);
+              });
+            }
+
+            return;
+          }
+
+          if (!empty($target['legacy_id'])) {
+            $query->where('events.organizer_id', $target['legacy_id']);
+            return;
+          }
+
+          $query->whereRaw('1 = 0');
+        })
+        ->orderBy('events.created_at', 'desc')
+        ->get()
+        ->map(function ($event) use ($language) {
+          return $this->formatEventForApi($event, $language);
+        });
+
+      $information['events']['categories'][$category->id] = $events;
+    }
+
+    return response()->json([
+      'success' => true,
+      'data' => $information,
+    ]);
+  }
+
   private function formatEventForApi($event, $language)
   {
     $event_date = $event->date_type == 'multiple' ? eventLatestDates($event->id) : null;
@@ -216,18 +290,21 @@ class OrganizerController extends Controller
       $organizer_name = $organizer ? $organizer->username : null;
     } else {
       $admin = Admin::first();
-      $organizer_name = $admin->username;
+      $organizer_name = $admin?->username;
     }
 
 
-    if ($event->event_type == 'online') {
+    if (!Schema::hasTable('tickets')) {
+      $ticket = null;
+      $start_price = 0;
+    } elseif ($event->event_type == 'online') {
       $ticket = Ticket::where('event_id', $event->id)->orderBy('price', 'asc')->first();
-      $start_price = $ticket->price;
+      $start_price = $ticket?->price ?? 0;
     } else {
       $ticket = Ticket::where('event_id', $event->id)->whereNotNull('price')->orderBy('price', 'asc')->first();
       if (!$ticket) {
         $ticket = Ticket::where('event_id', $event->id)->whereNotNull('f_price')->orderBy('price', 'asc')->first();
-        $start_price = $ticket->f_price;
+        $start_price = $ticket?->f_price ?? 0;
       } else {
         $start_price = $ticket->price;
       }
@@ -256,7 +333,7 @@ class OrganizerController extends Controller
       'organizer' => $organizer_name,
       'event_type' => $event->event_type,
       'address' => $event->address,
-      'start_price' => $ticket->pricing_type == 'free' ? $ticket->pricing_type : $start_price,
+      'start_price' => $ticket?->pricing_type == 'free' ? $ticket->pricing_type : $start_price,
       'wishlist' => !is_null($wishlist) ? 'yes' : 'no',
       'dates' => $dates,
     ];

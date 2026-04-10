@@ -2,19 +2,24 @@
 
 namespace Tests\Feature\Api;
 
-use Tests\TestCase;
 use App\Models\User;
 use App\Models\Identity;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Tests\Support\ActorFeatureTestCase;
 
-class IdentityTest extends TestCase
+class IdentityTest extends ActorFeatureTestCase
 {
-    use RefreshDatabase;
+    protected array $baselineSchema = ['users_customers', 'identities'];
+    protected array $baselineTruncate = [
+        'identity_members',
+        'identities',
+        'users',
+        'customers',
+    ];
 
     public function test_user_can_list_their_identities()
     {
-        $user = User::factory()->create();
+        $user = $this->createIdentityUser('john@example.com', 'john-doe');
         Sanctum::actingAs($user);
 
         // Personal identity should be created automatically (if you have observers/logic)
@@ -36,7 +41,7 @@ class IdentityTest extends TestCase
 
     public function test_user_can_request_new_identity()
     {
-        $user = User::factory()->create();
+        $user = $this->createIdentityUser('venue-owner@example.com', 'venue-owner');
         Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/identities', [
@@ -50,7 +55,8 @@ class IdentityTest extends TestCase
                 'address_line' => '123 Event St',
                 'city' => 'Metropolis',
                 'country' => 'USA',
-                'capacity' => 500
+                'capacity' => 500,
+                'whatsapp' => '123456789',
             ]
         ]);
 
@@ -65,10 +71,10 @@ class IdentityTest extends TestCase
 
     public function test_superadmin_can_approve_identity()
     {
-        $admin = User::factory()->create(['is_admin' => 1]); // Assuming 1 is superadmin
-        Sanctum::actingAs($admin);
+        $admin = $this->createIdentityUser('admin@example.com', 'admin');
+        Sanctum::actingAs($admin, [], 'admin_sanctum');
 
-        $user = User::factory()->create();
+        $user = $this->createIdentityUser('identity-owner@example.com', 'identity-owner');
         $identity = Identity::create([
             'type' => 'organizer',
             'status' => 'pending',
@@ -82,5 +88,16 @@ class IdentityTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertEquals('active', $identity->fresh()->status);
+    }
+
+    private function createIdentityUser(string $email, string $username): User
+    {
+        return User::query()->create([
+            'email' => $email,
+            'username' => $username,
+            'first_name' => ucfirst(str_replace(['-', '_'], ' ', $username)),
+            'password' => bcrypt('secret'),
+            'status' => 1,
+        ]);
     }
 }

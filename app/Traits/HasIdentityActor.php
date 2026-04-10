@@ -26,7 +26,17 @@ trait HasIdentityActor
         // 1. Check if we have an active identity context (Mobile/Accounts Center)
         $identity = $this->getActiveIdentity();
         if ($identity && $identity->type === $type) {
-            return $identity->meta['id'] ?? null;
+            $meta = is_array($identity->meta) ? $identity->meta : [];
+
+            if (isset($meta['legacy_id']) && is_numeric((string) $meta['legacy_id'])) {
+                return (int) $meta['legacy_id'];
+            }
+
+            if (isset($meta['id']) && is_numeric((string) $meta['id'])) {
+                return (int) $meta['id'];
+            }
+
+            return null;
         }
 
         // 2. Fallback to legacy guards (Web Panels)

@@ -14,6 +14,14 @@ use RuntimeException;
 
 class LoyaltyService
 {
+    private const DEFAULT_RULE_POINTS = [
+        'attendance_confirmed' => 40,
+        'event_purchase' => 100,
+        'marketplace_purchase' => 60,
+        'published_review' => 25,
+        'follow_accept' => 10,
+    ];
+
     public function __construct(protected RewardFulfillmentService $rewardFulfillmentService)
     {
     }
@@ -38,7 +46,12 @@ class LoyaltyService
         }
 
         $history = LoyaltyPointTransaction::query()->where('customer_id', $customer->id);
-        $currentPoints = (int) ((clone $history)->latest('id')->value('balance_after') ?? 0);
+        $currentPoints = $this->hasColumn($this->loyaltyTransactionColumns(), 'balance_after')
+            ? (int) ((clone $history)->latest('id')->value('balance_after') ?? 0)
+            : (int) (
+                (clone $history)->where('type', 'credit')->sum('points')
+                - (clone $history)->where('type', 'debit')->sum('points')
+            );
 
         return [
             'current_points' => $currentPoints,
@@ -80,28 +93,154 @@ class LoyaltyService
 
     public function awardFromRule(Customer $customer, string $ruleCode, string $referenceType, string|int $referenceId, array $meta = []): ?LoyaltyPointTransaction
     {
-        if (!$this->isAvailable()) {
+        if (!Schema::hasTable('loyalty_point_transactions')) {
             return null;
         }
 
-        $rule = LoyaltyRule::query()
-            ->where('code', $ruleCode)
-            ->where('is_active', true)
-            ->first();
-
+        $transactionColumns = $this->loyaltyTransactionColumns();
+        $rule = $this->resolveAwardRule($ruleCode);
         if (!$rule || (int) $rule->points <= 0) {
             return null;
         }
 
-        return $this->creditPoints(
-            $customer,
-            (int) $rule->points,
-            $rule,
-            $referenceType,
-            (string) $referenceId,
-            'loyalty_' . $ruleCode . '_' . $referenceType . '_' . $referenceId,
-            $meta
-        );
+        $customerId = (int) $customer->id;
+        $referenceId = (string) $referenceId;
+        $points = (int) $rule->points;
+        $idempotencyKey = 'loyalty_' . $ruleCode . '_' . $referenceType . '_' . $referenceId;
+
+        $existingQuery = DB::table('loyalty_point_transactions')
+            ->where('customer_id', $customerId);
+
+        if ($this->hasColumn($transactionColumns, 'idempotency_key')) {
+            $existingQuery->where('idempotency_key', $idempotencyKey);
+        } elseif ($this->hasColumn($transactionColumns, 'rule_key')) {
+            $existingQuery
+                ->where('rule_key', $ruleCode)
+                ->where('reference_type', $referenceType)
+                ->where('reference_id', $referenceId);
+        } elseif ($this->hasColumn($transactionColumns, 'rule_id') && isset($rule->id)) {
+            $existingQuery
+                ->where('rule_id', $rule->id)
+                ->where('reference_type', $referenceType)
+                ->where('reference_id', $referenceId);
+        } else {
+            $existingQuery
+                ->where('reference_type', $referenceType)
+                ->where('reference_id', $referenceId)
+                ->where('points', $points);
+        }
+
+        $existing = $existingQuery->first();
+        if ($existing) {
+            return LoyaltyPointTransaction::query()->find($existing->id);
+        }
+
+        $currentBalance = 0;
+        if ($this->hasColumn($transactionColumns, 'balance_after')) {
+            $currentBalance = (int) (DB::table('loyalty_point_transactions')
+                ->where('customer_id', $customerId)
+                ->orderByDesc('id')
+                ->value('balance_after') ?? 0);
+        }
+
+        $payload = [
+            'customer_id' => $customerId,
+            'type' => 'credit',
+            'points' => $points,
+            'reference_type' => $referenceType,
+            'reference_id' => $referenceId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        if ($this->hasColumn($transactionColumns, 'rule_id')) {
+            $payload['rule_id'] = $rule->id ?? null;
+        }
+
+        if ($this->hasColumn($transactionColumns, 'rule_key')) {
+            $payload['rule_key'] = $ruleCode;
+        }
+
+        if ($this->hasColumn($transactionColumns, 'balance_after')) {
+            $payload['balance_after'] = $currentBalance + $points;
+        }
+
+        if ($this->hasColumn($transactionColumns, 'idempotency_key')) {
+            $payload['idempotency_key'] = $idempotencyKey;
+        }
+
+        if ($this->hasColumn($transactionColumns, 'meta')) {
+            $payload['meta'] = json_encode(array_merge($meta, [
+                'rule_code' => $rule->code ?? $ruleCode,
+                'rule_label' => $rule->label ?? $ruleCode,
+            ]));
+        }
+
+        $transactionId = DB::table('loyalty_point_transactions')->insertGetId($payload);
+
+        return LoyaltyPointTransaction::query()->find($transactionId);
+    }
+
+    private function resolveAwardRule(string $ruleKey): object
+    {
+        if (Schema::hasTable('loyalty_rules')) {
+            $ruleColumns = $this->loyaltyRuleColumns();
+            $configuredRuleQuery = DB::table('loyalty_rules');
+
+            if ($this->hasColumn($ruleColumns, 'code')) {
+                $configuredRuleQuery->where('code', $ruleKey);
+            } elseif ($this->hasColumn($ruleColumns, 'rule_key')) {
+                $configuredRuleQuery->where('rule_key', $ruleKey);
+            }
+
+            if ($this->hasColumn($ruleColumns, 'is_active')) {
+                $configuredRuleQuery->where('is_active', true);
+            }
+
+            $configuredRule = $configuredRuleQuery->first();
+
+            if ($configuredRule) {
+                if (!isset($configuredRule->code) && isset($configuredRule->rule_key)) {
+                    $configuredRule->code = $configuredRule->rule_key;
+                }
+
+                return $configuredRule;
+            }
+        }
+
+        return (object) [
+            'id' => null,
+            'code' => $ruleKey,
+            'label' => $ruleKey,
+            'points' => self::DEFAULT_RULE_POINTS[$ruleKey] ?? 0,
+        ];
+    }
+
+    private function loyaltyTransactionColumns(): array
+    {
+        static $columns;
+
+        if ($columns === null) {
+            $columns = Schema::getColumnListing('loyalty_point_transactions');
+        }
+
+        return $columns;
+    }
+
+    private function loyaltyRuleColumns(): array
+    {
+        static $columns;
+
+        if ($columns === null) {
+            $columns = Schema::getColumnListing('loyalty_rules');
+        }
+
+        return $columns;
+    }
+
+    private function hasColumn(array $columns, string $column): bool
+    {
+        return in_array($column, $columns, true);
     }
 
     public function redeemReward(Customer $customer, RewardCatalog $reward): RewardRedemption

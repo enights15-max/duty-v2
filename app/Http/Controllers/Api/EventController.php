@@ -56,6 +56,7 @@ use App\Services\NotificationService;
 use App\Services\PlatformRevenueService;
 use App\Support\PublicAssetUrl;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -127,6 +128,7 @@ class EventController extends Controller
     $this->eventEarlyBirdDiscountService = $eventEarlyBirdDiscountService ?? app(EventEarlyBirdDiscountService::class);
     $this->eventTicketNameResolverService = $eventTicketNameResolverService ?? app(EventTicketNameResolverService::class);
     $this->eventPaymentVerificationService = $eventPaymentVerificationService ?? app(EventPaymentVerificationService::class);
+    $this->bonusWalletService = $bonusWalletService ?? app(BonusWalletService::class);
     $this->ticketPriceScheduleService = $ticketPriceScheduleService ?? app(TicketPriceScheduleService::class);
     $this->checkoutFundingAllocatorService = $checkoutFundingAllocatorService ?? app(CheckoutFundingAllocatorService::class);
     $this->bookingFundingService = $bookingFundingService ?? app(BookingFundingService::class);
@@ -1096,6 +1098,11 @@ class EventController extends Controller
     }
 
     $event = \App\Models\Event::find($request->event_id);
+    $dateWindowValidation = $this->eventBookingGuardService->validateEventDateWindow($event);
+    if ($dateWindowValidation instanceof JsonResponse) {
+      return $dateWindowValidation;
+    }
+
     if ($event && $event->age_limit > 0) {
       if (empty($request->customer_id) || $request->customer_id == 'guest') {
         return response()->json([
@@ -1216,6 +1223,9 @@ class EventController extends Controller
     $discount = $request->discount;
     $total_early_bird_dicount = $request->total_early_bird_dicount;
     $tax_amount = $request->tax;
+    $subtotal = (float) ($request->input('sub_total')
+      ?? $request->input('subtotal')
+      ?? $total);
 
     $primaryFeeBreakdown = $this->feeEngine->calculate(FeeEngine::OP_PRIMARY_TICKET_SALE, (float) $subtotal, [
       'fee_base_amount' => $total,
@@ -1229,7 +1239,7 @@ class EventController extends Controller
       $paymentStatus = $request->gatewayType == 'online' ? 'completed' : 'pending';
     }
 
-    $customerId = $request->customer_id;
+    $customerId = $authCustomer?->id ?? $request->customer_id;
     if (empty($customerId)) {
       $customerId = 'guest';
     }
@@ -1272,72 +1282,42 @@ class EventController extends Controller
     );
 
     $bookingCollection = $this->storeData($arrData);
+    if ($bookingCollection->isEmpty()) {
+      return response()->json([
+        'status' => false,
+        'message' => 'No pudimos crear la reserva con la selección actual.',
+      ], 422);
+    }
 
-    if ($bookingCollection->isNotEmpty() && $request->gatewayType == 'online' && $paymentStatus == 'completed') {
-      // DEDUCT FROM WALLET IF NEEDED
-      if ($request->gateway == 'wallet' && $customerId !== 'guest') {
-        try {
-          $customer = Customer::find($customerId);
-          if (!$customer) {
-            throw new \Exception('Customer not found for wallet payment.');
-          }
-          $bookingId = $bookingCollection->first()->booking_id;
+    $paymentCapture = [];
+    $requiresFundingCapture = (float) ($fundingPlan['wallet_amount'] ?? 0) > 0
+      || (float) ($fundingPlan['bonus_amount'] ?? 0) > 0
+      || (float) ($fundingPlan['card_amount'] ?? 0) > 0
+      || (float) ($fundingPlan['card_total_charge'] ?? 0) > 0;
 
-          // Debit uses pessimistic locking. Throws exception if insufficient funds.
-          $this->walletService->debit(
-            $customer,
-            $total,
-            'ticket_booking',
-            $bookingId,
-            'ticket_booking_' . $bookingId
-          );
-        } catch (\Exception $e) {
-          // Delete the generated bookings to rollback the transaction
-          foreach ($bookingCollection as $bookingInfo) {
-            $bookingInfo->delete();
-            // If there are QRCodes or tickets associated, they will be orphaned or deleted via cascade
-          }
-          return response()->json([
-            'status' => 'error',
-            'message' => 'Transaction failed: ' . $e->getMessage()
-          ], 400);
+    if ($bookingCollection->isNotEmpty() && $request->gatewayType == 'online' && $paymentStatus == 'completed' && $authCustomer && $requiresFundingCapture) {
+      try {
+        $paymentCapture = $this->bookingFundingService->captureForBookings(
+          $authCustomer,
+          $bookingCollection,
+          $fundingPlan,
+          $request->input('stripe_payment_method_id'),
+          (string) $currencyInfo->base_currency_text
+        );
+      } catch (\Exception $e) {
+        foreach ($bookingCollection as $bookingInfo) {
+          $bookingInfo->delete();
         }
+
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Payment failed: ' . $e->getMessage()
+        ], 400);
       }
+    }
 
-      // CHARGE SAVED STRIPE CARD IF NEEDED
-      if ($request->gateway == 'stripe' && $request->stripe_payment_method_id && $customerId !== 'guest') {
-        try {
-          $customer = Customer::find($customerId);
-          if (!$customer) {
-            throw new \Exception('Customer not found for Stripe payment.');
-          }
-          $bookingId = $bookingCollection->first()->booking_id;
-
-          // Charge saved card off-session using StripeService
-          $this->stripeService->chargeSavedCard(
-            $customer,
-            $total,
-            $currencyInfo->base_currency_text,
-            "Ticket Booking #$bookingId",
-            ['booking_id' => $bookingId]
-          );
-
-        } catch (\Exception $e) {
-          // Rollback bookings on payment failure
-          foreach ($bookingCollection as $bookingInfo) {
-            $bookingInfo->delete();
-          }
-          return response()->json([
-            'status' => 'error',
-            'message' => 'Payment failed: ' . $e->getMessage()
-          ], 400);
-        }
-      }
-
+    if ($bookingCollection->isNotEmpty()) {
       $ticket = DB::table('basic_settings')->select('how_ticket_will_be_send')->first();
-
-      // Use the first booking for general info, but pass the whole collection for invoice/mail
-      $firstBooking = $bookingCollection->first();
 
       if ($ticket->how_ticket_will_be_send == 'instant') {
         // generate an invoice in pdf format
@@ -1433,9 +1413,12 @@ class EventController extends Controller
       ]);
     }
 
+    // Use the first booking for general info, but pass the whole collection for invoice/mail.
+    $firstBooking = $bookingCollection->first();
+
     //send notification
     if ($customerId !== 'guest') {
-      $user = \App\Models\User::find($customerId);
+      $user = \App\Models\User::find($customerId) ?: $authCustomer;
       $this->notificationService->notifyUser(
         $user,
         __('Ticket Purchase Successful'),
@@ -1474,14 +1457,17 @@ class EventController extends Controller
       ]);
     }
 
+    $eventModel = $bookingInfo->relationLoaded('evnt') ? $bookingInfo->evnt : $bookingInfo->evnt()->first();
     $bookingInfoArray = $bookingInfo->toArray();
     $bookingInfoArray['organizer_name'] = $bookingInfo->organizer_name ?? null;
-    $bookingInfoArray['event_title'] = $bookingInfo->event_title ?? null;
-    $bookingInfoArray['thumbnail'] = $bookingInfo->thumbnail ?? null;
-    $bookingInfoArray['venue_name'] = $bookingInfo->venue_name ?? null;
-    $bookingInfoArray['event_end_date'] = $bookingInfo->event_end_date ?? null;
+    $bookingInfoArray['event_title'] = $bookingInfo->event_title ?? ($eventModel->title ?? null);
+    $bookingInfoArray['thumbnail'] = $bookingInfo->thumbnail
+      ?? (!empty($eventModel?->thumbnail) ? asset('assets/admin/img/event/thumbnail/' . $eventModel->thumbnail) : null);
+    $bookingInfoArray['venue_name'] = $bookingInfo->venue_name ?? ($eventModel->venue_name_snapshot ?? null);
+    $bookingInfoArray['event_end_date'] = $bookingInfo->event_end_date ?? ($eventModel->end_date_time ?? null);
     $bookingInfoArray['total'] = $bookingInfo->total ?? 0;
-    $bookingInfoArray['total_paid'] = $bookingInfo->total_paid ?? 0;
+    $bookingInfoArray['total_paid'] = $bookingInfo->total_paid
+      ?? number_format((float) ($bookingInfo->price ?? 0), 2, '.', '');
     if (isset($bookingInfo->invoice)) {
         $bookingInfoArray['invoice'] = $bookingInfo->invoice;
     }
@@ -1887,6 +1873,7 @@ class EventController extends Controller
 
     // Handle Variations / Ticket Stock Update
     $variationsJson = null;
+    $ticketId = null;
     if (!empty($specificVariation)) {
       // Logic to update stock for this single variation unit
       // Copied and adapted from original storeData stock logic
@@ -1895,10 +1882,12 @@ class EventController extends Controller
       // Prepare variation JSON for this booking (qty 1)
       // We need to generate unique IDs for slots/seats if applicable
       $variationsJson = $this->processVariationsForBooking($specificVariation);
+      $ticketId = (int) ($specificVariation[0]['ticket_id'] ?? 0) ?: null;
     } else {
       // Simple ticket stock update
       $ticket = $event->ticket()->first();
       if ($ticket) {
+        $ticketId = (int) $ticket->id;
         $ticket->ticket_available = $ticket->ticket_available - 1;
         $ticket->save();
       }
@@ -1957,6 +1946,9 @@ class EventController extends Controller
 
     if (Schema::hasColumn('bookings', 'ticket_id')) {
       $payload['ticket_id'] = $ticketId;
+    }
+    if (Schema::hasColumn('bookings', 'organizer_identity_id')) {
+      $payload['organizer_identity_id'] = $event?->owner_identity_id;
     }
 
     $restrictionPayload = $this->resolveResaleRestrictionPayload($info, $resolvedTicket);
@@ -2469,7 +2461,7 @@ class EventController extends Controller
           $ticketArr[] = [
             'ticket_id' => $ticket->id,
             'early_bird_dicount' => $early_bird_dicount,
-            'name' => $ticketContent->title,
+            'name' => $ticketContent->title ?? ($ticket->title ?? ('Ticket #' . $ticket->id)),
             'price' => $ticket->price,
             'type' => $ticket->pricing_type,
             'slot_unique_id' => (int) $ticket->normal_ticket_slot_unique_id
@@ -2483,7 +2475,7 @@ class EventController extends Controller
           $ticketArr[] = [
             'ticket_id' => $ticket->id,
             'early_bird_dicount' => 0,
-            'name' => $ticketContent->title,
+            'name' => $ticketContent->title ?? ($ticket->title ?? ('Ticket #' . $ticket->id)),
             'price' => 0,
             'type' => $ticket->pricing_type,
             'slot_unique_id' => (int) $ticket->free_tickete_slot_unique_id
@@ -2491,9 +2483,19 @@ class EventController extends Controller
         }
       }
 
+      if ($ticketArr === []) {
+        return [
+          'success' => false,
+          'message' => 'No tickets available for the selected event.',
+        ];
+      }
+
       $selTickets = [];
       foreach ($data->quantity as $key => $qty) {
         if ($qty > 0) {
+          if (!isset($ticketArr[$key])) {
+            continue;
+          }
           $selTickets[] = [
             'ticket_id' => $ticketArr[$key]['ticket_id'],
             'early_bird_dicount' => $qty * $ticketArr[$key]['early_bird_dicount'],
@@ -2896,6 +2898,7 @@ class EventController extends Controller
         }
       }
 
+      $authenticatedCustomer = auth('customer')->user();
       $checkoutCustomer = $authenticatedCustomer instanceof Customer ? $authenticatedCustomer : Auth::guard('customer')->user();
       if (!$checkoutCustomer instanceof Customer) {
         $checkoutCustomer = null;
@@ -2910,88 +2913,20 @@ class EventController extends Controller
       $checkoutContext = $this->eventCheckoutSelectionService->buildContext($request);
       $quantityList = $checkoutContext['quantity_list'];
       $quantityScalar = $checkoutContext['quantity_scalar'];
+      $quantity = $quantityList;
       $event_id = $request->event_id;
       $pricing_type = $request->pricing_type;
       $event_guest_checkout_status = $request->event_guest_checkout_status;
-
-
-      $selected_seats = !empty($seat_data) ? $seat_data : [];
-
-      $selected_slot_seat = collect($selected_seats)
-        ->groupBy('slot_id')
-        ->map(function ($group) {
-          $first = $group->first();
-          return [
-            'slot_id' => $first['slot_id'],
-            'slot_name' => $first['slot_name'],
-            'event_id' => $first['event_id'],
-            'ticket_id' => $first['ticket_id'],
-            'slot_unique_id' => $first['slot_unique_id'],
-            'slot_type' => $first['s_type'],
-            'seats' => collect($group)->map(function ($seat) {
-              return [
-                'seat_id' => $seat['id'],
-                'seat_name' => $seat['name'],
-                'discount' => $seat['discount'],
-                'price' => $seat['price'],
-                'payable_price' => $seat['payable_price'],
-              ];
-            })->values()->toArray(),
-          ];
-        })
-        ->map(function ($slot) {
-          // count and sum for each slot
-          $slot['seat_count'] = count($slot['seats']);
-          $slot['seats_price'] = collect($slot['seats'])->sum('payable_price');
-          return $slot;
-        })
-        ->values()
-        ->toArray();
-
-      $select = false;
+      $selected_seats = $checkoutContext['selected_seats'];
+      $selected_slot_seat = $checkoutContext['selected_slot_seat'];
       $event_type = Event::where('id', $event_id)->select('event_type')->first();
-
-
-      if ($event_type->event_type == 'venue') {
-        foreach ($quantity as $qty) {
-          if ($qty > 0) {
-            $select = true;
-            break;
-          }
-          continue;
-        }
-        //slot validation for variations wise seats
-        if (count($selected_slot_seat) > 0) {
-          $select = true;
-        }
-      } else {
-        if ($pricing_type == 'free') {
-          $select = true;
-          //free ticket validation
-          if (count($selected_slot_seat) > 0) {
-            $select = true;
-          }
-        } elseif ($pricing_type == 'normal') {
-          if ($quantity == 0) {
-            $select = false;
-          } else {
-            $select = true;
-          }
-
-          //when selected slot & seat pricing type normal
-          if (count($selected_slot_seat) > 0) {
-            $select = true;
-          }
-        } else {
-          foreach ($quantity as $qty) {
-            if ($qty > 0) {
-              $select = true;
-              break;
-            }
-            continue;
-          }
-        }
-      }
+      $select = $this->eventCheckoutSelectionService->hasAnySelection(
+        $event_type->event_type,
+        $pricing_type,
+        $quantityList,
+        $quantityScalar,
+        $selected_slot_seat
+      );
 
       if ($select == false) {
         return [
@@ -3133,7 +3068,7 @@ class EventController extends Controller
             $ticketArr[] = [
               'ticket_id' => $ticket->id,
               'early_bird_dicount' => $early_bird_dicount,
-              'name' => $ticketContent->title,
+              'name' => $ticketContent->title ?? ($ticket->title ?? ('Ticket #' . $ticket->id)),
               'price' => $ticket->price,
               'type' => $ticket->pricing_type,
               'slot_unique_id' => (int) $ticket->normal_ticket_slot_unique_id
@@ -3147,7 +3082,7 @@ class EventController extends Controller
             $ticketArr[] = [
               'ticket_id' => $ticket->id,
               'early_bird_dicount' => 0,
-              'name' => $ticketContent->title,
+              'name' => $ticketContent->title ?? ($ticket->title ?? ('Ticket #' . $ticket->id)),
               'price' => 0,
               'type' => $ticket->pricing_type,
               'slot_unique_id' => (int) $ticket->free_tickete_slot_unique_id
@@ -3155,9 +3090,19 @@ class EventController extends Controller
           }
         }
 
+        if ($ticketArr === []) {
+          return [
+            'success' => false,
+            'message' => 'No tickets available for the selected event.',
+          ];
+        }
+
         $selTickets = [];
         foreach ($quantity as $key => $qty) {
           if ($qty > 0) {
+            if (!isset($ticketArr[$key])) {
+              continue;
+            }
             $selTickets[] = [
               'ticket_id' => $ticketArr[$key]['ticket_id'],
               'early_bird_dicount' => $qty * $ticketArr[$key]['early_bird_dicount'],

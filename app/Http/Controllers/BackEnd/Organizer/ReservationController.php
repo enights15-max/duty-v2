@@ -222,7 +222,7 @@ class ReservationController extends Controller
         }
 
         Session::flash('success', 'Reservation timeline updated.');
-        return redirect()->route('organizer.event_reservation.details', ['id' => $id]);
+        return redirect()->route('organizer.event_booking.details', ['id' => $id]);
     }
 
     public function cancel($id)
@@ -243,7 +243,7 @@ class ReservationController extends Controller
         }
 
         Session::flash('success', 'Reservation cancelled. Inventory was released when applicable. Refunds remain admin-managed.');
-        return redirect()->route('organizer.event_reservation.details', ['id' => $id]);
+        return redirect()->route('organizer.event_booking.details', ['id' => $id]);
     }
 
     public function markDefaulted($id)
@@ -264,7 +264,7 @@ class ReservationController extends Controller
         }
 
         Session::flash('success', 'Reservation marked as defaulted. Inventory was released when applicable.');
-        return redirect()->route('organizer.event_reservation.details', ['id' => $id]);
+        return redirect()->route('organizer.event_booking.details', ['id' => $id]);
     }
 
     public function reactivate(Request $request, $id)
@@ -296,7 +296,7 @@ class ReservationController extends Controller
         }
 
         Session::flash('success', 'Reservation reactivated and inventory was re-allocated.');
-        return redirect()->route('organizer.event_reservation.details', ['id' => $id]);
+        return redirect()->route('organizer.event_booking.details', ['id' => $id]);
     }
 
     public function convert($id)
@@ -319,7 +319,7 @@ class ReservationController extends Controller
 
         $count = $bookings->count();
         Session::flash('success', "Reservation converted into {$count} booking(s).");
-        return redirect()->route('organizer.event_reservation.details', ['id' => $id]);
+        return redirect()->route('organizer.event_booking.details', ['id' => $id]);
     }
 
     private function buildScopedQuery(int $organizerId, string $status, string $queryText, array $eventIds, string $refundState, string $dueState): Builder

@@ -40,7 +40,10 @@ class Customer extends Model implements AuthenticatableContract
     'email_verified_at',
     'phone_verified_at',
     'verification_token',
-    'stripe_customer_id'
+    'stripe_customer_id',
+    'show_interested_events',
+    'show_attended_events',
+    'show_upcoming_attendance',
   ];
 
   protected $hidden = [
@@ -53,6 +56,10 @@ class Customer extends Model implements AuthenticatableContract
   protected $casts = [
     'email_verified_at' => 'datetime',
     'phone_verified_at' => 'datetime',
+    'is_private' => 'boolean',
+    'show_interested_events' => 'boolean',
+    'show_attended_events' => 'boolean',
+    'show_upcoming_attendance' => 'boolean',
   ];
 
   protected $appends = ['age'];
@@ -100,6 +107,34 @@ class Customer extends Model implements AuthenticatableContract
   public function following()
   {
     return $this->hasMany(Follower::class, 'customer_id', 'id');
+  }
+
+  public function follows()
+  {
+    return $this->morphMany(Follow::class, 'follower');
+  }
+
+  public function followers()
+  {
+    return $this->morphMany(Follow::class, 'followable');
+  }
+
+  public function isFollowing($model): bool
+  {
+    return $this->follows()
+      ->where('followable_id', $model->id)
+      ->where('followable_type', get_class($model))
+      ->where('status', 'accepted')
+      ->exists();
+  }
+
+  public function hasPendingFollowRequest($model): bool
+  {
+    return $this->follows()
+      ->where('followable_id', $model->id)
+      ->where('followable_type', get_class($model))
+      ->where('status', 'pending')
+      ->exists();
   }
 
   /**

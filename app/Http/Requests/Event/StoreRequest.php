@@ -147,8 +147,13 @@ class StoreRequest extends FormRequest
     }
 
     if ($this->event_type == 'venue') {
-      $ruleArray['latitude'] = 'required_if:event_type,venue';
-      $ruleArray['longitude'] = 'required_if:event_type,venue';
+      if ((string) $this->input('venue_source') === 'external') {
+        $ruleArray['latitude'] = 'required_if:event_type,venue';
+        $ruleArray['longitude'] = 'required_if:event_type,venue';
+      } else {
+        $ruleArray['latitude'] = 'nullable';
+        $ruleArray['longitude'] = 'nullable';
+      }
     }
 
     $bs = DB::table('basic_settings')
@@ -172,16 +177,24 @@ class StoreRequest extends FormRequest
       ];
 
       if ($bs->event_country_status == 1) {
-        $ruleArray[$language->code . '_country'] = 'required_if:event_type,venue';
+        $ruleArray[$language->code . '_country'] = $this->usesResolvedVenueSource()
+          ? 'nullable'
+          : 'required_if:event_type,venue';
       }
       if ($bs->event_state_status == 1) {
-        $ruleArray[$language->code . '_state'] = 'required_if:event_type,venue';
+        $ruleArray[$language->code . '_state'] = $this->usesResolvedVenueSource()
+          ? 'nullable'
+          : 'required_if:event_type,venue';
       }
 
       $ruleArray[$language->code . '_category_id'] = 'required';
       $ruleArray[$language->code . '_description'] = 'min:30';
-      $ruleArray[$language->code . '_address'] = 'required_if:event_type,venue';
-      $ruleArray[$language->code . '_city'] = 'required_if:event_type,venue';
+      $ruleArray[$language->code . '_address'] = $this->usesResolvedVenueSource()
+        ? 'nullable'
+        : 'required_if:event_type,venue';
+      $ruleArray[$language->code . '_city'] = $this->usesResolvedVenueSource()
+        ? 'nullable'
+        : 'required_if:event_type,venue';
     }
 
     return $ruleArray;

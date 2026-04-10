@@ -4,6 +4,7 @@ namespace App\Http\Controllers\BackEnd\Artist;
 
 use App\Http\Controllers\Controller;
 use App\Models\Artist;
+use App\Services\ProfessionalBalanceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;

@@ -21,7 +21,17 @@ class MyFatoorahController extends Controller
     public function __construct()
     {
         $info = OnlineGateway::where('keyword', 'myfatoorah')->first();
+        if (!$info || empty($info->information)) {
+            $this->myfatoorah = null;
+            return;
+        }
+
         $information = json_decode($info->information, true);
+        if (!is_array($information)) {
+            $this->myfatoorah = null;
+            return;
+        }
+
         $this->myfatoorah = MyFatoorah::getInstance($information['sandbox_status'] == 1 ? true : false);
     }
 

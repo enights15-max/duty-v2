@@ -5,6 +5,7 @@ use App\Models\BasicSettings\Basic;
 use App\Models\Event\Booking;
 use App\Models\Event\EventDates;
 use App\Models\Event\Ticket;
+use App\Models\Identity;
 use App\Models\Organizer;
 use App\Models\Venue;
 use App\Models\PaymentGateway\OnlineGateway;

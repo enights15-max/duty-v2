@@ -383,56 +383,75 @@ class MarketplaceController extends Controller
         }
 
         try {
-            DB::beginTransaction();
+            $result = DB::transaction(function () use ($booking, $customer, $recipient) {
+                $lockedBooking = Booking::query()
+                    ->whereKey($booking->id)
+                    ->lockForUpdate()
+                    ->first();
 
-            // Log the transfer
-            TicketTransfer::create([
-                'booking_id' => $booking->id,
-                'from_customer_id' => $customer->id,
-                'to_customer_id' => $recipient->id,
-                'notes' => 'Transferred via Mobile App',
-            ]);
-
-            // Update booking ownership
-            $booking->update([
-                'customer_id' => $recipient->id,
-                'fname' => $recipient->fname,
-                'lname' => $recipient->lname,
-                'email' => $recipient->email,
-                'phone' => $recipient->phone,
-                'is_listed' => false, // Reset listing status on transfer
-            ]);
-
+                if (!$lockedBooking || (int) $lockedBooking->customer_id !== (int) $customer->id) {
                     return [
-                        'response' => response()->json(['success' => false, 'message' => $transferError], $status),
+                        'response' => response()->json([
+                            'success' => false,
+                            'message' => 'Ticket not found or not owned by you.',
+                        ], 404),
+                    ];
+                }
+
+                if (!$lockedBooking->is_transferable) {
+                    return [
+                        'response' => response()->json(['success' => false, 'message' => 'This ticket is not transferable.'], 403),
+                    ];
+                }
+
+                $hasPendingTransfer = TicketTransfer::where('booking_id', $lockedBooking->id)
+                    ->where('status', 'pending')
+                    ->lockForUpdate()
+                    ->exists();
+
+                if ($lockedBooking->transfer_status === 'transfer_pending' || $hasPendingTransfer) {
+                    return [
+                        'response' => response()->json(['success' => false, 'message' => 'This ticket already has a pending transfer request.'], 409),
+                    ];
+                }
+
+                $event = \App\Models\Event::find($lockedBooking->event_id);
+                if ($event && $event->end_date_time && now()->greaterThan($event->end_date_time)) {
+                    return [
+                        'response' => response()->json(['success' => false, 'message' => 'Cannot transfer tickets for past events.'], 403),
                     ];
                 }
 
                 $transfer = TicketTransfer::create([
-                    'booking_id' => $booking->id,
+                    'booking_id' => $lockedBooking->id,
                     'from_customer_id' => $customer->id,
                     'to_customer_id' => $recipient->id,
-                    'notes' => 'Transfer request via Mobile App',
-                    'status' => 'pending',
-                    'flow' => 'owner_offer',
+                    'notes' => 'Direct transfer via Mobile App',
+                    'status' => 'accepted',
+                    'flow' => 'direct_owner_transfer',
                 ]);
 
-                $booking->transfer_status = 'transfer_pending';
-                $booking->save();
+                $lockedBooking->customer_id = $recipient->id;
+                $lockedBooking->email = $recipient->email;
+                $lockedBooking->phone = $recipient->phone;
+                $lockedBooking->transfer_status = null;
+                $lockedBooking->is_listed = false;
+                $lockedBooking->listing_price = 0;
+                $lockedBooking->save();
 
-                $this->ticketJourneyService->record($booking->fresh(), 'gift_transfer_pending', [
+                $this->ticketJourneyService->record($lockedBooking->fresh(), 'gift_transfer_completed', [
                     'actor_customer_id' => (int) $customer->id,
                     'target_customer_id' => (int) $recipient->id,
                     'transfer_id' => (int) $transfer->id,
                     'metadata' => [
-                        'flow' => 'owner_offer',
-                        'notes' => 'Transfer request via Mobile App',
+                        'flow' => 'direct_owner_transfer',
+                        'notes' => 'Direct transfer via Mobile App',
                     ],
                 ]);
 
                 return [
                     'transfer' => $transfer,
-                    'booking' => $booking->fresh(),
+                    'booking' => $lockedBooking->fresh(),
                 ];
             });
 
@@ -447,12 +466,12 @@ class MarketplaceController extends Controller
                 $eventTitle = optional($booking->evnt)->title ?? 'an event';
                 $this->notificationService->notifyUser(
                     $recipient,
-                    'Transfer Request',
-                    ($customer->fname ?? $customer->username) . ' wants to send you a ticket for ' . $eventTitle . '. Open the app to accept or reject.',
+                    'Ticket Transferred',
+                    ($customer->fname ?? $customer->username) . ' sent you a ticket for ' . $eventTitle . '.',
                     [
-                        'type' => 'transfer_request',
+                        'type' => 'ticket_transferred',
                         'transfer_id' => $transfer->id,
-                        'flow' => 'owner_offer',
+                        'flow' => 'direct_owner_transfer',
                         'booking_id' => $booking->id,
                         'event_id' => $booking->event_id,
                     ]
@@ -462,10 +481,10 @@ class MarketplaceController extends Controller
             }
             return response()->json([
                 'success' => true,
-                'message' => 'Transfer request sent to ' . ($recipient->fname ?? $recipient->username) . '. Waiting for approval.',
+                'message' => 'Ticket transferred successfully to ' . ($recipient->fname ?? $recipient->username) . '.',
                 'data' => [
                     'transfer_id' => $transfer->id,
-                    'status' => 'pending',
+                    'status' => 'accepted',
                 ]
             ]);
         } catch (\Exception $e) {
@@ -1409,6 +1428,22 @@ class MarketplaceController extends Controller
                 );
             } catch (\Throwable $notifyError) {
                 report($notifyError);
+            }
+
+            try {
+                app(\App\Services\LoyaltyService::class)->awardFromRule(
+                    $buyer,
+                    'marketplace_purchase',
+                    'marketplace_booking',
+                    (string) $booking->id,
+                    [
+                        'event_id' => (int) ($booking->event_id ?? 0),
+                        'booking_id' => (int) $booking->id,
+                        'seller_customer_id' => (int) $seller->id,
+                    ]
+                );
+            } catch (\Throwable $loyaltyError) {
+                report($loyaltyError);
             }
 
             return response()->json([

@@ -134,4 +134,9 @@ class OrganizerIdentityProfileApiTest extends ActorFeatureTestCase
         $this->assertSame(4501, $upcoming['id']);
         $this->assertSame('legacy_collective', $upcoming['organizer']);
     }
+
+    private function apiUrl(string $path): string
+    {
+        return 'http://localhost' . $path;
+    }
 }

@@ -5,9 +5,12 @@ namespace App\Http\Controllers\BackEnd;
 use App\Http\Controllers\Controller;
 use App\Models\BasicSettings\Basic;
 use App\Models\BasicSettings\MailTemplate;
+use App\Models\Identity;
 use App\Models\Organizer;
 use App\Models\Transaction;
 use App\Models\Withdraw;
+use App\Services\ProfessionalBalanceService;
+use App\Services\ProfessionalCatalogBridgeService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -31,6 +34,11 @@ class WithdrawController extends Controller
         return $query->where('withdraws.withdraw_id', 'like', '%' . $keyword . '%');
       })
       ->orderBy('id', 'desc')->paginate(10);
+
+    $collection->setCollection(
+      $collection->getCollection()->map(fn(Withdraw $withdraw) => $this->hydrateWithdrawActorMetadata($withdraw))
+    );
+
     $currencyInfo = $this->getCurrencyInfo();
     return view('backend.withdraw.history.index', compact('collection', 'currencyInfo'));
   }
@@ -39,12 +47,9 @@ class WithdrawController extends Controller
   {
     $withdraw = Withdraw::where('id', $request->id)->first();
 
-   if($withdraw->status == 0){
-      $organizer = $withdraw->organizer()->first();
-      $organizer->amount = ($organizer->amount + ($withdraw->amount));
-      $organizer->save();
-   }
-
+    if ($withdraw->status == 0) {
+      $this->restoreWithdrawBalance($withdraw);
+    }
 
     $withdraw->delete();
     return redirect()->back()->with('success', 'Deleted Successfully');
@@ -69,12 +74,12 @@ class WithdrawController extends Controller
     // get the website title info from db
     $website_info = Basic::select('website_title')->first();
 
-    $organizer = $withdraw->organizer()->first();
+    $actor = $this->resolveWithdrawActorContext($withdraw);
 
     // preparing dynamic data
-    $organizerName = $organizer->username;
-    $organizerEmail = $organizer->email;
-    $organizer_amount = $organizer->amount;
+    $organizerName = $actor['name'];
+    $organizerEmail = $actor['email'];
+    $organizer_amount = $actor['current_balance'];
     $withdraw_amount = $withdraw->amount;
     $total_charge = $withdraw->total_charge;
     $payable_amount = $withdraw->payable_amount;
@@ -123,7 +128,9 @@ class WithdrawController extends Controller
     // add other informations and send the mail
     try {
       $mail->setFrom($info->from_mail, $info->from_name);
-      $mail->addAddress($mailData['recipient']);
+      if (!empty($mailData['recipient'])) {
+        $mail->addAddress($mailData['recipient']);
+      }
 
       $mail->isHTML(true);
       $mail->Subject = $mailData['subject'];
@@ -163,12 +170,12 @@ class WithdrawController extends Controller
     // get the website title info from db
     $website_info = Basic::select('website_title')->first();
 
-    $organizer = $withdraw->organizer()->first();
+    $actor = $this->resolveWithdrawActorContext($withdraw);
 
     // preparing dynamic data
-    $organizerName = $organizer->username;
-    $organizerEmail = $organizer->email;
-    $organizer_amount = $organizer->amount + $withdraw->amount;
+    $organizerName = $actor['name'];
+    $organizerEmail = $actor['email'];
+    $organizer_amount = $actor['current_balance'] + (float) $withdraw->amount;
 
     $method = $withdraw->method()->select('name')->first();
 
@@ -208,7 +215,9 @@ class WithdrawController extends Controller
     // add other informations and send the mail
     try {
       $mail->setFrom($info->from_mail, $info->from_name);
-      $mail->addAddress($mailData['recipient']);
+      if (!empty($mailData['recipient'])) {
+        $mail->addAddress($mailData['recipient']);
+      }
 
       $mail->isHTML(true);
       $mail->Subject = $mailData['subject'];
@@ -219,9 +228,8 @@ class WithdrawController extends Controller
     } catch (Exception $e) {
       Session::flash('warning', 'Mail could not be sent.');
     }
-    $organizer = Organizer::where('id', $withdraw->organizer_id)->first();
-    $organizer->amount = ($organizer->amount + ($withdraw->amount));
-    $organizer->save();
+
+    $this->restoreWithdrawBalance($withdraw);
 
     $transcation = Transaction::where([['booking_id', $withdraw->id], ['transcation_type', 3]])->first();
     if ($transcation) {
@@ -233,5 +241,96 @@ class WithdrawController extends Controller
     //mail sending end
     $withdraw->save();
     return redirect()->back();
+  }
+
+  private function hydrateWithdrawActorMetadata(Withdraw $withdraw): Withdraw
+  {
+    $actor = $this->resolveWithdrawActorContext($withdraw);
+    $withdraw->actor_name = $actor['name'];
+    $withdraw->actor_email = $actor['email'];
+    $withdraw->actor_type = $actor['type'];
+
+    return $withdraw;
+  }
+
+  private function resolveWithdrawActorContext(Withdraw $withdraw): array
+  {
+    [$type, $identityId, $legacyId] = $this->detectWithdrawActor($withdraw);
+
+    $identity = $identityId ? Identity::query()->with('owner')->find($identityId) : null;
+
+    if (!$identity && $legacyId) {
+      $identity = $this->catalogBridge->findIdentityForLegacy($type, $legacyId);
+      $identityId = $identity?->id;
+    }
+
+    $legacyModel = match ($type) {
+      'venue' => $withdraw->venue()->first(),
+      'artist' => $withdraw->artist()->first(),
+      default => $withdraw->organizer()->first(),
+    };
+
+    $legacyName = data_get($legacyModel, 'username')
+      ?? data_get($legacyModel, 'name')
+      ?? data_get($legacyModel, 'title');
+
+    $legacyEmail = data_get($legacyModel, 'email');
+    $identityMeta = is_array($identity?->meta) ? $identity->meta : [];
+    $identityOwner = $identity?->relationLoaded('owner') ? $identity->owner : $identity?->owner()->first();
+
+    return [
+      'type' => $type,
+      'identity_id' => $identity?->id ? (int) $identity->id : null,
+      'legacy_id' => $legacyId,
+      'name' => $identity?->display_name ?: ($legacyName ?: ucfirst($type) . ' #' . ($identity?->id ?: $legacyId ?: $withdraw->id)),
+      'email' => $identityMeta['contact_email'] ?? $identityOwner?->email ?? $legacyEmail,
+      'current_balance' => match ($type) {
+        'venue' => $this->professionalBalanceService->currentVenueBalance($identity?->id, $legacyId),
+        'artist' => $this->professionalBalanceService->currentArtistBalance($identity?->id, $legacyId),
+        default => $this->professionalBalanceService->currentOrganizerBalance($identity?->id, $legacyId),
+      },
+    ];
+  }
+
+  private function detectWithdrawActor(Withdraw $withdraw): array
+  {
+    $venueIdentityId = $this->normalizeNullableInt(data_get($withdraw, 'venue_identity_id'));
+    $venueId = $this->normalizeNullableInt(data_get($withdraw, 'venue_id'));
+    if ($venueIdentityId !== null || $venueId !== null) {
+      return ['venue', $venueIdentityId, $venueId];
+    }
+
+    $artistIdentityId = $this->normalizeNullableInt(data_get($withdraw, 'artist_identity_id'));
+    $artistId = $this->normalizeNullableInt(data_get($withdraw, 'artist_id'));
+    if ($artistIdentityId !== null || $artistId !== null) {
+      return ['artist', $artistIdentityId, $artistId];
+    }
+
+    return [
+      'organizer',
+      $this->normalizeNullableInt(data_get($withdraw, 'organizer_identity_id')),
+      $this->normalizeNullableInt(data_get($withdraw, 'organizer_id')),
+    ];
+  }
+
+  private function restoreWithdrawBalance(Withdraw $withdraw): void
+  {
+    [$type, $identityId, $legacyId] = $this->detectWithdrawActor($withdraw);
+    $amount = (float) $withdraw->amount;
+
+    match ($type) {
+      'venue' => $this->professionalBalanceService->creditVenueBalance($identityId, $legacyId, $amount),
+      'artist' => $this->professionalBalanceService->creditArtistBalance($identityId, $legacyId, $amount),
+      default => $this->professionalBalanceService->creditOrganizerBalance($identityId, $legacyId, $amount),
+    };
+  }
+
+  private function normalizeNullableInt($value): ?int
+  {
+    if ($value === null || $value === '') {
+      return null;
+    }
+
+    return is_numeric($value) ? (int) $value : null;
   }
 }

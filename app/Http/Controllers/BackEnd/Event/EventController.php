@@ -38,14 +38,17 @@ class EventController extends Controller
 {
   protected NotificationService $notificationService;
   protected EventCollaboratorSplitService $eventCollaboratorSplitService;
+  protected EventCloneService $eventCloneService;
 
   public function __construct(
     NotificationService $notificationService,
-    EventCollaboratorSplitService $eventCollaboratorSplitService
+    EventCollaboratorSplitService $eventCollaboratorSplitService,
+    EventCloneService $eventCloneService
   )
   {
     $this->notificationService = $notificationService;
     $this->eventCollaboratorSplitService = $eventCollaboratorSplitService;
+    $this->eventCloneService = $eventCloneService;
   }
 
   //index
@@ -579,6 +582,17 @@ class EventController extends Controller
     $event = Event::find($id);
 
     if ($request['is_featured'] == 'yes') {
+      $effectiveEndDateTime = $this->resolveEffectiveEndDateTime($event);
+
+      if ($effectiveEndDateTime !== null && Carbon::parse($effectiveEndDateTime)->lt(Carbon::now())) {
+        $event->is_featured = 'no';
+        $event->save();
+
+        Session::flash('warning', 'Expired events cannot be marked as featured.');
+
+        return redirect()->back();
+      }
+
       $event->is_featured = 'yes';
       $event->save();
 
@@ -591,6 +605,29 @@ class EventController extends Controller
     }
 
     return redirect()->back();
+  }
+
+  public function cloneEvent(Request $request, $id)
+  {
+    $sourceEvent = Event::query()->findOrFail($id);
+    $clonedEvent = $this->eventCloneService->duplicate($sourceEvent);
+    $language = $request->input('language');
+
+    Session::flash('success', 'Event duplicated successfully.');
+
+    return redirect()->route('admin.event_management.edit_event', array_filter([
+      'id' => $clonedEvent->id,
+      'language' => $language,
+    ], static fn($value) => $value !== null && $value !== ''));
+  }
+
+  private function resolveEffectiveEndDateTime(Event $event): ?string
+  {
+    $latestDateEnd = EventDates::query()
+      ->where('event_id', $event->id)
+      ->max('end_date_time');
+
+    return $latestDateEnd ?: $event->end_date_time;
   }
 
   public function edit($id)

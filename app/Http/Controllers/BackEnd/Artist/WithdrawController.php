@@ -4,8 +4,12 @@ namespace App\Http\Controllers\BackEnd\Artist;
 
 use App\Http\Controllers\Controller;
 use App\Models\Artist;
+use App\Models\Transaction;
 use App\Models\Withdraw;
 use App\Models\WithdrawPaymentMethod;
+use App\Services\ProfessionalBalanceService;
+use App\Services\ProfessionalCatalogBridgeService;
+use App\Traits\HasIdentityActor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -16,7 +20,8 @@ class WithdrawController extends Controller
     use HasIdentityActor;
 
     public function __construct(
-        private ProfessionalBalanceService $professionalBalanceService
+        private ProfessionalBalanceService $professionalBalanceService,
+        private ProfessionalCatalogBridgeService $catalogBridge
     ) {
     }
 
@@ -59,15 +64,29 @@ class WithdrawController extends Controller
 
         $withdraw = new Withdraw();
         $withdraw->artist_id = $artist->id;
-        $withdraw->withdraw_method_id = $request->withdraw_method_id;
+        $artistIdentityId = $this->catalogBridge->findIdentityForLegacy('artist', $artist->id)?->id;
+        $withdraw->artist_identity_id = $artistIdentityId;
+        $withdraw->method_id = $request->withdraw_method_id;
         $withdraw->amount = $request->amount;
         $withdraw->payable_amount = $request->amount - ($method->fixed_charge + ($request->amount * $method->percentage_charge / 100));
         $withdraw->additional_reference = $request->additional_reference;
         $withdraw->status = 0; // pending
+        $balancePreview = $this->professionalBalanceService->debitArtistBalance($artistIdentityId, $artist->id, (float) $request->amount);
         $withdraw->save();
 
-        $artist->amount -= $request->amount;
-        $artist->save();
+        Transaction::create([
+            'transcation_id' => time(),
+            'booking_id' => $withdraw->id,
+            'transcation_type' => 3,
+            'artist_id' => $artist->id,
+            'artist_identity_id' => $artistIdentityId,
+            'payment_status' => 0,
+            'payment_method' => $withdraw->method_id,
+            'grand_total' => $withdraw->amount,
+            'pre_balance' => $balancePreview['pre_balance'],
+            'after_balance' => $balancePreview['after_balance'],
+            'gateway_type' => null,
+        ]);
 
         Session::flash('success', 'Withdraw request sent successfully');
         return redirect()->route('artist.withdraw');

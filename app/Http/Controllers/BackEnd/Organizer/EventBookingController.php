@@ -11,6 +11,7 @@ use App\Models\Event\Booking;
 use App\Models\Event\EventContent;
 use App\Models\PaymentGateway\OfflineGateway;
 use App\Models\PaymentGateway\OnlineGateway;
+use App\Services\ProfessionalCatalogBridgeService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;

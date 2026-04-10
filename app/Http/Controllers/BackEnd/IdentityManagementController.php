@@ -24,12 +24,12 @@ class IdentityManagementController extends Controller
     public function __construct(
         IdentityModerationNotificationService $notificationService,
         IdentityModerationTransitionService $transitionService,
-        IdentityLegacyMirrorService $legacyMirror
+        ?IdentityLegacyMirrorService $legacyMirror = null
     )
     {
         $this->notificationService = $notificationService;
         $this->transitionService = $transitionService;
-        $this->legacyMirror = $legacyMirror;
+        $this->legacyMirror = $legacyMirror ?? app(IdentityLegacyMirrorService::class);
     }
 
     public function index(Request $request)

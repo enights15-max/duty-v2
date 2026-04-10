@@ -31,7 +31,16 @@ class PayPalController extends Controller
   public function __construct()
   {
     $data = OnlineGateway::whereKeyword('paypal')->first();
+    if (!$data || empty($data->information)) {
+      $this->api_context = null;
+      return;
+    }
+
     $paypalData = json_decode($data->information, true);
+    if (!is_array($paypalData)) {
+      $this->api_context = null;
+      return;
+    }
 
 
     $paypal_conf = Config::get('paypal');

@@ -22,7 +22,20 @@ class RazorpayController extends Controller
   public function __construct()
   {
     $data = OnlineGateway::whereKeyword('razorpay')->first();
+    if (!$data || empty($data->information)) {
+      $this->key = null;
+      $this->secret = null;
+      $this->api = null;
+      return;
+    }
+
     $razorpayData = json_decode($data->information, true);
+    if (!is_array($razorpayData)) {
+      $this->key = null;
+      $this->secret = null;
+      $this->api = null;
+      return;
+    }
 
     $this->key = $razorpayData['key'];
     $this->secret = $razorpayData['secret'];

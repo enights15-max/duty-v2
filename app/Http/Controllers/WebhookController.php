@@ -103,16 +103,15 @@ class WebhookController extends Controller
 
     protected function handlePaymentIntentSucceeded($paymentIntent)
     {
-        // ... (existing topup logic)
-        if (isset($paymentIntent->metadata->user_id) && isset($paymentIntent->metadata->purpose)) {
-            $userId = (int) $paymentIntent->metadata->user_id;
-            $userType = (string) ($paymentIntent->metadata->user_type ?? 'customer');
-            $purpose = $paymentIntent->metadata->purpose;
-            $amountDOP = $paymentIntent->metadata->requested_amount ?? ($paymentIntent->amount / 100);
+        $metadata = $paymentIntent->metadata ?? (object) [];
+        $purpose = (string) ($metadata->purpose ?? '');
+        if ($purpose !== 'topup') {
+            return;
+        }
 
-            if ($purpose === 'topup') {
-                try {
-                    $user = $this->resolveActor($userId, $userType);
+        $actorId = (int) ($metadata->actor_id ?? $metadata->user_id ?? 0);
+        $actorType = (string) ($metadata->actor_type ?? $metadata->user_type ?? 'customer');
+        $amountDOP = (float) ($metadata->requested_amount ?? (($paymentIntent->amount ?? 0) / 100));
 
         if ($actorId <= 0) {
             Log::error('Wallet Topup Failed: Missing actor metadata', ['payment_intent' => $paymentIntent->id ?? null]);
@@ -120,8 +119,8 @@ class WebhookController extends Controller
         }
 
         try {
-            $walletContext = strtolower((string) ($paymentIntent->metadata->wallet_context ?? 'personal'));
-            $identityId = (int) ($paymentIntent->metadata->identity_id ?? 0);
+            $walletContext = strtolower((string) ($metadata->wallet_context ?? 'personal'));
+            $identityId = (int) ($metadata->identity_id ?? 0);
 
             if ($walletContext === 'professional' && $identityId > 0) {
                 $identity = Identity::query()
@@ -146,7 +145,6 @@ class WebhookController extends Controller
             }
 
             $actor = $this->resolveActor($actorId, $actorType);
-
             if (!$actor) {
                 Log::error("Wallet Topup Failed: Actor not found", ['actor_id' => $actorId, 'actor_type' => $actorType]);
                 return;
@@ -160,10 +158,15 @@ class WebhookController extends Controller
                 'TOPUP-' . $paymentIntent->id,
                 0,
                 0,
-                $this->buildTopupTransactionMeta((float) $amountDOP)
+                $this->buildTopupTransactionMeta($amountDOP)
             );
-            Log::info("Wallet Topup Success via Webhook", ['actor_id' => $actorId, 'actor_type' => $actorType, 'amount' => $amountDOP]);
-        } catch (\Exception $e) {
+
+            Log::info("Wallet Topup Success via Webhook", [
+                'actor_id' => $actorId,
+                'actor_type' => $actorType,
+                'amount' => $amountDOP,
+            ]);
+        } catch (\Throwable $e) {
             Log::error("Wallet Topup Failed", ['error' => $e->getMessage()]);
         }
     }

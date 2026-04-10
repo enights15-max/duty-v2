@@ -741,6 +741,21 @@ class WalletController extends Controller
     {
         $identity = $request->get('active_identity');
 
+        if (!$identity instanceof Identity) {
+            $requestedIdentityId = (int) ($request->header('X-Identity-Id') ?? $request->input('identity_id') ?? 0);
+            if ($requestedIdentityId > 0) {
+                $candidate = Identity::query()
+                    ->where('id', $requestedIdentityId)
+                    ->whereIn('type', ['organizer', 'artist', 'venue'])
+                    ->where('status', 'active')
+                    ->first();
+
+                if ($candidate && $this->identityBelongsToCustomer($candidate, $customer)) {
+                    $identity = $candidate;
+                }
+            }
+        }
+
         if ($identity instanceof Identity && in_array($identity->type, ['organizer', 'artist', 'venue'], true)) {
             return $this->professionalContext($identity);
         }

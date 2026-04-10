@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Event\Booking;
 use App\Models\Organizer;
+use App\Services\BookingScanService;
+use App\Services\ProfessionalCatalogBridgeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -12,6 +14,11 @@ use Illuminate\Support\Facades\Validator;
 
 class OrganizerScannerController extends Controller
 {
+  public function __construct(
+    private BookingScanService $bookingScanService,
+    private ProfessionalCatalogBridgeService $catalogBridge
+  ) {
+  }
 
   /* ********************************
      * Submit login for authentication
@@ -74,50 +81,32 @@ class OrganizerScannerController extends Controller
   //check qr-code
   public function check_qrcode(Request $request)
   {
-    $organizer_id = Auth::guard('organizer_sanctum')->user()->id;
+    $actor = $this->currentOrganizerActor();
 
     if (str_contains($request->booking_id, '__')) {
       $ids = explode('__', $request->booking_id);
       $booking_id = $ids[0];
       $unique_id = $ids[1];
-      $check = Booking::where([['booking_id', $booking_id]])->first();
+      $check = Booking::with('evnt')->where([['booking_id', $booking_id]])->first();
       if ($check) {
-        if ($check->organizer_id == $organizer_id) {
+        if ($check->isOwnedByOrganizerActor($actor['identity_id'], $actor['legacy_id'])) {
           // check payment status completed or not
           if ($check->paymentStatus == 'completed' || $check->paymentStatus == 'free') {
-            //check scanned_tickets column empty or not
-            if (is_null($check->scanned_tickets)) {
-              $scannedTicketArr = [
-                $unique_id
-              ];
-              $check->scanned_tickets = json_encode($scannedTicketArr);
-              $check->save();
-              return response()->json(
-                ['alert_type' => 'success',
-                 'message' => 'Verified',
+            $result = $this->bookingScanService->setTicketScanStatus($check, $unique_id, true);
+
+            if ($result['changed']) {
+              return response()->json([
+                'alert_type' => 'success',
+                'message' => 'Verified',
                 'booking_id' => $request->booking_id
               ]);
-            } else {
-              //ticket random id will be insert
-              $scannedTicketArr = json_decode($check->scanned_tickets, true);
-              if (!in_array($unique_id, $scannedTicketArr)) {
-                array_push($scannedTicketArr, $unique_id);
-                $check->scanned_tickets = json_encode($scannedTicketArr);
-                $check->save();
-                return response()->json([
-                  'alert_type' => 'success',
-                  'message' => 'Verified',
-                  'booking_id' => $request->booking_id
-                ]);
-              } else {
-
-                return response()->json([
-                  'alert_type' => 'error',
-                  'message' => 'Already Scanned',
-                  'booking_id' => $request->booking_id
-                ]);
-              }
             }
+
+            return response()->json([
+              'alert_type' => 'error',
+              'message' => 'Already Scanned',
+              'booking_id' => $request->booking_id
+            ]);
           } elseif ($check->paymentStatus == 'pending') {
             return response()->json([
               'alert_type' => 'error',
@@ -150,6 +139,20 @@ class OrganizerScannerController extends Controller
       ]);
     }
 
+  }
+
+  private function currentOrganizerActor(): array
+  {
+    $organizer = Auth::guard('organizer_sanctum')->user();
+    $legacyId = $organizer?->id ? (int) $organizer->id : null;
+    $identityId = $legacyId !== null
+      ? $this->catalogBridge->findIdentityForLegacy('organizer', $legacyId)?->id
+      : null;
+
+    return [
+      'identity_id' => $identityId,
+      'legacy_id' => $legacyId,
+    ];
   }
 
   public function logoutSubmit(Request $request)

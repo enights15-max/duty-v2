@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Event\Booking;
 use App\Models\Event\Ticket;
 use App\Models\TicketTransfer;
+use Illuminate\Support\Facades\Schema;
 
 class EventPurchaseLimitService
 {
@@ -143,16 +144,18 @@ class EventPurchaseLimitService
             ->where('paymentStatus', '!=', 'rejected')
             ->get();
 
-        $pendingOutgoingBookingIds = TicketTransfer::query()
-            ->pending()
-            ->where('from_customer_id', $customer->id)
-            ->whereHas('booking', function ($query) use ($event): void {
-                $query->where('event_id', $event->id)
-                    ->where('paymentStatus', '!=', 'rejected');
-            })
-            ->pluck('booking_id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
+        $pendingOutgoingBookingIds = Schema::hasTable((new TicketTransfer())->getTable())
+            ? TicketTransfer::query()
+                ->pending()
+                ->where('from_customer_id', $customer->id)
+                ->whereHas('booking', function ($query) use ($event): void {
+                    $query->where('event_id', $event->id)
+                        ->where('paymentStatus', '!=', 'rejected');
+                })
+                ->pluck('booking_id')
+                ->map(fn ($id) => (int) $id)
+                ->all()
+            : [];
 
         $ticketIdsForEvent = $event->ticket()->pluck('id')->map(fn ($id) => (int) $id)->all();
         $singleTicketEvent = count($ticketIdsForEvent) === 1 && (int) ($ticketIdsForEvent[0] ?? 0) === (int) $ticket->id;
@@ -189,6 +192,10 @@ class EventPurchaseLimitService
 
     private function countPendingIncomingGiftQuantity(Customer $customer, Event $event, Ticket $ticket, ?string $variationName = null): int
     {
+        if (!Schema::hasTable((new TicketTransfer())->getTable())) {
+            return 0;
+        }
+
         $transfers = TicketTransfer::query()
             ->pending()
             ->where('to_customer_id', $customer->id)

@@ -2,11 +2,15 @@
 
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\DiscoverController;
 use App\Http\Controllers\Api\HomeController;
+use App\Http\Controllers\Api\ArtistController;
+use App\Http\Controllers\Api\ArtistTipController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\EventWaitlistController;
 use App\Http\Controllers\Api\FcmTokenController;
 use App\Http\Controllers\Api\LanguageController;
+use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\OrganizerController;
 use App\Http\Controllers\Api\ProductOrderController;
 use App\Http\Controllers\Api\ProfessionalEventController;
@@ -16,6 +20,7 @@ use App\Http\Controllers\Api\ProfessionalLookupController;
 use App\Http\Controllers\Api\PrivacySettingsController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ShopController;
+use App\Http\Controllers\Api\SocialFeedController;
 use App\Http\Controllers\Api\SupportTicketController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\VenueController;
@@ -63,6 +68,23 @@ Route::prefix('venues')->group(function () {
   Route::get('/details/{id}', [VenueController::class, 'details'])->name('api.venues.details');
 });
 
+Route::get('/artist/{id}/profile', [ArtistController::class, 'profile'])->name('api.artist.profile');
+Route::get('/venue/{id}/profile', [VenueController::class, 'profile'])->name('api.venue.profile');
+Route::get('/organizer/{id}/profile', [OrganizerController::class, 'profile'])->name('api.organizer.profile');
+
+Route::prefix('discover')->group(function () {
+  Route::get('/artists', [DiscoverController::class, 'artists'])->name('api.discover.artists');
+  Route::get('/organizers', [DiscoverController::class, 'organizers'])->name('api.discover.organizers');
+  Route::get('/venues', [DiscoverController::class, 'venues'])->name('api.discover.venues');
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+  Route::get('/social/feed', [SocialFeedController::class, 'index'])->name('api.social.feed');
+  Route::get('/me/identities', [\App\Http\Controllers\Api\IdentityController::class, 'index'])->name('api.identities.index');
+  Route::post('/identities', [\App\Http\Controllers\Api\IdentityController::class, 'store'])->name('api.identities.store');
+  Route::patch('/identities/{id}', [\App\Http\Controllers\Api\IdentityController::class, 'update'])->name('api.identities.update');
+});
+
 Route::post('/event/apply-coupon', [EventController::class, 'applyCoupon'])->name('api.event.apply_coupon');
 Route::post('/event/checkout-verify', [EventController::class, 'checkoutVerify'])->name('api.event.checkout_verify');
 Route::post('/event/verify-payment', [EventController::class, 'verifyPayment'])->name('api.event.payment_verify');
@@ -76,6 +98,7 @@ Route::prefix('organizers')->group(function () {
   Route::get('/', [OrganizerController::class, 'index'])->name('api.organizers.index');
   Route::get('/details/{id}', [OrganizerController::class, 'details'])->name('api.organizers.details');
   Route::post('/contact-mail', [OrganizerController::class, 'contactMail'])->name('api.organizers.contact');
+  Route::post('/review', [\App\Http\Controllers\Api\OrganizerReviewController::class, 'store'])->middleware('auth:sanctum')->name('api.organizers.review');
 
   Route::middleware('auth:sanctum')->group(function () {
     Route::post('/follow', [\App\Http\Controllers\Api\FollowController::class, 'follow'])->name('api.follow');
@@ -273,7 +296,17 @@ Route::prefix('/admin')->group(function () {
      * Identity Management (Superadmin)
      * ************************************/
     Route::get('/identities', [\App\Http\Controllers\Api\AdminIdentityController::class, 'index']);
+    Route::get('/identities/{id}', [\App\Http\Controllers\Api\AdminIdentityController::class, 'show']);
     Route::post('/identities/{id}/approve', [\App\Http\Controllers\Api\AdminIdentityController::class, 'approve']);
     Route::post('/identities/{id}/reject', [\App\Http\Controllers\Api\AdminIdentityController::class, 'reject']);
+    Route::post('/identities/{id}/request-info', [\App\Http\Controllers\Api\AdminIdentityController::class, 'requestInfo']);
+    Route::post('/identities/{id}/suspend', [\App\Http\Controllers\Api\AdminIdentityController::class, 'suspend']);
+    Route::post('/identities/{id}/reactivate', [\App\Http\Controllers\Api\AdminIdentityController::class, 'reactivate']);
+
+    Route::get('/reviews', [\App\Http\Controllers\Api\AdminReviewController::class, 'index']);
+    Route::get('/reviews/{id}', [\App\Http\Controllers\Api\AdminReviewController::class, 'show']);
+    Route::post('/reviews/{id}/publish', [\App\Http\Controllers\Api\AdminReviewController::class, 'publish']);
+    Route::post('/reviews/{id}/hide', [\App\Http\Controllers\Api\AdminReviewController::class, 'hide']);
+    Route::post('/reviews/{id}/reject', [\App\Http\Controllers\Api\AdminReviewController::class, 'reject']);
   });
 });

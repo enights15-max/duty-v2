@@ -18,6 +18,7 @@ abstract class ActorFeatureTestCase extends TestCase
      * - withdrawal_requests
      * - marketplace
      * - followers
+     * - follows
      * - subscription_plans
      * - identities
      * - admins_permissions
@@ -28,6 +29,9 @@ abstract class ActorFeatureTestCase extends TestCase
      * - economy
      * - event_treasury
      * - event_rewards
+     * - bonus_wallets
+     * - booking_payment_allocations
+     * - reservations
      */
     protected array $baselineSchema = ['users_customers'];
     protected array $baselineTruncate = [];
@@ -78,7 +82,14 @@ abstract class ActorFeatureTestCase extends TestCase
                 $this->ensureMarketplaceTables();
                 break;
             case 'followers':
+            case 'follows':
                 $this->ensureFollowersTable();
+                break;
+            case 'bonus_wallets':
+                $this->ensureBonusWalletTables();
+                break;
+            case 'booking_payment_allocations':
+                $this->ensureBookingPaymentAllocationTable();
                 break;
             case 'subscription_plans':
                 $this->ensureSubscriptionPlansTable();
@@ -109,6 +120,9 @@ abstract class ActorFeatureTestCase extends TestCase
                 break;
             case 'event_rewards':
                 $this->ensureEventRewardTables();
+                break;
+            case 'reservations':
+                $this->ensureReservationTables();
                 break;
             default:
                 throw new RuntimeException('Unsupported baseline schema part: ' . $schemaPart);

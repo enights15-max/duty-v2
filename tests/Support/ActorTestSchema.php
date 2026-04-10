@@ -316,9 +316,17 @@ trait ActorTestSchema
         if (!Schema::hasTable('users')) {
             Schema::create('users', function (Blueprint $table) {
                 $table->id();
+                $table->string('username')->nullable();
                 $table->string('email')->nullable();
+                $table->string('first_name')->nullable();
+                $table->string('last_name')->nullable();
+                $table->string('phone')->nullable();
+                $table->string('country')->nullable();
+                $table->string('city')->nullable();
+                $table->string('address')->nullable();
                 $table->string('stripe_customer_id')->nullable();
                 $table->string('password')->nullable();
+                $table->tinyInteger('status')->default(1);
                 $table->timestamps();
             });
         }
@@ -331,16 +339,74 @@ trait ActorTestSchema
                 $table->string('fname')->nullable();
                 $table->string('lname')->nullable();
                 $table->string('phone')->nullable();
+                $table->string('country')->nullable();
+                $table->string('state')->nullable();
+                $table->string('city')->nullable();
+                $table->string('zip_code')->nullable();
+                $table->string('address')->nullable();
                 $table->string('photo')->nullable();
                 $table->string('stripe_customer_id')->nullable();
                 $table->string('password')->nullable();
+                $table->boolean('is_private')->default(false);
+                $table->boolean('show_interested_events')->default(true);
+                $table->boolean('show_attended_events')->default(true);
+                $table->boolean('show_upcoming_attendance')->default(true);
+                $table->tinyInteger('status')->default(1);
                 $table->timestamps();
+            });
+        }
+
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'username')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('username')->nullable();
             });
         }
 
         if (Schema::hasTable('users') && !Schema::hasColumn('users', 'stripe_customer_id')) {
             Schema::table('users', function (Blueprint $table) {
                 $table->string('stripe_customer_id')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'first_name')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('first_name')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'last_name')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('last_name')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'phone')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('phone')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'country')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('country')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'city')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('city')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'address')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('address')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'status')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->tinyInteger('status')->default(1);
             });
         }
 
@@ -374,9 +440,69 @@ trait ActorTestSchema
             });
         }
 
+        if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'country')) {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->string('country')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'state')) {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->string('state')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'city')) {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->string('city')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'zip_code')) {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->string('zip_code')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'address')) {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->string('address')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'is_private')) {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->boolean('is_private')->default(false);
+            });
+        }
+
+        if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'show_interested_events')) {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->boolean('show_interested_events')->default(true);
+            });
+        }
+
+        if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'show_attended_events')) {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->boolean('show_attended_events')->default(true);
+            });
+        }
+
+        if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'show_upcoming_attendance')) {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->boolean('show_upcoming_attendance')->default(true);
+            });
+        }
+
         if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'photo')) {
             Schema::table('customers', function (Blueprint $table) {
                 $table->string('photo')->nullable();
+            });
+        }
+
+        if (Schema::hasTable('customers') && !Schema::hasColumn('customers', 'status')) {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->tinyInteger('status')->default(1);
             });
         }
     }
@@ -409,6 +535,28 @@ trait ActorTestSchema
                 'updated_at' => now(),
             ]);
         }
+    }
+
+    protected function ensureReviewsTable(): void
+    {
+        if (Schema::hasTable('reviews')) {
+            return;
+        }
+
+        Schema::create('reviews', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('customer_id')->nullable();
+            $table->unsignedBigInteger('booking_id')->nullable();
+            $table->unsignedBigInteger('event_id')->nullable();
+            $table->unsignedBigInteger('reviewable_id');
+            $table->string('reviewable_type');
+            $table->unsignedTinyInteger('rating');
+            $table->text('comment')->nullable();
+            $table->string('status', 32)->default('published');
+            $table->json('meta')->nullable();
+            $table->timestamp('submitted_at')->nullable();
+            $table->timestamps();
+        });
     }
 
     protected function ensureWalletTables(): void
@@ -743,6 +891,18 @@ trait ActorTestSchema
 
     protected function ensureFollowersTable(): void
     {
+        if (!Schema::hasTable('follows')) {
+            Schema::create('follows', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('follower_id');
+                $table->string('follower_type')->nullable();
+                $table->unsignedBigInteger('followable_id');
+                $table->string('followable_type')->nullable();
+                $table->string('status', 32)->default('accepted');
+                $table->timestamps();
+            });
+        }
+
         if (!Schema::hasTable('followers')) {
             Schema::create('followers', function (Blueprint $table) {
                 $table->id();
@@ -751,6 +911,115 @@ trait ActorTestSchema
                 $table->string('following_type');
                 $table->timestamps();
             });
+        }
+    }
+
+    protected function ensureLoyaltyTables(): void
+    {
+        if (!Schema::hasTable('loyalty_rules')) {
+            Schema::create('loyalty_rules', function (Blueprint $table) {
+                $table->id();
+                $table->string('code', 64)->unique();
+                $table->string('label')->nullable();
+                $table->text('description')->nullable();
+                $table->unsignedInteger('points')->default(0);
+                $table->boolean('is_active')->default(true);
+                $table->json('meta')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('loyalty_point_transactions')) {
+            Schema::create('loyalty_point_transactions', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('customer_id');
+                $table->unsignedBigInteger('rule_id')->nullable();
+                $table->string('type', 16)->default('credit');
+                $table->integer('points')->default(0);
+                $table->integer('balance_after')->default(0);
+                $table->string('reference_type', 64)->nullable();
+                $table->string('reference_id')->nullable();
+                $table->string('idempotency_key', 191)->unique();
+                $table->json('meta')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('reward_catalog')) {
+            Schema::create('reward_catalog', function (Blueprint $table) {
+                $table->id();
+                $table->string('title');
+                $table->string('description')->nullable();
+                $table->string('reward_type', 32)->default('bonus_credit');
+                $table->integer('points_cost');
+                $table->decimal('bonus_amount', 10, 2)->nullable();
+                $table->boolean('is_active')->default(true);
+                $table->boolean('is_featured')->default(false);
+                $table->json('meta')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('reward_redemptions')) {
+            Schema::create('reward_redemptions', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('customer_id');
+                $table->unsignedBigInteger('reward_id');
+                $table->unsignedBigInteger('loyalty_transaction_id')->nullable();
+                $table->uuid('bonus_transaction_id')->nullable();
+                $table->string('reward_type', 32);
+                $table->integer('points_cost');
+                $table->string('status', 32)->default('processing');
+                $table->json('meta')->nullable();
+                $table->timestamp('fulfilled_at')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('coupons')) {
+            Schema::create('coupons', function (Blueprint $table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->string('code')->unique();
+                $table->string('type', 32);
+                $table->decimal('value', 10, 2)->default(0);
+                $table->text('events')->nullable();
+                $table->dateTime('start_date')->nullable();
+                $table->dateTime('end_date')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        $now = now();
+        $rules = [
+            ['code' => 'event_purchase', 'label' => 'Compra de evento', 'points' => 100, 'is_active' => true],
+            ['code' => 'marketplace_purchase', 'label' => 'Compra en marketplace', 'points' => 60, 'is_active' => true],
+            ['code' => 'published_review', 'label' => 'Review publicada', 'points' => 25, 'is_active' => true],
+            ['code' => 'follow_accept', 'label' => 'Nuevo follow', 'points' => 10, 'is_active' => true],
+            ['code' => 'attendance_confirmed', 'label' => 'Asistencia confirmada', 'points' => 40, 'is_active' => false],
+        ];
+
+        foreach ($rules as $rule) {
+            if (!DB::table('loyalty_rules')->where('code', $rule['code'])->exists()) {
+                DB::table('loyalty_rules')->insert(array_merge($rule, [
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]));
+            }
+        }
+
+        if (!DB::table('reward_catalog')->where('title', 'Bono RD$50')->exists()) {
+            DB::table('reward_catalog')->insert([
+                'title' => 'Bono RD$50',
+                'description' => 'Canjea puntos por credito interno para tu proxima compra.',
+                'reward_type' => 'bonus_credit',
+                'points_cost' => 250,
+                'bonus_amount' => 50,
+                'is_active' => true,
+                'is_featured' => true,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
         }
     }
 
@@ -976,6 +1245,7 @@ trait ActorTestSchema
                 $table->id();
                 $table->unsignedBigInteger('event_id')->nullable();
                 $table->unsignedBigInteger('language_id')->nullable();
+                $table->unsignedBigInteger('event_category_id')->nullable();
                 $table->string('title')->nullable();
                 $table->string('slug')->nullable();
                 $table->string('city')->nullable();
@@ -986,11 +1256,29 @@ trait ActorTestSchema
             });
         }
 
+        if (!Schema::hasColumn('event_contents', 'event_category_id')) {
+            Schema::table('event_contents', function (Blueprint $table) {
+                $table->unsignedBigInteger('event_category_id')->nullable();
+            });
+        }
+
         if (!Schema::hasTable('event_artist')) {
             Schema::create('event_artist', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('event_id');
                 $table->unsignedBigInteger('artist_id');
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('event_categories')) {
+            Schema::create('event_categories', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('language_id')->nullable();
+                $table->string('name')->nullable();
+                $table->string('slug')->nullable();
+                $table->tinyInteger('status')->default(1);
+                $table->integer('serial_number')->default(0);
                 $table->timestamps();
             });
         }
@@ -1013,9 +1301,33 @@ trait ActorTestSchema
             });
         }
 
+        if (!Schema::hasColumn('events', 'start_time')) {
+            Schema::table('events', function (Blueprint $table) {
+                $table->string('start_time')->nullable();
+            });
+        }
+
+        if (!Schema::hasColumn('events', 'duration')) {
+            Schema::table('events', function (Blueprint $table) {
+                $table->string('duration')->nullable();
+            });
+        }
+
         if (!Schema::hasColumn('events', 'end_date_time')) {
             Schema::table('events', function (Blueprint $table) {
                 $table->dateTime('end_date_time')->nullable();
+            });
+        }
+
+        if (!Schema::hasColumn('events', 'date_type')) {
+            Schema::table('events', function (Blueprint $table) {
+                $table->string('date_type')->nullable();
+            });
+        }
+
+        if (!Schema::hasColumn('events', 'event_type')) {
+            Schema::table('events', function (Blueprint $table) {
+                $table->string('event_type')->nullable();
             });
         }
     }

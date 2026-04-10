@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Event\Booking;
 use App\Models\Event\Ticket;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 
 class EventInventorySummaryService
 {
@@ -40,10 +41,12 @@ class EventInventorySummaryService
             return [];
         }
 
-        $ticketsByEvent = Ticket::query()
-            ->whereIn('event_id', $eventIds)
-            ->get()
-            ->groupBy(fn (Ticket $ticket) => (int) $ticket->event_id);
+        $ticketsByEvent = Schema::hasTable((new Ticket())->getTable())
+            ? Ticket::query()
+                ->whereIn('event_id', $eventIds)
+                ->get()
+                ->groupBy(fn (Ticket $ticket) => (int) $ticket->event_id)
+            : collect();
 
         $soldCountMap = $this->soldCountMap($eventIds);
         $marketplaceCountMap = $this->marketplaceCountMap($eventIds);
@@ -276,6 +279,10 @@ class EventInventorySummaryService
             /** @var Collection<int, Ticket> $loaded */
             $loaded = $event->tickets instanceof Collection ? $event->tickets : collect();
             return $loaded->values();
+        }
+
+        if (!Schema::hasTable((new Ticket())->getTable())) {
+            return collect();
         }
 
         return $event->tickets()->get();

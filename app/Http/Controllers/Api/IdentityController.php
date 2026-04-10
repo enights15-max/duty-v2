@@ -33,6 +33,7 @@ class IdentityController extends Controller
         $user = $this->resolveIdentityUser($authUser);
         if (!$user) {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+        }
 
         $identities = $user->usersIdentities()->get()->map(function ($identity) {
             return [
