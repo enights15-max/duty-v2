@@ -6,12 +6,10 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Schema;
 
 class NfcToken extends Model
 {
     use HasUuids;
-    private static ?bool $hasActorColumns = null;
 
     protected $fillable = [
         'user_id',
@@ -41,22 +39,6 @@ class NfcToken extends Model
         $actorId = $actor instanceof Authenticatable ? (int) $actor->getAuthIdentifier() : (int) $actor;
         $actorType = $actor instanceof \App\Models\User ? 'user' : 'customer';
 
-        if (self::supportsActorColumns()) {
-            return $query->where('actor_type', $actorType)->where('actor_id', $actorId);
-        }
-
-        return $query->where('user_id', $actorId);
-    }
-
-    public static function supportsActorColumns(): bool
-    {
-        if (self::$hasActorColumns !== null) {
-            return self::$hasActorColumns;
-        }
-
-        self::$hasActorColumns = Schema::hasColumn('nfc_tokens', 'actor_type')
-            && Schema::hasColumn('nfc_tokens', 'actor_id');
-
-        return self::$hasActorColumns;
+        return $query->where('actor_type', $actorType)->where('actor_id', $actorId);
     }
 }

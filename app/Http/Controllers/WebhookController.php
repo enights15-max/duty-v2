@@ -257,12 +257,9 @@ class WebhookController extends Controller
                 'exp_month' => $card->exp_month ?? null,
                 'exp_year' => $card->exp_year ?? null,
                 'status' => 'active',
+                'actor_type' => $user instanceof Customer ? 'customer' : 'user',
+                'actor_id' => $user->id,
             ];
-
-            if (PaymentMethod::supportsActorColumns()) {
-                $update['actor_type'] = $user instanceof Customer ? 'customer' : 'user';
-                $update['actor_id'] = $user->id;
-            }
 
             PaymentMethod::updateOrCreate(
                 ['stripe_payment_method_id' => $paymentMethodId],

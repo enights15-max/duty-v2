@@ -29,12 +29,9 @@ class NFCService
             'uid_hash' => $hash,
             'pin_hash' => $pin ? Hash::make($pin) : null,
             'status' => 'active',
+            'actor_type' => 'customer',
+            'actor_id' => $customer->id,
         ];
-
-        if (NfcToken::supportsActorColumns()) {
-            $payload['actor_type'] = 'customer';
-            $payload['actor_id'] = $customer->id;
-        }
 
         return NfcToken::updateOrCreate(
             ['user_id' => $customer->id],
