@@ -121,6 +121,8 @@ class MarketplacePurchaseActorTest extends ActorFeatureTestCase
             'booking_id' => 9001,
             'from_customer_id' => 302,
             'to_customer_id' => 301,
+            'status' => 'accepted',
+            'flow' => 'marketplace_purchase',
         ]);
 
         $this->assertDatabaseHas('wallet_transactions', [

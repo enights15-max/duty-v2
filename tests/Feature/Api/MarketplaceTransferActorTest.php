@@ -95,6 +95,8 @@ class MarketplaceTransferActorTest extends ActorFeatureTestCase
             'booking_id' => 9201,
             'from_customer_id' => 401,
             'to_customer_id' => 402,
+            'status' => 'accepted',
+            'flow' => 'direct_owner_transfer',
         ]);
     }
 
@@ -242,5 +244,69 @@ class MarketplaceTransferActorTest extends ActorFeatureTestCase
             'listing_price' => '75.00',
         ]);
         $this->assertDatabaseCount('ticket_transfers', 0);
+    }
+
+    public function test_outbox_excludes_marketplace_purchase_transfers(): void
+    {
+        DB::table('customers')->insert([
+            [
+                'id' => 410,
+                'email' => 'outbox@example.com',
+                'username' => 'outbox',
+                'fname' => 'Outbox',
+                'lname' => 'User',
+                'phone' => '710',
+                'password' => bcrypt('secret'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 411,
+                'email' => 'other@example.com',
+                'username' => 'other',
+                'fname' => 'Other',
+                'lname' => 'User',
+                'phone' => '711',
+                'password' => bcrypt('secret'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        DB::table('ticket_transfers')->insert([
+            [
+                'id' => 9301,
+                'booking_id' => 1,
+                'from_customer_id' => 410,
+                'to_customer_id' => 411,
+                'status' => 'accepted',
+                'flow' => 'direct_owner_transfer',
+                'notes' => 'Direct transfer via Mobile App',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 9302,
+                'booking_id' => 2,
+                'from_customer_id' => 410,
+                'to_customer_id' => 411,
+                'status' => 'accepted',
+                'flow' => 'marketplace_purchase',
+                'notes' => 'Marketplace Purchase',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        Sanctum::actingAs(\App\Models\Customer::findOrFail(410), [], 'sanctum');
+
+        $response = app(MarketplaceController::class)->outboxTransfers();
+        $payload = $response->getData(true);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertTrue($payload['success']);
+        $ids = array_column($payload['data'], 'id');
+        $this->assertContains(9301, $ids, 'Gift transfer should appear in outbox');
+        $this->assertNotContains(9302, $ids, 'Marketplace purchase should not appear in outbox');
     }
 }
