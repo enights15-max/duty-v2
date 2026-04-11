@@ -15,8 +15,6 @@ use Exception;
 
 class WalletService
 {
-    private ?bool $hasActorColumns = null;
-
     /**
      * Get or create a wallet for a user or customer.
      */
@@ -24,30 +22,22 @@ class WalletService
     {
         [$actorId, $actorType, $legacyUserId] = $this->resolveActor($actor);
 
-        if ($this->supportsActorColumns()) {
-            $wallet = Wallet::firstOrCreate(
-                ['actor_type' => $actorType, 'actor_id' => $actorId],
-                [
-                    'user_id' => $legacyUserId,
-                    'balance' => 0.00,
-                    'currency' => 'DOP',
-                    'status' => 'active'
-                ]
-            );
+        $wallet = Wallet::firstOrCreate(
+            ['actor_type' => $actorType, 'actor_id' => $actorId],
+            [
+                'user_id' => $legacyUserId,
+                'balance' => 0.00,
+                'currency' => 'DOP',
+                'status' => 'active'
+            ]
+        );
 
-            // Keep legacy column in sync for backward compatibility.
-            if (empty($wallet->user_id) && !empty($legacyUserId)) {
-                $wallet->user_id = $legacyUserId;
-                $wallet->save();
-            }
-
-            return $wallet;
+        if (empty($wallet->user_id) && !empty($legacyUserId)) {
+            $wallet->user_id = $legacyUserId;
+            $wallet->save();
         }
 
-        return Wallet::firstOrCreate(
-            ['user_id' => $legacyUserId],
-            ['balance' => 0.00, 'currency' => 'DOP', 'status' => 'active']
-        );
+        return $wallet;
     }
 
     /**
@@ -159,14 +149,8 @@ class WalletService
 
     private function findWalletForUpdate(int $actorId, string $actorType, int $legacyUserId): ?Wallet
     {
-        if ($this->supportsActorColumns()) {
-            return Wallet::where('actor_type', $actorType)
-                ->where('actor_id', $actorId)
-                ->lockForUpdate()
-                ->first();
-        }
-
-        return Wallet::where('user_id', $legacyUserId)
+        return Wallet::where('actor_type', $actorType)
+            ->where('actor_id', $actorId)
             ->lockForUpdate()
             ->first();
     }
@@ -215,13 +199,4 @@ class WalletService
         return 'customer';
     }
 
-    private function supportsActorColumns(): bool
-    {
-        if ($this->hasActorColumns !== null) {
-            return $this->hasActorColumns;
-        }
-
-        $this->hasActorColumns = Wallet::supportsActorColumns();
-        return $this->hasActorColumns;
-    }
 }

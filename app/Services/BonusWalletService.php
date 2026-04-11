@@ -14,38 +14,26 @@ use Illuminate\Support\Facades\Schema;
 
 class BonusWalletService
 {
-    private ?bool $hasActorColumns = null;
     private ?bool $hasExpirationColumns = null;
 
     public function getOrCreateWallet($actor): BonusWallet
     {
         [$actorId, $actorType, $legacyUserId] = $this->resolveActor($actor);
 
-        if ($this->supportsActorColumns()) {
-            $wallet = BonusWallet::firstOrCreate(
-                ['actor_type' => $actorType, 'actor_id' => $actorId],
-                [
-                    'user_id' => $legacyUserId,
-                    'balance' => 0.00,
-                    'currency' => 'DOP',
-                    'status' => 'active',
-                ]
-            );
-
-            if (empty($wallet->user_id) && !empty($legacyUserId)) {
-                $wallet->user_id = $legacyUserId;
-                $wallet->save();
-            }
-
-            return $this->supportsExpirationColumns()
-                ? $this->expireWallet($wallet)
-                : $wallet;
-        }
-
         $wallet = BonusWallet::firstOrCreate(
-            ['user_id' => $legacyUserId],
-            ['balance' => 0.00, 'currency' => 'DOP', 'status' => 'active']
+            ['actor_type' => $actorType, 'actor_id' => $actorId],
+            [
+                'user_id' => $legacyUserId,
+                'balance' => 0.00,
+                'currency' => 'DOP',
+                'status' => 'active',
+            ]
         );
+
+        if (empty($wallet->user_id) && !empty($legacyUserId)) {
+            $wallet->user_id = $legacyUserId;
+            $wallet->save();
+        }
 
         return $this->supportsExpirationColumns()
             ? $this->expireWallet($wallet)
@@ -174,14 +162,8 @@ class BonusWalletService
 
     private function findWalletForUpdate(int $actorId, string $actorType, int $legacyUserId): ?BonusWallet
     {
-        if ($this->supportsActorColumns()) {
-            return BonusWallet::where('actor_type', $actorType)
-                ->where('actor_id', $actorId)
-                ->lockForUpdate()
-                ->first();
-        }
-
-        return BonusWallet::where('user_id', $legacyUserId)
+        return BonusWallet::where('actor_type', $actorType)
+            ->where('actor_id', $actorId)
             ->lockForUpdate()
             ->first();
     }
@@ -336,16 +318,6 @@ class BonusWalletService
         }
 
         return 'customer';
-    }
-
-    private function supportsActorColumns(): bool
-    {
-        if ($this->hasActorColumns !== null) {
-            return $this->hasActorColumns;
-        }
-
-        $this->hasActorColumns = BonusWallet::supportsActorColumns();
-        return $this->hasActorColumns;
     }
 
     private function supportsExpirationColumns(): bool
