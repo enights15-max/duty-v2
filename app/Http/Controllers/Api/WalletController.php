@@ -595,8 +595,7 @@ class WalletController extends Controller
             return true;
         }
 
-        return DB::table('identity_members')
-            ->where('identity_id', $identity->id)
+        return $identity->members()
             ->where('user_id', $ownerUserId)
             ->where('status', 'active')
             ->exists();
