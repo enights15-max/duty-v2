@@ -912,8 +912,17 @@ trait ActorTestSchema
                 $table->unsignedBigInteger('from_customer_id');
                 $table->unsignedBigInteger('to_customer_id');
                 $table->text('notes')->nullable();
+                $table->string('status', 32)->nullable();
+                $table->string('flow', 64)->nullable();
                 $table->timestamps();
             });
+        } else {
+            if (!Schema::hasColumn('ticket_transfers', 'status')) {
+                Schema::table('ticket_transfers', fn ($t) => $t->string('status', 32)->nullable());
+            }
+            if (!Schema::hasColumn('ticket_transfers', 'flow')) {
+                Schema::table('ticket_transfers', fn ($t) => $t->string('flow', 64)->nullable());
+            }
         }
     }
 

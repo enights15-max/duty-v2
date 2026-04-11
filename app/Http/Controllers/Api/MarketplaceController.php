@@ -648,7 +648,7 @@ class MarketplaceController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Ticket transferred successfully to ' . ($recipient->fname ?? $recipient->username),
+                'message' => 'Transfer request sent. Waiting for the owner to approve.',
             ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Transfer request failed: ' . $e->getMessage()], 500);
@@ -706,10 +706,7 @@ class MarketplaceController extends Controller
         $customer = Auth::guard('sanctum')->user();
 
         $transfers = TicketTransfer::where('from_customer_id', $customer->id)
-            ->where(function ($query) {
-                $query->whereNull('notes')
-                    ->orWhere('notes', '!=', 'Marketplace Purchase');
-            })
+            ->where('flow', '!=', 'marketplace_purchase')
             ->with(['sender', 'receiver', 'booking', 'booking.evnt'])
             ->orderByDesc('id')
             ->get()
@@ -1340,6 +1337,8 @@ class MarketplaceController extends Controller
                     'booking_id' => $booking->id,
                     'from_customer_id' => $booking->customer_id,
                     'to_customer_id' => $buyer->id,
+                    'status' => 'accepted',
+                    'flow' => 'marketplace_purchase',
                     'notes' => 'Marketplace Purchase',
                 ]);
 

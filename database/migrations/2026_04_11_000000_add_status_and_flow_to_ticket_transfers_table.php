@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::table('ticket_transfers', function (Blueprint $table) {
+            if (!Schema::hasColumn('ticket_transfers', 'status')) {
+                $table->string('status')->nullable()->after('notes');
+            }
+
+            if (!Schema::hasColumn('ticket_transfers', 'flow')) {
+                $table->string('flow')->nullable()->after('status');
+            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('ticket_transfers', function (Blueprint $table) {
+            $table->dropColumn(['status', 'flow']);
+        });
+    }
+};
