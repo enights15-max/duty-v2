@@ -4,10 +4,10 @@ class AppConstants {
   static const String appName = 'Duty';
   static const String apiBaseUrl = AppUrls.apiBaseUrl;
 
-  static const String imageBaseUrl = AppUrls.imageBaseUrl;
-  static const String eventCoverBaseUrl = AppUrls.eventCoverBaseUrl;
-  static const String profileImageBaseUrl = AppUrls.profileImageBaseUrl;
-  static const String venueImageBaseUrl = AppUrls.venueImageBaseUrl;
+  static String get imageBaseUrl => AppUrls.imageBaseUrl;
+  static String get eventCoverBaseUrl => AppUrls.eventCoverBaseUrl;
+  static String get profileImageBaseUrl => AppUrls.profileImageBaseUrl;
+  static String get venueImageBaseUrl => AppUrls.venueImageBaseUrl;
 
   // Storage Keys
   static const String tokenKey = 'auth_token'; // Legacy (SharedPreferences)
