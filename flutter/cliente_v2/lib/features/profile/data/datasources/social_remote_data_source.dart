@@ -35,7 +35,7 @@ class SocialRemoteDataSource {
   Future<Map<String, dynamic>> followEntity(String type, int id) async {
     final response = await _apiClient.dio.post(
       AppUrls.follow,
-      data: {'target_type': type, 'target_id': id},
+      data: {'type': type, 'id': id},
       options: _safeOptions(),
     );
 
@@ -51,7 +51,7 @@ class SocialRemoteDataSource {
   Future<Map<String, dynamic>> unfollowEntity(String type, int id) async {
     final response = await _apiClient.dio.post(
       AppUrls.unfollow,
-      data: {'target_type': type, 'target_id': id},
+      data: {'type': type, 'id': id},
       options: _safeOptions(),
     );
 

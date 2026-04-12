@@ -9,7 +9,7 @@ class AppUrls {
 
   static const String _baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: '$_apiBase/api',
+    defaultValue: '$_fallbackApiBase/api',
   );
   static const String _publicBaseOverride = String.fromEnvironment(
     'PUBLIC_BASE_URL',
@@ -163,11 +163,11 @@ class AppUrls {
       '$_baseUrl/customers/marketplace/purchase/$bookingId';
 
   // Payment gateway helpers (non-API helpers hosted on same host)
-  static const String stripeCreatePaymentIntent =
+  static String get stripeCreatePaymentIntent =>
       '$_apiBase/pgw/create-payment-intent.php';
-  static const String flutterwaveCreatePayment =
+  static String get flutterwaveCreatePayment =>
       '$_apiBase/pgw/flutterwave-create-payment.php';
-  static const String flutterwaveVerifyPayment =
+  static String get flutterwaveVerifyPayment =>
       '$_apiBase/pgw/flutterwave-verify-payment.php';
   static const String wishlists = '$_baseUrl/customers/wishlists';
   static const String wishlistsStore = '$_baseUrl/customers/wishlists/store';
@@ -274,13 +274,13 @@ class AppUrls {
       '$professionalCollaborations/$earningId/mode';
 
   // Images
-  static const String imageBaseUrl =
+  static String get imageBaseUrl =>
       '$_apiBase/assets/admin/img/event/thumbnail/';
-  static const String eventCoverBaseUrl =
+  static String get eventCoverBaseUrl =>
       '$_apiBase/assets/admin/img/event-gallery/';
-  static const String profileImageBaseUrl =
+  static String get profileImageBaseUrl =>
       '$_apiBase/assets/admin/img/customer-profile/';
-  static const String organizerImageBaseUrl =
+  static String get organizerImageBaseUrl =>
       '$_apiBase/assets/admin/img/organizer-photo/';
   static String get organizerCoverImageBaseUrl =>
       '$_apiBase/assets/admin/img/organizer-cover/';
@@ -481,11 +481,24 @@ class AppUrls {
   static String get search => '$_baseUrl/search';
 
   // Social
-  static String get follow => '$_baseUrl/follow';
-  static String get unfollow => '$_baseUrl/unfollow';
+  static String get follow => '$_baseUrl/organizers/follow';
+  static String get unfollow => '$_baseUrl/organizers/unfollow';
+  // NOTE: follow-request system not yet implemented in backend
   static String get pendingFollowRequests => '$_baseUrl/follows/requests';
   static String acceptFollowRequest(int id) =>
       '$_baseUrl/follows/requests/$id/accept';
   static String rejectFollowRequest(int id) =>
       '$_baseUrl/follows/requests/$id/reject';
+
+  // User social profile endpoints (backend routes TBD)
+  static String userAttendedEvents(int userId) =>
+      '$_baseUrl/customers/$userId/attended-events';
+  static String userUpcomingAttendance(int userId) =>
+      '$_baseUrl/customers/$userId/upcoming-attendance';
+  static String userInterestedEvents(int userId) =>
+      '$_baseUrl/customers/$userId/interested-events';
+  static String userFavorites(int userId) =>
+      '$_baseUrl/customers/$userId/favorites';
+  static String userFollowers(int userId) =>
+      '$_baseUrl/customers/$userId/followers';
 }
