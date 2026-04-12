@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\DiscoverController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\ArtistController;
@@ -78,6 +79,19 @@ Route::prefix('discover')->group(function () {
   Route::get('/venues', [DiscoverController::class, 'venues'])->name('api.discover.venues');
 });
 
+// Universal search (optional auth for personalized results)
+Route::get('/search', [SearchController::class, 'search'])->name('api.search');
+
+// Public customer social profiles (optional auth for privacy-aware responses)
+Route::prefix('customers/{id}')->group(function () {
+  Route::get('/profile', [SearchController::class, 'userProfile'])->name('api.customers.public.profile');
+  Route::get('/attended-events', [SearchController::class, 'userAttendedEvents'])->name('api.customers.public.attended_events');
+  Route::get('/upcoming-attendance', [SearchController::class, 'userUpcomingAttendance'])->name('api.customers.public.upcoming_attendance');
+  Route::get('/interested-events', [SearchController::class, 'userInterestedEvents'])->name('api.customers.public.interested_events');
+  Route::get('/favorites', [SearchController::class, 'userFavorites'])->name('api.customers.public.favorites');
+  Route::get('/followers', [SearchController::class, 'userFollowers'])->name('api.customers.public.followers');
+});
+
 Route::middleware('auth:sanctum')->group(function () {
   Route::get('/social/feed', [SocialFeedController::class, 'index'])->name('api.social.feed');
   Route::get('/me/identities', [\App\Http\Controllers\Api\IdentityController::class, 'index'])->name('api.identities.index');
@@ -105,6 +119,13 @@ Route::prefix('organizers')->group(function () {
     Route::post('/unfollow', [\App\Http\Controllers\Api\FollowController::class, 'unfollow'])->name('api.unfollow');
     Route::get('/followed-events', [OrganizerController::class, 'followedEvents'])->name('api.organizers.followed_events');
   });
+});
+
+// Follow requests (auth required)
+Route::prefix('follows')->middleware('auth:sanctum')->group(function () {
+  Route::get('/requests', [\App\Http\Controllers\Api\FollowController::class, 'getPendingRequests'])->name('api.follows.requests');
+  Route::post('/requests/{id}/accept', [\App\Http\Controllers\Api\FollowController::class, 'acceptRequest'])->name('api.follows.requests.accept');
+  Route::post('/requests/{id}/reject', [\App\Http\Controllers\Api\FollowController::class, 'rejectRequest'])->name('api.follows.requests.reject');
 });
 
 Route::prefix('customer')->group(function () {
