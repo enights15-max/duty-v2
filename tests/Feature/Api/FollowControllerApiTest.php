@@ -4,6 +4,7 @@ namespace Tests\Feature\Api;
 
 use App\Http\Controllers\Api\FollowController;
 use App\Models\Customer;
+use App\Models\Follow;
 use App\Models\Organizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,7 @@ class FollowControllerApiTest extends ActorFeatureTestCase
 {
     protected array $baselineSchema = ['users_customers', 'followers'];
     protected array $baselineTruncate = [
+        'follows',
         'followers',
         'customers',
         'users',
@@ -43,10 +45,12 @@ class FollowControllerApiTest extends ActorFeatureTestCase
         $this->assertTrue($followPayload['success']);
         $this->assertTrue($followPayload['is_followed']);
         $this->assertEquals(1, $followPayload['followers_count']);
-        $this->assertDatabaseHas('followers', [
-            'customer_id' => 601,
-            'following_id' => 77,
-            'following_type' => Organizer::class,
+        $this->assertDatabaseHas('follows', [
+            'follower_id'    => 601,
+            'follower_type'  => Customer::class,
+            'followable_id'  => 77,
+            'followable_type' => Organizer::class,
+            'status'         => 'accepted',
         ]);
 
         $unfollowRequest = Request::create('/api/organizers/unfollow', 'POST', [
@@ -60,7 +64,7 @@ class FollowControllerApiTest extends ActorFeatureTestCase
         $this->assertTrue($unfollowPayload['success']);
         $this->assertFalse($unfollowPayload['is_followed']);
         $this->assertEquals(0, $unfollowPayload['followers_count']);
-        $this->assertDatabaseCount('followers', 0);
+        $this->assertDatabaseCount('follows', 0);
     }
 
     public function test_follow_requires_valid_type(): void
