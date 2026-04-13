@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Advertisement;
 use App\Models\BasicSettings\Basic;
 use App\Models\BasicSettings\PageHeading;
+use App\Models\BasicSettings\SEO;
 use App\Models\Language;
 use App\Models\Subscriber;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -20,9 +21,55 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
+
 class Controller extends BaseController
 {
   use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+  protected function hasTable(string $table): bool
+  {
+    try {
+      return Schema::hasTable($table);
+    } catch (\Throwable $exception) {
+      return false;
+    }
+  }
+
+  protected function safeFirst(string $table, callable $callback, $default = null)
+  {
+    if (!$this->hasTable($table)) {
+      return $default;
+    }
+
+    try {
+      return $callback() ?? $default;
+    } catch (\Throwable $exception) {
+      return $default;
+    }
+  }
+
+  protected function safeGet(string $table, callable $callback)
+  {
+    if (!$this->hasTable($table)) {
+      return collect();
+    }
+
+    try {
+      return $callback() ?? collect();
+    } catch (\Throwable $exception) {
+      return collect();
+    }
+  }
+
+  protected function fallbackLanguage(): Language
+  {
+    return new Language([
+      'id' => 1,
+      'code' => config('app.locale', 'en'),
+      'direction' => 'ltr',
+      'is_default' => 1,
+    ]);
+  }
 
   public function getCurrencyInfo()
   {
@@ -55,12 +102,7 @@ class Controller extends BaseController
 
   public function getLanguage()
   {
-    $fallbackLanguage = new Language([
-      'id' => 1,
-      'code' => config('app.locale', 'en'),
-      'direction' => 'ltr',
-      'is_default' => 1,
-    ]);
+    $fallbackLanguage = $this->fallbackLanguage();
 
     if (!Schema::hasTable('languages')) {
       return $fallbackLanguage;
@@ -84,37 +126,70 @@ class Controller extends BaseController
 
   public function getPageHeading($language)
   {
-    if (URL::current() == Route::is('courses')) {
-      $pageHeading = PageHeading::where('language_id', $language->id)->select('courses_page_title')->first();
-    } else if (URL::current() == Route::is('course_details')) {
-      $pageHeading = PageHeading::where('language_id', $language->id)->select('course_details_page_title')->first();
-    } else if (URL::current() == Route::is('instructors')) {
-      $pageHeading = PageHeading::where('language_id', $language->id)->select('instructors_page_title')->first();
-    } else if (URL::current() == Route::is('blogs')) {
-      $pageHeading = PageHeading::where('language_id', $language->id)->select('blog_page_title')->first();
-    } else if (URL::current() == Route::is('blog_details')) {
-      $pageHeading = PageHeading::where('language_id', $language->id)->select('blog_details_page_title')->first();
-    } else if (URL::current() == Route::is('faqs')) {
-      $pageHeading = PageHeading::where('language_id', $language->id)->select('faq_page_title')->first();
-    } else if (URL::current() == Route::is('contact')) {
-      $pageHeading = PageHeading::where('language_id', $language->id)->select('contact_page_title')->first();
-    } else if (URL::current() == Route::is('user.login')) {
-      $pageHeading = PageHeading::where('language_id', $language->id)->select('login_page_title')->first();
-    } else if (URL::current() == Route::is('user.forget_password')) {
-      $pageHeading = PageHeading::where('language_id', $language->id)->select('forget_password_page_title')->first();
-    } else if (URL::current() == Route::is('user.signup')) {
-      $pageHeading = PageHeading::where('language_id', $language->id)->select('signup_page_title')->first();
+    if (empty($language?->id)) {
+      return null;
     }
 
-    return $pageHeading;
+    return $this->safeFirst((new PageHeading())->getTable(), function () use ($language) {
+      $pageHeading = null;
+
+      if (URL::current() == Route::is('courses')) {
+        $pageHeading = PageHeading::where('language_id', $language->id)->select('courses_page_title')->first();
+      } else if (URL::current() == Route::is('course_details')) {
+        $pageHeading = PageHeading::where('language_id', $language->id)->select('course_details_page_title')->first();
+      } else if (URL::current() == Route::is('instructors')) {
+        $pageHeading = PageHeading::where('language_id', $language->id)->select('instructors_page_title')->first();
+      } else if (URL::current() == Route::is('blogs')) {
+        $pageHeading = PageHeading::where('language_id', $language->id)->select('blog_page_title')->first();
+      } else if (URL::current() == Route::is('blog_details')) {
+        $pageHeading = PageHeading::where('language_id', $language->id)->select('blog_details_page_title')->first();
+      } else if (URL::current() == Route::is('faqs')) {
+        $pageHeading = PageHeading::where('language_id', $language->id)->select('faq_page_title')->first();
+      } else if (URL::current() == Route::is('contact')) {
+        $pageHeading = PageHeading::where('language_id', $language->id)->select('contact_page_title')->first();
+      } else if (URL::current() == Route::is('user.login')) {
+        $pageHeading = PageHeading::where('language_id', $language->id)->select('login_page_title')->first();
+      } else if (URL::current() == Route::is('user.forget_password')) {
+        $pageHeading = PageHeading::where('language_id', $language->id)->select('forget_password_page_title')->first();
+      } else if (URL::current() == Route::is('user.signup')) {
+        $pageHeading = PageHeading::where('language_id', $language->id)->select('signup_page_title')->first();
+      }
+
+      return $pageHeading;
+    });
+  }
+
+  protected function getSeoInfo($language, array $columns = [])
+  {
+    if (empty($language?->id)) {
+      return null;
+    }
+
+    return $this->safeFirst((new SEO())->getTable(), function () use ($language, $columns) {
+      $query = $language->seoInfo();
+
+      if (!empty($columns)) {
+        $query->select($columns);
+      }
+
+      return $query->first();
+    });
   }
 
 
   public static function getBreadcrumb()
   {
-    $breadcrumb = Basic::select('breadcrumb')->first();
+    try {
+      if (!Schema::hasTable('basic_settings') || !Schema::hasColumn('basic_settings', 'breadcrumb')) {
+        return (object) ['breadcrumb' => null];
+      }
 
-    return $breadcrumb;
+      $breadcrumb = Basic::select('breadcrumb')->first();
+    } catch (\Throwable $exception) {
+      return (object) ['breadcrumb' => null];
+    }
+
+    return $breadcrumb ?: (object) ['breadcrumb' => null];
   }
 
 

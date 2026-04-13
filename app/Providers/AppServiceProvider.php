@@ -21,6 +21,7 @@ use App\Models\BasicSettings\SocialMedia;
 class AppServiceProvider extends ServiceProvider
 {
   private ?array $basicSettingsColumns = null;
+  private ?array $tableAvailability = null;
 
   /**
    * Register any application services.
@@ -69,7 +70,7 @@ class AppServiceProvider extends ServiceProvider
           }
         }
 
-        $language = Language::where('is_default', 1)->first();
+        $language = $this->resolveLanguage();
         $websiteSettings = $this->loadBasicSettings(
           [
             'event_country_status',
@@ -93,7 +94,9 @@ class AppServiceProvider extends ServiceProvider
           ]
         );
 
-        $footerText = $language->footerContent()->first();
+        $footerText = $this->safeFirstForTable('footer_contents', function () use ($language) {
+          return $language->footerContent()->first();
+        });
 
         if (Auth::guard('admin')->check() == true) {
           $view->with('roleInfo', $role);
@@ -106,7 +109,7 @@ class AppServiceProvider extends ServiceProvider
 
       // send this information to only back-end view files
       View::composer('organizer.*', function ($view) {
-        $language = Language::where('is_default', 1)->first();
+        $language = $this->resolveLanguage();
         $websiteSettings = $this->loadBasicSettings(
           [
             'admin_theme_version',
@@ -137,7 +140,9 @@ class AppServiceProvider extends ServiceProvider
           ]
         );
 
-        $footerText = $language->footerContent()->first();
+        $footerText = $this->safeFirstForTable('footer_contents', function () use ($language) {
+          return $language->footerContent()->first();
+        });
 
 
         $view->with('defaultLang', $language);
@@ -206,31 +211,43 @@ class AppServiceProvider extends ServiceProvider
 
 
         // get all the languages of this system
-        $allLanguages = Language::all();
+        $allLanguages = $this->safeGetForTable('languages', function () {
+          return Language::all();
+        });
 
         // get the current locale of this website
         if (Session::has('lang')) {
           $locale = Session::get('lang');
         }
         if (empty($locale)) {
-          $language = Language::where('is_default', 1)->first();
+          $language = $this->resolveLanguage();
         } else {
-          $language = Language::where('code', $locale)->first();
+          $language = $this->safeFirstForTable('languages', function () use ($locale) {
+            return Language::where('code', $locale)->first();
+          });
           if (empty($language)) {
-            $language = Language::where('is_default', 1)->first();
+            $language = $this->resolveLanguage();
           }
         }
 
         // get all the social medias
-        $socialMedias = SocialMedia::orderBy('serial_number')->get();
+        $socialMedias = $this->safeGetForTable('social_medias', function () {
+          return SocialMedia::orderBy('serial_number')->get();
+        });
 
         //seo
-        $seo = SEO::where('language_id', $language->id)->first();
+        $seo = $this->safeFirstForTable('seos', function () use ($language) {
+          return SEO::where('language_id', $language->id)->first();
+        });
         //seo
-        $pageHeading = PageHeading::where('language_id', $language->id)->first();
+        $pageHeading = $this->safeFirstForTable('page_headings', function () use ($language) {
+          return PageHeading::where('language_id', $language->id)->first();
+        });
 
         // get the menus of this website
-        $siteMenuInfo = $language->menuInfo;
+        $siteMenuInfo = $this->safeFirstForTable('menu_builders', function () use ($language) {
+          return $language->menuInfo()->first();
+        });
 
         if (is_null($siteMenuInfo)) {
           $menus = json_encode([]);
@@ -239,38 +256,60 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // get the announcement popups
-        $popups = $language->announcementPopup()->where('status', 1)->orderBy('serial_number', 'asc')->get();
+        $popups = $this->safeGetForTable('popups', function () use ($language) {
+          return $language->announcementPopup()->where('status', 1)->orderBy('serial_number', 'asc')->get();
+        });
 
         // get the cookie alert info
-        $cookieAlert = $language->cookieAlertInfo()->first();
+        $cookieAlert = $this->safeFirstForTable('cookie_alerts', function () use ($language) {
+          return $language->cookieAlertInfo()->first();
+        });
 
         // get footer section status (enable/disable) information
-        $footerSectionStatus = Section::query()->pluck('footer_section_status')->first();
+        $footerSectionStatus = $this->safeFirstForTable('sections', function () {
+          return Section::query()->pluck('footer_section_status')->first();
+        }, 0);
 
         if ($footerSectionStatus == 1) {
           // get the footer info
-          $footerData = $language->footerContent()->first();
+          $footerData = $this->safeFirstForTable('footer_contents', function () use ($language) {
+            return $language->footerContent()->first();
+          });
 
           // get the quick links of footer
-          $quickLinks = $language->footerQuickLink()->orderBy('serial_number', 'asc')->get();
+          $quickLinks = $this->safeGetForTable('quick_links', function () use ($language) {
+            return $language->footerQuickLink()->orderBy('serial_number', 'asc')->get();
+          });
 
           // get latest blogs
           if ($basicData->theme_version != 3) {
-            $blogs = Blog::join('blog_informations', 'blogs.id', '=', 'blog_informations.blog_id')
-              ->where('blog_informations.language_id', '=', $language->id)
-              ->select('blogs.image', 'blogs.created_at', 'blog_informations.title', 'blog_informations.slug')
-              ->orderByDesc('blogs.created_at')
-              ->limit(3)
-              ->get();
+            $blogs = $this->safeGetForTable('blogs', function () use ($language) {
+              if (!$this->hasTableSafely('blog_informations')) {
+                return collect();
+              }
+
+              return Blog::join('blog_informations', 'blogs.id', '=', 'blog_informations.blog_id')
+                ->where('blog_informations.language_id', '=', $language->id)
+                ->select('blogs.image', 'blogs.created_at', 'blog_informations.title', 'blog_informations.slug')
+                ->orderByDesc('blogs.created_at')
+                ->limit(3)
+                ->get();
+            });
           }
 
           // get newsletter title
           if ($basicData->theme_version == 2) {
-            $newsletterTitle = $language->newsletterSec()->pluck('title')->first();
+            $newsletterTitle = method_exists($language, 'newsletterSec')
+              ? $this->safeFirstForTable('newsletter_sections', function () use ($language) {
+                return $language->newsletterSec()->pluck('title')->first();
+              })
+              : null;
           }
         }
 
-        $bex = ContactPage::where('language_id', $language->id)->first();
+        $bex = $this->safeFirstForTable('contact_pages', function () use ($language) {
+          return ContactPage::where('language_id', $language->id)->first();
+        });
 
         $view->with('basicInfo', $basicData);
         $view->with('seo', $seo);
@@ -360,5 +399,67 @@ class AppServiceProvider extends ServiceProvider
     } catch (\Throwable $exception) {
       return $this->basicSettingsColumns = [];
     }
+  }
+
+  private function hasTableSafely(string $table): bool
+  {
+    if ($this->tableAvailability !== null && array_key_exists($table, $this->tableAvailability)) {
+      return $this->tableAvailability[$table];
+    }
+
+    try {
+      $exists = Schema::hasTable($table);
+    } catch (\Throwable $exception) {
+      $exists = false;
+    }
+
+    $this->tableAvailability ??= [];
+    $this->tableAvailability[$table] = $exists;
+
+    return $exists;
+  }
+
+  private function safeFirstForTable(string $table, callable $callback, $default = null)
+  {
+    if (!$this->hasTableSafely($table)) {
+      return $default;
+    }
+
+    try {
+      return $callback() ?? $default;
+    } catch (\Throwable $exception) {
+      return $default;
+    }
+  }
+
+  private function safeGetForTable(string $table, callable $callback)
+  {
+    if (!$this->hasTableSafely($table)) {
+      return collect();
+    }
+
+    try {
+      return $callback() ?? collect();
+    } catch (\Throwable $exception) {
+      return collect();
+    }
+  }
+
+  private function resolveLanguage(): Language
+  {
+    $fallbackLanguage = new Language([
+      'id' => 1,
+      'code' => config('app.locale', 'en'),
+      'direction' => 'ltr',
+      'is_default' => 1,
+    ]);
+
+    if (!$this->hasTableSafely('languages')) {
+      return $fallbackLanguage;
+    }
+
+    return Language::where('is_default', 1)->first()
+      ?? Language::query()->orderBy('id')->first()
+      ?? $fallbackLanguage;
   }
 }
