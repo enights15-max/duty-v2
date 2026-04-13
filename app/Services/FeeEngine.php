@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Schema;
 
 class FeeEngine
 {
+    private ?array $basicSettingsColumns = null;
+
     public const OP_PRIMARY_TICKET_SALE = 'primary_ticket_sale';
     public const OP_CHECKOUT_CARD_PROCESSING = 'checkout_card_processing';
     public const OP_MARKETPLACE_RESALE = 'marketplace_resale';
@@ -192,9 +194,10 @@ class FeeEngine
 
     public function catalog(): array
     {
-        $basic = Schema::hasTable('basic_settings')
-            ? Basic::query()->select('commission', 'marketplace_commission')->first()
-            : null;
+        $basic = $this->loadBasicSettings([
+            'commission' => 0,
+            'marketplace_commission' => 5,
+        ]);
 
         return [
             self::OP_PRIMARY_TICKET_SALE => [
@@ -394,5 +397,59 @@ class FeeEngine
     private function normalizeMoney(mixed $value): float
     {
         return round((float) $value, 2);
+    }
+
+    private function loadBasicSettings(array $defaults): object
+    {
+        $payload = $defaults;
+        $availableColumns = $this->getBasicSettingsColumns();
+
+        if (empty($availableColumns)) {
+            return (object) $payload;
+        }
+
+        $selectableColumns = [];
+        foreach (array_keys($defaults) as $column) {
+            if (isset($availableColumns[$column])) {
+                $selectableColumns[] = $column;
+            }
+        }
+
+        if (empty($selectableColumns)) {
+            return (object) $payload;
+        }
+
+        try {
+            $row = Basic::query()->select($selectableColumns)->first();
+        } catch (\Throwable $exception) {
+            return (object) $payload;
+        }
+
+        if (!$row) {
+            return (object) $payload;
+        }
+
+        foreach ($selectableColumns as $column) {
+            $payload[$column] = $row->{$column};
+        }
+
+        return (object) $payload;
+    }
+
+    private function getBasicSettingsColumns(): array
+    {
+        if ($this->basicSettingsColumns !== null) {
+            return $this->basicSettingsColumns;
+        }
+
+        try {
+            if (!Schema::hasTable('basic_settings')) {
+                return $this->basicSettingsColumns = [];
+            }
+
+            return $this->basicSettingsColumns = array_flip(Schema::getColumnListing('basic_settings'));
+        } catch (\Throwable $exception) {
+            return $this->basicSettingsColumns = [];
+        }
     }
 }
