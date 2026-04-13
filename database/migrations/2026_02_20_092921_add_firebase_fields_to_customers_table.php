@@ -31,7 +31,7 @@ return new class extends Migration {
             }
 
             if (!Schema::hasColumn('customers', 'firebase_uid')) {
-                $table->string('firebase_uid')->nullable()->after('provider_id');
+                $table->string('firebase_uid')->nullable();
             }
         });
 

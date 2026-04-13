@@ -10,19 +10,19 @@ return new class extends Migration
     {
         Schema::table('customers', function (Blueprint $table) {
             if (!Schema::hasColumn('customers', 'is_private')) {
-                $table->boolean('is_private')->default(false)->after('gender');
+                $table->boolean('is_private')->default(false);
             }
 
             if (!Schema::hasColumn('customers', 'show_interested_events')) {
-                $table->boolean('show_interested_events')->default(true)->after('is_private');
+                $table->boolean('show_interested_events')->default(true);
             }
 
             if (!Schema::hasColumn('customers', 'show_attended_events')) {
-                $table->boolean('show_attended_events')->default(true)->after('show_interested_events');
+                $table->boolean('show_attended_events')->default(true);
             }
 
             if (!Schema::hasColumn('customers', 'show_upcoming_attendance')) {
-                $table->boolean('show_upcoming_attendance')->default(true)->after('show_attended_events');
+                $table->boolean('show_upcoming_attendance')->default(true);
             }
         });
     }

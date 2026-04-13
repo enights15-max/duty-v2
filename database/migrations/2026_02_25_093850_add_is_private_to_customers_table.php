@@ -13,7 +13,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('customers', function (Blueprint $table) {
-            $table->boolean('is_private')->default(0)->after('status');
+            $table->boolean('is_private')->default(0);
         });
     }
 

@@ -19,11 +19,11 @@ return new class extends Migration {
 
         Schema::table('wallet_transactions', function (Blueprint $table) {
             if (!Schema::hasColumn('wallet_transactions', 'description')) {
-                $table->string('description')->nullable()->after('amount');
+                $table->string('description')->nullable();
             }
 
             if (!Schema::hasColumn('wallet_transactions', 'created_by')) {
-                $table->unsignedBigInteger('created_by')->nullable()->after('status');
+                $table->unsignedBigInteger('created_by')->nullable();
             }
 
             // Note: Changing enums in Laravel/MySQL can be tricky. 

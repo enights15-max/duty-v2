@@ -10,11 +10,11 @@ return new class extends Migration
     {
         Schema::table('tickets', function (Blueprint $table) {
             if (!Schema::hasColumn('tickets', 'sale_status')) {
-                $table->string('sale_status', 24)->default('active')->after('reservation_min_installment_amount');
+                $table->string('sale_status', 24)->default('active');
             }
 
             if (!Schema::hasColumn('tickets', 'archived_at')) {
-                $table->timestamp('archived_at')->nullable()->after('sale_status');
+                $table->timestamp('archived_at')->nullable();
             }
         });
     }

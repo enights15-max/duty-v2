@@ -10,28 +10,28 @@ return new class extends Migration {
     {
         if (Schema::hasTable('transactions') && !Schema::hasColumn('transactions', 'venue_identity_id')) {
             Schema::table('transactions', function (Blueprint $table): void {
-                $table->unsignedBigInteger('venue_identity_id')->nullable()->after('venue_id');
+                $table->unsignedBigInteger('venue_identity_id')->nullable();
                 $table->index('venue_identity_id');
             });
         }
 
         if (Schema::hasTable('transactions') && !Schema::hasColumn('transactions', 'artist_identity_id')) {
             Schema::table('transactions', function (Blueprint $table): void {
-                $table->unsignedBigInteger('artist_identity_id')->nullable()->after('artist_id');
+                $table->unsignedBigInteger('artist_identity_id')->nullable();
                 $table->index('artist_identity_id');
             });
         }
 
         if (Schema::hasTable('withdraws') && !Schema::hasColumn('withdraws', 'venue_identity_id')) {
             Schema::table('withdraws', function (Blueprint $table): void {
-                $table->unsignedBigInteger('venue_identity_id')->nullable()->after('venue_id');
+                $table->unsignedBigInteger('venue_identity_id')->nullable();
                 $table->index('venue_identity_id');
             });
         }
 
         if (Schema::hasTable('withdraws') && !Schema::hasColumn('withdraws', 'artist_identity_id')) {
             Schema::table('withdraws', function (Blueprint $table): void {
-                $table->unsignedBigInteger('artist_identity_id')->nullable()->after('artist_id');
+                $table->unsignedBigInteger('artist_identity_id')->nullable();
                 $table->index('artist_identity_id');
             });
         }

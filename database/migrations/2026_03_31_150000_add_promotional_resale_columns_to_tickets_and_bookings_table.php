@@ -11,8 +11,7 @@ return new class extends Migration
         if (Schema::hasTable('tickets') && !Schema::hasColumn('tickets', 'allow_promotional_resale')) {
             Schema::table('tickets', function (Blueprint $table): void {
                 $table->boolean('allow_promotional_resale')
-                    ->default(true)
-                    ->after('reservation_min_installment_amount');
+                    ->default(true);
             });
         }
 
@@ -20,26 +19,22 @@ return new class extends Migration
             Schema::table('bookings', function (Blueprint $table): void {
                 if (!Schema::hasColumn('bookings', 'is_resellable')) {
                     $table->boolean('is_resellable')
-                        ->default(true)
-                        ->after('is_transferable');
+                        ->default(true);
                 }
 
                 if (!Schema::hasColumn('bookings', 'resale_restriction_reason')) {
                     $table->string('resale_restriction_reason', 64)
-                        ->nullable()
-                        ->after('is_resellable');
+                        ->nullable();
                 }
 
                 if (!Schema::hasColumn('bookings', 'acquisition_source')) {
                     $table->string('acquisition_source', 64)
-                        ->nullable()
-                        ->after('resale_restriction_reason');
+                        ->nullable();
                 }
 
                 if (!Schema::hasColumn('bookings', 'coupon_code')) {
                     $table->string('coupon_code', 191)
-                        ->nullable()
-                        ->after('acquisition_source');
+                        ->nullable();
                 }
             });
         }

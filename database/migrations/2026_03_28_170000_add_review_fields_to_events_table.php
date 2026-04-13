@@ -10,10 +10,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            $table->string('review_status', 40)->nullable()->after('status');
-            $table->text('review_notes')->nullable()->after('review_status');
-            $table->timestamp('reviewed_at')->nullable()->after('review_notes');
-            $table->unsignedBigInteger('reviewed_by_admin_id')->nullable()->after('reviewed_at');
+            $table->string('review_status', 40)->nullable();
+            $table->text('review_notes')->nullable();
+            $table->timestamp('reviewed_at')->nullable();
+            $table->unsignedBigInteger('reviewed_by_admin_id')->nullable();
         });
 
         DB::table('events')

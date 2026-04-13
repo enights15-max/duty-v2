@@ -22,7 +22,7 @@ return new class extends Migration {
 
         Schema::table('events', function (Blueprint $table) {
             if (!Schema::hasColumn('events', 'venue_id')) {
-                $table->unsignedBigInteger('venue_id')->nullable()->after('organizer_id');
+                $table->unsignedBigInteger('venue_id')->nullable();
             }
 
             if (Schema::hasTable('venues') && Schema::getConnection()->getDriverName() !== 'sqlite') {

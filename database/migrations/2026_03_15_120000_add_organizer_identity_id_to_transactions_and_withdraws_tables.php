@@ -10,14 +10,14 @@ return new class extends Migration {
     {
         if (Schema::hasTable('transactions') && !Schema::hasColumn('transactions', 'organizer_identity_id')) {
             Schema::table('transactions', function (Blueprint $table): void {
-                $table->unsignedBigInteger('organizer_identity_id')->nullable()->after('organizer_id');
+                $table->unsignedBigInteger('organizer_identity_id')->nullable();
                 $table->index('organizer_identity_id');
             });
         }
 
         if (Schema::hasTable('withdraws') && !Schema::hasColumn('withdraws', 'organizer_identity_id')) {
             Schema::table('withdraws', function (Blueprint $table): void {
-                $table->unsignedBigInteger('organizer_identity_id')->nullable()->after('organizer_id');
+                $table->unsignedBigInteger('organizer_identity_id')->nullable();
                 $table->index('organizer_identity_id');
             });
         }

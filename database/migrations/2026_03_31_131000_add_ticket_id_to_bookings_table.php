@@ -15,7 +15,7 @@ return new class extends Migration
 
         if (!Schema::hasColumn('bookings', 'ticket_id')) {
             Schema::table('bookings', function (Blueprint $table): void {
-                $table->unsignedBigInteger('ticket_id')->nullable()->after('organizer_identity_id');
+                $table->unsignedBigInteger('ticket_id')->nullable();
                 $table->index('ticket_id');
             });
         }

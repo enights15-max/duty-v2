@@ -10,15 +10,15 @@ return new class extends Migration
     {
         Schema::table('withdrawal_requests', function (Blueprint $table): void {
             if (!Schema::hasColumn('withdrawal_requests', 'identity_id')) {
-                $table->unsignedBigInteger('identity_id')->nullable()->after('customer_id');
+                $table->unsignedBigInteger('identity_id')->nullable();
             }
 
             if (!Schema::hasColumn('withdrawal_requests', 'actor_type')) {
-                $table->string('actor_type', 32)->nullable()->after('identity_id');
+                $table->string('actor_type', 32)->nullable();
             }
 
             if (!Schema::hasColumn('withdrawal_requests', 'display_name')) {
-                $table->string('display_name')->nullable()->after('actor_type');
+                $table->string('display_name')->nullable();
             }
         });
     }

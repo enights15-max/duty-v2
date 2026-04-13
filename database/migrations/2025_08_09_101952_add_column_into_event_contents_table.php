@@ -23,13 +23,13 @@ return new class extends Migration
 
     Schema::table('event_contents', function (Blueprint $table) {
       if (!Schema::hasColumn('event_contents', 'country_id')) {
-        $table->bigInteger('country_id')->nullable()->after('event_id');
+        $table->bigInteger('country_id')->nullable();
       }
       if (!Schema::hasColumn('event_contents', 'city_id')) {
-        $table->bigInteger('city_id')->nullable()->after('country_id');
+        $table->bigInteger('city_id')->nullable();
       }
       if (!Schema::hasColumn('event_contents', 'state_id')) {
-        $table->bigInteger('state_id')->nullable()->after('city_id');
+        $table->bigInteger('state_id')->nullable();
       }
     });
   }

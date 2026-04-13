@@ -11,8 +11,7 @@ return new class extends Migration
         Schema::table('admins', function (Blueprint $table) {
             if (!Schema::hasColumn('admins', 'navigation_layout')) {
                 $table->string('navigation_layout', 20)
-                    ->default('sidebar')
-                    ->after('status');
+                    ->default('sidebar');
             }
         });
     }

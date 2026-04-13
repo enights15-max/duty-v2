@@ -13,7 +13,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('basic_settings', function (Blueprint $table) {
-            $table->decimal('marketplace_commission', 5, 2)->default(5.00)->after('commission');
+            $table->decimal('marketplace_commission', 5, 2)->default(5.00);
         });
     }
 

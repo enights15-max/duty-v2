@@ -26,7 +26,7 @@ return new class extends Migration {
 
         Schema::table('users', function (Blueprint $table) {
             if (!Schema::hasColumn('users', 'stripe_customer_id')) {
-                $table->string('stripe_customer_id')->nullable()->after('id');
+                $table->string('stripe_customer_id')->nullable();
             }
         });
     }

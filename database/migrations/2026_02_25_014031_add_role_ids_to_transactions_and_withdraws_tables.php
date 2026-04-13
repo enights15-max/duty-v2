@@ -13,13 +13,13 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->unsignedBigInteger('venue_id')->nullable()->after('organizer_id');
-            $table->unsignedBigInteger('artist_id')->nullable()->after('venue_id');
+            $table->unsignedBigInteger('venue_id')->nullable();
+            $table->unsignedBigInteger('artist_id')->nullable();
         });
 
         Schema::table('withdraws', function (Blueprint $table) {
-            $table->unsignedBigInteger('venue_id')->nullable()->after('organizer_id');
-            $table->unsignedBigInteger('artist_id')->nullable()->after('venue_id');
+            $table->unsignedBigInteger('venue_id')->nullable();
+            $table->unsignedBigInteger('artist_id')->nullable();
         });
     }
 

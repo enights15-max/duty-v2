@@ -13,11 +13,11 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('venues', function (Blueprint $table) {
-            $table->string('username')->unique()->after('slug')->nullable();
-            $table->string('email')->unique()->after('username')->nullable();
-            $table->string('password')->after('email')->nullable();
-            $table->timestamp('email_verified_at')->nullable()->after('password');
-            $table->decimal('amount', 20, 2)->default(0.00)->after('status');
+            $table->string('username')->unique()->nullable();
+            $table->string('email')->unique()->nullable();
+            $table->string('password')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->decimal('amount', 20, 2)->default(0.00);
             $table->rememberToken();
         });
     }

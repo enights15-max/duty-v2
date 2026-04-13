@@ -9,11 +9,11 @@ return new class extends Migration {
     {
         Schema::table('ticket_transfers', function (Blueprint $table) {
             if (!Schema::hasColumn('ticket_transfers', 'status')) {
-                $table->string('status')->nullable()->after('notes');
+                $table->string('status')->nullable();
             }
 
             if (!Schema::hasColumn('ticket_transfers', 'flow')) {
-                $table->string('flow')->nullable()->after('status');
+                $table->string('flow')->nullable();
             }
         });
     }
