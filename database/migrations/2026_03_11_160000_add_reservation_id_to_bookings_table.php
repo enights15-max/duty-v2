@@ -10,6 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
+
+        if (!Schema::hasTable('bookings')) {
+            return;
+        }
         Schema::table('bookings', function (Blueprint $table) {
             $table->unsignedBigInteger('reservation_id')->nullable();
             $table->index('reservation_id', 'bookings_reservation_id_idx');

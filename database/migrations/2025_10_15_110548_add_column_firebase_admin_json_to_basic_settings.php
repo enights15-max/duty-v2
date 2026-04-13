@@ -13,6 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
+
+        if (!Schema::hasTable('basic_settings')) {
+            return;
+        }
         Schema::table('basic_settings', function (Blueprint $table) {
             $table->string('firebase_admin_json')->nullable();
         });

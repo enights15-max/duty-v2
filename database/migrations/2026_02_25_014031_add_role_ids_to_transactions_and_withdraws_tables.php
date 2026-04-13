@@ -12,15 +12,19 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::table('transactions', function (Blueprint $table) {
-            $table->unsignedBigInteger('venue_id')->nullable();
-            $table->unsignedBigInteger('artist_id')->nullable();
-        });
+        if (Schema::hasTable('transactions')) {
+            Schema::table('transactions', function (Blueprint $table) {
+                $table->unsignedBigInteger('venue_id')->nullable();
+                $table->unsignedBigInteger('artist_id')->nullable();
+            });
+        }
 
-        Schema::table('withdraws', function (Blueprint $table) {
-            $table->unsignedBigInteger('venue_id')->nullable();
-            $table->unsignedBigInteger('artist_id')->nullable();
-        });
+        if (Schema::hasTable('withdraws')) {
+            Schema::table('withdraws', function (Blueprint $table) {
+                $table->unsignedBigInteger('venue_id')->nullable();
+                $table->unsignedBigInteger('artist_id')->nullable();
+            });
+        }
     }
 
     /**

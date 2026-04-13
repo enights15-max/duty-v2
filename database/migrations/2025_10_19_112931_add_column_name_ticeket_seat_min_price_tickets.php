@@ -13,6 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
+
+        if (!Schema::hasTable('tickets')) {
+            return;
+        }
         Schema::table('tickets', function (Blueprint $table) {
             $table->decimal("slot_seat_min_price")->default(0);
         });

@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+
+        if (!Schema::hasTable('event_lineups')) {
+            return;
+        }
         Schema::table('event_lineups', function (Blueprint $table) {
             if (!Schema::hasColumn('event_lineups', 'is_headliner')) {
                 $table->boolean('is_headliner')->default(false);

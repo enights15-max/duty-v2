@@ -11,45 +11,51 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('wallets', function (Blueprint $table) {
-            $table->string('actor_type', 32)->nullable();
-            $table->unsignedBigInteger('actor_id')->nullable();
-            $table->index(['actor_type', 'actor_id'], 'wallets_actor_type_actor_id_idx');
-        });
+        if (Schema::hasTable('wallets')) {
+            Schema::table('wallets', function (Blueprint $table) {
+                $table->string('actor_type', 32)->nullable();
+                $table->unsignedBigInteger('actor_id')->nullable();
+                $table->index(['actor_type', 'actor_id'], 'wallets_actor_type_actor_id_idx');
+            });
 
-        Schema::table('nfc_tokens', function (Blueprint $table) {
-            $table->string('actor_type', 32)->nullable();
-            $table->unsignedBigInteger('actor_id')->nullable();
-            $table->index(['actor_type', 'actor_id'], 'nfc_tokens_actor_type_actor_id_idx');
-        });
+            // Backfill from legacy user_id with "customer" default to preserve existing wallet/NFC flows.
+            DB::table('wallets')
+                ->whereNull('actor_id')
+                ->update([
+                    'actor_type' => 'customer',
+                    'actor_id' => DB::raw('user_id'),
+                ]);
+        }
 
-        Schema::table('payment_methods', function (Blueprint $table) {
-            $table->string('actor_type', 32)->nullable();
-            $table->unsignedBigInteger('actor_id')->nullable();
-            $table->index(['actor_type', 'actor_id'], 'payment_methods_actor_type_actor_id_idx');
-        });
+        if (Schema::hasTable('nfc_tokens')) {
+            Schema::table('nfc_tokens', function (Blueprint $table) {
+                $table->string('actor_type', 32)->nullable();
+                $table->unsignedBigInteger('actor_id')->nullable();
+                $table->index(['actor_type', 'actor_id'], 'nfc_tokens_actor_type_actor_id_idx');
+            });
 
-        // Backfill from legacy user_id with "customer" default to preserve existing wallet/NFC flows.
-        DB::table('wallets')
-            ->whereNull('actor_id')
-            ->update([
-                'actor_type' => 'customer',
-                'actor_id' => DB::raw('user_id'),
-            ]);
+            DB::table('nfc_tokens')
+                ->whereNull('actor_id')
+                ->update([
+                    'actor_type' => 'customer',
+                    'actor_id' => DB::raw('user_id'),
+                ]);
+        }
 
-        DB::table('nfc_tokens')
-            ->whereNull('actor_id')
-            ->update([
-                'actor_type' => 'customer',
-                'actor_id' => DB::raw('user_id'),
-            ]);
+        if (Schema::hasTable('payment_methods')) {
+            Schema::table('payment_methods', function (Blueprint $table) {
+                $table->string('actor_type', 32)->nullable();
+                $table->unsignedBigInteger('actor_id')->nullable();
+                $table->index(['actor_type', 'actor_id'], 'payment_methods_actor_type_actor_id_idx');
+            });
 
-        DB::table('payment_methods')
-            ->whereNull('actor_id')
-            ->update([
-                'actor_type' => 'customer',
-                'actor_id' => DB::raw('user_id'),
-            ]);
+            DB::table('payment_methods')
+                ->whereNull('actor_id')
+                ->update([
+                    'actor_type' => 'customer',
+                    'actor_id' => DB::raw('user_id'),
+                ]);
+        }
     }
 
     /**

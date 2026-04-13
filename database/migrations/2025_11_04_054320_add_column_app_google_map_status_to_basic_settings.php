@@ -13,6 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
+
+        if (!Schema::hasTable('basic_settings')) {
+            return;
+        }
         Schema::table('basic_settings', function (Blueprint $table) {
           if (!Schema::hasColumn('basic_settings', 'app_google_map_status')) {
               $table->tinyInteger('app_google_map_status')->default(0);

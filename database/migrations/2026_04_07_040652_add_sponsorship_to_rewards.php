@@ -13,31 +13,37 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('event_reward_definitions', function (Blueprint $table) {
-            if (!Schema::hasColumn('event_reward_definitions', 'exclusive_promoter_split_id')) {
-                $table->unsignedBigInteger('exclusive_promoter_split_id')->nullable()->index();
-            }
-            if (!Schema::hasColumn('event_reward_definitions', 'sponsor_identity_id')) {
-                $table->unsignedBigInteger('sponsor_identity_id')->nullable();
-                $table->index('sponsor_identity_id');
-            }
-        });
+        if (Schema::hasTable('event_reward_definitions')) {
+            Schema::table('event_reward_definitions', function (Blueprint $table) {
+                if (!Schema::hasColumn('event_reward_definitions', 'exclusive_promoter_split_id')) {
+                    $table->unsignedBigInteger('exclusive_promoter_split_id')->nullable()->index();
+                }
+                if (!Schema::hasColumn('event_reward_definitions', 'sponsor_identity_id')) {
+                    $table->unsignedBigInteger('sponsor_identity_id')->nullable();
+                    $table->index('sponsor_identity_id');
+                }
+            });
+        }
 
-        Schema::table('event_reward_instances', function (Blueprint $table) {
-            if (!Schema::hasColumn('event_reward_instances', 'promoter_identity_id')) {
-                $table->unsignedBigInteger('promoter_identity_id')->nullable()->index();
-            }
-            if (!Schema::hasColumn('event_reward_instances', 'sponsor_identity_id')) {
-                $table->unsignedBigInteger('sponsor_identity_id')->nullable();
-                $table->index('sponsor_identity_id');
-            }
-        });
-        
-        Schema::table('bookings', function (Blueprint $table) {
-            if (!Schema::hasColumn('bookings', 'promoter_split_id')) {
-                $table->unsignedBigInteger('promoter_split_id')->nullable()->index();
-            }
-        });
+        if (Schema::hasTable('event_reward_instances')) {
+            Schema::table('event_reward_instances', function (Blueprint $table) {
+                if (!Schema::hasColumn('event_reward_instances', 'promoter_identity_id')) {
+                    $table->unsignedBigInteger('promoter_identity_id')->nullable()->index();
+                }
+                if (!Schema::hasColumn('event_reward_instances', 'sponsor_identity_id')) {
+                    $table->unsignedBigInteger('sponsor_identity_id')->nullable();
+                    $table->index('sponsor_identity_id');
+                }
+            });
+        }
+
+        if (Schema::hasTable('bookings')) {
+            Schema::table('bookings', function (Blueprint $table) {
+                if (!Schema::hasColumn('bookings', 'promoter_split_id')) {
+                    $table->unsignedBigInteger('promoter_split_id')->nullable()->index();
+                }
+            });
+        }
     }
 
     public function down()

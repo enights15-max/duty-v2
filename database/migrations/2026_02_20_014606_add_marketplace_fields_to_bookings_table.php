@@ -12,6 +12,10 @@ return new class extends Migration {
      */
     public function up()
     {
+
+        if (!Schema::hasTable('bookings')) {
+            return;
+        }
         Schema::table('bookings', function (Blueprint $table) {
             $table->boolean('is_transferable')->default(true);
             $table->boolean('is_listed')->default(false);

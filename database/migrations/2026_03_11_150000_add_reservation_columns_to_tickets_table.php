@@ -10,6 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
+
+        if (!Schema::hasTable('tickets')) {
+            return;
+        }
         Schema::table('tickets', function (Blueprint $table) {
             $table->boolean('reservation_enabled')->default(false);
             $table->enum('reservation_deposit_type', ['fixed', 'percentage'])->nullable();

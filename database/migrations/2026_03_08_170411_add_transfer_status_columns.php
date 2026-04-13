@@ -8,16 +8,20 @@ return new class extends Migration {
     public function up()
     {
         // Add status to ticket_transfers
-        Schema::table('ticket_transfers', function (Blueprint $table) {
-            $table->string('status')->default('pending');
-            // pending, accepted, rejected, cancelled
-        });
+        if (Schema::hasTable('ticket_transfers')) {
+            Schema::table('ticket_transfers', function (Blueprint $table) {
+                $table->string('status')->default('pending');
+                // pending, accepted, rejected, cancelled
+            });
+        }
 
         // Add transfer_status to bookings
-        Schema::table('bookings', function (Blueprint $table) {
-            $table->string('transfer_status')->nullable();
-            // null = normal, 'transfer_pending' = awaiting acceptance
-        });
+        if (Schema::hasTable('bookings')) {
+            Schema::table('bookings', function (Blueprint $table) {
+                $table->string('transfer_status')->nullable();
+                // null = normal, 'transfer_pending' = awaiting acceptance
+            });
+        }
     }
 
     public function down()

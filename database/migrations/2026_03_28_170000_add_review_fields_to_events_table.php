@@ -9,6 +9,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+
+        if (!Schema::hasTable('events')) {
+            return;
+        }
         Schema::table('events', function (Blueprint $table) {
             $table->string('review_status', 40)->nullable();
             $table->text('review_notes')->nullable();

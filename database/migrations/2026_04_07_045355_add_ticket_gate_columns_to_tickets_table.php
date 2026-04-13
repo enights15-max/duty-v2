@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        if (!Schema::hasTable('tickets')) {
+            return;
+        }
         Schema::table('tickets', function (Blueprint $table) {
             // "Don't activate me until THIS ticket sells out / date arrives"
             $table->unsignedBigInteger('gate_ticket_id')->nullable();

@@ -11,6 +11,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
+
+        if (!Schema::hasTable('chats')) {
+            return;
+        }
         Schema::table('chats', function (Blueprint $table) {
             // Rename customer_id to initiator_id
             $table->renameColumn('customer_id', 'initiator_id');

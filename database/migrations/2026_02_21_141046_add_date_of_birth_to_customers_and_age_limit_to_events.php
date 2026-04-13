@@ -12,13 +12,17 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::table('customers', function (Blueprint $table) {
-            $table->date('date_of_birth')->nullable();
-        });
+        if (Schema::hasTable('customers')) {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->date('date_of_birth')->nullable();
+            });
+        }
 
-        Schema::table('events', function (Blueprint $table) {
-            $table->integer('age_limit')->default(0)->comment('0 means all ages');
-        });
+        if (Schema::hasTable('events')) {
+            Schema::table('events', function (Blueprint $table) {
+                $table->integer('age_limit')->default(0)->comment('0 means all ages');
+            });
+        }
     }
 
     /**

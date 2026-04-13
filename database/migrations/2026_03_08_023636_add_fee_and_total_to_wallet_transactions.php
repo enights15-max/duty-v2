@@ -12,6 +12,10 @@ return new class extends Migration {
      */
     public function up()
     {
+
+        if (!Schema::hasTable('wallet_transactions')) {
+            return;
+        }
         Schema::table('wallet_transactions', function (Blueprint $table) {
             $table->decimal('fee', 15, 2)->default(0);
             $table->decimal('total_amount', 15, 2)->default(0);
