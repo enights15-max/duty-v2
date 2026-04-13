@@ -37,9 +37,18 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        if (!Schema::hasTable('chats')) {
+            return;
+        }
+
         Schema::table('chats', function (Blueprint $table) {
-            $table->foreign('initiator_id', 'chats_customer_id_foreign')->references('id')->on('customers')->onDelete('cascade');
-            $table->foreign('participant_id', 'chats_organizer_id_foreign')->references('id')->on('organizers')->onDelete('cascade');
+            if (Schema::hasColumn('chats', 'initiator_id')) {
+                $table->foreign('initiator_id', 'chats_customer_id_foreign')->references('id')->on('customers')->onDelete('cascade');
+            }
+
+            if (Schema::hasColumn('chats', 'participant_id')) {
+                $table->foreign('participant_id', 'chats_organizer_id_foreign')->references('id')->on('organizers')->onDelete('cascade');
+            }
         });
     }
 };

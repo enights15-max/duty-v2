@@ -14,14 +14,41 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::table('online_gateways')->insert([
-          'name' => 'NowPayments',
-          'keyword' => 'now_payments',
-          'information' => "",
-          'status' => 0,
-          'mobile_status' => 0,
-          'mobile_information' => ""
-        ]);
+        if (!Schema::hasTable('online_gateways')) {
+            return;
+        }
+
+        $columns = array_flip(Schema::getColumnListing('online_gateways'));
+        if (!isset($columns['keyword']) || !isset($columns['name'])) {
+            return;
+        }
+
+        $payload = [];
+        foreach ([
+            'name' => 'NowPayments',
+            'keyword' => 'now_payments',
+            'information' => '',
+            'status' => 0,
+            'mobile_status' => 0,
+            'mobile_information' => '',
+        ] as $column => $value) {
+            if (isset($columns[$column])) {
+                $payload[$column] = $value;
+            }
+        }
+
+        if (isset($columns['created_at'])) {
+            $payload['created_at'] = now();
+        }
+
+        if (isset($columns['updated_at'])) {
+            $payload['updated_at'] = now();
+        }
+
+        DB::table('online_gateways')->updateOrInsert(
+            ['keyword' => 'now_payments'],
+            $payload
+        );
     }
 
     /**
@@ -31,8 +58,12 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('online_gateways', function (Blueprint $table) {
-            //
-        });
+        if (!Schema::hasTable('online_gateways') || !Schema::hasColumn('online_gateways', 'keyword')) {
+            return;
+        }
+
+        DB::table('online_gateways')
+            ->where('keyword', 'now_payments')
+            ->delete();
     }
 };

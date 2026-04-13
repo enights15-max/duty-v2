@@ -35,11 +35,26 @@ return new class extends Migration
             $legacyId = $meta['legacy_id'] ?? $meta['id'] ?? null;
             $balance = 0;
 
-            if ($legacyId && $identity->type === 'organizer' && Schema::hasTable('organizers')) {
+            if (
+                $legacyId
+                && $identity->type === 'organizer'
+                && Schema::hasTable('organizers')
+                && Schema::hasColumn('organizers', 'amount')
+            ) {
                 $balance = (float) (DB::table('organizers')->where('id', $legacyId)->value('amount') ?? 0);
-            } elseif ($legacyId && $identity->type === 'artist' && Schema::hasTable('artists')) {
+            } elseif (
+                $legacyId
+                && $identity->type === 'artist'
+                && Schema::hasTable('artists')
+                && Schema::hasColumn('artists', 'amount')
+            ) {
                 $balance = (float) (DB::table('artists')->where('id', $legacyId)->value('amount') ?? 0);
-            } elseif ($legacyId && $identity->type === 'venue' && Schema::hasTable('venues')) {
+            } elseif (
+                $legacyId
+                && $identity->type === 'venue'
+                && Schema::hasTable('venues')
+                && Schema::hasColumn('venues', 'amount')
+            ) {
                 $balance = (float) (DB::table('venues')->where('id', $legacyId)->value('amount') ?? 0);
             }
 

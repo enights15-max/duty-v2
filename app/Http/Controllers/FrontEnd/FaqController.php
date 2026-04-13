@@ -12,7 +12,7 @@ class FaqController extends Controller
   {
     $language = $this->getLanguage();
 
-    $queryResult['seoInfo'] = $language->seoInfo()->select('meta_keyword_faq', 'meta_description_faq')->first();
+    $queryResult['seoInfo'] = $this->getSeoInfo($language, ['meta_keyword_faq', 'meta_description_faq']);
 
     $queryResult['pageHeading'] = $this->getPageHeading($language);
 

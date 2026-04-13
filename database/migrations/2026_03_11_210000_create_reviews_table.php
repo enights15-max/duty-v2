@@ -31,7 +31,15 @@ return new class extends Migration {
             );
         });
 
-        if (Schema::hasTable('organizer_reviews')) {
+        if (
+            Schema::hasTable('organizer_reviews')
+            && Schema::hasColumn('organizer_reviews', 'customer_id')
+            && Schema::hasColumn('organizer_reviews', 'organizer_id')
+            && Schema::hasColumn('organizer_reviews', 'rating')
+            && Schema::hasColumn('organizer_reviews', 'comment')
+            && Schema::hasColumn('organizer_reviews', 'created_at')
+            && Schema::hasColumn('organizer_reviews', 'updated_at')
+        ) {
             $legacy = DB::table('organizer_reviews')->get();
             foreach ($legacy as $row) {
                 DB::table('reviews')->updateOrInsert(

@@ -15,7 +15,7 @@ class BlogController extends Controller
   {
     $language = $this->getLanguage();
 
-    $queryResult['seoInfo'] = $language->seoInfo()->select('meta_keyword_blog', 'meta_description_blog')->first();
+    $queryResult['seoInfo'] = $this->getSeoInfo($language, ['meta_keyword_blog', 'meta_description_blog']);
 
     $queryResult['pageHeading'] = $this->getPageHeading($language);
 
