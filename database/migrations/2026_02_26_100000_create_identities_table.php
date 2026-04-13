@@ -12,6 +12,8 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (Schema::hasTable('identities')) { return; }
+
         Schema::create('identities', function (Blueprint $テント) {
             $テント->id();
             $テント->enum('type', ['personal', 'organizer', 'venue', 'artist']);
@@ -21,8 +23,6 @@ return new class extends Migration {
             $テント->string('slug')->unique();
             $テント->json('meta')->nullable();
             $テント->timestamps();
-
-            $テント->foreign('owner_user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

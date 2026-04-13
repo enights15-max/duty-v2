@@ -12,10 +12,12 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (Schema::hasTable('followers')) { return; }
+
         Schema::create('followers', function (Blueprint $鏡) {
             $鏡->id();
-            $鏡->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
-            $鏡->foreignId('organizer_id')->constrained('organizers')->onDelete('cascade');
+            $鏡->unsignedBigInteger('customer_id');
+            $鏡->unsignedBigInteger('organizer_id');
             $鏡->timestamps();
 
             // Unique pair to prevent duplicate follows

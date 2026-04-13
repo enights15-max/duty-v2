@@ -12,6 +12,8 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (Schema::hasTable('chats')) { return; }
+
         Schema::create('chats', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('customer_id');
@@ -19,9 +21,6 @@ return new class extends Migration {
             $table->text('last_message')->nullable();
             $table->timestamp('last_message_at')->nullable();
             $table->timestamps();
-
-            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
-            $table->foreign('organizer_id')->references('id')->on('organizers')->onDelete('cascade');
         });
     }
 

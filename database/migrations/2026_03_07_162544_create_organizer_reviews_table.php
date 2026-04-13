@@ -12,6 +12,8 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (Schema::hasTable('organizer_reviews')) { return; }
+
         Schema::create('organizer_reviews', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('customer_id');
@@ -19,9 +21,6 @@ return new class extends Migration {
             $table->tinyInteger('rating');
             $table->text('comment')->nullable();
             $table->timestamps();
-
-            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
-            $table->foreign('organizer_id')->references('id')->on('organizers')->onDelete('cascade');
         });
     }
 

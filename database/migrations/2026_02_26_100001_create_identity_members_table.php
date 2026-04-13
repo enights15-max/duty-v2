@@ -12,6 +12,8 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (Schema::hasTable('identity_members')) { return; }
+
         Schema::create('identity_members', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('identity_id');
@@ -22,8 +24,6 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->unique(['identity_id', 'user_id']);
-            $table->foreign('identity_id')->references('id')->on('identities')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

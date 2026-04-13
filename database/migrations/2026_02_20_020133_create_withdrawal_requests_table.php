@@ -12,6 +12,8 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (Schema::hasTable('withdrawal_requests')) { return; }
+
         Schema::create('withdrawal_requests', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('customer_id');
@@ -22,8 +24,6 @@ return new class extends Migration {
             $table->text('admin_notes')->nullable();
             $table->string('transaction_id')->nullable(); // External reference
             $table->timestamps();
-
-            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
         });
     }
 
