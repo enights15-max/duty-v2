@@ -14,18 +14,22 @@ return new class extends Migration {
         if (!Schema::hasTable('chats')) {
             return;
         }
-        Schema::table('chats', function (Blueprint $table) {
-            try {
+
+        try {
+            Schema::table('chats', function (Blueprint $table) {
                 $table->dropForeign('chats_customer_id_foreign');
-            } catch (\Exception $e) {
-                // Foreign key may not exist on fresh databases
-            }
-            try {
+            });
+        } catch (\Exception $e) {
+            // Foreign key may not exist on fresh databases
+        }
+
+        try {
+            Schema::table('chats', function (Blueprint $table) {
                 $table->dropForeign('chats_organizer_id_foreign');
-            } catch (\Exception $e) {
-                // Foreign key may not exist on fresh databases
-            }
-        });
+            });
+        } catch (\Exception $e) {
+            // Foreign key may not exist on fresh databases
+        }
     }
 
     /**
