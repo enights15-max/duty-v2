@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+
+        if (!Schema::hasTable('bonus_transactions')) {
+            return;
+        }
         Schema::table('bonus_transactions', function (Blueprint $table) {
             if (!Schema::hasColumn('bonus_transactions', 'consumed_amount')) {
                 $table->decimal('consumed_amount', 10, 2)->default(0);

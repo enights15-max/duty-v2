@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up()
     {
+
+        if (!Schema::hasTable('events')) {
+            return;
+        }
         Schema::table('events', function (Blueprint $table) {
             $table->string('venue_source', 32)->nullable();
             $table->string('venue_name_snapshot')->nullable();

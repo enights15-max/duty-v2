@@ -13,6 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
+
+        if (!Schema::hasTable('basic_settings')) {
+            return;
+        }
         Schema::table('basic_settings', function (Blueprint $table) {
             $table->string('mobile_primary_colour')->nullable();
             $table->string('mobile_breadcrumb_overlay_opacity')->nullable();

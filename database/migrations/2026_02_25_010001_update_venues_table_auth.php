@@ -12,6 +12,10 @@ return new class extends Migration {
      */
     public function up()
     {
+
+        if (!Schema::hasTable('venues')) {
+            return;
+        }
         Schema::table('venues', function (Blueprint $table) {
             $table->string('username')->unique()->nullable();
             $table->string('email')->unique()->nullable();

@@ -13,6 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
+
+        if (!Schema::hasTable('fcm_tokens')) {
+            return;
+        }
         Schema::table('fcm_tokens', function (Blueprint $table) {
             $table->string('message_title')->nullable();
             $table->text('message_description')->nullable();

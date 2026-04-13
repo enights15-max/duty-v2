@@ -12,6 +12,10 @@ return new class extends Migration {
      */
     public function up()
     {
+
+        if (!Schema::hasTable('customers')) {
+            return;
+        }
         Schema::table('customers', function (Blueprint $table) {
             $table->boolean('is_private')->default(0);
         });

@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+
+        if (!Schema::hasTable('admins')) {
+            return;
+        }
         Schema::table('admins', function (Blueprint $table) {
             if (!Schema::hasColumn('admins', 'navigation_layout')) {
                 $table->string('navigation_layout', 20)

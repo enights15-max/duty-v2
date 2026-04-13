@@ -9,6 +9,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+
+        if (!Schema::hasTable('basic_settings')) {
+            return;
+        }
         Schema::table('basic_settings', function (Blueprint $table) {
             if (!Schema::hasColumn('basic_settings', 'app_default_country_iso2')) {
                 $table->string('app_default_country_iso2', 2)->nullable();

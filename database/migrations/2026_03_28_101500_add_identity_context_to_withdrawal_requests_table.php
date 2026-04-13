@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+
+        if (!Schema::hasTable('withdrawal_requests')) {
+            return;
+        }
         Schema::table('withdrawal_requests', function (Blueprint $table): void {
             if (!Schema::hasColumn('withdrawal_requests', 'identity_id')) {
                 $table->unsignedBigInteger('identity_id')->nullable();

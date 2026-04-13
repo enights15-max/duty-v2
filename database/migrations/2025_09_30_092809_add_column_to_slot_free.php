@@ -13,6 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
+
+        if (!Schema::hasTable('tickets')) {
+            return;
+        }
         Schema::table('tickets', function (Blueprint $table) {
             $table->tinyInteger('free_tickete_slot_enable')->default(0);
             $table->integer('free_tickete_slot_unique_id')->nullable();

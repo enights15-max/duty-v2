@@ -12,6 +12,10 @@ return new class extends Migration {
      */
     public function up()
     {
+
+        if (!Schema::hasTable('organizers')) {
+            return;
+        }
         Schema::table('organizers', function (Blueprint $table) {
             $table->string('cover_photo')->nullable();
         });

@@ -12,6 +12,10 @@ return new class extends Migration {
      */
     public function up()
     {
+
+        if (!Schema::hasTable('basic_settings')) {
+            return;
+        }
         Schema::table('basic_settings', function (Blueprint $table) {
             $table->tinyInteger('marketplace_max_price_rule')->default(0)->comment('0: Off, 1: On');
         });

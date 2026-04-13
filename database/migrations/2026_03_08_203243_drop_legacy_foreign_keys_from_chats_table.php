@@ -10,6 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
+
+        if (!Schema::hasTable('chats')) {
+            return;
+        }
         Schema::table('chats', function (Blueprint $table) {
             try {
                 $table->dropForeign('chats_customer_id_foreign');

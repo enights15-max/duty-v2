@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+
+        if (!Schema::hasTable('tickets')) {
+            return;
+        }
         Schema::table('tickets', function (Blueprint $table) {
             if (!Schema::hasColumn('tickets', 'sale_status')) {
                 $table->string('sale_status', 24)->default('active');
