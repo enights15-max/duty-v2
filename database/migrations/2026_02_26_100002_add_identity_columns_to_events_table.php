@@ -50,8 +50,16 @@ return new class extends Migration {
 
         Schema::table('events', function (Blueprint $table) {
             if (Schema::getConnection()->getDriverName() !== 'sqlite') {
-                $table->dropForeign(['owner_identity_id']);
-                $table->dropForeign(['venue_identity_id']);
+                try {
+                    $table->dropForeign(['owner_identity_id']);
+                } catch (\Exception $e) {
+                    // Foreign key may not exist on fresh databases
+                }
+                try {
+                    $table->dropForeign(['venue_identity_id']);
+                } catch (\Exception $e) {
+                    // Foreign key may not exist on fresh databases
+                }
             }
 
             $columns = array_values(array_filter([

@@ -11,8 +11,16 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('chats', function (Blueprint $table) {
-            $table->dropForeign('chats_customer_id_foreign');
-            $table->dropForeign('chats_organizer_id_foreign');
+            try {
+                $table->dropForeign('chats_customer_id_foreign');
+            } catch (\Exception $e) {
+                // Foreign key may not exist on fresh databases
+            }
+            try {
+                $table->dropForeign('chats_organizer_id_foreign');
+            } catch (\Exception $e) {
+                // Foreign key may not exist on fresh databases
+            }
         });
     }
 

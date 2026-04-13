@@ -16,10 +16,19 @@ return new class extends Migration {
             return;
         }
 
+        // Only drop the foreign key if it actually exists
+        $foreignKeys = Schema::getConnection()
+            ->getDoctrineSchemaManager()
+            ->listTableForeignKeys('wallets');
+
+        $hasFk = collect($foreignKeys)->contains(fn ($fk) => in_array('user_id', $fk->getLocalColumns()));
+
+        if (!$hasFk) {
+            return;
+        }
+
         Schema::table('wallets', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
-            // We keep the column but without strict constraint to users table
-            // as it might be used for Customers too in this project.
         });
     }
 
