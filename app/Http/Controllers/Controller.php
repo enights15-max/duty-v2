@@ -20,8 +20,6 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
-use stdClass;
-
 class Controller extends BaseController
 {
   use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
@@ -57,30 +55,30 @@ class Controller extends BaseController
 
   public function getLanguage()
   {
+    $fallbackLanguage = new Language([
+      'id' => 1,
+      'code' => config('app.locale', 'en'),
+      'direction' => 'ltr',
+      'is_default' => 1,
+    ]);
+
     if (!Schema::hasTable('languages')) {
-      return (object) [
-        'id' => 1,
-        'code' => config('app.locale', 'en'),
-      ];
+      return $fallbackLanguage;
     }
 
     // get the current locale of this system
-    if (Session::has('lang')) {
-      $locale = Session::get('lang');
-    }
-    if (empty($locale)) {
-      $language = Language::where('is_default', 1)->first();
-    } else {
+    $locale = Session::get('lang');
+
+    if (!empty($locale)) {
       $language = Language::where('code', $locale)->first();
-      if (empty($language)) {
-        $language = Language::where('is_default', 1)->first();
+      if (!empty($language)) {
+        return $language;
       }
     }
 
-    return $language ?: (object) [
-      'id' => 1,
-      'code' => config('app.locale', 'en'),
-    ];
+    return Language::where('is_default', 1)->first()
+      ?? Language::query()->orderBy('id')->first()
+      ?? $fallbackLanguage;
   }
 
 
