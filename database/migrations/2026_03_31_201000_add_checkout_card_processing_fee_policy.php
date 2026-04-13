@@ -10,10 +10,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('fee_policies')) {
+        if (!Schema::hasTable('fee_policies') || !Schema::hasColumn('fee_policies', 'operation_key')) {
             return;
         }
 
+        $columns = array_flip(Schema::getColumnListing('fee_policies'));
         $catalog = app(FeeEngine::class)->catalog();
         $policy = $catalog[FeeEngine::OP_CHECKOUT_CARD_PROCESSING] ?? null;
         if (!$policy) {
@@ -36,25 +37,26 @@ return new class extends Migration
             'updated_at' => now(),
         ];
 
-        $existingId = DB::table('fee_policies')
-            ->where('operation_key', FeeEngine::OP_CHECKOUT_CARD_PROCESSING)
-            ->value('id');
-
-        if ($existingId) {
-            DB::table('fee_policies')
-                ->where('id', $existingId)
-                ->update($payload);
-            return;
+        $payload = [];
+        foreach ($basePayload as $column => $value) {
+            if (isset($columns[$column])) {
+                $payload[$column] = $value;
+            }
         }
 
-        DB::table('fee_policies')->insert(array_merge($payload, [
-            'created_at' => now(),
-        ]));
+        if (isset($columns['created_at'])) {
+            $payload['created_at'] = now();
+        }
+
+        DB::table('fee_policies')->updateOrInsert(
+            ['operation_key' => FeeEngine::OP_CHECKOUT_CARD_PROCESSING],
+            $payload
+        );
     }
 
     public function down(): void
     {
-        if (!Schema::hasTable('fee_policies')) {
+        if (!Schema::hasTable('fee_policies') || !Schema::hasColumn('fee_policies', 'operation_key')) {
             return;
         }
 

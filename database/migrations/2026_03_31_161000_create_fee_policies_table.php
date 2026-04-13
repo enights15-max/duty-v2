@@ -30,12 +30,16 @@ return new class extends Migration
             });
         }
 
+        if (!Schema::hasColumn('fee_policies', 'operation_key')) {
+            return;
+        }
+
+        $columns = array_flip(Schema::getColumnListing('fee_policies'));
         $engine = app(FeeEngine::class);
         $catalog = $engine->catalog();
 
-        $rows = [];
         foreach ($catalog as $operationKey => $policy) {
-            $rows[] = [
+            $row = [
                 'operation_key' => $operationKey,
                 'label' => $policy['label'],
                 'description' => $policy['description'],
@@ -51,13 +55,19 @@ return new class extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
-        }
 
-        DB::table('fee_policies')->upsert(
-            $rows,
-            ['operation_key'],
-            ['label', 'description', 'fee_type', 'percentage_value', 'fixed_value', 'minimum_fee', 'maximum_fee', 'charged_to', 'currency', 'is_active', 'meta', 'updated_at']
-        );
+            $payload = [];
+            foreach ($row as $column => $value) {
+                if (isset($columns[$column])) {
+                    $payload[$column] = $value;
+                }
+            }
+
+            DB::table('fee_policies')->updateOrInsert(
+                ['operation_key' => $operationKey],
+                $payload
+            );
+        }
     }
 
     public function down(): void

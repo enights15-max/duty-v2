@@ -95,14 +95,18 @@ return new class extends Migration {
         $identityColumn = $type . '_identity_id';
 
         foreach ($identityMap as $legacyId => $identityId) {
-            if (Schema::hasTable('transactions')) {
+            if (Schema::hasTable('transactions')
+                && Schema::hasColumn('transactions', $legacyColumn)
+                && Schema::hasColumn('transactions', $identityColumn)) {
                 DB::table('transactions')
                     ->whereNull($identityColumn)
                     ->where($legacyColumn, $legacyId)
                     ->update([$identityColumn => $identityId]);
             }
 
-            if (Schema::hasTable('withdraws')) {
+            if (Schema::hasTable('withdraws')
+                && Schema::hasColumn('withdraws', $legacyColumn)
+                && Schema::hasColumn('withdraws', $identityColumn)) {
                 DB::table('withdraws')
                     ->whereNull($identityColumn)
                     ->where($legacyColumn, $legacyId)

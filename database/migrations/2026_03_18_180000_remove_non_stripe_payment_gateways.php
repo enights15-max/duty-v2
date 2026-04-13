@@ -8,17 +8,24 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (Schema::hasTable('online_gateways')) {
+        if (Schema::hasTable('online_gateways') && Schema::hasColumn('online_gateways', 'keyword')) {
             DB::table('online_gateways')
                 ->where('keyword', '!=', 'stripe')
                 ->delete();
 
-            DB::table('online_gateways')
-                ->where('keyword', 'stripe')
-                ->update([
-                    'status' => 1,
-                    'mobile_status' => 1,
-                ]);
+            $payload = [];
+            if (Schema::hasColumn('online_gateways', 'status')) {
+                $payload['status'] = 1;
+            }
+            if (Schema::hasColumn('online_gateways', 'mobile_status')) {
+                $payload['mobile_status'] = 1;
+            }
+
+            if ($payload !== []) {
+                DB::table('online_gateways')
+                    ->where('keyword', 'stripe')
+                    ->update($payload);
+            }
         }
 
         if (Schema::hasTable('offline_gateways')) {

@@ -13,12 +13,15 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use App\Models\BasicSettings\PageHeading;
 use App\Models\BasicSettings\SocialMedia;
 
 class AppServiceProvider extends ServiceProvider
 {
+  private ?array $basicSettingsColumns = null;
+
   /**
    * Register any application services.
    *
@@ -42,7 +45,18 @@ class AppServiceProvider extends ServiceProvider
       # code...
       Paginator::useBootstrap();
 
-      $data = Basic::select('favicon', 'website_title', 'logo', 'timezone', 'preloader', 'event_guest_checkout_status', 'primary_color')->first();
+      $data = $this->loadBasicSettings(
+        ['favicon', 'website_title', 'logo', 'timezone', 'preloader', 'event_guest_checkout_status', 'primary_color'],
+        [
+          'favicon' => null,
+          'website_title' => config('app.name', 'Duty'),
+          'logo' => null,
+          'timezone' => config('app.timezone', 'America/Santo_Domingo'),
+          'preloader' => null,
+          'event_guest_checkout_status' => 0,
+          'primary_color' => null,
+        ]
+      );
 
       // send this information to only back-end view files
       View::composer('backend.*', function ($view) {
@@ -56,17 +70,28 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $language = Language::where('is_default', 1)->first();
-        $websiteSettings = Basic::select(
-          'event_country_status',
-          'event_state_status',
-          'admin_theme_version',
-          'base_currency_symbol_position',
-          'base_currency_symbol',
-          'base_currency_text',
-          'google_map_status',
-          'google_map_api_key'
-        )
-          ->first();
+        $websiteSettings = $this->loadBasicSettings(
+          [
+            'event_country_status',
+            'event_state_status',
+            'admin_theme_version',
+            'base_currency_symbol_position',
+            'base_currency_symbol',
+            'base_currency_text',
+            'google_map_status',
+            'google_map_api_key',
+          ],
+          [
+            'event_country_status' => 0,
+            'event_state_status' => 0,
+            'admin_theme_version' => null,
+            'base_currency_symbol_position' => 'left',
+            'base_currency_symbol' => null,
+            'base_currency_text' => null,
+            'google_map_status' => 0,
+            'google_map_api_key' => null,
+          ]
+        );
 
         $footerText = $language->footerContent()->first();
 
@@ -82,20 +107,35 @@ class AppServiceProvider extends ServiceProvider
       // send this information to only back-end view files
       View::composer('organizer.*', function ($view) {
         $language = Language::where('is_default', 1)->first();
-        $websiteSettings = Basic::select(
-          'admin_theme_version',
-          'base_currency_symbol',
-          'base_currency_symbol_position',
-          'base_currency_text',
-          'base_currency_text_position',
-          'base_currency_rate',
-          'organizer_email_verification',
-          'event_state_status',
-          'google_map_status',
-          'google_map_api_key',
-          'event_country_status',
-          'event_state_status'
-        )->first();
+        $websiteSettings = $this->loadBasicSettings(
+          [
+            'admin_theme_version',
+            'base_currency_symbol',
+            'base_currency_symbol_position',
+            'base_currency_text',
+            'base_currency_text_position',
+            'base_currency_rate',
+            'organizer_email_verification',
+            'event_state_status',
+            'google_map_status',
+            'google_map_api_key',
+            'event_country_status',
+            'event_state_status',
+          ],
+          [
+            'admin_theme_version' => null,
+            'base_currency_symbol' => null,
+            'base_currency_symbol_position' => 'left',
+            'base_currency_text' => null,
+            'base_currency_text_position' => 'left',
+            'base_currency_rate' => 1,
+            'organizer_email_verification' => 0,
+            'event_state_status' => 0,
+            'google_map_status' => 0,
+            'google_map_api_key' => null,
+            'event_country_status' => 0,
+          ]
+        );
 
         $footerText = $language->footerContent()->first();
 
@@ -109,32 +149,60 @@ class AppServiceProvider extends ServiceProvider
       // send this information to only front-end view files
       View::composer('frontend.*', function ($view) {
         // get basic info
-        $basicData = Basic::select(
-          'theme_version',
-          'footer_logo',
-          'primary_color',
-          'breadcrumb_overlay_color',
-          'breadcrumb_overlay_opacity',
-          'breadcrumb',
-          'email_address',
-          'contact_number',
-          'address',
-          'latitude',
-          'longitude',
-          'base_currency_symbol',
-          'base_currency_symbol_position',
-          'base_currency_text',
-          'base_currency_text_position',
-          'base_currency_rate',
-          'is_shop_rating',
-          'facebook_login_status',
-          'google_login_status',
-          'google_recaptcha_status',
-          'event_country_status',
-          'event_state_status',
-          'google_map_status',
-          'google_map_api_key',
-        )->first();
+        $basicData = $this->loadBasicSettings(
+          [
+            'theme_version',
+            'footer_logo',
+            'primary_color',
+            'breadcrumb_overlay_color',
+            'breadcrumb_overlay_opacity',
+            'breadcrumb',
+            'email_address',
+            'contact_number',
+            'address',
+            'latitude',
+            'longitude',
+            'base_currency_symbol',
+            'base_currency_symbol_position',
+            'base_currency_text',
+            'base_currency_text_position',
+            'base_currency_rate',
+            'is_shop_rating',
+            'facebook_login_status',
+            'google_login_status',
+            'google_recaptcha_status',
+            'event_country_status',
+            'event_state_status',
+            'google_map_status',
+            'google_map_api_key',
+          ],
+          [
+            'theme_version' => 1,
+            'footer_logo' => null,
+            'primary_color' => null,
+            'breadcrumb_overlay_color' => '000000',
+            'breadcrumb_overlay_opacity' => 0.5,
+            'breadcrumb' => null,
+            'email_address' => null,
+            'contact_number' => null,
+            'address' => null,
+            'latitude' => null,
+            'longitude' => null,
+            'base_currency_symbol' => null,
+            'base_currency_symbol_position' => 'left',
+            'base_currency_text' => null,
+            'base_currency_text_position' => 'left',
+            'base_currency_rate' => 1,
+            'is_shop_rating' => 0,
+            'facebook_login_status' => 0,
+            'google_login_status' => 0,
+            'google_recaptcha_status' => 0,
+            'event_country_status' => 0,
+            'event_state_status' => 0,
+            'google_map_status' => 0,
+            'google_map_api_key' => null,
+          ]
+        );
 
 
         // get all the languages of this system
@@ -235,6 +303,62 @@ class AppServiceProvider extends ServiceProvider
 
       // send this information to both front-end & back-end view files
       View::share(['websiteInfo' => $data]);
+    }
+  }
+
+  private function loadBasicSettings(array $columns, array $defaults = [])
+  {
+    $payload = [];
+
+    foreach ($columns as $column) {
+      $payload[$column] = $defaults[$column] ?? null;
+    }
+
+    $availableColumns = $this->getBasicSettingsColumns();
+
+    if (empty($availableColumns)) {
+      return (object) $payload;
+    }
+
+    $selectableColumns = array_values(array_filter($columns, function ($column) use ($availableColumns) {
+      return isset($availableColumns[$column]);
+    }));
+
+    if (empty($selectableColumns)) {
+      return (object) $payload;
+    }
+
+    try {
+      $row = Basic::query()->select($selectableColumns)->first();
+    } catch (\Throwable $exception) {
+      return (object) $payload;
+    }
+
+    if (!$row) {
+      return (object) $payload;
+    }
+
+    foreach ($selectableColumns as $column) {
+      $payload[$column] = $row->{$column};
+    }
+
+    return (object) $payload;
+  }
+
+  private function getBasicSettingsColumns(): array
+  {
+    if ($this->basicSettingsColumns !== null) {
+      return $this->basicSettingsColumns;
+    }
+
+    try {
+      if (!Schema::hasTable('basic_settings')) {
+        return $this->basicSettingsColumns = [];
+      }
+
+      return $this->basicSettingsColumns = array_flip(Schema::getColumnListing('basic_settings'));
+    } catch (\Throwable $exception) {
+      return $this->basicSettingsColumns = [];
     }
   }
 }

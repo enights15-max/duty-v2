@@ -37,18 +37,40 @@ return new class extends Migration
 
     private function backfillTicketIds(): void
     {
+        if (!Schema::hasColumn('bookings', 'ticket_id')) {
+            return;
+        }
+
+        $hasEventId = Schema::hasColumn('bookings', 'event_id');
+        $hasVariation = Schema::hasColumn('bookings', 'variation');
+        $hasTicketsByEvent = Schema::hasTable('tickets') && Schema::hasColumn('tickets', 'event_id');
+
+        if (!$hasVariation && !$hasEventId) {
+            return;
+        }
+
+        $bookingSelectColumns = ['id'];
+        if ($hasEventId) {
+            $bookingSelectColumns[] = 'event_id';
+        }
+        if ($hasVariation) {
+            $bookingSelectColumns[] = 'variation';
+        }
+
         DB::table('bookings')
-            ->select('id', 'event_id', 'variation')
+            ->select($bookingSelectColumns)
             ->whereNull('ticket_id')
             ->orderBy('id')
-            ->chunkById(250, function ($bookings): void {
-                $eventIds = collect($bookings)
-                    ->pluck('event_id')
-                    ->filter()
-                    ->unique()
-                    ->values();
+            ->chunkById(250, function ($bookings) use ($hasEventId, $hasVariation, $hasTicketsByEvent): void {
+                $eventIds = $hasEventId
+                    ? collect($bookings)
+                        ->pluck('event_id')
+                        ->filter()
+                        ->unique()
+                        ->values()
+                    : collect();
 
-                $singleTicketMap = $eventIds->isEmpty()
+                $singleTicketMap = !$hasTicketsByEvent || $eventIds->isEmpty()
                     ? collect()
                     : DB::table('tickets')
                         ->select('event_id', DB::raw('MIN(id) as ticket_id'), DB::raw('COUNT(*) as ticket_count'))
@@ -58,9 +80,11 @@ return new class extends Migration
                         ->keyBy('event_id');
 
                 foreach ($bookings as $booking) {
-                    $ticketId = $this->extractTicketIdFromVariation($booking->variation);
+                    $ticketId = $hasVariation
+                        ? $this->extractTicketIdFromVariation($booking->variation)
+                        : null;
 
-                    if ($ticketId === null) {
+                    if ($ticketId === null && $hasEventId) {
                         $summary = $singleTicketMap->get($booking->event_id);
                         if ($summary && (int) $summary->ticket_count === 1) {
                             $ticketId = (int) $summary->ticket_id;
