@@ -21,7 +21,7 @@ return new class extends Migration
             return;
         }
 
-        $payload = [
+        $basePayload = [
             'operation_key' => FeeEngine::OP_CHECKOUT_CARD_PROCESSING,
             'label' => $policy['label'],
             'description' => $policy['description'],
