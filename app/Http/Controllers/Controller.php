@@ -73,30 +73,48 @@ class Controller extends BaseController
 
   public function getCurrencyInfo()
   {
-    if (!Schema::hasTable('basic_settings')) {
-      return (object) [
-        'base_currency_symbol' => 'RD$',
-        'base_currency_symbol_position' => 'left',
-        'base_currency_text' => 'DOP',
-        'base_currency_text_position' => 'right',
-        'base_currency_rate' => 1,
-      ];
+    $defaults = [
+      'base_currency_symbol' => 'RD$',
+      'base_currency_symbol_position' => 'left',
+      'base_currency_text' => 'DOP',
+      'base_currency_text_position' => 'right',
+      'base_currency_rate' => 1,
+    ];
+
+    if (!$this->hasTable('basic_settings')) {
+      return (object) $defaults;
     }
 
-    $baseCurrencyInfo = Basic::select('base_currency_symbol', 'base_currency_symbol_position', 'base_currency_text', 'base_currency_text_position', 'base_currency_rate')
-      ->first();
+    try {
+      $availableColumns = array_flip(Schema::getColumnListing('basic_settings'));
+    } catch (\Throwable $exception) {
+      return (object) $defaults;
+    }
+
+    $selectableColumns = array_values(array_filter(array_keys($defaults), function ($column) use ($availableColumns) {
+      return isset($availableColumns[$column]);
+    }));
+
+    if (empty($selectableColumns)) {
+      return (object) $defaults;
+    }
+
+    try {
+      $baseCurrencyInfo = Basic::select($selectableColumns)->first();
+    } catch (\Throwable $exception) {
+      return (object) $defaults;
+    }
 
     if (!$baseCurrencyInfo) {
-      return (object) [
-        'base_currency_symbol' => 'RD$',
-        'base_currency_symbol_position' => 'left',
-        'base_currency_text' => 'DOP',
-        'base_currency_text_position' => 'right',
-        'base_currency_rate' => 1,
-      ];
+      return (object) $defaults;
     }
 
-    return $baseCurrencyInfo;
+    $payload = $defaults;
+    foreach ($selectableColumns as $column) {
+      $payload[$column] = $baseCurrencyInfo->{$column};
+    }
+
+    return (object) $payload;
   }
 
 
