@@ -10,6 +10,8 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (Schema::hasTable('booking_payment_allocations')) { return; }
+
         Schema::create('booking_payment_allocations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('booking_id');
@@ -21,7 +23,6 @@ return new class extends Migration {
             $table->string('reference_id')->nullable();
             $table->timestamps();
 
-            $table->foreign('booking_id')->references('id')->on('bookings')->onDelete('cascade');
             $table->index(['booking_id', 'source_type'], 'booking_payment_allocations_booking_source_idx');
         });
     }

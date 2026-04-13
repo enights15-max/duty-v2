@@ -12,9 +12,11 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (Schema::hasTable('wallet_transactions')) { return; }
+
         Schema::create('wallet_transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('wallet_id')->constrained('wallets')->onDelete('cascade'); // Link to wallets.id (uuid)
+            $table->uuid('wallet_id'); // Link to wallets.id (uuid)
             $table->enum('type', ['credit', 'debit', 'hold_release']);
             $table->decimal('amount', 10, 2);
             $table->string('reference_type')->nullable(); // poly: topup, ticket, pos, refund

@@ -12,6 +12,8 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (Schema::hasTable('chat_messages')) { return; }
+
         Schema::create('chat_messages', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('chat_id');
@@ -20,8 +22,6 @@ return new class extends Migration {
             $table->text('message');
             $table->boolean('is_read')->default(false);
             $table->timestamps();
-
-            $table->foreign('chat_id')->references('id')->on('chats')->onDelete('cascade');
         });
     }
 

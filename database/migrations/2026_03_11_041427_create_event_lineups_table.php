@@ -8,6 +8,8 @@ return new class extends Migration
 {
     public function up()
     {
+        if (Schema::hasTable('event_lineups')) { return; }
+
         Schema::create('event_lineups', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('event_id');
@@ -18,8 +20,6 @@ return new class extends Migration
             $table->boolean('is_headliner')->default(false);
             $table->timestamps();
 
-            $table->foreign('event_id')->references('id')->on('events')->onDelete('cascade');
-            $table->foreign('artist_id')->references('id')->on('artists')->onDelete('set null');
             $table->index(['event_id', 'sort_order']);
             $table->index(['event_id', 'is_headliner']);
         });

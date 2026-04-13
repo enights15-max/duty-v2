@@ -10,6 +10,8 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (Schema::hasTable('bonus_transactions')) { return; }
+
         Schema::create('bonus_transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('bonus_wallet_id');
@@ -20,8 +22,6 @@ return new class extends Migration {
             $table->string('idempotency_key')->unique();
             $table->enum('status', ['pending', 'completed', 'failed', 'reversed'])->default('completed');
             $table->timestamps();
-
-            $table->foreign('bonus_wallet_id')->references('id')->on('bonus_wallets')->onDelete('cascade');
         });
     }
 

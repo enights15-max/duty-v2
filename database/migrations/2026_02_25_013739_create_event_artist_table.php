@@ -12,10 +12,12 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (Schema::hasTable('event_artist')) { return; }
+
         Schema::create('event_artist', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
-            $table->foreignId('artist_id')->constrained('artists')->onDelete('cascade');
+            $table->unsignedBigInteger('event_id');
+            $table->unsignedBigInteger('artist_id');
             $table->timestamps();
         });
     }

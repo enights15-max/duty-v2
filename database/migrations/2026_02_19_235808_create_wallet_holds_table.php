@@ -12,9 +12,11 @@ return new class extends Migration {
      */
     public function up()
     {
+        if (Schema::hasTable('wallet_holds')) { return; }
+
         Schema::create('wallet_holds', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('wallet_id')->constrained('wallets')->onDelete('cascade');
+            $table->uuid('wallet_id');
             $table->decimal('amount', 10, 2);
             $table->timestamp('expires_at');
             $table->string('reference_type')->nullable(); // e.g., 'ticket_purchase'

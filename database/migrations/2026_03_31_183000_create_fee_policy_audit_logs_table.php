@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        if (Schema::hasTable('fee_policy_audit_logs')) { return; }
+
         Schema::create('fee_policy_audit_logs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('fee_policy_id');
@@ -20,7 +22,6 @@ return new class extends Migration {
             $table->index('fee_policy_id');
             $table->index('admin_id');
             $table->index('action');
-            $table->foreign('fee_policy_id')->references('id')->on('fee_policies')->cascadeOnDelete();
         });
     }
 
