@@ -13,8 +13,8 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('wallet_transactions', function (Blueprint $table) {
-            $table->decimal('fee', 15, 2)->default(0)->after('amount');
-            $table->decimal('total_amount', 15, 2)->default(0)->after('fee');
+            $table->decimal('fee', 15, 2)->default(0);
+            $table->decimal('total_amount', 15, 2)->default(0);
         });
     }
 

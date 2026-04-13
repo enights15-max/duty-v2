@@ -12,20 +12,20 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('wallets', function (Blueprint $table) {
-            $table->string('actor_type', 32)->nullable()->after('user_id');
-            $table->unsignedBigInteger('actor_id')->nullable()->after('actor_type');
+            $table->string('actor_type', 32)->nullable();
+            $table->unsignedBigInteger('actor_id')->nullable();
             $table->index(['actor_type', 'actor_id'], 'wallets_actor_type_actor_id_idx');
         });
 
         Schema::table('nfc_tokens', function (Blueprint $table) {
-            $table->string('actor_type', 32)->nullable()->after('user_id');
-            $table->unsignedBigInteger('actor_id')->nullable()->after('actor_type');
+            $table->string('actor_type', 32)->nullable();
+            $table->unsignedBigInteger('actor_id')->nullable();
             $table->index(['actor_type', 'actor_id'], 'nfc_tokens_actor_type_actor_id_idx');
         });
 
         Schema::table('payment_methods', function (Blueprint $table) {
-            $table->string('actor_type', 32)->nullable()->after('user_id');
-            $table->unsignedBigInteger('actor_id')->nullable()->after('actor_type');
+            $table->string('actor_type', 32)->nullable();
+            $table->unsignedBigInteger('actor_id')->nullable();
             $table->index(['actor_type', 'actor_id'], 'payment_methods_actor_type_actor_id_idx');
         });
 

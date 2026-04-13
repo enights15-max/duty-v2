@@ -11,11 +11,11 @@ return new class extends Migration
     {
         Schema::table('basic_settings', function (Blueprint $table) {
             if (!Schema::hasColumn('basic_settings', 'app_default_country_iso2')) {
-                $table->string('app_default_country_iso2', 2)->nullable()->after('timezone');
+                $table->string('app_default_country_iso2', 2)->nullable();
             }
 
             if (!Schema::hasColumn('basic_settings', 'app_supported_country_iso2s')) {
-                $table->text('app_supported_country_iso2s')->nullable()->after('app_default_country_iso2');
+                $table->text('app_supported_country_iso2s')->nullable();
             }
         });
 

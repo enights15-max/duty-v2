@@ -13,7 +13,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->string('order_number')->nullable()->after('booking_id');
+            $table->string('order_number')->nullable();
         });
     }
 

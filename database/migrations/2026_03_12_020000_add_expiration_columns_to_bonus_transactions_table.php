@@ -9,15 +9,15 @@ return new class extends Migration {
     {
         Schema::table('bonus_transactions', function (Blueprint $table) {
             if (!Schema::hasColumn('bonus_transactions', 'consumed_amount')) {
-                $table->decimal('consumed_amount', 10, 2)->default(0)->after('amount');
+                $table->decimal('consumed_amount', 10, 2)->default(0);
             }
 
             if (!Schema::hasColumn('bonus_transactions', 'expired_amount')) {
-                $table->decimal('expired_amount', 10, 2)->default(0)->after('consumed_amount');
+                $table->decimal('expired_amount', 10, 2)->default(0);
             }
 
             if (!Schema::hasColumn('bonus_transactions', 'expires_at')) {
-                $table->timestamp('expires_at')->nullable()->after('status');
+                $table->timestamp('expires_at')->nullable();
             }
         });
     }

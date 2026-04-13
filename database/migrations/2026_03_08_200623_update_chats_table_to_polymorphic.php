@@ -20,8 +20,8 @@ return new class extends Migration {
 
         Schema::table('chats', function (Blueprint $table) {
             // Add polymorphic type columns
-            $table->string('initiator_type')->after('initiator_id')->nullable();
-            $table->string('participant_type')->after('participant_id')->nullable();
+            $table->string('initiator_type')->nullable();
+            $table->string('participant_type')->nullable();
         });
 
         // Migrate existing data

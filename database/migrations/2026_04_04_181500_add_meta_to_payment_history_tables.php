@@ -9,19 +9,19 @@ return new class extends Migration {
     {
         if (Schema::hasTable('reservation_payments') && !Schema::hasColumn('reservation_payments', 'meta')) {
             Schema::table('reservation_payments', function (Blueprint $table) {
-                $table->json('meta')->nullable()->after('paid_at');
+                $table->json('meta')->nullable();
             });
         }
 
         if (Schema::hasTable('booking_payment_allocations') && !Schema::hasColumn('booking_payment_allocations', 'meta')) {
             Schema::table('booking_payment_allocations', function (Blueprint $table) {
-                $table->json('meta')->nullable()->after('reference_id');
+                $table->json('meta')->nullable();
             });
         }
 
         if (Schema::hasTable('wallet_transactions') && !Schema::hasColumn('wallet_transactions', 'meta')) {
             Schema::table('wallet_transactions', function (Blueprint $table) {
-                $table->json('meta')->nullable()->after('status');
+                $table->json('meta')->nullable();
             });
         }
     }

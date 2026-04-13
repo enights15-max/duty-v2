@@ -14,12 +14,12 @@ return new class extends Migration
 
         Schema::table('event_financial_entries', function (Blueprint $table): void {
             if (!Schema::hasColumn('event_financial_entries', 'target_identity_id')) {
-                $table->unsignedBigInteger('target_identity_id')->nullable()->after('owner_identity_type');
+                $table->unsignedBigInteger('target_identity_id')->nullable();
                 $table->index('target_identity_id');
             }
 
             if (!Schema::hasColumn('event_financial_entries', 'target_identity_type')) {
-                $table->string('target_identity_type', 32)->nullable()->after('target_identity_id');
+                $table->string('target_identity_type', 32)->nullable();
             }
         });
     }

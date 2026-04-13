@@ -14,11 +14,11 @@ return new class extends Migration
 
         Schema::table('event_treasuries', function (Blueprint $table): void {
             if (!Schema::hasColumn('event_treasuries', 'admin_release_approved_at')) {
-                $table->timestamp('admin_release_approved_at')->nullable()->after('hold_until');
+                $table->timestamp('admin_release_approved_at')->nullable();
             }
 
             if (!Schema::hasColumn('event_treasuries', 'admin_release_approved_by_admin_id')) {
-                $table->unsignedBigInteger('admin_release_approved_by_admin_id')->nullable()->after('admin_release_approved_at');
+                $table->unsignedBigInteger('admin_release_approved_by_admin_id')->nullable();
             }
         });
     }

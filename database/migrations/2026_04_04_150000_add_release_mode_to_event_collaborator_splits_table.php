@@ -15,8 +15,7 @@ return new class extends Migration
         if (!Schema::hasColumn('event_collaborator_splits', 'release_mode')) {
             Schema::table('event_collaborator_splits', function (Blueprint $table): void {
                 $table->string('release_mode', 32)
-                    ->default('claim_required')
-                    ->after('status');
+                    ->default('claim_required');
             });
         }
     }

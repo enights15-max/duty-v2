@@ -9,13 +9,13 @@ return new class extends Migration {
     {
         // Add status to ticket_transfers
         Schema::table('ticket_transfers', function (Blueprint $table) {
-            $table->string('status')->default('pending')->after('notes');
+            $table->string('status')->default('pending');
             // pending, accepted, rejected, cancelled
         });
 
         // Add transfer_status to bookings
         Schema::table('bookings', function (Blueprint $table) {
-            $table->string('transfer_status')->nullable()->after('is_listed');
+            $table->string('transfer_status')->nullable();
             // null = normal, 'transfer_pending' = awaiting acceptance
         });
     }

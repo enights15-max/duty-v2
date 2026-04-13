@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->unsignedBigInteger('reservation_id')->nullable()->after('customer_id');
+            $table->unsignedBigInteger('reservation_id')->nullable();
             $table->index('reservation_id', 'bookings_reservation_id_idx');
         });
     }

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('event_lineups', function (Blueprint $table) {
             if (!Schema::hasColumn('event_lineups', 'is_headliner')) {
-                $table->boolean('is_headliner')->default(false)->after('sort_order');
+                $table->boolean('is_headliner')->default(false);
                 $table->index(['event_id', 'is_headliner'], 'event_lineups_event_headliner_idx');
             }
         });

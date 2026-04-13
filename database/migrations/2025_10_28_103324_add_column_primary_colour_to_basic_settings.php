@@ -14,9 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('basic_settings', function (Blueprint $table) {
-            $table->string('mobile_primary_colour')->nullable()->after('mobile_app_logo');
-            $table->string('mobile_breadcrumb_overlay_opacity')->nullable()->after('mobile_app_logo');
-            $table->string('mobile_breadcrumb_overlay_colour')->nullable()->after('mobile_app_logo');
+            $table->string('mobile_primary_colour')->nullable();
+            $table->string('mobile_breadcrumb_overlay_opacity')->nullable();
+            $table->string('mobile_breadcrumb_overlay_colour')->nullable();
         });
     }
 

@@ -37,11 +37,11 @@ return new class extends Migration {
 
             // Add polymorphic columns
             if (!Schema::hasColumn('followers', 'following_id')) {
-                $table->unsignedBigInteger('following_id')->nullable()->after('customer_id');
+                $table->unsignedBigInteger('following_id')->nullable();
             }
 
             if (!Schema::hasColumn('followers', 'following_type')) {
-                $table->string('following_type')->nullable()->after('following_id');
+                $table->string('following_type')->nullable();
             }
 
             // Re-add indices
@@ -75,7 +75,7 @@ return new class extends Migration {
                 }
 
                 if (!Schema::hasColumn('followers', 'organizer_id')) {
-                    $table->unsignedBigInteger('organizer_id')->after('customer_id');
+                    $table->unsignedBigInteger('organizer_id');
                 }
 
                 $table->unique(['customer_id', 'organizer_id'], 'followers_customer_id_organizer_id_unique');

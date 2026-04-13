@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::table('tickets', function (Blueprint $table) {
             // "Don't activate me until THIS ticket sells out / date arrives"
-            $table->unsignedBigInteger('gate_ticket_id')->nullable()->after('sale_status');
-            $table->enum('gate_trigger', ['sold_out', 'date', 'manual'])->default('sold_out')->after('gate_ticket_id');
-            $table->dateTime('gate_trigger_date')->nullable()->after('gate_trigger');
+            $table->unsignedBigInteger('gate_ticket_id')->nullable();
+            $table->enum('gate_trigger', ['sold_out', 'date', 'manual'])->default('sold_out');
+            $table->dateTime('gate_trigger_date')->nullable();
 
             $table->index('gate_ticket_id');
         });
