@@ -16,20 +16,13 @@ return new class extends Migration {
             return;
         }
 
-        // Only drop the foreign key if it actually exists
-        $foreignKeys = Schema::getConnection()
-            ->getDoctrineSchemaManager()
-            ->listTableForeignKeys('wallets');
-
-        $hasFk = collect($foreignKeys)->contains(fn ($fk) => in_array('user_id', $fk->getLocalColumns()));
-
-        if (!$hasFk) {
-            return;
+        try {
+            Schema::table('wallets', function (Blueprint $table) {
+                $table->dropForeign(['user_id']);
+            });
+        } catch (\Exception $e) {
+            // Foreign key may not exist on fresh databases
         }
-
-        Schema::table('wallets', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-        });
     }
 
     /**
