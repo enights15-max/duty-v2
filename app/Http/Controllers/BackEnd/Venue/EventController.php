@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use Mews\Purifier\Facades\Purifier;
 use App\Http\Requests\Event\StoreRequest;
 use App\Http\Requests\Event\UpdateRequest;
+use App\Http\Requests\TicketSettingRequest;
 use App\Traits\HasIdentityActor;
 
 class EventController extends Controller
@@ -194,6 +195,68 @@ class EventController extends Controller
         @unlink(public_path('assets/admin/img/event/thumbnail/') . $event->thumbnail);
         $event->delete();
         return redirect()->back()->with('success', 'Deleted Successfully');
+    }
+
+    public function images($eventId)
+    {
+        Event::where('id', $eventId)->where('venue_id', $this->getVenueId())->firstOrFail();
+        $images = EventImage::where('event_id', $eventId)->get();
+        return $images;
+    }
+
+    public function imagedbrmv(Request $request)
+    {
+        $pi = EventImage::where('id', $request->fileid)->firstOrFail();
+        $event = Event::where('id', $pi->event_id)->where('venue_id', $this->getVenueId())->firstOrFail();
+        $image_count = EventImage::where('event_id', $event->id)->count();
+        if ($image_count > 1) {
+            @unlink(public_path('assets/admin/img/event-gallery/') . $pi->image);
+            $pi->delete();
+            return $pi->id;
+        }
+        return 'false';
+    }
+
+    public function updateFeatured(Request $request, $id)
+    {
+        $event = Event::where('id', $id)->where('venue_id', $this->getVenueId())->firstOrFail();
+        $event->is_featured = $request->input('is_featured') === 'yes' ? 'yes' : 'no';
+        $event->save();
+        Session::flash('success', 'Updated Successfully');
+        return redirect()->back();
+    }
+
+    public function editTicketSetting($id)
+    {
+        $event = Event::where('id', $id)->where('venue_id', $this->getVenueId())->with('ticket')->firstOrFail();
+        $information['event'] = $event;
+        // Reuse organizer ticket-settings view — venue uses same ticket model structure
+        return view('organizer.event.ticket-settings', $information);
+    }
+
+    public function updateTicketSetting(TicketSettingRequest $request)
+    {
+        $event = Event::where('id', $request->event_id)->where('venue_id', $this->getVenueId())->firstOrFail();
+        $in = $request->all();
+        if ($request->hasFile('ticket_image')) {
+            @unlink(public_path('assets/admin/img/event_ticket/') . $event->ticket_image);
+            $img = $request->file('ticket_image');
+            $filename = time() . rand(111, 999) . '.' . $img->getClientOriginalExtension();
+            @mkdir(public_path('assets/admin/img/event_ticket/'), 0775, true);
+            $img->move(public_path('assets/admin/img/event_ticket/'), $filename);
+            $in['ticket_image'] = $filename;
+        }
+        if ($request->hasFile('ticket_logo')) {
+            @unlink(public_path('assets/admin/img/event_ticket_logo/') . $event->ticket_logo);
+            $img = $request->file('ticket_logo');
+            $filename = time() . rand(111, 999) . '.' . $img->getClientOriginalExtension();
+            @mkdir(public_path('assets/admin/img/event_ticket_logo/'), 0775, true);
+            $img->move(public_path('assets/admin/img/event_ticket_logo/'), $filename);
+            $in['ticket_logo'] = $filename;
+        }
+        $event->update($in);
+        Session::flash('success', 'Updated Successfully');
+        return response()->json(['status' => 'success'], 200);
     }
 
     // Additional methods (gallerystore, imagermv, etc.) can be copied from Organizer/EventController

@@ -261,4 +261,16 @@ class VenueController extends Controller
         Session::flash('success', 'Password updated successfully!');
         return redirect()->back();
     }
+
+    public function changeTheme(Request $request)
+    {
+        $venue = Auth::guard('venue')->user();
+        // theme_version column may not exist on all deployments; guard with try/catch
+        try {
+            Venue::where('id', $venue->id)->update(['theme_version' => $request->theme_version]);
+        } catch (\Throwable $e) {
+            // silently ignore if column does not exist
+        }
+        return redirect()->back();
+    }
 }
