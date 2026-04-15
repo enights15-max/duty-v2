@@ -14,6 +14,8 @@ use App\Models\Event\EventCategory;
 use App\Models\Journal\Blog;
 use App\Models\Language;
 use App\Models\Organizer;
+use App\Models\Identity;
+use App\Models\Review;
 use App\Models\ShopManagement\Product;
 use App\Models\ShopManagement\ProductOrder;
 use App\Models\Reservation\TicketReservation;
@@ -172,6 +174,9 @@ class AdminController extends Controller
 
     try {
       $now = now();
+      $thisYear = $now->year;
+
+      // Reservation stats
       $information['activeReservations'] = TicketReservation::where('status', 'active')
         ->where('expires_at', '>', $now)
         ->count();
@@ -181,10 +186,37 @@ class AdminController extends Controller
       $information['reservationsDue2h'] = TicketReservation::where('status', 'active')
         ->whereBetween('expires_at', [$now, $now->copy()->addHours(2)])
         ->count();
+      $information['totalReservations'] = TicketReservation::count();
+
+      // Moderation queue
+      $information['pendingIdentities'] = Identity::where('status', 'pending')->count();
+      $information['pendingReviews'] = Review::where('status', 'pending_moderation')->count();
+
+      // Annual metrics
+      $information['bookingsThisYear'] = Booking::where('paymentStatus', 'completed')
+        ->whereYear('created_at', $thisYear)
+        ->count();
+      $information['ordersThisYear'] = ProductOrder::where('payment_status', 'completed')
+        ->whereYear('created_at', $thisYear)
+        ->count();
+      $information['eventRevenueThisYear'] = Booking::where('paymentStatus', 'completed')
+        ->whereYear('created_at', $thisYear)
+        ->selectRaw('COALESCE(SUM(price + COALESCE(tax, 0)), 0) as total')
+        ->value('total') ?? 0;
+      $information['productRevenueThisYear'] = ProductOrder::where('payment_status', 'completed')
+        ->whereYear('created_at', $thisYear)
+        ->sum('total') ?? 0;
     } catch (\Throwable $e) {
       $information['activeReservations'] = 0;
       $information['reservationsDue24h'] = 0;
       $information['reservationsDue2h'] = 0;
+      $information['totalReservations'] = 0;
+      $information['pendingIdentities'] = 0;
+      $information['pendingReviews'] = 0;
+      $information['bookingsThisYear'] = 0;
+      $information['ordersThisYear'] = 0;
+      $information['eventRevenueThisYear'] = 0;
+      $information['productRevenueThisYear'] = 0;
     }
 
 
