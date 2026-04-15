@@ -16,6 +16,7 @@ use App\Models\Language;
 use App\Models\Organizer;
 use App\Models\ShopManagement\Product;
 use App\Models\ShopManagement\ProductOrder;
+use App\Models\Reservation\TicketReservation;
 use App\Models\Transaction;
 use App\Rules\ImageMimeTypeRule;
 use App\Rules\MatchEmailRule;
@@ -168,6 +169,23 @@ class AdminController extends Controller
     $information['transcation_count'] = Transaction::query()->count();
 
     $information['total_earning'] = Earning::first();
+
+    try {
+      $now = now();
+      $information['activeReservations'] = TicketReservation::where('status', 'active')
+        ->where('expires_at', '>', $now)
+        ->count();
+      $information['reservationsDue24h'] = TicketReservation::where('status', 'active')
+        ->whereBetween('expires_at', [$now, $now->copy()->addHours(24)])
+        ->count();
+      $information['reservationsDue2h'] = TicketReservation::where('status', 'active')
+        ->whereBetween('expires_at', [$now, $now->copy()->addHours(2)])
+        ->count();
+    } catch (\Throwable $e) {
+      $information['activeReservations'] = 0;
+      $information['reservationsDue24h'] = 0;
+      $information['reservationsDue2h'] = 0;
+    }
 
 
     //income of event bookings
