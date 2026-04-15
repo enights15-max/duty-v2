@@ -42,115 +42,129 @@ class HomeController extends Controller
   }
   public function index()
   {
-    $tickets = Ticket::get();
-    $tController = new TicketController;
-    foreach ($tickets as $tickets) {
-      $tController->includeSlotSystemVariable($tickets->id);
+    try {
+      $tickets = Ticket::get();
+      $tController = new TicketController;
+      foreach ($tickets as $tickets) {
+        $tController->includeSlotSystemVariable($tickets->id);
+      }
+
+
+      $language = $this->getLanguage();
+
+      $queryResult['seoInfo'] = $this->getSeoInfo($language, ['meta_keyword_home', 'meta_description_home']);
+
+      // get the sections of selected home version
+      $sectionInfo = $this->safeFirst((new Section())->getTable(), function () {
+        return Section::first();
+      }, (object) [
+        'featured_section_status' => 0,
+        'categories_section_status' => 0,
+        'about_section_status' => 0,
+        'features_section_status' => 0,
+        'how_work_section_status' => 0,
+        'testimonials_section_status' => 0,
+        'partner_section_status' => 0,
+      ]);
+      $queryResult['secInfo'] = $sectionInfo;
+
+      $queryResult['heroInfo'] = $this->safeFirst((new HeroSection())->getTable(), function () use ($language) {
+        return $language->heroSec()->first();
+      });
+
+      $queryResult['secTitleInfo'] = $this->safeFirst('section_titles', function () use ($language) {
+        return $language->sectionTitle()->first();
+      });
+
+      $categories = $this->safeGet((new EventCategory())->getTable(), function () use ($language) {
+        return $language->event_category()
+          ->where('status', 1)
+          ->where('is_featured', '=', 'yes')
+          ->orderBy('serial_number', 'asc')
+          ->get();
+      });
+
+
+      $queryResult['categories'] = $categories;
+
+      $queryResult['currencyInfo'] = $this->getCurrencyInfo();
+
+      if ($sectionInfo->features_section_status == 1) {
+        $queryResult['featureData'] = $this->safeFirst('basic_settings', function () {
+          return Basic::select('features_section_image')->first();
+        });
+
+        $queryResult['features'] = $this->safeGet('features', function () use ($language) {
+          return $language->feature()->orderBy('serial_number', 'asc')->get();
+        });
+      }
+
+
+      if ($sectionInfo->about_us_section_status == 1) {
+        $queryResult['aboutUsInfo'] = $this->safeFirst((new AboutUsSection())->getTable(), function () use ($language) {
+          return $language->aboutUsSec()->first();
+        });
+      }
+      $queryResult['heroSection'] = $this->safeFirst((new HeroSection())->getTable(), function () use ($language) {
+        return HeroSection::where('language_id', $language->id)->first();
+      });
+      $queryResult['eventCategories'] = $this->safeGet((new EventCategory())->getTable(), function () use ($language) {
+        return EventCategory::where([['language_id', $language->id], ['status', 1], ['is_featured', 'yes']])
+          ->orderBy('serial_number', 'asc')
+          ->get();
+      });
+
+      $queryResult['aboutUsSection'] = $this->safeFirst((new AboutUsSection())->getTable(), function () use ($language) {
+        return AboutUsSection::where('language_id', $language->id)->first();
+      });
+
+      $queryResult['featureEventSection'] = $this->safeFirst((new EventFeatureSection())->getTable(), function () use ($language) {
+        return EventFeatureSection::where('language_id', $language->id)->first();
+      });
+      $queryResult['featureEventItems'] = $this->safeGet((new EventFeature())->getTable(), function () use ($language) {
+        return EventFeature::where('language_id', $language->id)->orderBy('serial_number', 'asc')->get();
+      });
+
+      $queryResult['howWork'] = $this->safeFirst((new HowWork())->getTable(), function () use ($language) {
+        return HowWork::where('language_id', $language->id)->first();
+      });
+      $queryResult['howWorkItems'] = $this->safeGet((new HowWorkItem())->getTable(), function () use ($language) {
+        return HowWorkItem::where('language_id', $language->id)->orderBy('serial_number', 'asc')->get();
+      });
+
+      if ($sectionInfo->testimonials_section_status == 1) {
+        $queryResult['testimonialData'] = $this->safeFirst((new TestimonialSection())->getTable(), function () use ($language) {
+          return TestimonialSection::where('language_id', $language->id)->first();
+        });
+
+        $queryResult['testimonials'] = $this->safeGet((new Testimonial())->getTable(), function () use ($language) {
+          return Testimonial::where('language_id', $language->id)->orderBy('serial_number', 'asc')->get();
+        });
+      }
+
+      $queryResult['partnerInfo'] = $this->safeFirst((new PartnerSection())->getTable(), function () use ($language) {
+        return PartnerSection::where('language_id', $language->id)->first();
+      });
+      $queryResult['partners'] = $this->safeGet((new Partner())->getTable(), function () {
+        return Partner::orderBy('serial_number', 'asc')->get();
+      });
+      $queryResult['footerInfo'] = $this->safeFirst((new FooterContent())->getTable(), function () use ($language) {
+        return FooterContent::where('language_id', $language->id)->first();
+      });
+      $queryResult['quickLinkInfos'] = $this->safeGet((new QuickLink())->getTable(), function () {
+        return QuickLink::orderBy('serial_number', 'asc')->get();
+      });
+
+      return view('frontend.home.index-v1', $queryResult);
+    } catch (\Throwable $exception) {
+      report($exception);
+
+      if (app()->environment('local', 'testing')) {
+        throw $exception;
+      }
+
+      return view('landing');
     }
-
-
-    $language = $this->getLanguage();
-
-    $queryResult['seoInfo'] = $this->getSeoInfo($language, ['meta_keyword_home', 'meta_description_home']);
-
-    // get the sections of selected home version
-    $sectionInfo = $this->safeFirst((new Section())->getTable(), function () {
-      return Section::first();
-    }, (object) [
-      'features_section_status' => 0,
-      'about_us_section_status' => 0,
-      'testimonials_section_status' => 0,
-    ]);
-    $queryResult['secInfo'] = $sectionInfo;
-
-    $queryResult['heroInfo'] = $this->safeFirst((new HeroSection())->getTable(), function () use ($language) {
-      return $language->heroSec()->first();
-    });
-
-    $queryResult['secTitleInfo'] = $this->safeFirst('section_titles', function () use ($language) {
-      return $language->sectionTitle()->first();
-    });
-
-    $categories = $this->safeGet((new EventCategory())->getTable(), function () use ($language) {
-      return $language->event_category()
-        ->where('status', 1)
-        ->where('is_featured', '=', 'yes')
-        ->orderBy('serial_number', 'asc')
-        ->get();
-    });
-
-
-    $queryResult['categories'] = $categories;
-
-    $queryResult['currencyInfo'] = $this->getCurrencyInfo();
-
-    if ($sectionInfo->features_section_status == 1) {
-      $queryResult['featureData'] = $this->safeFirst('basic_settings', function () {
-        return Basic::select('features_section_image')->first();
-      });
-
-      $queryResult['features'] = $this->safeGet('features', function () use ($language) {
-        return $language->feature()->orderBy('serial_number', 'asc')->get();
-      });
-    }
-
-
-    if ($sectionInfo->about_us_section_status == 1) {
-      $queryResult['aboutUsInfo'] = $this->safeFirst((new AboutUsSection())->getTable(), function () use ($language) {
-        return $language->aboutUsSec()->first();
-      });
-    }
-    $queryResult['heroSection'] = $this->safeFirst((new HeroSection())->getTable(), function () use ($language) {
-      return HeroSection::where('language_id', $language->id)->first();
-    });
-    $queryResult['eventCategories'] = $this->safeGet((new EventCategory())->getTable(), function () use ($language) {
-      return EventCategory::where([['language_id', $language->id], ['status', 1], ['is_featured', 'yes']])
-        ->orderBy('serial_number', 'asc')
-        ->get();
-    });
-
-    $queryResult['aboutUsSection'] = $this->safeFirst((new AboutUsSection())->getTable(), function () use ($language) {
-      return AboutUsSection::where('language_id', $language->id)->first();
-    });
-
-    $queryResult['featureEventSection'] = $this->safeFirst((new EventFeatureSection())->getTable(), function () use ($language) {
-      return EventFeatureSection::where('language_id', $language->id)->first();
-    });
-    $queryResult['featureEventItems'] = $this->safeGet((new EventFeature())->getTable(), function () use ($language) {
-      return EventFeature::where('language_id', $language->id)->orderBy('serial_number', 'asc')->get();
-    });
-
-    $queryResult['howWork'] = $this->safeFirst((new HowWork())->getTable(), function () use ($language) {
-      return HowWork::where('language_id', $language->id)->first();
-    });
-    $queryResult['howWorkItems'] = $this->safeGet((new HowWorkItem())->getTable(), function () use ($language) {
-      return HowWorkItem::where('language_id', $language->id)->orderBy('serial_number', 'asc')->get();
-    });
-
-    if ($sectionInfo->testimonials_section_status == 1) {
-      $queryResult['testimonialData'] = $this->safeFirst((new TestimonialSection())->getTable(), function () use ($language) {
-        return TestimonialSection::where('language_id', $language->id)->first();
-      });
-
-      $queryResult['testimonials'] = $this->safeGet((new Testimonial())->getTable(), function () use ($language) {
-        return Testimonial::where('language_id', $language->id)->orderBy('serial_number', 'asc')->get();
-      });
-    }
-
-    $queryResult['partnerInfo'] = $this->safeFirst((new PartnerSection())->getTable(), function () use ($language) {
-      return PartnerSection::where('language_id', $language->id)->first();
-    });
-    $queryResult['partners'] = $this->safeGet((new Partner())->getTable(), function () {
-      return Partner::orderBy('serial_number', 'asc')->get();
-    });
-    $queryResult['footerInfo'] = $this->safeFirst((new FooterContent())->getTable(), function () use ($language) {
-      return FooterContent::where('language_id', $language->id)->first();
-    });
-    $queryResult['quickLinkInfos'] = $this->safeGet((new QuickLink())->getTable(), function () {
-      return QuickLink::orderBy('serial_number', 'asc')->get();
-    });
-
-    return view('frontend.home.index-v1', $queryResult);
   }
   //offline
   public function offline()

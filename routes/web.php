@@ -166,6 +166,7 @@ Route::prefix('event-booking')->group(function () {
 
 
 Route::get('/change-language', 'Controller@changeLanguage')->name('change_language');
+Route::post('/waitlist', 'Controller@storeWaitlist')->name('waitlist.store');
 Route::post('/store-subscriber', 'Controller@storeSubscriber')->name('store_subscriber');
 
 /*

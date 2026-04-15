@@ -19,21 +19,26 @@ class ChangeLanguage
    */
   public function handle(Request $request, Closure $next)
   {
-    if ($request->session()->has('lang')) {
-      $locale = $request->session()->get('lang');
-    }
+    $locale = $request->session()->get('lang');
+
     if (empty($locale)) {
-      // set the default language as system locale
-      $language = Schema::hasTable('languages')
-        ? Language::where('is_default', 1)->first()
-        : null;
-      $languageCode = $language->code ?? config('app.locale', 'en');
+      $languageCode = config('app.locale', 'en');
+
+      try {
+        $language = Schema::hasTable('languages')
+          ? Language::where('is_default', 1)->first()
+          : null;
+
+        $languageCode = $language->code ?? $languageCode;
+      } catch (\Throwable $exception) {
+        // Fall back to the configured locale when the DB is unavailable.
+      }
 
       App::setLocale($languageCode);
     } else {
-      // set the selected language as system locale
       App::setLocale($locale);
     }
+
     return $next($request);
   }
 }
