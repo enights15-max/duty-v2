@@ -622,8 +622,9 @@
 
   {{-- dashboard information start --}}
   @php
+    $rolePermissions = [];
     if (!is_null($roleInfo)) {
-        $rolePermissions = json_decode($roleInfo->permissions);
+        $rolePermissions = json_decode($roleInfo->permissions) ?? [];
     }
 
     $can = function ($permission) use ($roleInfo, $rolePermissions) {

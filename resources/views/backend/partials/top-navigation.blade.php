@@ -1,6 +1,7 @@
 @php
+    $rolePermissions = [];
     if (!is_null($roleInfo)) {
-        $rolePermissions = json_decode($roleInfo->permissions);
+        $rolePermissions = json_decode($roleInfo->permissions) ?? [];
     }
 
     $canMenuBuilder = is_null($roleInfo) || (!empty($rolePermissions) && in_array('Menu Builder', $rolePermissions));
