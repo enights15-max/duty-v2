@@ -340,6 +340,29 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
   });
   // organizer management route end
 
+  // user management route start
+  Route::prefix('/user-management')->middleware('permission:User Management')->group(function () {
+
+    Route::get('/registered-users', 'BackEnd\User\UserManagementController@index')->name('admin.user_management.registered_users');
+
+    Route::prefix('/user/{id}')->group(function () {
+      Route::post('/update-email-status', 'BackEnd\User\UserManagementController@updateEmailStatus')->name('admin.user_management.user.update_email_status');
+
+      Route::post('/update-account-status', 'BackEnd\User\UserManagementController@updateAccountStatus')->name('admin.user_management.user.update_account_status');
+
+      Route::get('/details', 'BackEnd\User\UserManagementController@show')->name('admin.user_management.user_details');
+
+      Route::get('/change-password', 'BackEnd\User\UserManagementController@changePassword')->name('admin.user_management.user.change_password');
+
+      Route::post('/update-password', 'BackEnd\User\UserManagementController@updatePassword')->name('admin.user_management.user.update_password');
+
+      Route::post('/delete', 'BackEnd\User\UserManagementController@destroy')->name('admin.user_management.user.delete');
+    });
+
+    Route::post('/bulk-delete-user', 'BackEnd\User\UserManagementController@bulkDestroy')->name('admin.user_management.bulk_delete_user');
+  });
+  // user management route end
+
   // organizer management route start
   Route::prefix('/customer-management')->middleware('permission:Customer Management')->group(function () {
 

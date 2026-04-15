@@ -18,7 +18,7 @@
         <i class="flaticon-right-arrow"></i>
       </li>
       <li class="nav-item">
-        <a href="{{ route('organizer.support_tickets') }}">{{ __('All Tickets') }}</a>
+        <a href="{{ route('admin.support_tickets') }}">{{ __('All Tickets') }}</a>
       </li>
       <li class="separator">
         <i class="flaticon-right-arrow"></i>

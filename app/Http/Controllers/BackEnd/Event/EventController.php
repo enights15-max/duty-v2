@@ -103,7 +103,7 @@ class EventController extends Controller
       $title = request()->input('title');
     }
 
-    $events = Event::join('event_contents', 'event_contents.event_id', '=', 'events.id')
+    $baseQuery = Event::join('event_contents', 'event_contents.event_id', '=', 'events.id')
       ->join('event_categories', 'event_categories.id', '=', 'event_contents.event_category_id')
       ->where('event_contents.language_id', '=', $language->id)
       ->when($title, function ($query) use ($title) {
