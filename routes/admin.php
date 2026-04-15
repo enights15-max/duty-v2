@@ -898,6 +898,33 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
   // subscriber route end (routes defined above in user_management group)
 
 
+  // identity management routes
+  Route::prefix('/identity-management')->group(function () {
+    Route::get('/', 'BackEnd\IdentityManagementController@index')->name('admin.identity_management.index');
+    Route::get('/{id}', 'BackEnd\IdentityManagementController@show')->name('admin.identity_management.show');
+    Route::get('/export', 'BackEnd\IdentityManagementController@export')->name('admin.identity_management.export');
+    Route::post('/{id}/approve', 'BackEnd\IdentityManagementController@approve')->name('admin.identity_management.approve');
+    Route::post('/{id}/reject', 'BackEnd\IdentityManagementController@reject')->name('admin.identity_management.reject');
+    Route::post('/{id}/request-info', 'BackEnd\IdentityManagementController@requestInfo')->name('admin.identity_management.request_info');
+    Route::post('/{id}/suspend', 'BackEnd\IdentityManagementController@suspend')->name('admin.identity_management.suspend');
+  });
+
+  // review moderation routes
+  Route::prefix('/review-management')->group(function () {
+    Route::get('/', 'BackEnd\ReviewManagementController@index')->name('admin.review_management.index');
+    Route::get('/{id}', 'BackEnd\ReviewManagementController@show')->name('admin.review_management.show');
+    Route::post('/{id}/publish', 'BackEnd\ReviewManagementController@publish')->name('admin.review_management.publish');
+    Route::post('/{id}/hide', 'BackEnd\ReviewManagementController@hide')->name('admin.review_management.hide');
+    Route::post('/{id}/reject', 'BackEnd\ReviewManagementController@reject')->name('admin.review_management.reject');
+  });
+
+  // blackmarket routes
+  Route::prefix('/blackmarket')->group(function () {
+    Route::get('/tickets', 'BackEnd\BlackmarketController@tickets')->name('admin.blackmarket.tickets');
+    Route::get('/settings', 'BackEnd\BlackmarketController@settings')->name('admin.blackmarket.settings');
+    Route::post('/settings', 'BackEnd\BlackmarketController@updateSettings')->name('admin.blackmarket.update_settings');
+  });
+
   // upload image in summernote route
   Route::prefix('/summernote')->group(function () {
     Route::post('/upload-image', 'BackEnd\SummernoteController@upload');
