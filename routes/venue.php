@@ -36,6 +36,29 @@ Route::prefix('/venue')->middleware('auth:venue', 'adminLang')->group(function (
     Route::get('/edit-event/{id}', 'BackEnd\Venue\EventController@edit')->name('venue.event_management.edit_event');
     Route::post('/event-update', 'BackEnd\Venue\EventController@update')->name('venue.event.update');
     Route::post('bulk/delete/event', 'BackEnd\Venue\EventController@bulk_delete')->name('venue.event_management.bulk_delete_event');
+    Route::post('/event/{id}/update-featured', 'BackEnd\Venue\EventController@updateFeatured')->name('venue.event_management.event.update_featured');
+    Route::get('/event-images/{id}', 'BackEnd\Venue\EventController@images')->name('venue.event.images');
+    Route::post('/event-img-dbrmv', 'BackEnd\Venue\EventController@imagedbrmv')->name('venue.event.imgdbrmv');
+
+    // Event Ticket Management
+    Route::get('event/ticket', 'BackEnd\Venue\EventTicketController@index')->name('venue.event.ticket');
+    Route::get('/edit-ticket-setting/{id}', 'BackEnd\Venue\EventController@editTicketSetting')->name('venue.event_management.ticket_setting');
+    Route::post('/update-ticket-setting', 'BackEnd\Venue\EventController@updateTicketSetting')->name('venue.event_management.update_ticket_setting');
+
+    // Event Reservations
+    Route::prefix('/event-reservations')->group(function () {
+        Route::get('/', 'BackEnd\Venue\ReservationController@index')->name('venue.event_reservation.index');
+        Route::get('/export', 'BackEnd\Venue\ReservationController@export')->name('venue.event_reservation.export');
+        Route::get('/{id}', 'BackEnd\Venue\ReservationController@show')->name('venue.event_reservation.details');
+        Route::post('/{id}/extend', 'BackEnd\Venue\ReservationController@extend')->name('venue.event_reservation.extend');
+        Route::post('/{id}/cancel', 'BackEnd\Venue\ReservationController@cancel')->name('venue.event_reservation.cancel');
+        Route::post('/{id}/default', 'BackEnd\Venue\ReservationController@markDefaulted')->name('venue.event_reservation.default');
+        Route::post('/{id}/reactivate', 'BackEnd\Venue\ReservationController@reactivate')->name('venue.event_reservation.reactivate');
+        Route::post('/{id}/convert', 'BackEnd\Venue\ReservationController@convert')->name('venue.event_reservation.convert');
+    });
+
+    // Theme
+    Route::post('/change-theme', 'BackEnd\Venue\VenueController@changeTheme')->name('venue.change_theme');
 
     // Income & Transactions
     Route::get('/monthly-income', 'BackEnd\Venue\VenueController@monthly_income')->name('venue.monthly_income');

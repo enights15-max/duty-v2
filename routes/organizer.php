@@ -115,6 +115,18 @@ Route::prefix('/organizer')->middleware('auth:organizer', 'Deactive:organizer', 
   Route::post('/withdraw/witdraw/bulk-delete', 'BackEnd\Organizer\OrganizerWithdrawController@bulkDelete')->name('organizer.witdraw.bulk_delete_withdraw');
   Route::post('/withdraw/witdraw/delete', 'BackEnd\Organizer\OrganizerWithdrawController@Delete')->name('organizer.witdraw.delete_withdraw');
 
+  // Event Reservations
+  Route::prefix('/event-reservations')->group(function () {
+    Route::get('/', 'BackEnd\Organizer\ReservationController@index')->name('organizer.event_reservation.index');
+    Route::get('/export', 'BackEnd\Organizer\ReservationController@export')->name('organizer.event_reservation.export');
+    Route::get('/{id}', 'BackEnd\Organizer\ReservationController@show')->name('organizer.event_reservation.details');
+    Route::post('/{id}/extend', 'BackEnd\Organizer\ReservationController@extend')->name('organizer.event_reservation.extend');
+    Route::post('/{id}/cancel', 'BackEnd\Organizer\ReservationController@cancel')->name('organizer.event_reservation.cancel');
+    Route::post('/{id}/default', 'BackEnd\Organizer\ReservationController@markDefaulted')->name('organizer.event_reservation.default');
+    Route::post('/{id}/reactivate', 'BackEnd\Organizer\ReservationController@reactivate')->name('organizer.event_reservation.reactivate');
+    Route::post('/{id}/convert', 'BackEnd\Organizer\ReservationController@convert')->name('organizer.event_reservation.convert');
+  });
+
   Route::get('event-booking', 'BackEnd\Organizer\EventBookingController@index')->name('organizer.event.booking');
   Route::post('event-booking/update/payment-status/{id}', 'BackEnd\Organizer\EventBookingController@updatePaymentStatus')->name('organizer.event_booking.update_payment_status');
   Route::get('event-booking/details/{id}', 'BackEnd\Organizer\EventBookingController@show')->name('organizer.event_booking.details');

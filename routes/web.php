@@ -45,7 +45,6 @@ Route::middleware('change.lang')->prefix('/customer')->group(function () {
     Route::get('/signup', 'FrontEnd\CustomerController@signup')->name('customer.signup');
     Route::post('/create', 'FrontEnd\CustomerController@create')->name('customer.create');
     Route::post('/store', 'FrontEnd\CustomerController@authentication')->name('customer.authentication');
-    Route::post('/store', 'FrontEnd\CustomerController@authentication')->name('customer.authentication');
 
     /*---socialite---*/
     ##==facebook
@@ -109,7 +108,7 @@ Route::middleware('change.lang')->group(function () {
 
 Route::prefix('event-booking')->group(function () {
   Route::get('/paypal/notify', 'FrontEnd\PaymentGateway\PayPalController@notify')->name('event_booking.paypal.notify');
-  Route::get('/paypal/cancel', 'FrontEnd\PaymentGateway\PayPalController@cancel')->name('event_booking.cancel');
+  Route::get('/paypal/cancel', 'FrontEnd\PaymentGateway\PayPalController@cancel')->name('event_booking.paypal.cancel');
 
   Route::post('/apply-coupon', 'FrontEnd\EventController@applyCoupon')->name('apply-coupon');
 
@@ -166,6 +165,7 @@ Route::prefix('event-booking')->group(function () {
 
 
 Route::get('/change-language', 'Controller@changeLanguage')->name('change_language');
+Route::post('/waitlist', 'Controller@storeWaitlist')->name('waitlist.store');
 Route::post('/store-subscriber', 'Controller@storeSubscriber')->name('store_subscriber');
 
 /*
@@ -211,6 +211,13 @@ Route::middleware('change.lang')->group(function () {
   Route::get('/product-order-complete/complete/{via?}', 'FrontEnd\Shop\OrderController@complete')->name('product_order.complete');
   Route::post('organizers/contact/send-mail', 'FrontEnd\OrganizerController@sendMail')->name('organizer.contact.send_mail');
 
+  Route::get('organizers/', 'FrontEnd\OrganizerController@index')->name('frontend.all.organizer');
+
+  // App download CTA — redirects to landing page until deep links are configured
+  Route::get('download-app', function () {
+    return redirect(url('/'));
+  })->name('frontend.download_app');
+
   Route::get('organizer/details/{id}/{name}', 'FrontEnd\OrganizerController@details')->name('frontend.organizer.details');
   Route::get('artist/details/{id}/{name}', 'FrontEnd\ArtistController@details')->name('frontend.artist.details');
   Route::get('venue/details/{id}/{name}', 'FrontEnd\VenueController@details')->name('frontend.venue.details');
@@ -231,7 +238,7 @@ Route::middleware('change.lang')->group(function () {
 
 Route::prefix('product-order')->group(function () {
   Route::get('paypal/notify', 'FrontEnd\Shop\PaymentGateway\PaypalController@notify')->name('product_order.paypal.notify');
-  Route::get('paypal/cancel', 'FrontEnd\Shop\PaymentGateway\PaypalController@cancel')->name('product_order.cancel');
+  Route::get('paypal/cancel', 'FrontEnd\Shop\PaymentGateway\PaypalController@cancel')->name('product_order.paypal.cancel');
   Route::get('paystack/notify', 'FrontEnd\Shop\PaymentGateway\PaystackController@notify')->name('product_order.paystack.notify');
   Route::get('instamojo/notify', 'FrontEnd\Shop\PaymentGateway\InstamojoController@notify')->name('product_order.instamojo.notify');
   Route::post('razorpay/notify', 'FrontEnd\Shop\PaymentGateway\RazorpayController@notify')->name('product_order.razorpay.notify');

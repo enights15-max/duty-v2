@@ -63,12 +63,13 @@ class Controller extends BaseController
 
   protected function fallbackLanguage(): Language
   {
-    return new Language([
-      'id' => 1,
+    $lang = new Language([
       'code' => config('app.locale', 'en'),
       'direction' => 'ltr',
       'is_default' => 1,
     ]);
+    $lang->id = 1;
+    return $lang;
   }
 
   public function getCurrencyInfo()
@@ -122,23 +123,26 @@ class Controller extends BaseController
   {
     $fallbackLanguage = $this->fallbackLanguage();
 
-    if (!Schema::hasTable('languages')) {
+    if (!$this->hasTable('languages')) {
       return $fallbackLanguage;
     }
 
-    // get the current locale of this system
-    $locale = Session::get('lang');
+    try {
+      $locale = Session::get('lang');
 
-    if (!empty($locale)) {
-      $language = Language::where('code', $locale)->first();
-      if (!empty($language)) {
-        return $language;
+      if (!empty($locale)) {
+        $language = Language::where('code', $locale)->first();
+        if (!empty($language)) {
+          return $language;
+        }
       }
-    }
 
-    return Language::where('is_default', 1)->first()
-      ?? Language::query()->orderBy('id')->first()
-      ?? $fallbackLanguage;
+      return Language::where('is_default', 1)->first()
+        ?? Language::query()->orderBy('id')->first()
+        ?? $fallbackLanguage;
+    } catch (\Throwable $exception) {
+      return $fallbackLanguage;
+    }
   }
 
 
@@ -270,6 +274,33 @@ class Controller extends BaseController
     return Response::json([
       'success' => 'You have successfully subscribed to our newsletter.'
     ], 200);
+  }
+
+  public function storeWaitlist(Request $request)
+  {
+    $validated = $request->validate([
+      'email' => 'required|email:rfc,dns',
+    ]);
+
+    if (!$this->hasTable('subscribers')) {
+      return redirect()->back()->withInput()->withErrors([
+        'email' => 'La lista de espera no está disponible en este momento.',
+      ]);
+    }
+
+    try {
+      Subscriber::firstOrCreate([
+        'email_id' => $validated['email'],
+      ]);
+    } catch (\Throwable $exception) {
+      report($exception);
+
+      return redirect()->back()->withInput()->withErrors([
+        'email' => 'No pudimos guardar tu correo ahora mismo. Inténtalo de nuevo.',
+      ]);
+    }
+
+    return redirect()->back()->with('waitlist_success', true);
   }
 
 

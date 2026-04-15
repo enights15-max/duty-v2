@@ -54,8 +54,9 @@
             </div>
 
             @php
+                $rolePermissions = [];
                 if (!is_null($roleInfo)) {
-                    $rolePermissions = json_decode($roleInfo->permissions);
+                    $rolePermissions = json_decode($roleInfo->permissions) ?? [];
                 }
             @endphp
 

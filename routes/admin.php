@@ -100,6 +100,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::get('/event-images/{id}', 'BackEnd\Event\EventController@images')->name('admin.event.images');
     Route::post('/event-update', 'BackEnd\Event\EventController@update')->name('admin.event.update');
     Route::post('bulk/delete/event', 'BackEnd\Event\EventController@bulk_delete')->name('admin.event_management.bulk_delete_event');
+    Route::post('/event/{id}/clone', 'BackEnd\Event\EventController@cloneEvent')->name('admin.event_management.clone_event');
 
     Route::get('event/ticket', 'BackEnd\Event\TicketController@index')->name('admin.event.ticket');
     Route::get('event/add-ticket', 'BackEnd\Event\TicketController@create')->name('admin.event.add.ticket');
@@ -145,7 +146,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::get('all-state', 'BackEnd\Event\EventController@searchSate')->name('admin.get_state');
     Route::get('all-city', 'BackEnd\Event\EventController@getSearchCity')->name('admin.get_city');
 
-    Route::get('get-state/', 'BackEnd\Event\CityController@get_state')->name('get.city.state');
+    Route::get('get-state/', 'BackEnd\Event\CityController@get_state')->name('admin.city.get_state');
     Route::get('get-cities/', 'BackEnd\Event\CityController@getcities')->name('get.cities.state');
 
 
@@ -251,7 +252,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('/store/partner', 'BackEnd\HomePage\PartnerController@store')->name('admin.home_page.store_partner');
     Route::put('/update/partner', 'BackEnd\HomePage\PartnerController@update_partner')->name('admin.home_page.update_partner');
     Route::post('delete-partner/{id}', 'BackEnd\HomePage\PartnerController@delete')->name('admin.home_page.delete_partner');
-    Route::post('bulk-delete-how-work/item', 'BackEnd\HomePage\PartnerController@bulk_delete')->name('admin.home_page.bulk_delete_how_work_item');
+    Route::post('bulk-delete-partner', 'BackEnd\HomePage\PartnerController@bulk_delete')->name('admin.home_page.bulk_delete_partner');
   });
 
   Route::group(['middleware' => 'permission:Withdraw Method'], function () {
@@ -262,7 +263,6 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
 
     Route::get('withdraw/payment-method/input', 'BackEnd\WithdrawPaymentMethodInputController@index')->name('admin.withdraw_payment_method.mange_input');
     Route::post('withdraw/payment-method/input-store', 'BackEnd\WithdrawPaymentMethodInputController@store')->name('admin.withdraw_payment_method.store_input');
-    Route::get('withdraw/payment-method/input-edit/{id}', 'BackEnd\WithdrawPaymentMethodInputController@edit')->name('admin.withdraw_payment_method.edit_input');
     Route::get('withdraw/payment-method/input-edit/{id}', 'BackEnd\WithdrawPaymentMethodInputController@edit')->name('admin.withdraw_payment_method.edit_input');
     Route::post('withdraw/payment-method/input-update', 'BackEnd\WithdrawPaymentMethodInputController@update')->name('admin.withdraw_payment_method.update_input');
     Route::post('withdraw/payment-method/order-update', 'BackEnd\WithdrawPaymentMethodInputController@order_update')->name('admin.withdraw_payment_method.order_update');
@@ -340,6 +340,29 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     });
   });
   // organizer management route end
+
+  // user management route start
+  Route::prefix('/user-management')->middleware('permission:User Management')->group(function () {
+
+    Route::get('/registered-users', 'BackEnd\User\UserManagementController@index')->name('admin.user_management.registered_users');
+
+    Route::prefix('/user/{id}')->group(function () {
+      Route::post('/update-email-status', 'BackEnd\User\UserManagementController@updateEmailStatus')->name('admin.user_management.user.update_email_status');
+
+      Route::post('/update-account-status', 'BackEnd\User\UserManagementController@updateAccountStatus')->name('admin.user_management.user.update_account_status');
+
+      Route::get('/details', 'BackEnd\User\UserManagementController@show')->name('admin.user_management.user_details');
+
+      Route::get('/change-password', 'BackEnd\User\UserManagementController@changePassword')->name('admin.user_management.user.change_password');
+
+      Route::post('/update-password', 'BackEnd\User\UserManagementController@updatePassword')->name('admin.user_management.user.update_password');
+
+      Route::post('/delete', 'BackEnd\User\UserManagementController@destroy')->name('admin.user_management.user.delete');
+    });
+
+    Route::post('/bulk-delete-user', 'BackEnd\User\UserManagementController@bulkDestroy')->name('admin.user_management.bulk_delete_user');
+  });
+  // user management route end
 
   // organizer management route start
   Route::prefix('/customer-management')->middleware('permission:Customer Management')->group(function () {
@@ -896,37 +919,36 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('update/contact-page/{lagnid}', 'BackEnd\ContactController@update')->name('admin.update.contact_page');
   });
   // footer route end
-  // subscriber route start
-  Route::get('/subscribers', 'BackEnd\User\SubscriberController@index')->name('admin.user_management.subscribers');
+  // subscriber route end (routes defined above in user_management group)
 
-  Route::post(
-    '/subscriber/{id}/delete',
-    'BackEnd\User\SubscriberController@destroy'
-  )->name('admin.user_management.subscriber.delete');
 
-  Route::post(
-    '/bulk-delete-subscriber',
-    'BackEnd\User\SubscriberController@bulkDestroy'
-  )->name('admin.user_management.bulk_delete_subscriber');
-
-  Route::get('/mail-for-subscribers', 'BackEnd\User\SubscriberController@writeEmail')->name('admin.user_management.mail_for_subscribers');
-
-  Route::post(
-    '/subscribers/send-email',
-    'BackEnd\User\SubscriberController@sendEmail'
-  )->name('admin.user_management.subscribers.send_email');
-
-  Route::prefix('/push-notification')->group(function () {
-    Route::get('/settings', 'BackEnd\User\PushNotificationController@settings')->name('admin.user_management.push_notification.settings');
-
-    Route::post('/update-settings', 'BackEnd\User\PushNotificationController@updateSettings')->name('admin.user_management.push_notification.update_settings');
-
-    Route::get('/notification-for-visitors', 'BackEnd\User\PushNotificationController@writeNotification')->name('admin.user_management.push_notification.notification_for_visitors');
-
-    Route::post('/send-notification', 'BackEnd\User\PushNotificationController@sendNotification')->name('admin.user_management.push_notification.send_notification');
+  // identity management routes
+  Route::prefix('/identity-management')->group(function () {
+    Route::get('/', 'BackEnd\IdentityManagementController@index')->name('admin.identity_management.index');
+    Route::get('/{id}', 'BackEnd\IdentityManagementController@show')->name('admin.identity_management.show');
+    Route::get('/export', 'BackEnd\IdentityManagementController@export')->name('admin.identity_management.export');
+    Route::post('/{id}/approve', 'BackEnd\IdentityManagementController@approve')->name('admin.identity_management.approve');
+    Route::post('/{id}/reject', 'BackEnd\IdentityManagementController@reject')->name('admin.identity_management.reject');
+    Route::post('/{id}/request-info', 'BackEnd\IdentityManagementController@requestInfo')->name('admin.identity_management.request_info');
+    Route::post('/{id}/suspend', 'BackEnd\IdentityManagementController@suspend')->name('admin.identity_management.suspend');
+    Route::post('/{id}/reactivate', 'BackEnd\IdentityManagementController@reactivate')->name('admin.identity_management.reactivate');
   });
-  // subscriber route end
 
+  // review moderation routes
+  Route::prefix('/review-management')->group(function () {
+    Route::get('/', 'BackEnd\ReviewManagementController@index')->name('admin.review_management.index');
+    Route::get('/{id}', 'BackEnd\ReviewManagementController@show')->name('admin.review_management.show');
+    Route::post('/{id}/publish', 'BackEnd\ReviewManagementController@publish')->name('admin.review_management.publish');
+    Route::post('/{id}/hide', 'BackEnd\ReviewManagementController@hide')->name('admin.review_management.hide');
+    Route::post('/{id}/reject', 'BackEnd\ReviewManagementController@reject')->name('admin.review_management.reject');
+  });
+
+  // blackmarket routes
+  Route::prefix('/blackmarket')->group(function () {
+    Route::get('/tickets', 'BackEnd\BlackmarketController@tickets')->name('admin.blackmarket.tickets');
+    Route::get('/settings', 'BackEnd\BlackmarketController@settings')->name('admin.blackmarket.settings');
+    Route::post('/settings', 'BackEnd\BlackmarketController@updateSettings')->name('admin.blackmarket.update_settings');
+  });
 
   // upload image in summernote route
   Route::prefix('/summernote')->group(function () {

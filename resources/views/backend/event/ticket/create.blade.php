@@ -499,7 +499,7 @@
 @section('variables')
   <script>
     "use strict";
-    var storeUrl = "{{ route('organizer.event.imagesstore') }}";
-    var removeUrl = "{{ route('organizer.event.imagermv') }}";
+    var storeUrl = "{{ route('admin.event.imagesstore') }}";
+    var removeUrl = "{{ route('admin.event.imagermv') }}";
   </script>
 @endsection
