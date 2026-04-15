@@ -45,7 +45,6 @@ Route::middleware('change.lang')->prefix('/customer')->group(function () {
     Route::get('/signup', 'FrontEnd\CustomerController@signup')->name('customer.signup');
     Route::post('/create', 'FrontEnd\CustomerController@create')->name('customer.create');
     Route::post('/store', 'FrontEnd\CustomerController@authentication')->name('customer.authentication');
-    Route::post('/store', 'FrontEnd\CustomerController@authentication')->name('customer.authentication');
 
     /*---socialite---*/
     ##==facebook
@@ -232,7 +231,7 @@ Route::middleware('change.lang')->group(function () {
 
 Route::prefix('product-order')->group(function () {
   Route::get('paypal/notify', 'FrontEnd\Shop\PaymentGateway\PaypalController@notify')->name('product_order.paypal.notify');
-  Route::get('paypal/cancel', 'FrontEnd\Shop\PaymentGateway\PaypalController@cancel')->name('product_order.cancel');
+  Route::get('paypal/cancel', 'FrontEnd\Shop\PaymentGateway\PaypalController@cancel')->name('product_order.paypal.cancel');
   Route::get('paystack/notify', 'FrontEnd\Shop\PaymentGateway\PaystackController@notify')->name('product_order.paystack.notify');
   Route::get('instamojo/notify', 'FrontEnd\Shop\PaymentGateway\InstamojoController@notify')->name('product_order.instamojo.notify');
   Route::post('razorpay/notify', 'FrontEnd\Shop\PaymentGateway\RazorpayController@notify')->name('product_order.razorpay.notify');
