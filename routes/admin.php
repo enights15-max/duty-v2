@@ -100,6 +100,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::get('/event-images/{id}', 'BackEnd\Event\EventController@images')->name('admin.event.images');
     Route::post('/event-update', 'BackEnd\Event\EventController@update')->name('admin.event.update');
     Route::post('bulk/delete/event', 'BackEnd\Event\EventController@bulk_delete')->name('admin.event_management.bulk_delete_event');
+    Route::post('/event/{id}/clone', 'BackEnd\Event\EventController@cloneEvent')->name('admin.event_management.clone_event');
 
     Route::get('event/ticket', 'BackEnd\Event\TicketController@index')->name('admin.event.ticket');
     Route::get('event/add-ticket', 'BackEnd\Event\TicketController@create')->name('admin.event.add.ticket');
@@ -930,6 +931,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('/{id}/reject', 'BackEnd\IdentityManagementController@reject')->name('admin.identity_management.reject');
     Route::post('/{id}/request-info', 'BackEnd\IdentityManagementController@requestInfo')->name('admin.identity_management.request_info');
     Route::post('/{id}/suspend', 'BackEnd\IdentityManagementController@suspend')->name('admin.identity_management.suspend');
+    Route::post('/{id}/reactivate', 'BackEnd\IdentityManagementController@reactivate')->name('admin.identity_management.reactivate');
   });
 
   // review moderation routes

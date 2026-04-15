@@ -211,6 +211,13 @@ Route::middleware('change.lang')->group(function () {
   Route::get('/product-order-complete/complete/{via?}', 'FrontEnd\Shop\OrderController@complete')->name('product_order.complete');
   Route::post('organizers/contact/send-mail', 'FrontEnd\OrganizerController@sendMail')->name('organizer.contact.send_mail');
 
+  Route::get('organizers/', 'FrontEnd\OrganizerController@index')->name('frontend.all.organizer');
+
+  // App download CTA — redirects to landing page until deep links are configured
+  Route::get('download-app', function () {
+    return redirect(url('/'));
+  })->name('frontend.download_app');
+
   Route::get('organizer/details/{id}/{name}', 'FrontEnd\OrganizerController@details')->name('frontend.organizer.details');
   Route::get('artist/details/{id}/{name}', 'FrontEnd\ArtistController@details')->name('frontend.artist.details');
   Route::get('venue/details/{id}/{name}', 'FrontEnd\VenueController@details')->name('frontend.venue.details');
