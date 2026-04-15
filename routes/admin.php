@@ -145,6 +145,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::get('all-state', 'BackEnd\Event\EventController@searchSate')->name('admin.get_state');
     Route::get('all-city', 'BackEnd\Event\EventController@getSearchCity')->name('admin.get_city');
 
+    Route::get('get-state/', 'BackEnd\Event\CityController@get_state')->name('admin.city.get_state');
     Route::get('get-cities/', 'BackEnd\Event\CityController@getcities')->name('get.cities.state');
 
 
@@ -250,6 +251,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('/store/partner', 'BackEnd\HomePage\PartnerController@store')->name('admin.home_page.store_partner');
     Route::put('/update/partner', 'BackEnd\HomePage\PartnerController@update_partner')->name('admin.home_page.update_partner');
     Route::post('delete-partner/{id}', 'BackEnd\HomePage\PartnerController@delete')->name('admin.home_page.delete_partner');
+    Route::post('bulk-delete-partner', 'BackEnd\HomePage\PartnerController@bulk_delete')->name('admin.home_page.bulk_delete_partner');
   });
 
   Route::group(['middleware' => 'permission:Withdraw Method'], function () {
@@ -893,27 +895,7 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('update/contact-page/{lagnid}', 'BackEnd\ContactController@update')->name('admin.update.contact_page');
   });
   // footer route end
-  // subscriber route start
-
-  Route::post(
-    '/subscriber/{id}/delete',
-    'BackEnd\User\SubscriberController@destroy'
-
-  Route::post(
-    '/bulk-delete-subscriber',
-    'BackEnd\User\SubscriberController@bulkDestroy'
-
-
-  Route::post(
-    '/subscribers/send-email',
-    'BackEnd\User\SubscriberController@sendEmail'
-
-  Route::prefix('/push-notification')->group(function () {
-
-
-
-  });
-  // subscriber route end
+  // subscriber route end (routes defined above in user_management group)
 
 
   // upload image in summernote route
