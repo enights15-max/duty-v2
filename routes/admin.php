@@ -145,7 +145,6 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::get('all-state', 'BackEnd\Event\EventController@searchSate')->name('admin.get_state');
     Route::get('all-city', 'BackEnd\Event\EventController@getSearchCity')->name('admin.get_city');
 
-    Route::get('get-state/', 'BackEnd\Event\CityController@get_state')->name('get.city.state');
     Route::get('get-cities/', 'BackEnd\Event\CityController@getcities')->name('get.cities.state');
 
 
@@ -251,7 +250,6 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
     Route::post('/store/partner', 'BackEnd\HomePage\PartnerController@store')->name('admin.home_page.store_partner');
     Route::put('/update/partner', 'BackEnd\HomePage\PartnerController@update_partner')->name('admin.home_page.update_partner');
     Route::post('delete-partner/{id}', 'BackEnd\HomePage\PartnerController@delete')->name('admin.home_page.delete_partner');
-    Route::post('bulk-delete-how-work/item', 'BackEnd\HomePage\PartnerController@bulk_delete')->name('admin.home_page.bulk_delete_how_work_item');
   });
 
   Route::group(['middleware' => 'permission:Withdraw Method'], function () {
@@ -262,7 +260,6 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
 
     Route::get('withdraw/payment-method/input', 'BackEnd\WithdrawPaymentMethodInputController@index')->name('admin.withdraw_payment_method.mange_input');
     Route::post('withdraw/payment-method/input-store', 'BackEnd\WithdrawPaymentMethodInputController@store')->name('admin.withdraw_payment_method.store_input');
-    Route::get('withdraw/payment-method/input-edit/{id}', 'BackEnd\WithdrawPaymentMethodInputController@edit')->name('admin.withdraw_payment_method.edit_input');
     Route::get('withdraw/payment-method/input-edit/{id}', 'BackEnd\WithdrawPaymentMethodInputController@edit')->name('admin.withdraw_payment_method.edit_input');
     Route::post('withdraw/payment-method/input-update', 'BackEnd\WithdrawPaymentMethodInputController@update')->name('admin.withdraw_payment_method.update_input');
     Route::post('withdraw/payment-method/order-update', 'BackEnd\WithdrawPaymentMethodInputController@order_update')->name('admin.withdraw_payment_method.order_update');
@@ -897,33 +894,24 @@ Route::prefix('/admin')->middleware(['auth:admin', 'adminLang'])->group(function
   });
   // footer route end
   // subscriber route start
-  Route::get('/subscribers', 'BackEnd\User\SubscriberController@index')->name('admin.user_management.subscribers');
 
   Route::post(
     '/subscriber/{id}/delete',
     'BackEnd\User\SubscriberController@destroy'
-  )->name('admin.user_management.subscriber.delete');
 
   Route::post(
     '/bulk-delete-subscriber',
     'BackEnd\User\SubscriberController@bulkDestroy'
-  )->name('admin.user_management.bulk_delete_subscriber');
 
-  Route::get('/mail-for-subscribers', 'BackEnd\User\SubscriberController@writeEmail')->name('admin.user_management.mail_for_subscribers');
 
   Route::post(
     '/subscribers/send-email',
     'BackEnd\User\SubscriberController@sendEmail'
-  )->name('admin.user_management.subscribers.send_email');
 
   Route::prefix('/push-notification')->group(function () {
-    Route::get('/settings', 'BackEnd\User\PushNotificationController@settings')->name('admin.user_management.push_notification.settings');
 
-    Route::post('/update-settings', 'BackEnd\User\PushNotificationController@updateSettings')->name('admin.user_management.push_notification.update_settings');
 
-    Route::get('/notification-for-visitors', 'BackEnd\User\PushNotificationController@writeNotification')->name('admin.user_management.push_notification.notification_for_visitors');
 
-    Route::post('/send-notification', 'BackEnd\User\PushNotificationController@sendNotification')->name('admin.user_management.push_notification.send_notification');
   });
   // subscriber route end
 
